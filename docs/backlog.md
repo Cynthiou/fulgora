@@ -1,25 +1,28 @@
 # Backlog Fulgora
 
-42 user stories réparties en 8 epics. Chaque US renvoie aux règles métier (RM-xxx) du document « Règles métier et contraintes ».
+46 user stories réparties en 9 epics. Chaque US renvoie aux règles métier (RM-xxx) du document « Règles métier et contraintes ».
 
 **Priorités**
 - **MVP** : la plus petite version utile, de bout en bout. Je prépare une séance, je la fais à la salle, je la retrouve dans mon historique.
 - **V1** : ce qui rend l'appli complète (programmes, agenda, corrections, progression).
 - **Plus tard** : utile, mais pas indispensable.
 
-**Ordre de réalisation du MVP** : Compte (01 à 03), Catalogue (07 à 09), Séances modèles (12 à 15), Agenda (23), Entraînement (28 à 30, 33, 34), Historique (35, 36).
+MVP, V1 et Plus tard donnent l'**ordre de travail** : toutes les US sont prévues, aucune n'est abandonnée.
+
+**Ordre de réalisation du MVP** : Compte (01 à 03), Navigation (44), Catalogue (07 à 09), Séances modèles (12 à 15), Agenda (23), Entraînement (28 à 30, 33, 34), Historique (35, 36).
 
 | Epic | US | MVP | V1 | Plus tard |
 |---|---|---|---|---|
-| 1. Compte | 01 à 06 | 3 | 2 | 1 |
+| 1. Compte | 01 à 06 | 3 | 3 | 0 |
 | 2. Catalogue | 07 à 11 | 3 | 2 | 0 |
-| 3. Séances modèles | 12 à 17 | 4 | 2 | 0 |
+| 3. Séances modèles | 12 à 17, 43 | 4 | 3 | 0 |
 | 4. Programmes | 18 à 22 | 0 | 4 | 1 |
 | 5. Agenda | 23 à 27 | 1 | 4 | 0 |
 | 6. Entraînement | 28 à 34 | 5 | 2 | 0 |
 | 7. Historique | 35 à 38 | 2 | 2 | 0 |
 | 8. Progression | 39 à 42 | 0 | 3 | 1 |
-| **Total** | **42** | **18** | **21** | **3** |
+| 9. Socle | 44 à 46 | 1 | 2 | 0 |
+| **Total** | **46** | **19** | **25** | **2** |
 
 ---
 
@@ -29,7 +32,7 @@
 En tant que visiteur, je veux créer un compte afin de garder mes séances.
 - Pseudo, e-mail et mot de passe sont obligatoires (RM-001).
 - Un pseudo ou un e-mail déjà utilisé est refusé avec un message clair.
-- Le mot de passe est enregistré haché, jamais en clair (RM-002).
+- Le mot de passe est haché avec Argon2, jamais enregistré en clair (RM-002).
 
 ### US-02 · Se connecter · MVP
 En tant qu'utilisateur, je veux me connecter avec mon pseudo ou mon e-mail afin de retrouver mes données.
@@ -53,10 +56,11 @@ En tant qu'utilisateur, je veux choisir mes unités, mes alertes de minuteur et 
 - Son, vibration et notification de minuteur se règlent séparément (RM-062).
 - Les préférences sont propres à chaque utilisateur (RM-005).
 
-### US-06 · Supprimer mon compte · Plus tard
+### US-06 · Supprimer mon compte · V1
 En tant qu'utilisateur, je veux supprimer mon compte afin d'effacer mes données.
 - Confirmation en deux temps (RM-006).
 - Toutes mes données sont supprimées dans une seule transaction.
+- C'est le droit à l'effacement du RGPD : obligatoire dès que l'appli accueille de vrais comptes.
 
 ## Epic 2. Catalogue
 
@@ -98,8 +102,10 @@ En tant qu'utilisateur, je veux créer une séance avec un nom afin de préparer
 
 ### US-13 · Ajouter un bloc · MVP
 En tant qu'utilisateur, je veux ajouter des blocs à ma séance afin de l'organiser.
-- MVP : bloc classique. V1 : circuit, AMRAP, for time, échauffement, étirements, défi, note (RM-019).
+- Types : classique, échauffement, étirements, défi et note. Ils fonctionnent tous comme un bloc classique, seule l'étiquette change (RM-019).
+- Un bloc note ne contient aucun exercice (RM-020).
 - Plusieurs blocs du même type sont possibles (RM-020).
+- Les blocs chronométrés (circuit, AMRAP, for time) font l'objet de l'US-43.
 
 ### US-14 · Ajouter un exercice dans un bloc · MVP
 En tant qu'utilisateur, je veux ajouter des exercices du catalogue dans un bloc afin de composer ma séance.
@@ -110,6 +116,13 @@ En tant qu'utilisateur, je veux ajouter des exercices du catalogue dans un bloc 
 En tant qu'utilisateur, je veux définir mes séries et leurs objectifs afin de savoir quoi faire à la salle.
 - Seules les mesures de l'exercice sont proposées (RM-010, RM-022).
 - Le repos d'une série remplace le repos par défaut de l'exercice (RM-023).
+
+### US-43 · Ajouter un bloc chronométré · V1
+En tant qu'utilisateur, je veux ajouter un bloc circuit, AMRAP ou for time afin de varier mes formats d'entraînement.
+- Circuit : un nombre de tours prévu.
+- AMRAP : un temps limite, le plus de tours possible.
+- For time : un travail fixé, fait le plus vite possible.
+- Les tours et le temps réalisés se notent pendant la séance (US-31).
 
 ### US-16 · Réordonner · V1
 En tant qu'utilisateur, je veux changer l'ordre des blocs, des exercices et des séries afin d'ajuster ma séance.
@@ -183,7 +196,7 @@ En tant qu'utilisateur, je veux démarrer une séance prévue afin de noter ce q
 
 ### US-29 · Valider une série · MVP
 En tant qu'utilisateur, je veux saisir et valider ce que j'ai réellement fait sur une série afin de suivre ma performance.
-- Les objectifs prévus sont pré-remplis et modifiables.
+- Les valeurs réalisées sont pré-remplies avec les objectifs prévus. Je ne modifie que le réalisé, le prévu reste figé (RM-041).
 - La série est sauvegardée tout de suite (RM-044).
 - L'ordre d'exécution est libre (RM-024).
 
@@ -192,6 +205,7 @@ En tant qu'utilisateur, je veux un minuteur de repos après chaque série afin d
 - Bips aux trois dernières secondes, bip long et vibration à zéro si activés (RM-060).
 - Changement visuel dans les 10 dernières secondes (RM-061).
 - Pas de promesse de vibration sur iPhone (RM-063).
+- Par défaut, le son et la vibration sont activés. Les réglages arrivent avec l'US-05.
 
 ### US-31 · Minuteur de bloc · V1
 En tant qu'utilisateur, je veux un minuteur pour les blocs AMRAP, for time et circuit afin de suivre leur format.
@@ -252,3 +266,62 @@ En tant qu'utilisateur, je veux voir combien de séances prévues j'ai faites af
 ### US-42 · Indicateur d'accueil · Plus tard
 En tant qu'utilisateur, je veux voir mon indicateur favori en arrivant dans l'appli afin d'être motivé.
 - Je choisis l'indicateur dans mes préférences (RM-005, RM-059).
+
+## Epic 9. Socle
+
+### US-44 · Naviguer dans l'appli · MVP
+En tant qu'utilisateur, je veux passer facilement d'une partie de l'appli à l'autre afin de trouver vite ce que je cherche.
+- Quatre onglets en bas de l'écran sur mobile :
+  - **Accueil** : séance du jour, reprise d'un entraînement en cours, indicateurs de progression.
+  - **Calendrier** : séances libres, programmes et rendez-vous planifiés.
+  - **Suivi** : historique des séances et progression des performances.
+  - **Catalogue** : exercices, recherche, filtres, sélection pour préparer une séance.
+- Le profil s'ouvre depuis l'avatar dans l'en-tête, pas depuis un cinquième onglet.
+- Les écrans de création (séance, programme) s'ouvrent depuis les parcours concernés, pas depuis la barre d'onglets.
+- L'onglet actif est visible et annoncé aux lecteurs d'écran.
+
+### US-45 · Installer l'appli sur mon téléphone · V1
+En tant qu'utilisateur, je veux installer Fulgora sur l'écran d'accueil de mon téléphone afin de l'ouvrir comme une vraie appli à la salle.
+- L'appli est une PWA (application web installable) : nom, icône, couleurs du thème.
+- Elle s'ouvre en plein écran, sans la barre du navigateur.
+- Hors connexion, un message clair s'affiche au lieu d'une page d'erreur.
+
+### US-46 · Consulter mes notifications · V1
+En tant qu'utilisateur, je veux voir mes notifications afin de ne rien manquer.
+- Une pastille sur l'avatar indique le nombre de notifications non lues.
+- La liste affiche les plus récentes en premier : séance à confirmer, séance manquée, programme terminé, record personnel (RM-055).
+- Ouvrir une notification la marque comme lue et mène à l'écran concerné.
+- Une séance manquée corrigée après coup marque sa notification comme lue (RM-057).
+
+---
+
+## Définition de terminé
+
+Une US n'est terminée que si toutes ces conditions sont remplies.
+
+**Fonctionnel**
+- Tous les critères d'acceptation sont vérifiés dans le navigateur, sur mobile (375 px) et sur ordinateur.
+- Les textes affichés sont en français, sans faute.
+
+**Accessibilité (RM-064)**
+- Contraste d'au moins 4,5 pour 1 pour le texte.
+- Tout se fait au clavier, et l'élément sélectionné est bien visible (focus).
+- Chaque bouton, champ et image a un libellé compréhensible.
+- Les zones à toucher font au moins 44 × 44 px.
+- Une alerte sonore ou une vibration a toujours un équivalent visuel (RM-061).
+
+**Sécurité**
+- Toutes les données reçues sont vérifiées côté serveur.
+- Un utilisateur ne peut lire ou modifier que ses propres données.
+- Aucune requête SQL n'est construite en collant du texte : toujours des paramètres `?`.
+- Aucun secret dans le code ni dans les commits.
+
+**Qualité**
+- Les routes du serveur ont leurs tests (cas normal et cas d'erreur), et ils passent.
+- `npm run check` (Biome) et la vérification TypeScript ne signalent aucune erreur.
+- Les conventions de nommage sont respectées (`docs/naming-conventions.md`).
+
+**Livraison**
+- Le travail est sur une branche dédiée, fusionné dans `main` après relecture.
+- La carte Trello est déplacée dans « Terminé ».
+
