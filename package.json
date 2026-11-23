@@ -1,0 +1,22 @@
+{
+  "name": "fulgora",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "db:migrate": "npm run db:migrate -w server",
+    "db:seed": "npm run db:seed -w server"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.0",
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/*.svg",
+      "!client/public",
+      "!server/database/seed"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended"
+    }
+  }
+}
