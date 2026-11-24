@@ -6,7 +6,9 @@
       "!**/*.svg",
       "!client/public",
       "!server/database/seed",
-      "!design"
+      "!design",
+      "!test-results",
+      "!playwright-report"
     ]
   },
   "formatter": {
