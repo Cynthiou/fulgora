@@ -55,53 +55,53 @@ erDiagram
 
 ### Compte
 
-| Table | Contenu | Points clés |
-|---|---|---|
+| Table  | Contenu                                                                                                                              | Points clés                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
 | `user` | Pseudo, e-mail, hachage du mot de passe, sexe, préférences (unités, son, vibration, notifications de minuteur, indicateur d'accueil) | `username` et `email` uniques (RM-001). Unités par défaut : kg et km. |
 
 ### Catalogue
 
-| Table | Contenu | Points clés |
-|---|---|---|
-| `exercise` | Slug, nom, description, difficulté, illustrations et cartes musculaires homme/femme, archivage | `owner_user_id` vide = catalogue commun, sinon exercice personnel (RM-007). `source_exercise_id` relie une copie à son original (RM-012, RM-013). `slug` unique. |
-| `exercise_text` | Instructions, erreurs à éviter, alternatives, dans l'ordre | Unique sur (`exercise_id`, `type`, `position`). |
-| `category`, `muscle`, `equipment` | Listes de référence (code + nom affiché) | `code` unique. |
-| `measure` | Les 8 mesures : `reps`, `weight`, `duration`, `distance`, `speed`, `resistance`, `incline`, `calories` | `code` unique. |
-| `exercise_category`, `exercise_equipment`, `exercise_measure` | Tables de liaison | Clé primaire sur le couple. |
-| `exercise_muscle` | Liaison avec le rôle `primary` ou `secondary` | Au moins un `primary` par exercice (RM-009), contrôlé par le serveur. |
+| Table                                                         | Contenu                                                                                                | Points clés                                                                                                                                                      |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exercise`                                                    | Slug, nom, description, difficulté, illustrations et cartes musculaires homme/femme, archivage         | `owner_user_id` vide = catalogue commun, sinon exercice personnel (RM-007). `source_exercise_id` relie une copie à son original (RM-012, RM-013). `slug` unique. |
+| `exercise_text`                                               | Instructions, erreurs à éviter, alternatives, dans l'ordre                                             | Unique sur (`exercise_id`, `type`, `position`).                                                                                                                  |
+| `category`, `muscle`, `equipment`                             | Listes de référence (code + nom affiché)                                                               | `code` unique.                                                                                                                                                   |
+| `measure`                                                     | Les 8 mesures : `reps`, `weight`, `duration`, `distance`, `speed`, `resistance`, `incline`, `calories` | `code` unique.                                                                                                                                                   |
+| `exercise_category`, `exercise_equipment`, `exercise_measure` | Tables de liaison                                                                                      | Clé primaire sur le couple.                                                                                                                                      |
+| `exercise_muscle`                                             | Liaison avec le rôle `primary` ou `secondary`                                                          | Au moins un `primary` par exercice (RM-009), contrôlé par le serveur.                                                                                            |
 
 ### Séances préparées (le prévu)
 
-| Table | Contenu | Points clés |
-|---|---|---|
-| `session_template` | La séance préparée (nom, propriétaire) | |
-| `session_version` | Une version figée de son contenu | Unique sur (`session_template_id`, `version_number`). Jamais modifiée une fois utilisée (RM-017). |
-| `template_block` | Un bloc : type, nom, position, tours prévus, temps limite, consigne | Position unique dans la version (RM-024). |
-| `template_block_exercise` | Un exercice dans un bloc, avec son repos par défaut | Position unique dans le bloc. |
-| `planned_set` | Une série prévue et ses objectifs (une colonne par mesure) | Position unique dans l'exercice. `rest_after_seconds` remplace le repos par défaut (RM-023). |
+| Table                     | Contenu                                                             | Points clés                                                                                       |
+| ------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `session_template`        | La séance préparée (nom, propriétaire)                              |                                                                                                   |
+| `session_version`         | Une version figée de son contenu                                    | Unique sur (`session_template_id`, `version_number`). Jamais modifiée une fois utilisée (RM-017). |
+| `template_block`          | Un bloc : type, nom, position, tours prévus, temps limite, consigne | Position unique dans la version (RM-024).                                                         |
+| `template_block_exercise` | Un exercice dans un bloc, avec son repos par défaut                 | Position unique dans le bloc.                                                                     |
+| `planned_set`             | Une série prévue et ses objectifs (une colonne par mesure)          | Position unique dans l'exercice. `rest_after_seconds` remplace le repos par défaut (RM-023).      |
 
 ### Programmes
 
-| Table | Contenu | Points clés |
-|---|---|---|
-| `program` | Nom, période, statut | Fin ≥ début. `source_program_id` pour un programme réutilisé (RM-036). |
+| Table             | Contenu                                                 | Points clés                                                              |
+| ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `program`         | Nom, période, statut                                    | Fin ≥ début. `source_program_id` pour un programme réutilisé (RM-036).   |
 | `weekly_schedule` | « Telle séance, tel jour de la semaine, à telle heure » | Jour ISO 1 (lundi) à 7. `deactivated_at` quand la règle change (RM-031). |
-| `program_change` | Historique des changements | Ancienne et nouvelle valeur en JSON (RM-037). |
+| `program_change`  | Historique des changements                              | Ancienne et nouvelle valeur en JSON (RM-037).                            |
 
 ### Agenda et réalisation (le réalisé)
 
-| Table | Contenu | Points clés |
-|---|---|---|
-| `appointment` | Une séance planifiée à une date | Pointe vers une **version** de séance. `initial_date` et `moved_manually` pour les déplacements (RM-032). Sans programme = séance libre (RM-015). |
-| `workout_session` | La séance réellement faite | Un seul par rendez-vous (RM-038). `last_activity_at` pour la clôture à 4 h (RM-065). Une seule `in_progress` par utilisateur (DT-15). |
-| `workout_block` | Copie du bloc prévu, plus les résultats (tours, durée réelle) | `source_template_block_id` vide = bloc ajouté pendant la séance (RM-043). |
-| `workout_exercise` | Copie de l'exercice prévu, plus un commentaire | Même logique d'origine. |
-| `workout_set` | Chaque mesure en double : `_planned` (copié, figé) et `_actual` (saisi) | `validated_at` = première validation, `updated_at` vide jusqu'à une correction (RM-049, DT-14). |
+| Table              | Contenu                                                                 | Points clés                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appointment`      | Une séance planifiée à une date                                         | Pointe vers une **version** de séance. `initial_date` et `moved_manually` pour les déplacements (RM-032). Sans programme = séance libre (RM-015). |
+| `workout_session`  | La séance réellement faite                                              | Un seul par rendez-vous (RM-038). `last_activity_at` pour la clôture à 4 h (RM-065). Une seule `in_progress` par utilisateur (DT-15).             |
+| `workout_block`    | Copie du bloc prévu, plus les résultats (tours, durée réelle)           | `source_template_block_id` vide = bloc ajouté pendant la séance (RM-043).                                                                         |
+| `workout_exercise` | Copie de l'exercice prévu, plus un commentaire                          | Même logique d'origine.                                                                                                                           |
+| `workout_set`      | Chaque mesure en double : `_planned` (copié, figé) et `_actual` (saisi) | `validated_at` = première validation, `updated_at` vide jusqu'à une correction (RM-049, DT-14).                                                   |
 
 ### Alertes
 
-| Table | Contenu | Points clés |
-|---|---|---|
+| Table          | Contenu                                                                                      | Points clés                                                                                       |
+| -------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `notification` | Type, titre, message, lien vers un rendez-vous, un programme ou un exercice, date de lecture | Une seule « séance à confirmer » et une seule « séance manquée » par rendez-vous (RM-056, DT-16). |
 
 ## 3. Le principe du prévu et du réalisé
@@ -132,14 +132,14 @@ Ces règles sont vérifiées par le serveur, dans les actions, avec des tests :
 
 Chargé par `npm run db:seed` depuis `server/database/seed/catalog.json` :
 
-| Table | Lignes |
-|---|---|
-| `exercise` | 151 |
-| `exercise_text` | 1 485 |
-| `category` | 8 |
-| `muscle` | 15 |
-| `equipment` | 6 |
-| `measure` | 8 |
+| Table           | Lignes |
+| --------------- | ------ |
+| `exercise`      | 151    |
+| `exercise_text` | 1 485  |
+| `category`      | 8      |
+| `muscle`        | 15     |
+| `equipment`     | 6      |
+| `measure`       | 8      |
 
 Illustrations et données : Marc Mayol (crédit obligatoire dans « À propos »). Cartes musculaires dérivées de react-native-body-highlighter (licence MIT).
 

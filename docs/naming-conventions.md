@@ -4,52 +4,52 @@ Règle de base : **le code est en anglais, ce que voit l'utilisateur est en fran
 
 ## 1. Les langues
 
-| Élément | Langue | Exemple |
-|---|---|---|
-| Dossiers, fichiers, variables, fonctions | Anglais | `exerciseRepository.ts`, `readExercises` |
-| Tables, colonnes, valeurs de statut | Anglais | `workout_session`, `status = 'in_progress'` |
-| Clés JSON échangées entre client et serveur | Anglais | `{ "planned_date": "2026-11-23" }` |
-| Textes affichés, messages d'erreur montrés à l'écran | Français | « Démarrer la séance » |
-| Commentaires dans le code | Anglais | `// One function, one query.` |
-| Messages de commit | Anglais | `feat(exercise): add exercise list` |
-| Documentation (`docs/`) | Français | ce fichier |
+| Élément                                              | Langue   | Exemple                                     |
+| ---------------------------------------------------- | -------- | ------------------------------------------- |
+| Dossiers, fichiers, variables, fonctions             | Anglais  | `exerciseRepository.ts`, `readExercises`    |
+| Tables, colonnes, valeurs de statut                  | Anglais  | `workout_session`, `status = 'in_progress'` |
+| Clés JSON échangées entre client et serveur          | Anglais  | `{ "planned_date": "2026-11-23" }`          |
+| Textes affichés, messages d'erreur montrés à l'écran | Français | « Démarrer la séance »                      |
+| Commentaires dans le code                            | Anglais  | `// One function, one query.`               |
+| Messages de commit                                   | Anglais  | `feat(exercise): add exercise list`         |
+| Documentation (`docs/`)                              | Français | ce fichier                                  |
 
 ## 2. Une famille, un dossier
 
 Chaque fonctionnalité porte **le même nom du serveur jusqu'à l'écran**, en kebab-case (mots en minuscules reliés par des tirets).
 
-| Famille | Serveur | Client |
-|---|---|---|
-| Utilisateur | `server/src/modules/user/` | `client/src/features/user/` |
-| Exercice | `modules/exercise/` | `features/exercise/` |
-| Séance modèle | `modules/session-template/` | `features/session-template/` |
-| Rendez-vous | `modules/appointment/` | `features/appointment/` |
-| Programme | `modules/program/` | `features/program/` |
-| Séance réalisée | `modules/workout-session/` | `features/workout-session/` |
-| Historique | `modules/history/` | `features/history/` |
-| Notification | `modules/notification/` | `features/notification/` |
+| Famille         | Serveur                     | Client                       |
+| --------------- | --------------------------- | ---------------------------- |
+| Utilisateur     | `server/src/modules/user/`  | `client/src/features/user/`  |
+| Exercice        | `modules/exercise/`         | `features/exercise/`         |
+| Séance modèle   | `modules/session-template/` | `features/session-template/` |
+| Rendez-vous     | `modules/appointment/`      | `features/appointment/`      |
+| Programme       | `modules/program/`          | `features/program/`          |
+| Séance réalisée | `modules/workout-session/`  | `features/workout-session/`  |
+| Historique      | `modules/history/`          | `features/history/`          |
+| Notification    | `modules/notification/`     | `features/notification/`     |
 
 ## 3. Les fichiers
 
 ### Serveur : le routeur dit où, l'action dit comment, le repository dit quoi
 
-| Fichier | Rôle | Nom |
-|---|---|---|
-| Routeur | relie une adresse à une action | `exerciseRouter.ts` |
-| Actions | vérifie la demande, applique les règles, choisit le code HTTP | `exerciseActions.ts` |
-| Repository | fait une requête SQL, rien d'autre | `exerciseRepository.ts` |
-| Middleware | contrôle avant l'action (connexion, validation) | `authenticate.ts` |
+| Fichier    | Rôle                                                          | Nom                     |
+| ---------- | ------------------------------------------------------------- | ----------------------- |
+| Routeur    | relie une adresse à une action                                | `exerciseRouter.ts`     |
+| Actions    | vérifie la demande, applique les règles, choisit le code HTTP | `exerciseActions.ts`    |
+| Repository | fait une requête SQL, rien d'autre                            | `exerciseRepository.ts` |
+| Middleware | contrôle avant l'action (connexion, validation)               | `authenticate.ts`       |
 
 ### Client
 
-| Fichier | Nom | Exemple |
-|---|---|---|
-| Page | PascalCase + `Page` | `ExerciseListPage.tsx` |
-| Composant | PascalCase | `ExerciseCard.tsx` |
-| Hook | `use` + nom | `useExercises.ts` |
-| Service (appels au serveur) | famille + `Service` | `exerciseService.ts` |
-| Contexte | nom + `Context` | `AuthContext.tsx` |
-| Util | verbe + nom | `formatWeight.ts` |
+| Fichier                     | Nom                 | Exemple                |
+| --------------------------- | ------------------- | ---------------------- |
+| Page                        | PascalCase + `Page` | `ExerciseListPage.tsx` |
+| Composant                   | PascalCase          | `ExerciseCard.tsx`     |
+| Hook                        | `use` + nom         | `useExercises.ts`      |
+| Service (appels au serveur) | famille + `Service` | `exerciseService.ts`   |
+| Contexte                    | nom + `Context`     | `AuthContext.tsx`      |
+| Util                        | verbe + nom         | `formatWeight.ts`      |
 
 ### Partagé
 
