@@ -5,7 +5,8 @@
       "!**/dist",
       "!**/*.svg",
       "!client/public",
-      "!server/database/seed"
+      "!server/database/seed",
+      "!design"
     ]
   },
   "formatter": {
