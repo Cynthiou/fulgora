@@ -41,11 +41,13 @@ Le client peut être contourné : n'importe qui peut envoyer une requête à la 
 - Les schémas propres à chaque US (écrits dans chaque US).
 
 ## Tâches techniques
+
 - [ ] Outillage : installer `zod` dans `shared` (`--ignore-scripts`)
 - [ ] Shared : créer `shared/validation.ts` : `idParamSchema`, `dateSchema` (AAAA-MM-JJ, date réelle), `timeSchema` (HH:MM)
 - [ ] Backend : créer `server/src/middlewares/validate.ts`
 - [ ] Tests : unitaires des schémas communs ; intégration d'une route témoin (400 avec le détail des champs)
 
 ## Definition of Done
+
 - [ ] Tests verts
 - [ ] Messages d'erreur en français, affichables tels quels

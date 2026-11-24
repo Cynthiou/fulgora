@@ -54,9 +54,11 @@ Les écrans A7e, A7f, B5g et B5h, laissés de côté par les US-15, US-29 et US-
 ## États à gérer
 
 ### Un seul côté fait
+
 Série « incomplète », côté fait enregistré.
 
 ### Abandon entre les deux côtés
+
 Le côté fait reste ; la série compte comme non faite dans « séries réalisées ».
 
 ## Réponses API attendues
@@ -73,6 +75,7 @@ Le côté fait reste ; la série compte comme non faite dans « séries réalis�
 - Objectif de répétitions différent par côté (non prévu par la maquette).
 
 ## Tâches techniques
+
 - [ ] BDD : migration 005 : `template_block_exercise.is_per_side BOOLEAN NOT NULL DEFAULT FALSE` ; `planned_set.weight_left_kg` et `weight_right_kg DECIMAL(9,3) NULL` ; mêmes colonnes copiées dans `workout_exercise.is_per_side`, `workout_set.weight_left_planned_kg`, `weight_right_planned_kg`
 - [ ] BDD : table `workout_set_side (workout_set_id, side ENUM('left','right'), reps_actual, weight_actual_kg, duration_actual_seconds, validated_at, PRIMARY KEY (workout_set_id, side))`, clé étrangère vers `workout_set` en `RESTRICT`
 - [ ] Shared : `sessionDraftSchema` : `is_per_side`, charges gauche / droite (seulement si `is_per_side`) ; `computeTonnage` et `formatSetSummary` gèrent les deux côtés
@@ -83,5 +86,6 @@ Le côté fait reste ; la série compte comme non faite dans « séries réalis�
 - [ ] Tests : E2E curl à charge différente G / D
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Code relu et fusionné via pull request

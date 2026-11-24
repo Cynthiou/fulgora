@@ -49,9 +49,11 @@ Le bouton « Corriger les résultats », masqué en MVP, apparaît sur SUI-06, B
 ## États à gérer
 
 ### Rien n'a changé
+
 « Enregistrer » inactif.
 
 ### Erreur
+
 Message, saisies conservées.
 
 ## Réponses API attendues
@@ -70,6 +72,7 @@ Message, saisies conservées.
 - Modifier le prévu (US-17).
 
 ## Tâches techniques
+
 - [ ] Backend : `correctWorkoutSet` : `_actual`, `validated_at = COALESCE(validated_at, NOW(3))`, `updated_at = NOW(3)` ; contexte : séance `completed` ou `unfinished` de l'utilisateur
 - [ ] Backend : ajout et suppression réutilisent US-32 avec le statut de séance terminé autorisé
 - [ ] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus
@@ -77,4 +80,5 @@ Message, saisies conservées.
 - [ ] Tests : back : correction, `validated_at` conservé, `updated_at` rempli, prévu inchangé, séance en cours → 409, record corrigé à la baisse retiré
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

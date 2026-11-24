@@ -43,10 +43,12 @@ Un chiffre visible chaque jour (« 2 séances cette semaine ») entretient la mo
 - Indicateurs personnalisés.
 
 ## Tâches techniques
+
 - [ ] Shared : `HOME_METRICS` (code, libellé)
 - [ ] Backend : réutilise `GET /api/progress/summary?period=week`
 - [ ] Frontend : `HomeMetric.tsx` à l'Accueil
 - [ ] Tests : affichage selon la préférence, « Aucun » masque
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

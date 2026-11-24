@@ -44,9 +44,11 @@ Un rendez-vous tombe à l'eau : on décale la séance au lendemain, ou même à 
 ## États à gérer
 
 ### Envoi
+
 Boutons désactivés.
 
 ### Séance démarrée entre-temps
+
 Refus et rechargement.
 
 ## Réponses API attendues
@@ -61,6 +63,7 @@ Refus et rechargement.
 - Changer le jour de toutes les semaines (US-20).
 
 ## Tâches techniques
+
 - [ ] Shared : `computeAppointmentStatus(plannedDate, today)` (planned / to_confirm / missed selon la règle des 72 h) : fonction pure, utilisée aussi par US-27
 - [ ] Backend : `readAppointmentForUpdate`, `moveAppointment(id, date, time, status)` : `UPDATE appointment SET initial_date = COALESCE(initial_date, planned_date), planned_date = ?, planned_time = ?, moved_manually = TRUE, status = ? WHERE id = ?`
 - [ ] Backend : `deleteAppointmentNotifications(appointmentId, types)`, `createAppointmentNotification(appointmentId, type)`
@@ -70,5 +73,6 @@ Refus et rechargement.
 - [ ] Tests : E2E exemple CAL-05b
 
 ## Definition of Done
+
 - [ ] Exemple CAL-05b reproduit en test d'intégration
 - [ ] Code relu et fusionné via pull request

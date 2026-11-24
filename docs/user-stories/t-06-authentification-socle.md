@@ -47,6 +47,7 @@ Les US Compte ont besoin de hacher les mots de passe, de créer un jeton et de p
 - Pages d'inscription et de connexion (US-01, US-02).
 
 ## Tâches techniques
+
 - [ ] Outillage : installer `argon2` et `jsonwebtoken` (+ `@types/jsonwebtoken`) (`--ignore-scripts` puis construction du module natif d'argon2 vérifiée)
 - [ ] Backend : `utils/password.ts` : Argon2id, mémoire 19 456 Kio, 2 passes, parallélisme 1
 - [ ] Backend : `utils/token.ts` : `signToken(userId)`, `verifyToken(token)`
@@ -56,5 +57,6 @@ Les US Compte ont besoin de hacher les mots de passe, de créer un jeton et de p
 - [ ] Tests : unitaires (hachage, vérification, jeton expiré) ; intégration d'une route témoin protégée
 
 ## Definition of Done
+
 - [ ] Tests verts
 - [ ] Aucun mot de passe ni jeton dans les logs

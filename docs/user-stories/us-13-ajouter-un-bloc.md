@@ -41,6 +41,7 @@ Une séance se pense en parties : on s'échauffe, on travaille, on s'étire. Les
 ## Éléments affichés
 
 ### Panneau « Type de bloc »
+
 - Classique · Exercices et séries, avec objectifs et repos
 - Circuit · Exercices enchaînés, nombre de tours (Bientôt)
 - AMRAP · Maximum de tours dans une durée fixe (Bientôt)
@@ -51,24 +52,29 @@ Une séance se pense en parties : on s'échauffe, on travaille, on s'étire. Les
 - Note · Texte libre
 
 ### Bloc vide
+
 **Champ :** Intitulé (facultatif) (Ex. Force) · **Lien :** Changer
 **Texte :** 0 exercice · « Choisis tes exercices dans le catalogue. »
 **Boutons :** Ajouter des exercices · Enregistrer le bloc
 
 ### Retrait
+
 Toast « Bloc retiré » + bouton « Annuler » (5 s)
 
 ## États à gérer
 
 ### Type indisponible
+
 Tuile grisée avec « Bientôt » en texte, non sélectionnable, annoncée comme indisponible.
 
 ### Bloc Note
+
 Pas de section Exercices.
 
 ## Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Bloc Note avec exercices : `400`
 - Type inconnu ou chronométré : `400`
 - Plus de 20 blocs : `400`
@@ -83,6 +89,7 @@ Validation dans la route de l'US-23 :
 - Réordonner par glisser-déposer (US-16) : en MVP, l'ordre est celui de création.
 
 ## Tâches techniques
+
 - [ ] Shared : `BLOCK_TYPES` (code, libellé, description, `isAvailable`) dans `shared/session-template.ts`
 - [ ] Shared : `sessionDraftSchema` : `block_type` limité aux 5 types MVP, note sans exercice (`superRefine`), 20 blocs max, `name` 0 à 160, `instructions` 0 à 2 000
 - [ ] Frontend : `components/BlockTypePicker.tsx` (panneau, une colonne, tuiles indisponibles)
@@ -93,6 +100,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : front : ajout, retrait + annulation, tuile indisponible non sélectionnable
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Panneau utilisable au clavier, focus rendu au bouton à la fermeture
 - [ ] Code relu et fusionné via pull request

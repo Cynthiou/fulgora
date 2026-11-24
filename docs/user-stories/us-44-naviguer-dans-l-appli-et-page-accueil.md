@@ -46,9 +46,11 @@ En tant qu'utilisateur, je veux passer facilement d'une partie de l'appli à l'a
 ## Éléments affichés
 
 ### Onglets
+
 Accueil · Planning · Suivi · Catalogue
 
 ### Accueil, utilisateur débutant
+
 **Section :** Séance du jour
 **Texte :** Aucune séance prévue
 **Aide :** Crée ta première séance : choisis tes blocs et tes exercices, puis lance-la quand tu veux.
@@ -57,34 +59,42 @@ Accueil · Planning · Suivi · Catalogue
 **Actions rapides :** Voir mon planning · Voir mon historique
 
 ### Accueil, utilisateur actif
+
 **Sélecteur :** « 4 aujourd'hui › »
 **Carte :** 07:00 · FORCE 8 SEM. · S4/8 · Jambes · 1 bloc · 3 exercices
 **Bouton :** ▶ Démarrer la séance
 
 ### Accueil, séance démarrée
+
 **Carte :** ● EN COURS · Jambes · Commencée à 07:04 · 6 / 11 séries
 **Bouton :** Reprendre ma séance
 
 ### Erreur
+
 **Titre :** Impossible de charger tes séances
 **Texte :** Vérifie ta connexion internet, puis réessaie.
 **Bouton :** Réessayer
 
 ### Page introuvable
+
 **Titre :** Page introuvable · **Bouton :** Retour à l'accueil
 
 ## États à gérer
 
 ### Chargement
+
 Blocs gris à l'emplacement du contenu, la structure ne bouge pas ; en-tête et onglets utilisables ; statut annoncé « Chargement de l'accueil ».
 
 ### Erreur
+
 Message unique à la place de « Séance du jour » et « Mes programmes » ; actions rapides et onglets restent disponibles.
 
 ### Séance du jour sans exercice
+
 Le bouton devient « Ajouter des exercices » (RM-018).
 
 ### Séance déjà en cours
+
 « Démarrer » n'apparaît sur aucune autre carte.
 
 ## Réponses API attendues
@@ -104,6 +114,7 @@ Le bouton devient « Ajouter des exercices » (RM-018).
 - Notifications (US-46).
 
 ## Tâches techniques
+
 - [ ] Backend : `appointmentRepository.readAppointmentsBetween(userId, from, to)` : rendez-vous + nom de séance + programme + séance réalisée liée (`LEFT JOIN workout_session`), `WHERE a.owner_user_id = ? AND a.planned_date BETWEEN ? AND ?`, tri `planned_date, planned_time IS NULL, planned_time, id`
 - [ ] Backend : `appointmentRepository.countVersionContent(versionIds)` : nombre de blocs et d'exercices par version (pour « 1 bloc · 3 exercices »)
 - [ ] Backend : `appointmentActions.browse` ; `GET /api/appointments` → `authenticate` → `validate({ query: dateRangeSchema })` (62 jours max)
@@ -120,6 +131,7 @@ Le bouton devient « Ajouter des exercices » (RM-018).
 - [ ] Tests : E2E : navigation au clavier entre les 4 onglets ; page privée sans connexion → connexion → retour ; axe sur les 5 états de l'Accueil
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] 5 états de l'Accueil implémentés et testés
 - [ ] Mobile-first 375 px, onglets à 44 px, vérifié sur tablette et ordinateur

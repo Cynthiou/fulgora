@@ -41,11 +41,13 @@ On peut devoir partir de la salle avant la fin. Les séries faites sont du vrai 
 ## Éléments affichés
 
 ### Confirmation
+
 **Titre :** Abandonner cette séance ?
 **Message :** Tes séries faites seront gardées dans ton historique. Tu ne pourras pas reprendre cette séance.
 **Actions :** « Abandonner » · « Continuer ma séance »
 
 ### Clôture automatique (RM-065)
+
 **Message :** Cette séance a été clôturée après 4 heures sans activité. Tes résultats ont été conservés.
 **Boutons :** Voir le résumé · Corriger les résultats (US-37)
 
@@ -54,12 +56,15 @@ On peut devoir partir de la salle avant la fin. Les séries faites sont du vrai 
 ## États à gérer
 
 ### Confirmation annulée
+
 Aucune requête, la séance continue.
 
 ### Abandon en cours
+
 Boutons désactivés.
 
 ### Erreur API
+
 Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → résumé).
 
 ## Réponses API attendues
@@ -78,6 +83,7 @@ Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → 
 - Reprendre une séance inachevée (interdit par RM-045).
 
 ## Tâches techniques
+
 - [ ] BDD : `workout_session.auto_closed` (migration 004)
 - [ ] Backend : `workoutSessionRepository.abandonWorkoutSession(id, userId)` : `UPDATE workout_session SET status = 'unfinished', ended_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`
 - [ ] Backend : action : 0 ligne modifiée → relire la séance → absente : 404, sinon 409
@@ -91,6 +97,7 @@ Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → 
 - [ ] Tests : E2E : abandonner après 2 séries → résumé « INACHEVÉE »
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Modale accessible (focus piégé, Échap = continuer)
 - [ ] Code relu et fusionné via pull request

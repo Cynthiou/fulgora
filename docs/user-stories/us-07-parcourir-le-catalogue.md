@@ -44,19 +44,23 @@ Le catalogue est le point de départ de toute séance : 175 exercices illustrés
 **Bouton en haut :** Sélectionner (mode sélection, US-14)
 
 **Erreur :**
+
 > Impossible de charger les exercices
 > Vérifie ta connexion internet, puis réessaie.
-Bouton « Réessayer »
+> Bouton « Réessayer »
 
 ## États à gérer
 
 ### Chargement de la liste
+
 Cartes grises de la même hauteur que les vraies ; statut annoncé « Chargement des exercices ».
 
 ### Chargement progressif
+
 Une seule carte grise ajoutée en bas.
 
 ### Erreur de chargement
+
 Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif, les cartes déjà affichées restent et « Réessayer » remplace la ligne de chargement.
 
 ## Réponses API attendues
@@ -73,6 +77,7 @@ Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif
 - Créer un exercice personnel (US-10).
 
 ## Tâches techniques
+
 - [ ] BDD : s'appuyer sur `exercise`, `exercise_category`, `category`, `exercise_equipment`, `equipment`
 - [ ] Backend : `exerciseRepository.readExercises(userId, filters, limit, offset)` : colonnes `id, slug, name, difficulty, image_female_url, image_male_url, (owner_user_id IS NOT NULL) AS is_personal` + sous-requête du premier groupe (`category_name`) + sous-requête du matériel (`GROUP_CONCAT` des noms séparés par « · »), `WHERE (e.owner_user_id IS NULL OR e.owner_user_id = ?) AND e.is_archived = FALSE`, `ORDER BY e.name LIMIT ? OFFSET ?` (limit et offset en chaînes)
 - [ ] Backend : `exerciseRepository.countExercises(userId, filters)` : même `WHERE`, `COUNT(*)`
@@ -91,6 +96,7 @@ Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif
 - [ ] Tests : E2E : faire défiler jusqu'au bout ; axe sur les états liste, chargement, erreur
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, chargement progressif et erreur implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur

@@ -41,6 +41,7 @@ Un cycle qui a marché se refait souvent, avec de nouvelles dates.
 ## États à gérer
 
 ### Copie en cours
+
 Boutons désactivés.
 
 ## Réponses API attendues
@@ -53,10 +54,12 @@ Boutons désactivés.
 - Partager un programme avec un autre utilisateur.
 
 ## Tâches techniques
+
 - [ ] Backend : `copyProgram` dans `withTransaction` : nouveau programme, pour chaque règle active une nouvelle séance préparée (copie de la dernière version) et une nouvelle règle, puis génération des rendez-vous (US-18)
 - [ ] Backend : `POST /api/programs/:id/copy`
 - [ ] Frontend : `ReuseProgramPage.tsx`
 - [ ] Tests : back : copie indépendante (modifier la copie ne touche pas l'original) ; aucun résultat ni statut copié
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

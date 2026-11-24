@@ -58,12 +58,15 @@ En MVP, l'onglet Planning n'affichait qu'une liste simple. Il devient le vrai ca
 ## États à gérer
 
 ### Chargement
+
 Grille grise, navigation utilisable.
 
 ### Erreur
+
 « Impossible de charger ton planning. » + « Réessayer ».
 
 ### Séance en cours
+
 « Une séance est en cours » à la place de « Démarrer ».
 
 ## Réponses API attendues
@@ -76,6 +79,7 @@ Grille grise, navigation utilisable.
 - Déplacer, annuler, confirmer (US-25 à US-27).
 
 ## Tâches techniques
+
 - [ ] Backend : `readAppointmentsBetween` élargi : rendez-vous **prévus** dans la plage **ou réalisés** dans la plage (`a.planned_date BETWEEN ? AND ? OR DATE(ws.started_at) BETWEEN ? AND ?`), avec `initial_date`, `moved_manually`, programme et numéro de semaine
 - [ ] Shared : `getAppointmentDisplayDate(row)` (date réelle si faite), `buildDayEntries(rows, day)` (séances du jour + rappels grisés), `buildMonthGrid(year, month)` (semaines du lundi au dimanche), `getProgramWeekNumber(program, date)`
 - [ ] Frontend : `features/appointment/pages/PlanningPage.tsx` (Mois / Semaine), `MonthGrid.tsx`, `WeekList.tsx`, `DayAppointments.tsx`, `AppointmentRow.tsx`, `AppointmentDetailPage.tsx` (CAL-04), `AppointmentActionsMenu.tsx`, `CreateChoiceSheet.tsx` (CAL-01b)
@@ -84,5 +88,6 @@ Grille grise, navigation utilisable.
 - [ ] Tests : E2E navigation mois / semaine / jour ; axe sur CAL-01, CAL-02, CAL-03
 
 ## Definition of Done
+
 - [ ] Exemple CAL-10 vérifié sur les données de démonstration
 - [ ] Code relu et fusionné via pull request

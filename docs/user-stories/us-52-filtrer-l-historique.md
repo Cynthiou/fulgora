@@ -46,6 +46,7 @@ L'historique du MVP (US-35) reçoit une pastille de filtres et les flèches ‹ 
 ## États à gérer
 
 ### Aucun résultat
+
 SUI-05v.
 
 ## Réponses API attendues
@@ -57,10 +58,12 @@ SUI-05v.
 - Recherche par nom de séance.
 
 ## Tâches techniques
+
 - [ ] Backend : `readHistory` et `countHistory` reçoivent des morceaux de SQL constants pour la période, le programme (`a.program_id = ?` ou `a.program_id IS NULL` pour « Séance libre ») et les statuts (avec `query` pour `IN (?)`)
 - [ ] Shared : `historyQuerySchema`, `getPeriodRange` (US-41)
 - [ ] Frontend : `HistoryFilterSheet.tsx`, `ActiveFilterChips` (réutilisé de l'US-08), `PeriodNavigator`
 - [ ] Tests : back : combinaisons, « Séance libre », exemple SUI-05g = 3 ; E2E filtre puis retour arrière
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

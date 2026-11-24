@@ -43,6 +43,7 @@ Une machine prise, une bonne forme du jour : la séance réelle s'écarte du pr�
 ## États à gérer
 
 ### Ajout en cours
+
 Bouton désactivé.
 
 ## Réponses API attendues
@@ -56,6 +57,7 @@ Bouton désactivé.
 - Modifier le prévu (US-17).
 
 ## Tâches techniques
+
 - [ ] BDD : provenance par les colonnes `source_*` à `NULL` (D-18)
 - [ ] Backend : `createWorkoutSet`, `createWorkoutExercise`, `createWorkoutBlock` (positions = max + 1), `deleteAddedWorkoutSet` (seulement si `source_planned_set_id IS NULL`)
 - [ ] Backend : `POST /api/workout-sessions/:id/blocks`, `POST /api/workout-blocks/:id/exercises`, `POST /api/workout-exercises/:id/sets`, `DELETE /api/workout-sets/:id`
@@ -63,4 +65,5 @@ Bouton désactivé.
 - [ ] Tests : back : ajout, suppression d'un ajouté, refus sur un prévu, séance terminée → 409
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

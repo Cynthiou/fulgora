@@ -46,6 +46,7 @@ Exemple : Jambes le jeudi à 07:00, Fractionné le jeudi à 12:30 et Course le s
 ## États à gérer
 
 ### Retrait annulable
+
 Toast 5 s, `aria-live`.
 
 ## Réponses API attendues
@@ -57,10 +58,12 @@ Enregistrées avec le brouillon (US-18).
 - Changer un jour après la création (US-20).
 
 ## Tâches techniques
+
 - [ ] Frontend : `AddSessionOnDaySheet.tsx` (PRO-03a), `EditProgramInfoPage` en mode brouillon (PRO-03b), retrait par glissement + bouton poubelle, `UndoToast`
 - [ ] Shared : `countProgramAppointments(start, end, sessions)` utilisé pour tous les compteurs
 - [ ] Tests : unitaires compteurs (24 → 30, 24 → 12) ; front : retrait + annulation, décocher le dernier jour d'une séance
 
 ## Definition of Done
+
 - [ ] Compteurs vérifiés sur l'exemple de la maquette
 - [ ] Code relu et fusionné via pull request

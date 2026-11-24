@@ -41,6 +41,7 @@ Un AMRAP de 12 minutes se joue contre la montre : il faut le temps et le compte 
 ## États à gérer
 
 ### Bloc en cours
+
 Les autres blocs restent accessibles.
 
 ## Réponses API attendues
@@ -58,11 +59,13 @@ Les autres blocs restent accessibles.
 - Saisie série par série dans un bloc chronométré.
 
 ## Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Backend : `updateWorkoutBlockResult(blockId, rounds, extraReps, duration)` (contexte vérifié comme pour une série, `touchWorkoutSession`)
 - [ ] Frontend : `BlockTimer.tsx` selon le type ; réutilisation de `useCountdown` / `useStopwatch`
 - [ ] Tests : back : résultat enregistré, séance terminée → 409 ; unitaires du compteur de tours
 
 ## Definition of Done
+
 - [ ] Écrans maquettés et validés avant le développement
 - [ ] Code relu et fusionné via pull request

@@ -61,14 +61,17 @@ Les objectifs prévus servent deux fois : ils guident pendant la séance, puis i
 ## États à gérer
 
 ### Valeur invalide
+
 Message sous le champ (« Entre un nombre entre 0 et 1 000. »), bouton « Valider l'exercice » désactivé.
 
 ### Exercice sans mesure connue
+
 Message « Cet exercice n'a pas de mesure : tu pourras seulement le cocher comme fait. »
 
 ## Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Valeur hors bornes ou de mauvais type : `400`
 - Mesure non prévue pour l'exercice : `422`, code `MEASURE_NOT_ALLOWED`, avec le nom de l'exercice et la mesure
 
@@ -83,6 +86,7 @@ Validation dans la route de l'US-23 :
 - Minuteur pendant la séance (US-49).
 
 ## Tâches techniques
+
 - [ ] BDD : `planned_set` : `reps`, `weight_kg`, `duration_seconds`, `distance_meters`, `speed_kmh`, `resistance`, `incline_percent`, `calories`, `rest_after_seconds` ; `template_block_exercise.default_rest_seconds`
 - [ ] Backend : `exerciseRepository.readExerciseMeasureCodes(ids)` (avec `query`) : `SELECT em.exercise_id, m.code FROM exercise_measure em JOIN measure m ON m.id = em.measure_id WHERE em.exercise_id IN (?)`
 - [ ] Shared : `getSetFields(measureCodes)` : liste des champs à afficher, utilisée par le client et par le serveur
@@ -98,6 +102,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : E2E : configurer un exercice de chaque profil ; axe sur A7a à A7d
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement pour les 4 profils
 - [ ] Clavier numérique sur mobile vérifié
 - [ ] Code relu et fusionné via pull request

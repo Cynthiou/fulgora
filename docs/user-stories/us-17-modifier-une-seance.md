@@ -52,12 +52,15 @@ On ajuste ses séances au fil des semaines (plus de charge, un exercice en plus)
 ## États à gérer
 
 ### Rien n'a changé
+
 « Valider » inactif.
 
 ### Rendez-vous démarré entre-temps
+
 Il est retiré de la liste avec un message.
 
 ### Erreur API
+
 Message, brouillon conservé.
 
 ## Réponses API attendues
@@ -77,6 +80,7 @@ Message, brouillon conservé.
 - Déplacer (US-25), règle hebdomadaire (US-20).
 
 ## Tâches techniques
+
 - [ ] Backend : `readVersionTree(versionId)` (blocs, exercices, séries) et conversion en `SessionDraft`
 - [ ] Backend : `GET /api/appointments/:id/session` : la version actuelle en brouillon + `can_apply_to_following` + liste des rendez-vous concernés par chaque portée
 - [ ] Backend : `readNextVersionNumber(templateId)` ; `createSessionVersion(templateId, n)` et création de l'arbre (fonctions de l'US-23)
@@ -91,5 +95,6 @@ Message, brouillon conservé.
 - [ ] Tests : E2E : modifier « Jambes » et les suivantes, vérifier deux dates
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Code relu et fusionné via pull request

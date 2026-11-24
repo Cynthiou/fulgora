@@ -48,12 +48,15 @@ Tout le monde ne suit pas un programme : on peut juste prévoir « Haut du corps
 ## États à gérer
 
 ### Enregistrement en cours
+
 Bouton « Enregistrement… » désactivé, éditeur en lecture seule.
 
 ### Erreur API
+
 Message + « Réessayer », brouillon intact.
 
 ### Succès
+
 Écran A9, puis retour au jour choisi.
 
 ## Réponses API attendues
@@ -71,6 +74,7 @@ Message + « Réessayer », brouillon intact.
 - Déplacer ou annuler (US-25, US-26).
 
 ## Tâches techniques
+
 - [ ] BDD : tables `session_template`, `session_version`, `template_block`, `template_block_exercise`, `planned_set`, `appointment`
 - [ ] Shared : `freeSessionSchema` : `planned_date` (dans la plage), `planned_time` facultatif, `session: sessionDraftSchema`
 - [ ] Backend : `sessionTemplateRepository` (toutes avec `db: Queryable`) : `createSessionTemplate` (`INSERT INTO session_template (owner_user_id, name) VALUES (?, ?)`), `createSessionVersion` (`… VALUES (?, 1)`), `createTemplateBlock`, `createTemplateBlockExercise`, `createPlannedSet`
@@ -86,6 +90,7 @@ Message + « Réessayer », brouillon intact.
 - [ ] Tests : E2E : parcours A1 → A9 complet, la séance apparaît à l'Accueil le bon jour
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Transaction testée (aucune ligne orpheline après échec)
 - [ ] Mobile-first 375 px

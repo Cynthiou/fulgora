@@ -53,9 +53,11 @@ L'en-tête des 4 onglets affiche l'accès aux notifications (cloche ou pastille,
 ## États à gérer
 
 ### Chargement / Erreur
+
 Comme les autres listes.
 
 ### Élément supprimé
+
 NOT-07e.
 
 ## Réponses API attendues
@@ -76,6 +78,7 @@ NOT-07e.
 - Création des notifications (US-27, US-40, US-48).
 
 ## Tâches techniques
+
 - [ ] Backend : `notificationRepository.readNotifications(userId, limit, offset)`, `countUnreadNotifications(userId)`, `markNotificationRead(id, userId)`, `markAllNotificationsRead(userId)` ; `notificationRouter.ts`
 - [ ] Backend : la route `/read-all` et `/unread-count` **déclarées avant** `/:id`
 - [ ] Frontend : `NotificationBell.tsx` (en-tête, `aria-label` avec le nombre), `NotificationsPage.tsx`, `NotificationItem.tsx`, `useUnreadCount` (rafraîchi à chaque changement de page)
@@ -84,4 +87,5 @@ NOT-07e.
 - [ ] Tests : E2E notification → séance → compteur diminué ; axe
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

@@ -33,9 +33,11 @@ Les exercices au poids du corps n'ont que la mesure « répétitions » : imposs
 - **D-14** : les 24 nouveaux exercices restent sans carte musculaire au départ ; la fiche affiche alors les muscles en texte seulement. Les cartes sont ajoutées dès qu'elles sont dessinées.
 
 ## Tâches techniques
+
 - [ ] BDD : mettre à jour `catalog.json` (mesure « charge » sur le profil `bodyweight`)
 - [ ] Backend : `bin/seedDev.ts` : compte de démonstration (mot de passe lu dans l'environnement), une séance libre, refus si `NODE_ENV=production`
 - [ ] Tests : après seed, `exercise_measure` contient la charge pour Tractions
 
 ## Definition of Done
+
 - [ ] Seed relancé sur une base vide sans erreur

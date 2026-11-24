@@ -42,6 +42,7 @@ Une séance qu'on sait qu'on ne fera pas ne doit pas finir « manquée ».
 ## États à gérer
 
 ### Envoi
+
 Boutons désactivés.
 
 ## Réponses API attendues
@@ -55,6 +56,7 @@ Boutons désactivés.
 - Annuler toutes les séances d'un programme (US-21).
 
 ## Tâches techniques
+
 - [ ] BDD : `appointment.cancelled_at` + contrainte (migration 002)
 - [ ] Backend : `cancelAppointment(id, userId)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status IN ('planned','to_confirm') AND NOT EXISTS (SELECT 1 FROM workout_session WHERE appointment_id = appointment.id)` ; 0 ligne → relire pour 404 / 409
 - [ ] Backend : `markAppointmentNotificationsRead(appointmentId)` ; `PATCH /api/appointments/:id/cancel`
@@ -62,4 +64,5 @@ Boutons désactivés.
 - [ ] Tests : back : annulation, `cancelled_at` rempli, commencée → 409, la contrainte refuse `cancelled` sans date
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

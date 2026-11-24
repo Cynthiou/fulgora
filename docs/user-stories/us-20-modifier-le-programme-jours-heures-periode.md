@@ -46,12 +46,15 @@ L'emploi du temps change en cours de cycle : passer la course du samedi au diman
 ## États à gérer
 
 ### Aucun changement
+
 « Valider » inactif.
 
 ### Calcul de l'aperçu
+
 Liste en chargement.
 
 ### Séance en cours dans le programme
+
 Elle n'est jamais déplacée.
 
 ## Réponses API attendues
@@ -66,6 +69,7 @@ Elle n'est jamais déplacée.
 - Abandonner (US-21).
 
 ## Tâches techniques
+
 - [ ] Shared : `planScheduleChange(program, schedules, appointments, changes, today)` : fonction pure qui renvoie les rendez-vous à déplacer, à créer, à annuler et inchangés (utilisée pour l'aperçu et l'application)
 - [ ] Backend : `deactivateWeeklySchedule(id, at)`, `createWeeklySchedule`, `readFutureAppointmentsForUpdate(programId, today)` (`FOR UPDATE`), `moveAppointmentsToSchedule`, `createAppointments`, `cancelAppointments`, `createProgramChange(programId, type, old, new)`
 - [ ] Backend : `programActions.previewSchedule` et `programActions.updateSchedule` dans `withTransaction`
@@ -74,5 +78,6 @@ Elle n'est jamais déplacée.
 - [ ] Tests : E2E samedi → dimanche
 
 ## Definition of Done
+
 - [ ] L'aperçu et l'application donnent exactement le même résultat (test)
 - [ ] Code relu et fusionné via pull request

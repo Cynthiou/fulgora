@@ -50,9 +50,11 @@ L'historique (US-35) affiche maintenant des séances « À confirmer » et « Ma
 ## États à gérer
 
 ### Envoi
+
 Boutons désactivés.
 
 ### Déjà traitée ailleurs
+
 Rechargement de l'état réel.
 
 ## Réponses API attendues
@@ -70,6 +72,7 @@ Rechargement de l'état réel.
 - Centre de notifications (US-46).
 
 ## Tâches techniques
+
 - [ ] Backend : tâche `updateAppointmentStatuses()` toutes les 5 min, pour chaque fuseau : `UPDATE appointment SET status = 'to_confirm' WHERE status = 'planned' AND planned_date < ?` (aujourd'hui) puis `UPDATE … SET status = 'missed' WHERE status = 'to_confirm' AND planned_date <= ?` (aujourd'hui − 4 jours) ; les rendez-vous avec une séance réalisée sont exclus
 - [ ] Backend : notifications créées par `INSERT … SELECT` sur les rendez-vous concernés, sans doublon grâce à l'index unique (`ON DUPLICATE KEY UPDATE id = id`)
 - [ ] Backend : `markNotDone(id, userId)` : `to_confirm` → `missed`, notification « à confirmer » lue, **pas** de notification « manquée »
@@ -79,5 +82,6 @@ Rechargement de l'état réel.
 - [ ] Tests : unitaires `getMissedDeadline`
 
 ## Definition of Done
+
 - [ ] Tâche planifiée testée sans attendre minuit
 - [ ] Code relu et fusionné via pull request

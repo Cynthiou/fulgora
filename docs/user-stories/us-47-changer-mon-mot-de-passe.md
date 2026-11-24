@@ -47,9 +47,11 @@ Un mot de passe peut avoir fuité ou été partagé : il faut pouvoir le changer
 ## États à gérer
 
 ### Envoi
+
 Bouton désactivé.
 
 ### Erreur
+
 Champs vidés, messages sous les champs.
 
 ## Réponses API attendues
@@ -69,6 +71,7 @@ Champs vidés, messages sous les champs.
 - Déconnexion des autres appareils.
 
 ## Tâches techniques
+
 - [ ] Shared : `changePasswordSchema` : 3 champs, règles de l'inscription, `refine` sur l'égalité
 - [ ] Backend : `userRepository.readUserPasswordHash(userId)`, `updateUserPassword(userId, hash)`
 - [ ] Backend : `PUT /api/users/me/password` → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action (vérifier, hacher, enregistrer, 204)
@@ -77,6 +80,7 @@ Champs vidés, messages sous les champs.
 - [ ] Tests : front : champs vidés après erreur, bouton inactif
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Aucun mot de passe dans les logs ni dans les réponses
 - [ ] Code relu et fusionné via pull request

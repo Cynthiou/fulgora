@@ -41,6 +41,7 @@ Un record battu, c'est la meilleure motivation.
 ## États à gérer
 
 ### Aucun record sur la période
+
 Carte masquée.
 
 ## Réponses API attendues
@@ -52,10 +53,12 @@ Carte masquée.
 - Table de records (interdite par RM-051).
 
 ## Tâches techniques
+
 - [ ] Backend : à la fin d'une séance (US-34) et après correction (US-37) : `readPreviousBestSets(userId, exerciseIds, excludeSessionId)`, comparaison avec `computeExerciseRecords`, création de la notification (`INSERT`, sans doublon)
 - [ ] Backend : `readRecentRecords(userId, from, to)` pour le Résumé
 - [ ] Shared : `detectNewRecords(previousSets, sessionSets, profile)` (fonction pure)
 - [ ] Tests : unitaires `detectNewRecords` (égalité = pas de record, première séance = pas de notification) ; back : notification unique, correction à la baisse
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

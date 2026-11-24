@@ -52,12 +52,15 @@ Un programme évite de planifier chaque séance à la main : on décrit une sema
 ## États à gérer
 
 ### Enregistrement du brouillon / création en cours
+
 Boutons désactivés.
 
 ### Erreur API
+
 Message, saisie conservée.
 
 ### Séance « À configurer »
+
 « Créer le programme » désactivé avec l'explication.
 
 ## Réponses API attendues
@@ -74,6 +77,7 @@ Message, saisie conservée.
 - Modifier un programme créé (US-20, US-21).
 
 ## Tâches techniques
+
 - [ ] Shared : `programDraftSchema` (nom 0 à 160, dates, jours 1 à 7, séances avec `weekday`, `planned_time`, `name`, `session: SessionDraft`) ; `listWeekdayDates(start, end, weekday)` ; `countProgramAppointments`
 - [ ] Backend : `programRepository.createProgram` (statut `draft`), `updateProgramInfo`, `updateProgramStatus`
 - [ ] Backend : `weeklyScheduleRepository.createWeeklySchedule(programId, templateId, weekday, time)`, `deleteDraftSchedules(programId)`
@@ -86,5 +90,6 @@ Message, saisie conservée.
 - [ ] Tests : E2E parcours complet PRO-02 → PRO-06 ; axe
 
 ## Definition of Done
+
 - [ ] Nombre de rendez-vous vérifié à la main sur un exemple
 - [ ] Code relu et fusionné via pull request

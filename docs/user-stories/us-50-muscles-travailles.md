@@ -40,6 +40,7 @@ On a tendance à toujours travailler les mêmes muscles : la carte le rend visib
 ## États à gérer
 
 ### Aucune série sur la période
+
 « Aucun muscle travaillé sur cette période. »
 
 ## Réponses API attendues
@@ -55,10 +56,12 @@ On a tendance à toujours travailler les mêmes muscles : la carte le rend visib
 - Corps en 3D manipulable (V3).
 
 ## Tâches techniques
+
 - [ ] Backend : `readMuscleSets(userId, from, to)` : `SUM(CASE em.role WHEN 'primary' THEN 1 ELSE 0.5 END)` par muscle, sur les séries validées des séances `completed` / `unfinished`, en excluant les groupes cardio et étirements
 - [ ] Frontend : `MuscleMapCard.tsx` (SVG face / dos, zones par code de muscle, intensité + liste texte)
 - [ ] Tests : back : exemple SUI-02 reproduit ; série non validée ignorée
 
 ## Definition of Done
+
 - [ ] Exemple SUI-02 vérifié
 - [ ] Code relu et fusionné via pull request

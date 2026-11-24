@@ -50,22 +50,27 @@ En tant qu'utilisateur, je veux chercher un exercice par son nom et filtrer par 
 **Lien :** Tout effacer
 
 **Aucun résultat :**
+
 > Aucun exercice trouvé pour « squaat »
 > Vérifie l'orthographe ou retire un filtre.
-Boutons « Effacer la recherche » · « Réinitialiser les filtres »
+> Boutons « Effacer la recherche » · « Réinitialiser les filtres »
 
 ## États à gérer
 
 ### Recherche avec résultats
+
 Compteur et terme en gras.
 
 ### Aucun résultat
+
 Message avec le terme saisi.
 
 ### Chargement
+
 Recherche et filtres restent utilisables.
 
 ### Erreur
+
 Comme l'US-07, recherche et filtres conservés.
 
 ## Réponses API attendues
@@ -80,6 +85,7 @@ Comme l'US-07, recherche et filtres conservés.
 - Tri autre que par nom.
 
 ## Tâches techniques
+
 - [ ] Backend : `readExercises` et `countExercises` : ajouter des morceaux de SQL **constants**, seulement si le filtre est fourni : `AND e.name LIKE ? ESCAPE '\\'` ; `AND EXISTS (SELECT 1 FROM exercise_category ec WHERE ec.exercise_id = e.id AND ec.category_id IN (?))` ; idem matériel avec `exercise_equipment` ; `AND e.difficulty IN (?)`
 - [ ] Backend : utiliser `query` (et non `execute`) pour ces deux fonctions, à cause des tableaux dans `IN (?)`
 - [ ] Backend : échapper `\`, `%` et `_` dans la recherche avant de l'entourer de `%`
@@ -96,6 +102,7 @@ Comme l'US-07, recherche et filtres conservés.
 - [ ] Tests : E2E : filtrer, ouvrir une fiche, revenir → filtres et position conservés ; axe avec un filtre déplié
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États résultats, aucun résultat, chargement et erreur testés
 - [ ] Grilles utilisables au clavier (Tab, Entrée, Espace)

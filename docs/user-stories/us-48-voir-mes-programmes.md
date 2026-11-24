@@ -54,15 +54,19 @@ L'Accueil (US-44) affiche maintenant la section « Mes programmes » avec le pro
 ## États à gérer
 
 ### Chargement
+
 Cartes grises.
 
 ### Erreur
+
 « Impossible de charger tes programmes. » + « Réessayer ».
 
 ### Vide
+
 PRO-01v.
 
 ### Introuvable
+
 « Programme introuvable » + retour à la liste.
 
 ## Réponses API attendues
@@ -75,6 +79,7 @@ PRO-01v.
 - Créer, modifier, abandonner, supprimer, réutiliser (US-18 à US-22).
 
 ## Tâches techniques
+
 - [ ] BDD : statuts de `program` avec `draft` (migration 003)
 - [ ] Backend : `programRepository.readPrograms(userId, status)` avec, par programme, le nombre de rendez-vous et de rendez-vous passés et faits (sous-requêtes `COUNT`)
 - [ ] Backend : `readProgram(id, userId)`, `readProgramSchedules(id)`, `readProgramAppointments(id)` (avec la séance réalisée liée)
@@ -88,6 +93,7 @@ PRO-01v.
 - [ ] Tests : E2E liste → détail ; axe sur PRO-01, PRO-07, PRO-13
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Tâche planifiée testée sans attendre minuit (date passée en paramètre)
 - [ ] Code relu et fusionné via pull request

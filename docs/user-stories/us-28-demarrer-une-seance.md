@@ -45,39 +45,48 @@ Démarrer, c'est passer du prévu au réalisé. Le prévu est copié et figé po
 ## Éléments affichés
 
 ### Séance prévue (B1)
+
 **Étiquette :** PRÉVUE · **Texte :** Jeudi 26 novembre · 1 bloc · 6 exercices
 **Bloc :** Classique · Force · « Développé couché · Tractions · Gainage · Tapis · Curl · Gainage latéral »
 **Bouton :** ▶ Démarrer la séance (ou « Ajouter des exercices » si la séance est vide)
 
 ### Séance en cours (B2)
+
 **En-tête :** En cours · séance libre · ● 12:40
 **Compteur :** Séries réalisées · 3 / 18
 **Ligne :** Développé couché · 1 / 3 séries · 3 séries · 10 rép. · 40 kg
 **Boutons :** Abandonner · Terminer la séance
 
 ### Refus, séance déjà en cours
+
 **Titre :** Une séance est déjà en cours
 **Message :** Termine ou abandonne « Jambes » avant d'en démarrer une autre.
 **Actions :** « Reprendre « Jambes » » · « Fermer »
 
 ### Erreur
+
 « Impossible de démarrer la séance. » + « Réessayer »
 
 ## États à gérer
 
 ### Séance sans exercice
+
 Bouton « Ajouter des exercices » à la place de « Démarrer ».
 
 ### Démarrage en cours
+
 Bouton désactivé (pas de double démarrage).
 
 ### Séance déjà en cours
+
 Refus explicite + accès direct à la séance en cours.
 
 ### Erreur API
+
 Message + « Réessayer » ; l'état réel est rechargé (si la séance a quand même démarré, on l'ouvre).
 
 ### Chargement de B2
+
 Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 
 ## Réponses API attendues
@@ -102,6 +111,7 @@ Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 - Clôture automatique après 4 h (US-33).
 
 ## Tâches techniques
+
 - [ ] BDD : `workout_session`, `workout_block`, `workout_exercise`, `workout_set` ; index unique `uq_one_active_workout_per_user`
 - [ ] Backend : `appointmentRepository.readAppointmentForUpdate(id, userId)` : `SELECT id, status, session_version_id FROM appointment WHERE id = ? AND owner_user_id = ? FOR UPDATE`
 - [ ] Backend : `sessionTemplateRepository.countVersionExercises(versionId)` (jointure `template_block_exercise` → `template_block`)
@@ -121,6 +131,7 @@ Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 - [ ] Tests : E2E : démarrer depuis l'Accueil, recharger, « Reprendre ma séance » ; axe sur B1 et B2
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Test de concurrence vert
 - [ ] Mobile-first 375 px

@@ -28,57 +28,57 @@ Version finale du 24 novembre 2026 · 60 cartes : 8 tâches de socle (T-01 à T-
 
 ## Décisions prises pour terminer le backlog
 
-| Code | Question | Décision | Cartes |
-|---|---|---|---|
-| D-01 | Q-01 Notifications | Cloche dans l'en-tête des 4 onglets, à gauche de l'avatar | US-44, US-46 |
-| D-02 | Q-02 Gauche / droite | Modèle de la maquette : réglage par exercice, même objectif de répétitions ou de durée, charge éventuellement différente par côté, résultats côté par côté. Nouvelle US-51 | US-15, US-29, US-49, US-51 |
-| D-03 | Q-03 Changer le type d'un bloc | Objectifs compatibles gardés, les autres vidés ; Note interdite tant que le bloc a des exercices ; en MVP, seulement sur un bloc vide | US-13, US-17 |
-| D-04 | Q-04 Indicateurs d'accueil | Séances faites cette semaine · Temps d'entraînement de la semaine · Aucun | US-05, US-42 |
-| D-05 | Q-05 Propositions du Profil | Les 5 propositions des maquettes sont adoptées | US-03, US-06, US-46, US-47 |
-| D-06 | O-02 Blocs chronométrés | Un total par bloc (tours, répétitions en plus, durée) | US-43, US-31 |
-| D-07 | Q-07 Filtres de l'historique | En V1, nouvelle US-52 | US-35, US-52 |
-| D-08 | Compteur de séries | Une étape cardio compte comme une série | US-28 |
-| D-09 | Abandon sans série | RM-045 telle quelle : « inachevée » sans résultat | US-33 |
-| D-10 | Terminer sans série | Refusé (`422`), « Abandonner » proposé | US-34 |
-| D-11 | Migration 004 | `user.terms_accepted_at`, `user.timezone`, `workout_session.auto_closed`, `workout_session.declared_afterwards` | T-04 |
-| D-12 | O-04 Fuseau horaire | Fuseau de l'utilisateur, `Europe/Paris` par défaut | US-27, T-04 |
-| D-13 | Connexion | JWT dans un cookie `httpOnly`, limite de révocation documentée | T-06 |
-| D-14 | Cartes musculaires manquantes | Muscles affichés en texte en attendant les dessins | T-08 |
-| D-15 | Écrans non maquettés | Première tâche de la carte : maquetter et faire valider | US-10, US-11, US-31 |
-| D-16 | Exercice personnalisé | Les séances déjà prévues gardent l'exercice d'origine | US-11 |
-| D-17 | Q-06 Chronométrer un exercice | V1 ; en MVP, durée saisie à la main | US-49 |
-| D-18 | O-03 Provenance | Pas de distinction pendant / après coup : « ajouté » | US-32, US-37 |
-| D-19 | Muscles : cardio et mobilité | Exclus par le groupe (Cardio, Étirements) | US-50 |
+| Code | Question                       | Décision                                                                                                                                                                   | Cartes                     |
+| ---- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| D-01 | Q-01 Notifications             | Cloche dans l'en-tête des 4 onglets, à gauche de l'avatar                                                                                                                  | US-44, US-46               |
+| D-02 | Q-02 Gauche / droite           | Modèle de la maquette : réglage par exercice, même objectif de répétitions ou de durée, charge éventuellement différente par côté, résultats côté par côté. Nouvelle US-51 | US-15, US-29, US-49, US-51 |
+| D-03 | Q-03 Changer le type d'un bloc | Objectifs compatibles gardés, les autres vidés ; Note interdite tant que le bloc a des exercices ; en MVP, seulement sur un bloc vide                                      | US-13, US-17               |
+| D-04 | Q-04 Indicateurs d'accueil     | Séances faites cette semaine · Temps d'entraînement de la semaine · Aucun                                                                                                  | US-05, US-42               |
+| D-05 | Q-05 Propositions du Profil    | Les 5 propositions des maquettes sont adoptées                                                                                                                             | US-03, US-06, US-46, US-47 |
+| D-06 | O-02 Blocs chronométrés        | Un total par bloc (tours, répétitions en plus, durée)                                                                                                                      | US-43, US-31               |
+| D-07 | Q-07 Filtres de l'historique   | En V1, nouvelle US-52                                                                                                                                                      | US-35, US-52               |
+| D-08 | Compteur de séries             | Une étape cardio compte comme une série                                                                                                                                    | US-28                      |
+| D-09 | Abandon sans série             | RM-045 telle quelle : « inachevée » sans résultat                                                                                                                          | US-33                      |
+| D-10 | Terminer sans série            | Refusé (`422`), « Abandonner » proposé                                                                                                                                     | US-34                      |
+| D-11 | Migration 004                  | `user.terms_accepted_at`, `user.timezone`, `workout_session.auto_closed`, `workout_session.declared_afterwards`                                                            | T-04                       |
+| D-12 | O-04 Fuseau horaire            | Fuseau de l'utilisateur, `Europe/Paris` par défaut                                                                                                                         | US-27, T-04                |
+| D-13 | Connexion                      | JWT dans un cookie `httpOnly`, limite de révocation documentée                                                                                                             | T-06                       |
+| D-14 | Cartes musculaires manquantes  | Muscles affichés en texte en attendant les dessins                                                                                                                         | T-08                       |
+| D-15 | Écrans non maquettés           | Première tâche de la carte : maquetter et faire valider                                                                                                                    | US-10, US-11, US-31        |
+| D-16 | Exercice personnalisé          | Les séances déjà prévues gardent l'exercice d'origine                                                                                                                      | US-11                      |
+| D-17 | Q-06 Chronométrer un exercice  | V1 ; en MVP, durée saisie à la main                                                                                                                                        | US-49                      |
+| D-18 | O-03 Provenance                | Pas de distinction pendant / après coup : « ajouté »                                                                                                                       | US-32, US-37               |
+| D-19 | Muscles : cardio et mobilité   | Exclus par le groupe (Cardio, Étirements)                                                                                                                                  | US-50                      |
 
 ## Évolutions de la base
 
-| Migration | Contenu | Carte |
-|---|---|---|
-| 001 | Schéma actuel (25 tables) | T-04 |
-| 002 | `appointment.cancelled_at` + contrainte | T-04 (utilisé par US-21, US-26) |
-| 003 | `program.status` avec `draft` | T-04 (utilisé par US-18) |
-| 004 | `user.terms_accepted_at`, `user.timezone`, `workout_session.auto_closed`, `workout_session.declared_afterwards` | T-04 |
-| 005 | Exercices « chaque côté » : `is_per_side`, charges gauche / droite, table `workout_set_side` | US-51 |
+| Migration | Contenu                                                                                                         | Carte                           |
+| --------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| 001       | Schéma actuel (25 tables)                                                                                       | T-04                            |
+| 002       | `appointment.cancelled_at` + contrainte                                                                         | T-04 (utilisé par US-21, US-26) |
+| 003       | `program.status` avec `draft`                                                                                   | T-04 (utilisé par US-18)        |
+| 004       | `user.terms_accepted_at`, `user.timezone`, `workout_session.auto_closed`, `workout_session.declared_afterwards` | T-04                            |
+| 005       | Exercices « chaque côté » : `is_per_side`, charges gauche / droite, table `workout_set_side`                    | US-51                           |
 
 ## Plan des sprints
 
-| Sprint | Cartes | Points |
-|---|---|---|
-| Sprint 0 · Socle technique | T-01, T-02, T-03, T-04, T-05, T-06, T-07, T-08 | 21 |
-| Sprint 01 · Compte et navigation | US-01, US-02, US-03, US-44 | 13 |
-| Sprint 02 · Catalogue | US-07, US-08, US-09 | 9 |
-| Sprint 03 · Préparer une séance libre | US-12, US-13, US-14, US-15, US-23 | 18 |
-| Sprint 04 · Faire sa séance | US-28, US-29, US-30, US-33, US-34 | 19 |
-| Sprint 05 · Historique (fin du MVP) | US-35, US-36 | 6 |
-| Sprint 06 · Planning et notifications | US-24, US-26, US-27, US-25, US-46 | 25 |
-| Sprint 07 · Créer un programme | US-48, US-18, US-19 | 16 |
-| Sprint 08 · Faire évoluer séances et programmes | US-16, US-17, US-20, US-21 | 24 |
-| Sprint 09 · Historique complet | US-37, US-38, US-52 | 13 |
-| Sprint 10 · Entraînement avancé | US-32, US-49, US-51 | 16 |
-| Sprint 11 · Progression et Suivi | US-39, US-40, US-41, US-50 | 22 |
-| Sprint 12 · Profil et installation | US-04, US-05, US-47, US-06, US-45 | 16 |
-| Sprint 13 · Blocs chronométrés et exercices personnels | US-43, US-31, US-10, US-11 | 20 |
-| Plus tard | US-22, US-42 | 5 |
+| Sprint                                                 | Cartes                                         | Points |
+| ------------------------------------------------------ | ---------------------------------------------- | ------ |
+| Sprint 0 · Socle technique                             | T-01, T-02, T-03, T-04, T-05, T-06, T-07, T-08 | 21     |
+| Sprint 01 · Compte et navigation                       | US-01, US-02, US-03, US-44                     | 13     |
+| Sprint 02 · Catalogue                                  | US-07, US-08, US-09                            | 9      |
+| Sprint 03 · Préparer une séance libre                  | US-12, US-13, US-14, US-15, US-23              | 18     |
+| Sprint 04 · Faire sa séance                            | US-28, US-29, US-30, US-33, US-34              | 19     |
+| Sprint 05 · Historique (fin du MVP)                    | US-35, US-36                                   | 6      |
+| Sprint 06 · Planning et notifications                  | US-24, US-26, US-27, US-25, US-46              | 25     |
+| Sprint 07 · Créer un programme                         | US-48, US-18, US-19                            | 16     |
+| Sprint 08 · Faire évoluer séances et programmes        | US-16, US-17, US-20, US-21                     | 24     |
+| Sprint 09 · Historique complet                         | US-37, US-38, US-52                            | 13     |
+| Sprint 10 · Entraînement avancé                        | US-32, US-49, US-51                            | 16     |
+| Sprint 11 · Progression et Suivi                       | US-39, US-40, US-41, US-50                     | 22     |
+| Sprint 12 · Profil et installation                     | US-04, US-05, US-47, US-06, US-45              | 16     |
+| Sprint 13 · Blocs chronométrés et exercices personnels | US-43, US-31, US-10, US-11                     | 20     |
+| Plus tard                                              | US-22, US-42                                   | 5      |
 
 **Total :** 243 points. MVP = Sprint 0 à Sprint 05 (19 US) ; V1 = Sprint 06 à Sprint 13 (31 US) ; Plus tard : 2 US.
 
@@ -237,6 +237,7 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 - Protection de branche sur GitHub (réglage du dépôt, fait à la main par Cynthia).
 
 ### Tâches techniques
+
 - [ ] Outillage : installer `vitest`, `supertest`, `@types/supertest` dans `server` (`--ignore-scripts`)
 - [ ] Outillage : installer `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` dans `client`
 - [ ] Outillage : installer `@playwright/test` et `@axe-core/playwright` à la racine
@@ -247,6 +248,7 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 - [ ] Tests : un test unitaire témoin par workspace et un test E2E témoin (la page de connexion s'affiche)
 
 ### Definition of Done
+
 - [ ] Les 4 scripts fonctionnent en local
 - [ ] Une PR de test volontairement cassée est bien refusée par la CI
 - [ ] Aucune trace de Claude dans les commits ni dans la PR
@@ -304,6 +306,7 @@ Le jeton de connexion est dans un cookie : le navigateur l'envoie tout seul. San
 - Validation des données (T-03).
 
 ### Tâches techniques
+
 - [ ] Outillage : installer `helmet` et `express-rate-limit` (`--ignore-scripts`)
 - [ ] Backend : `app.ts` : `app.disable("x-powered-by")`, `helmet()`, `express.json({ limit: "100kb" })`
 - [ ] Backend : créer `server/src/utils/httpError.ts` : classe `HttpError(status, code, message, field?)`
@@ -314,6 +317,7 @@ Le jeton de connexion est dans un cookie : le navigateur l'envoie tout seul. San
 - [ ] Tests : 403 sans origine, 403 mauvaise origine, 200 bonne origine, GET non bloqué, 429 au 6ᵉ essai, `X-Powered-By` absent, 500 sans détail
 
 ### Definition of Done
+
 - [ ] Tous les tests de la checklist passent
 - [ ] Aucun secret ni origine en dur dans le code
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript
@@ -361,12 +365,14 @@ Le client peut être contourné : n'importe qui peut envoyer une requête à la 
 - Les schémas propres à chaque US (écrits dans chaque US).
 
 ### Tâches techniques
+
 - [ ] Outillage : installer `zod` dans `shared` (`--ignore-scripts`)
 - [ ] Shared : créer `shared/validation.ts` : `idParamSchema`, `dateSchema` (AAAA-MM-JJ, date réelle), `timeSchema` (HH:MM)
 - [ ] Backend : créer `server/src/middlewares/validate.ts`
 - [ ] Tests : unitaires des schémas communs ; intégration d'une route témoin (400 avec le détail des champs)
 
 ### Definition of Done
+
 - [ ] Tests verts
 - [ ] Messages d'erreur en français, affichables tels quels
 
@@ -414,6 +420,7 @@ En tant que développeuse, je veux faire évoluer la base avec des migrations nu
 - Données de départ (T-08).
 
 ### Tâches techniques
+
 - [ ] BDD : `001` = le schéma actuel de `schema.sql`
 - [ ] BDD : `002` : `appointment.cancelled_at` + contrainte `ck_appointment_cancelled_at`
 - [ ] BDD : `003` : `program.status` avec `draft`
@@ -423,6 +430,7 @@ En tant que développeuse, je veux faire évoluer la base avec des migrations nu
 - [ ] Tests : base vide → 4 versions ; relance → rien ; reset en production → refus
 
 ### Definition of Done
+
 - [ ] Base de développement et base de test migrées sans erreur
 - [ ] `schema.sql` mis à jour pour refléter l'état final (documentation)
 
@@ -463,12 +471,14 @@ Créer une séance écrit dans 6 tables. Si la 4ᵉ écriture échoue, les 3 pre
 - Verrous propres à chaque US (`FOR UPDATE`), écrits dans l'US concernée.
 
 ### Tâches techniques
+
 - [ ] Backend : `database/client.ts` : exporter le type `Queryable`
 - [ ] Backend : créer `database/withTransaction.ts` (`getConnection`, `beginTransaction`, `commit`, `rollback`, `release` dans `finally`)
 - [ ] BDD : documenter dans `docs/` la création de l'utilisateur MySQL à droits limités (commande à lancer par Cynthia)
 - [ ] Tests : transaction réussie ; erreur au milieu → aucune ligne ; connexion rendue (le pool ne s'épuise pas après 20 échecs)
 
 ### Definition of Done
+
 - [ ] Tests verts
 - [ ] La notion de transaction est expliquée en commentaire en tête du fichier
 
@@ -521,6 +531,7 @@ Les US Compte ont besoin de hacher les mots de passe, de créer un jeton et de p
 - Pages d'inscription et de connexion (US-01, US-02).
 
 ### Tâches techniques
+
 - [ ] Outillage : installer `argon2` et `jsonwebtoken` (+ `@types/jsonwebtoken`) (`--ignore-scripts` puis construction du module natif d'argon2 vérifiée)
 - [ ] Backend : `utils/password.ts` : Argon2id, mémoire 19 456 Kio, 2 passes, parallélisme 1
 - [ ] Backend : `utils/token.ts` : `signToken(userId)`, `verifyToken(token)`
@@ -530,6 +541,7 @@ Les US Compte ont besoin de hacher les mots de passe, de créer un jeton et de p
 - [ ] Tests : unitaires (hachage, vérification, jeton expiré) ; intégration d'une route témoin protégée
 
 ### Definition of Done
+
 - [ ] Tests verts
 - [ ] Aucun mot de passe ni jeton dans les logs
 
@@ -579,6 +591,7 @@ Chaque page charge des données, peut échouer et doit afficher un état vide. S
 - Barre d'onglets et mise en page (US-44).
 
 ### Tâches techniques
+
 - [ ] Frontend : `services/apiError.ts` + mise à jour de `apiFetch`
 - [ ] Frontend : `contexts/AuthContext.tsx` + `hooks/useAuth.ts`
 - [ ] Frontend : `components/ProtectedRoute.tsx`
@@ -587,6 +600,7 @@ Chaque page charge des données, peut échouer et doit afficher un état vide. S
 - [ ] Tests : `apiFetch` (erreur lue), `ProtectedRoute` (redirection), `StatusBadge` (symbole + texte)
 
 ### Definition of Done
+
 - [ ] Tests verts
 - [ ] axe sans violation sur les composants communs
 
@@ -625,11 +639,13 @@ Les exercices au poids du corps n'ont que la mesure « répétitions » : imposs
 - **D-14** : les 24 nouveaux exercices restent sans carte musculaire au départ ; la fiche affiche alors les muscles en texte seulement. Les cartes sont ajoutées dès qu'elles sont dessinées.
 
 ### Tâches techniques
+
 - [ ] BDD : mettre à jour `catalog.json` (mesure « charge » sur le profil `bodyweight`)
 - [ ] Backend : `bin/seedDev.ts` : compte de démonstration (mot de passe lu dans l'environnement), une séance libre, refus si `NODE_ENV=production`
 - [ ] Tests : après seed, `exercise_measure` contient la charge pour Tractions
 
 ### Definition of Done
+
 - [ ] Seed relancé sur une base vide sans erreur
 
 # Sprint 01 · Compte et navigation
@@ -712,18 +728,23 @@ Toutes les données de Fulgora sont personnelles : séances, programmes, résult
 ### États à gérer
 
 #### Formulaire vide
+
 Bouton actif ; la validation se fait à l'envoi.
 
 #### Erreur de validation
+
 Résumé en haut + message sous chaque champ, icône + texte + bordure (jamais la couleur seule). Mot de passe vidé.
 
 #### Inscription en cours
+
 Bouton « Création du compte… » désactivé, champs en lecture seule, statut annoncé « Création du compte en cours ».
 
 #### Échec réseau
+
 « Connexion impossible. Réessaie. » en haut, données conservées.
 
 #### Succès
+
 Écran « Compte créé », puis Accueil.
 
 ### Réponses API attendues
@@ -743,6 +764,7 @@ Bouton « Création du compte… » désactivé, champs en lecture seule, statut
 - Pages CGU et Politique de confidentialité (contenu à rédiger à part).
 
 ### Tâches techniques
+
 - [ ] BDD : utiliser `user` avec `terms_accepted_at` (migration 004) ; unicité par `uq_user_username` et `uq_user_email`
 - [ ] Shared : `shared/user.ts` : `signupSchema` (règles ci-dessus, `terms_accepted` doit valoir `true`) et type `PublicUser` (sans hachage)
 - [ ] Backend : `userRepository.createUser` : `INSERT INTO user (username, email, password_hash, terms_accepted_at) VALUES (?, ?, ?, NOW(3))`
@@ -762,6 +784,7 @@ Bouton « Création du compte… » désactivé, champs en lecture seule, statut
 - [ ] Sécurité : limiteur de tentatives actif ; aucun mot de passe dans les logs
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
 - [ ] États formulaire, erreur, envoi, échec réseau et succès implémentés et testés
 - [ ] Développé en mobile-first : conçu à 375 px puis élargi, vérifié sur tablette et ordinateur
@@ -824,18 +847,23 @@ En tant qu'utilisateur inscrit, je veux me connecter avec mon pseudo ou mon adre
 ### États à gérer
 
 #### Connexion initiale
+
 Formulaire vide, mot de passe masqué.
 
 #### Erreur d'identifiants
+
 Message unique en haut, icône + texte + bordure, annoncé aux lecteurs d'écran ; mot de passe vidé, focus dessus.
 
 #### Chargement
+
 Bouton désactivé, statut annoncé « Connexion en cours ».
 
 #### Échec réseau
+
 Même emplacement que l'erreur, données conservées.
 
 #### Session déjà valide
+
 Pas de formulaire : redirection vers l'Accueil.
 
 ### Réponses API attendues
@@ -853,6 +881,7 @@ Pas de formulaire : redirection vers l'Accueil.
 - « Se souvenir de moi » (la durée est fixe : 7 jours).
 
 ### Tâches techniques
+
 - [ ] Shared : `loginSchema` : `identifier` (1 à 254 caractères), `password` (1 à 128)
 - [ ] Backend : `userRepository.readUserByIdentifier` : `SELECT id, username, email, sex, password_hash FROM user WHERE email = ? OR username = ? LIMIT 1` (même valeur deux fois, mise en minuscules pour l'e-mail)
 - [ ] Backend : `userRepository.readUser(id)` : l'utilisateur sans hachage, pour `/me`
@@ -869,6 +898,7 @@ Pas de formulaire : redirection vers l'Accueil.
 - [ ] Tests : E2E : connexion puis rechargement → toujours connectée ; page privée → connexion → retour sur la page privée
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
 - [ ] États connexion, erreur, chargement et échec réseau implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur
@@ -915,6 +945,7 @@ Le téléphone peut être prêté, ou l'appli ouverte sur l'ordinateur d'une sal
 **Bouton :** Se déconnecter
 
 #### Confirmation (séance en cours)
+
 **Titre :** Te déconnecter ?
 **Message :** Ta séance en cours restera enregistrée. Tu pourras la reprendre à ta prochaine connexion.
 **Actions :** « Se déconnecter » · « Annuler »
@@ -922,9 +953,11 @@ Le téléphone peut être prêté, ou l'appli ouverte sur l'ordinateur d'une sal
 ### États à gérer
 
 #### Déconnexion en cours
+
 Bouton désactivé.
 
 #### Erreur API
+
 Le cookie est quand même effacé côté client par la redirection ; message « Déconnexion impossible. Réessaie. » si le serveur ne répond pas, avec « Réessayer ».
 
 ### Réponses API attendues
@@ -943,6 +976,7 @@ Le cookie est quand même effacé côté client par la redirection ; message « 
 - Suppression du compte (US-06).
 
 ### Tâches techniques
+
 - [ ] Backend : `authActions.logout` : `clearAuthCookie(res)` avec les mêmes options que la pose, 204
 - [ ] Backend : `POST /api/auth/logout` → `checkOrigin` → `authenticate` → action
 - [ ] Frontend : `authService.logout`
@@ -953,6 +987,7 @@ Le cookie est quand même effacé côté client par la redirection ; message « 
 - [ ] Tests : E2E : déconnexion sans séance ; déconnexion avec séance en cours (confirmation, puis reprise possible après reconnexion)
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Confirmation accessible (focus piégé dans la modale, Échap ferme)
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
@@ -1005,9 +1040,11 @@ En tant qu'utilisateur, je veux passer facilement d'une partie de l'appli à l'a
 ### Éléments affichés
 
 #### Onglets
+
 Accueil · Planning · Suivi · Catalogue
 
 #### Accueil, utilisateur débutant
+
 **Section :** Séance du jour
 **Texte :** Aucune séance prévue
 **Aide :** Crée ta première séance : choisis tes blocs et tes exercices, puis lance-la quand tu veux.
@@ -1016,34 +1053,42 @@ Accueil · Planning · Suivi · Catalogue
 **Actions rapides :** Voir mon planning · Voir mon historique
 
 #### Accueil, utilisateur actif
+
 **Sélecteur :** « 4 aujourd'hui › »
 **Carte :** 07:00 · FORCE 8 SEM. · S4/8 · Jambes · 1 bloc · 3 exercices
 **Bouton :** ▶ Démarrer la séance
 
 #### Accueil, séance démarrée
+
 **Carte :** ● EN COURS · Jambes · Commencée à 07:04 · 6 / 11 séries
 **Bouton :** Reprendre ma séance
 
 #### Erreur
+
 **Titre :** Impossible de charger tes séances
 **Texte :** Vérifie ta connexion internet, puis réessaie.
 **Bouton :** Réessayer
 
 #### Page introuvable
+
 **Titre :** Page introuvable · **Bouton :** Retour à l'accueil
 
 ### États à gérer
 
 #### Chargement
+
 Blocs gris à l'emplacement du contenu, la structure ne bouge pas ; en-tête et onglets utilisables ; statut annoncé « Chargement de l'accueil ».
 
 #### Erreur
+
 Message unique à la place de « Séance du jour » et « Mes programmes » ; actions rapides et onglets restent disponibles.
 
 #### Séance du jour sans exercice
+
 Le bouton devient « Ajouter des exercices » (RM-018).
 
 #### Séance déjà en cours
+
 « Démarrer » n'apparaît sur aucune autre carte.
 
 ### Réponses API attendues
@@ -1063,6 +1108,7 @@ Le bouton devient « Ajouter des exercices » (RM-018).
 - Notifications (US-46).
 
 ### Tâches techniques
+
 - [ ] Backend : `appointmentRepository.readAppointmentsBetween(userId, from, to)` : rendez-vous + nom de séance + programme + séance réalisée liée (`LEFT JOIN workout_session`), `WHERE a.owner_user_id = ? AND a.planned_date BETWEEN ? AND ?`, tri `planned_date, planned_time IS NULL, planned_time, id`
 - [ ] Backend : `appointmentRepository.countVersionContent(versionIds)` : nombre de blocs et d'exercices par version (pour « 1 bloc · 3 exercices »)
 - [ ] Backend : `appointmentActions.browse` ; `GET /api/appointments` → `authenticate` → `validate({ query: dateRangeSchema })` (62 jours max)
@@ -1079,6 +1125,7 @@ Le bouton devient « Ajouter des exercices » (RM-018).
 - [ ] Tests : E2E : navigation au clavier entre les 4 onglets ; page privée sans connexion → connexion → retour ; axe sur les 5 états de l'Accueil
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] 5 états de l'Accueil implémentés et testés
 - [ ] Mobile-first 375 px, onglets à 44 px, vérifié sur tablette et ordinateur
@@ -1132,19 +1179,23 @@ Le catalogue est le point de départ de toute séance : 175 exercices illustrés
 **Bouton en haut :** Sélectionner (mode sélection, US-14)
 
 **Erreur :**
+
 > Impossible de charger les exercices
 > Vérifie ta connexion internet, puis réessaie.
-Bouton « Réessayer »
+> Bouton « Réessayer »
 
 ### États à gérer
 
 #### Chargement de la liste
+
 Cartes grises de la même hauteur que les vraies ; statut annoncé « Chargement des exercices ».
 
 #### Chargement progressif
+
 Une seule carte grise ajoutée en bas.
 
 #### Erreur de chargement
+
 Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif, les cartes déjà affichées restent et « Réessayer » remplace la ligne de chargement.
 
 ### Réponses API attendues
@@ -1161,6 +1212,7 @@ Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif
 - Créer un exercice personnel (US-10).
 
 ### Tâches techniques
+
 - [ ] BDD : s'appuyer sur `exercise`, `exercise_category`, `category`, `exercise_equipment`, `equipment`
 - [ ] Backend : `exerciseRepository.readExercises(userId, filters, limit, offset)` : colonnes `id, slug, name, difficulty, image_female_url, image_male_url, (owner_user_id IS NOT NULL) AS is_personal` + sous-requête du premier groupe (`category_name`) + sous-requête du matériel (`GROUP_CONCAT` des noms séparés par « · »), `WHERE (e.owner_user_id IS NULL OR e.owner_user_id = ?) AND e.is_archived = FALSE`, `ORDER BY e.name LIMIT ? OFFSET ?` (limit et offset en chaînes)
 - [ ] Backend : `exerciseRepository.countExercises(userId, filters)` : même `WHERE`, `COUNT(*)`
@@ -1179,6 +1231,7 @@ Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif
 - [ ] Tests : E2E : faire défiler jusqu'au bout ; axe sur les états liste, chargement, erreur
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, chargement progressif et erreur implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur
@@ -1236,22 +1289,27 @@ En tant qu'utilisateur, je veux chercher un exercice par son nom et filtrer par 
 **Lien :** Tout effacer
 
 **Aucun résultat :**
+
 > Aucun exercice trouvé pour « squaat »
 > Vérifie l'orthographe ou retire un filtre.
-Boutons « Effacer la recherche » · « Réinitialiser les filtres »
+> Boutons « Effacer la recherche » · « Réinitialiser les filtres »
 
 ### États à gérer
 
 #### Recherche avec résultats
+
 Compteur et terme en gras.
 
 #### Aucun résultat
+
 Message avec le terme saisi.
 
 #### Chargement
+
 Recherche et filtres restent utilisables.
 
 #### Erreur
+
 Comme l'US-07, recherche et filtres conservés.
 
 ### Réponses API attendues
@@ -1266,6 +1324,7 @@ Comme l'US-07, recherche et filtres conservés.
 - Tri autre que par nom.
 
 ### Tâches techniques
+
 - [ ] Backend : `readExercises` et `countExercises` : ajouter des morceaux de SQL **constants**, seulement si le filtre est fourni : `AND e.name LIKE ? ESCAPE '\\'` ; `AND EXISTS (SELECT 1 FROM exercise_category ec WHERE ec.exercise_id = e.id AND ec.category_id IN (?))` ; idem matériel avec `exercise_equipment` ; `AND e.difficulty IN (?)`
 - [ ] Backend : utiliser `query` (et non `execute`) pour ces deux fonctions, à cause des tableaux dans `IN (?)`
 - [ ] Backend : échapper `\`, `%` et `_` dans la recherche avant de l'entourer de `%`
@@ -1282,6 +1341,7 @@ Comme l'US-07, recherche et filtres conservés.
 - [ ] Tests : E2E : filtrer, ouvrir une fiche, revenir → filtres et position conservés ; axe avec un filtre déplié
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États résultats, aucun résultat, chargement et erreur testés
 - [ ] Grilles utilisables au clavier (Tab, Entrée, Espace)
@@ -1334,24 +1394,29 @@ Savoir quels muscles travaillent, comment faire le mouvement et quelles erreurs 
 **Image absente :** « Illustration non disponible » (texte alternatif : « Mon tirage élastique, illustration non disponible »)
 
 **Erreur :**
+
 > Impossible de charger la fiche
 > Vérifie ta connexion internet, puis réessaie.
-Bouton « Réessayer »
+> Bouton « Réessayer »
 
 **Introuvable :** « Exercice introuvable » + bouton « Retour au catalogue »
 
 ### États à gérer
 
 #### Chargement
+
 Nom dans l'en-tête, contenu gris, bouton d'ajout désactivé, statut annoncé.
 
 #### Erreur
+
 Message + « Réessayer » ; le retour reste disponible ; bouton d'ajout masqué.
 
 #### Exercice personnel sans illustration
+
 Badge + emplacement réservé avec texte visible.
 
 #### Introuvable (404)
+
 Message + retour au catalogue.
 
 ### Réponses API attendues
@@ -1368,6 +1433,7 @@ Message + retour au catalogue.
 - Modifier ou personnaliser l'exercice (US-11).
 
 ### Tâches techniques
+
 - [ ] Backend : `exerciseRepository.readExercise(id, userId)` : même condition de visibilité que US-07
 - [ ] Backend : `readExerciseMuscles(id)` (nom + rôle, principaux d'abord), `readExerciseEquipments(id)`, `readExerciseMeasures(id)` (code + libellé), `readExerciseTexts(id)` (`ORDER BY type, position`), `readExerciseCategories(id)` : une fonction = une requête
 - [ ] Backend : `exerciseActions.read` : appelle les 6 fonctions l'une après l'autre, 404 si l'exercice est absent
@@ -1382,6 +1448,7 @@ Message + retour au catalogue.
 - [ ] Tests : E2E : liste → fiche → retour (filtres conservés) ; axe sur la fiche complète
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, erreur, introuvable et exercice personnel testés
 - [ ] Mobile-first 375 px ; en-tête et bouton du bas fixes
@@ -1434,6 +1501,7 @@ Une séance préparée, c'est savoir exactement quoi faire en arrivant à la sal
 **Boutons :** Ajouter un bloc · Enregistrer la séance
 
 #### Confirmation de sortie
+
 **Titre :** Quitter sans enregistrer ?
 **Message :** Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue.
 **Actions :** « Quitter » · « Continuer la séance »
@@ -1441,9 +1509,11 @@ Une séance préparée, c'est savoir exactement quoi faire en arrivant à la sal
 ### États à gérer
 
 #### Brouillon vide
+
 Un seul appel à l'action : « Ajouter un bloc ».
 
 #### Brouillon modifié
+
 Confirmation de sortie active.
 
 ### Réponses API attendues
@@ -1456,6 +1526,7 @@ Aucune route propre : l'enregistrement est livré par l'US-23.
 - Séance d'un programme (US-18).
 
 ### Tâches techniques
+
 - [ ] Shared : `shared/session-template.ts` : types `SessionDraft`, `DraftBlock`, `DraftExercise`, `PlannedSetValues` ; `sessionDraftSchema` (Zod) avec toutes les bornes (voir US-15)
 - [ ] Frontend : `features/session-template/hooks/sessionDraftReducer.ts` : fonction pure, actions `setName`, `setDate`, `setTime`, `addBlock`, `removeBlock`, `restoreBlock`, `moveBlock`, `addExercises`, `removeExercise`, `updateExerciseRest`, `addSet`, `duplicateLastSet`, `updateSet`, `removeSet`
 - [ ] Frontend : `features/session-template/hooks/useSessionDraft.ts` (`useReducer` + `isDirty`)
@@ -1467,6 +1538,7 @@ Aucune route propre : l'enregistrement est livré par l'US-23.
 - [ ] Tests : front : nom obligatoire, avertissement « pas d'exercice », confirmation de sortie
 
 ### Definition of Done
+
 - [ ] Reducer couvert par des tests unitaires
 - [ ] Confirmation de sortie testée (retour ‹ et fermeture)
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
@@ -1514,6 +1586,7 @@ Une séance se pense en parties : on s'échauffe, on travaille, on s'étire. Les
 ### Éléments affichés
 
 #### Panneau « Type de bloc »
+
 - Classique · Exercices et séries, avec objectifs et repos
 - Circuit · Exercices enchaînés, nombre de tours (Bientôt)
 - AMRAP · Maximum de tours dans une durée fixe (Bientôt)
@@ -1524,24 +1597,29 @@ Une séance se pense en parties : on s'échauffe, on travaille, on s'étire. Les
 - Note · Texte libre
 
 #### Bloc vide
+
 **Champ :** Intitulé (facultatif) (Ex. Force) · **Lien :** Changer
 **Texte :** 0 exercice · « Choisis tes exercices dans le catalogue. »
 **Boutons :** Ajouter des exercices · Enregistrer le bloc
 
 #### Retrait
+
 Toast « Bloc retiré » + bouton « Annuler » (5 s)
 
 ### États à gérer
 
 #### Type indisponible
+
 Tuile grisée avec « Bientôt » en texte, non sélectionnable, annoncée comme indisponible.
 
 #### Bloc Note
+
 Pas de section Exercices.
 
 ### Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Bloc Note avec exercices : `400`
 - Type inconnu ou chronométré : `400`
 - Plus de 20 blocs : `400`
@@ -1556,6 +1634,7 @@ Validation dans la route de l'US-23 :
 - Réordonner par glisser-déposer (US-16) : en MVP, l'ordre est celui de création.
 
 ### Tâches techniques
+
 - [ ] Shared : `BLOCK_TYPES` (code, libellé, description, `isAvailable`) dans `shared/session-template.ts`
 - [ ] Shared : `sessionDraftSchema` : `block_type` limité aux 5 types MVP, note sans exercice (`superRefine`), 20 blocs max, `name` 0 à 160, `instructions` 0 à 2 000
 - [ ] Frontend : `components/BlockTypePicker.tsx` (panneau, une colonne, tuiles indisponibles)
@@ -1566,6 +1645,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : front : ajout, retrait + annulation, tuile indisponible non sélectionnable
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Panneau utilisable au clavier, focus rendu au bouton à la fermeture
 - [ ] Code relu et fusionné via pull request
@@ -1623,17 +1703,21 @@ On construit sa séance avec les mêmes outils que pour chercher un exercice : r
 ### États à gérer
 
 #### Aucune sélection
+
 Bouton d'ajout désactivé.
 
 #### Limite atteinte
+
 Au-delà de 30 exercices dans le bloc : « 30 exercices au maximum par bloc », cartes non sélectionnables.
 
 #### Exercice devenu indisponible
+
 Refusé à l'enregistrement (US-23) avec son nom.
 
 ### Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Exercice d'un autre utilisateur, archivé ou inexistant : `422`, code `EXERCISE_NOT_AVAILABLE`, avec le nom ou l'identifiant
 - Plus de 30 exercices dans un bloc : `400`
 
@@ -1644,6 +1728,7 @@ Validation dans la route de l'US-23 :
 - Créer un exercice personnel depuis la sélection (US-10).
 
 ### Tâches techniques
+
 - [ ] Backend : `exerciseRepository.readAvailableExerciseIds(userId, ids)` (avec `query`) : `SELECT id FROM exercise WHERE id IN (?) AND is_archived = FALSE AND (owner_user_id IS NULL OR owner_user_id = ?)`
 - [ ] Frontend : `ExerciseListPage` reçoit `selectionMode` (`"block"` ou `"catalog"`) ; `useExerciseSelection` (liste ordonnée d'identifiants, `toggle`, `clear`)
 - [ ] Frontend : `components/SelectableExerciseCard.tsx` (`aria-pressed`, libellé « sélectionné, 1 sur 3 »)
@@ -1655,6 +1740,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : E2E : bloc → sélection de 3 exercices → retour, ordre respecté ; catalogue → Sélectionner → Ajouter à une séance → éditeur
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Sélection utilisable au clavier et au lecteur d'écran
 - [ ] Code relu et fusionné via pull request
@@ -1722,14 +1808,17 @@ Les objectifs prévus servent deux fois : ils guident pendant la séance, puis i
 ### États à gérer
 
 #### Valeur invalide
+
 Message sous le champ (« Entre un nombre entre 0 et 1 000. »), bouton « Valider l'exercice » désactivé.
 
 #### Exercice sans mesure connue
+
 Message « Cet exercice n'a pas de mesure : tu pourras seulement le cocher comme fait. »
 
 ### Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Valeur hors bornes ou de mauvais type : `400`
 - Mesure non prévue pour l'exercice : `422`, code `MEASURE_NOT_ALLOWED`, avec le nom de l'exercice et la mesure
 
@@ -1744,6 +1833,7 @@ Validation dans la route de l'US-23 :
 - Minuteur pendant la séance (US-49).
 
 ### Tâches techniques
+
 - [ ] BDD : `planned_set` : `reps`, `weight_kg`, `duration_seconds`, `distance_meters`, `speed_kmh`, `resistance`, `incline_percent`, `calories`, `rest_after_seconds` ; `template_block_exercise.default_rest_seconds`
 - [ ] Backend : `exerciseRepository.readExerciseMeasureCodes(ids)` (avec `query`) : `SELECT em.exercise_id, m.code FROM exercise_measure em JOIN measure m ON m.id = em.measure_id WHERE em.exercise_id IN (?)`
 - [ ] Shared : `getSetFields(measureCodes)` : liste des champs à afficher, utilisée par le client et par le serveur
@@ -1759,6 +1849,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : E2E : configurer un exercice de chaque profil ; axe sur A7a à A7d
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement pour les 4 profils
 - [ ] Clavier numérique sur mobile vérifié
 - [ ] Code relu et fusionné via pull request
@@ -1813,12 +1904,15 @@ Tout le monde ne suit pas un programme : on peut juste prévoir « Haut du corps
 ### États à gérer
 
 #### Enregistrement en cours
+
 Bouton « Enregistrement… » désactivé, éditeur en lecture seule.
 
 #### Erreur API
+
 Message + « Réessayer », brouillon intact.
 
 #### Succès
+
 Écran A9, puis retour au jour choisi.
 
 ### Réponses API attendues
@@ -1836,6 +1930,7 @@ Message + « Réessayer », brouillon intact.
 - Déplacer ou annuler (US-25, US-26).
 
 ### Tâches techniques
+
 - [ ] BDD : tables `session_template`, `session_version`, `template_block`, `template_block_exercise`, `planned_set`, `appointment`
 - [ ] Shared : `freeSessionSchema` : `planned_date` (dans la plage), `planned_time` facultatif, `session: sessionDraftSchema`
 - [ ] Backend : `sessionTemplateRepository` (toutes avec `db: Queryable`) : `createSessionTemplate` (`INSERT INTO session_template (owner_user_id, name) VALUES (?, ?)`), `createSessionVersion` (`… VALUES (?, 1)`), `createTemplateBlock`, `createTemplateBlockExercise`, `createPlannedSet`
@@ -1851,6 +1946,7 @@ Message + « Réessayer », brouillon intact.
 - [ ] Tests : E2E : parcours A1 → A9 complet, la séance apparaît à l'Accueil le bon jour
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Transaction testée (aucune ligne orpheline après échec)
 - [ ] Mobile-first 375 px
@@ -1905,39 +2001,48 @@ Démarrer, c'est passer du prévu au réalisé. Le prévu est copié et figé po
 ### Éléments affichés
 
 #### Séance prévue (B1)
+
 **Étiquette :** PRÉVUE · **Texte :** Jeudi 26 novembre · 1 bloc · 6 exercices
 **Bloc :** Classique · Force · « Développé couché · Tractions · Gainage · Tapis · Curl · Gainage latéral »
 **Bouton :** ▶ Démarrer la séance (ou « Ajouter des exercices » si la séance est vide)
 
 #### Séance en cours (B2)
+
 **En-tête :** En cours · séance libre · ● 12:40
 **Compteur :** Séries réalisées · 3 / 18
 **Ligne :** Développé couché · 1 / 3 séries · 3 séries · 10 rép. · 40 kg
 **Boutons :** Abandonner · Terminer la séance
 
 #### Refus, séance déjà en cours
+
 **Titre :** Une séance est déjà en cours
 **Message :** Termine ou abandonne « Jambes » avant d'en démarrer une autre.
 **Actions :** « Reprendre « Jambes » » · « Fermer »
 
 #### Erreur
+
 « Impossible de démarrer la séance. » + « Réessayer »
 
 ### États à gérer
 
 #### Séance sans exercice
+
 Bouton « Ajouter des exercices » à la place de « Démarrer ».
 
 #### Démarrage en cours
+
 Bouton désactivé (pas de double démarrage).
 
 #### Séance déjà en cours
+
 Refus explicite + accès direct à la séance en cours.
 
 #### Erreur API
+
 Message + « Réessayer » ; l'état réel est rechargé (si la séance a quand même démarré, on l'ouvre).
 
 #### Chargement de B2
+
 Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 
 ### Réponses API attendues
@@ -1962,6 +2067,7 @@ Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 - Clôture automatique après 4 h (US-33).
 
 ### Tâches techniques
+
 - [ ] BDD : `workout_session`, `workout_block`, `workout_exercise`, `workout_set` ; index unique `uq_one_active_workout_per_user`
 - [ ] Backend : `appointmentRepository.readAppointmentForUpdate(id, userId)` : `SELECT id, status, session_version_id FROM appointment WHERE id = ? AND owner_user_id = ? FOR UPDATE`
 - [ ] Backend : `sessionTemplateRepository.countVersionExercises(versionId)` (jointure `template_block_exercise` → `template_block`)
@@ -1981,6 +2087,7 @@ Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 - [ ] Tests : E2E : démarrer depuis l'Accueil, recharger, « Reprendre ma séance » ; axe sur B1 et B2
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Test de concurrence vert
 - [ ] Mobile-first 375 px
@@ -2043,11 +2150,13 @@ C'est le cœur de l'appli à la salle : un appui quand on a fait comme prévu, q
 **Bas :** Suivant : Tractions ›
 
 #### Panneau « Modifier »
+
 **Titre :** Ce que tu as réellement fait · Série 2
 **Champs :** Répétitions · prévu 10 · Charge (kg) · prévu 40 (boutons − / +)
 **Actions :** Valider · Annuler
 
 #### Relevé cardio
+
 **Titre :** Étape 2 · Durée · Distance (km) · Vitesse moy. (km/h) · Inclinaison moy. (%) · Calories · « Valider l'étape 2 »
 
 **Série vide :** « Indique au moins une valeur pour valider la série. »
@@ -2056,12 +2165,15 @@ C'est le cœur de l'appli à la salle : un appui quand on a fait comme prévu, q
 ### États à gérer
 
 #### Validation en cours
+
 Bouton désactivé ; la série passe tout de suite en « validée » (affichage optimiste).
 
 #### Erreur API
+
 Retour à l'état précédent + message + « Réessayer ».
 
 #### Séance clôturée entre-temps (4 h)
+
 Message de RM-065 et retour au résumé.
 
 ### Réponses API attendues
@@ -2084,6 +2196,7 @@ Message de RM-065 et retour au résumé.
 - Corriger après la fin de la séance (US-37).
 
 ### Tâches techniques
+
 - [ ] Backend : `workoutSessionRepository.readWorkoutSetContext(setId, userId)` : série + statut de la séance + `exercise_id` (jointures `workout_exercise` → `workout_block` → `workout_session`, `WHERE wset.id = ? AND ws.owner_user_id = ?`)
 - [ ] Backend : `updateWorkoutSetActual(setId, values)` : met à jour les 8 colonnes `_actual` et `validated_at = COALESCE(validated_at, NOW(3))` ; **jamais** les colonnes `_planned`
 - [ ] Backend : `touchWorkoutSession(id)` : `UPDATE workout_session SET last_activity_at = NOW(3) WHERE id = ?`
@@ -2100,6 +2213,7 @@ Message de RM-065 et retour au résumé.
 - [ ] Tests : E2E : valider 3 séries d'un exercice, puis passer au suivant ; axe sur B3 et le panneau
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Zones − / + d'au moins 44 px, utilisables d'une main
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
@@ -2158,15 +2272,19 @@ Sans minuteur intégré, il faut ouvrir une autre application à chaque série.
 ### États à gérer
 
 #### Repos en cours
+
 Temps en gros, boutons actifs.
 
 #### 10 dernières secondes
+
 Cadre noir, annonce unique.
 
 #### Fin du repos
+
 Alerte, puis retour à l'exercice.
 
 #### Navigateur sans son ni vibration
+
 Seul le signal visuel ; aucune erreur.
 
 ### Réponses API attendues
@@ -2180,6 +2298,7 @@ Aucune : tout se passe dans le navigateur.
 - Repos conservé après fermeture de l'appli.
 
 ### Tâches techniques
+
 - [ ] Shared : `getRestDuration(set, exercise)` (série → exercice → 90 s)
 - [ ] Frontend : `hooks/useCountdown.ts` : `endsAt`, `secondsLeft` calculé à partir de `Date.now()`, `addSeconds`, `skip`, nettoyage de l'intervalle
 - [ ] Frontend : `hooks/useTimerAlerts.ts` : bips (Web Audio API, contexte audio créé au premier appui de l'utilisateur), `navigator.vibrate` seulement s'il existe, chaque alerte déclenchée une seule fois
@@ -2191,6 +2310,7 @@ Aucune : tout se passe dans le navigateur.
 - [ ] Tests : E2E : valider une série → repos → Passer ; axe sur B4
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés sur un vrai téléphone (Android et iPhone)
 - [ ] Aucune information portée par le son seul
 - [ ] Code relu et fusionné via pull request
@@ -2238,11 +2358,13 @@ On peut devoir partir de la salle avant la fin. Les séries faites sont du vrai 
 ### Éléments affichés
 
 #### Confirmation
+
 **Titre :** Abandonner cette séance ?
 **Message :** Tes séries faites seront gardées dans ton historique. Tu ne pourras pas reprendre cette séance.
 **Actions :** « Abandonner » · « Continuer ma séance »
 
 #### Clôture automatique (RM-065)
+
 **Message :** Cette séance a été clôturée après 4 heures sans activité. Tes résultats ont été conservés.
 **Boutons :** Voir le résumé · Corriger les résultats (US-37)
 
@@ -2251,12 +2373,15 @@ On peut devoir partir de la salle avant la fin. Les séries faites sont du vrai 
 ### États à gérer
 
 #### Confirmation annulée
+
 Aucune requête, la séance continue.
 
 #### Abandon en cours
+
 Boutons désactivés.
 
 #### Erreur API
+
 Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → résumé).
 
 ### Réponses API attendues
@@ -2275,6 +2400,7 @@ Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → 
 - Reprendre une séance inachevée (interdit par RM-045).
 
 ### Tâches techniques
+
 - [ ] BDD : `workout_session.auto_closed` (migration 004)
 - [ ] Backend : `workoutSessionRepository.abandonWorkoutSession(id, userId)` : `UPDATE workout_session SET status = 'unfinished', ended_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`
 - [ ] Backend : action : 0 ligne modifiée → relire la séance → absente : 404, sinon 409
@@ -2288,6 +2414,7 @@ Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → 
 - [ ] Tests : E2E : abandonner après 2 séries → résumé « INACHEVÉE »
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Modale accessible (focus piégé, Échap = continuer)
 - [ ] Code relu et fusionné via pull request
@@ -2335,11 +2462,13 @@ Le résumé, c'est la récompense : durée, séries faites, volume soulevé.
 ### Éléments affichés
 
 #### Confirmation
+
 **Titre :** Terminer la séance ?
 **Message :** 1 série n'est pas faite. Elle restera non faite dans ton historique.
 **Actions :** « Terminer » · « Continuer ma séance »
 
 #### Résumé (B6)
+
 **Titre :** Résumé · Haut du corps · jeudi 26 novembre
 **Étiquette :** ✓ TERMINÉE (ou INACHEVÉE)
 **Chiffres :** 48 min · 17 / 18 séries · 3 240 kg volume
@@ -2349,12 +2478,15 @@ Le résumé, c'est la récompense : durée, séries faites, volume soulevé.
 ### États à gérer
 
 #### Terminaison en cours
+
 Boutons désactivés.
 
 #### Erreur API
+
 Message « Impossible de terminer la séance. Réessaie. » + « Réessayer » ; l'état réel est rechargé.
 
 #### Aucune série validée
+
 Voir À PRÉCISER.
 
 ### Réponses API attendues
@@ -2373,6 +2505,7 @@ Voir À PRÉCISER.
 - Détection et notification des records (US-40).
 
 ### Tâches techniques
+
 - [ ] Backend : `workoutSessionRepository.completeWorkoutSession(id, userId)` : même forme que l'abandon avec `status = 'completed'`
 - [ ] Backend : `workoutSessionActions.complete` : 0 ligne → 404 / 409 ; sinon relire l'arbre et renvoyer le résumé
 - [ ] Backend : `POST /api/workout-sessions/:id/complete`
@@ -2385,6 +2518,7 @@ Voir À PRÉCISER.
 - [ ] Tests : E2E : séance complète → résumé avec les bons chiffres ; axe sur B6
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Chiffres du résumé vérifiés à la main sur un exemple
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
@@ -2440,6 +2574,7 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 **Onglets :** Résumé · Historique · Exercices (seul Historique en MVP)
 **Groupe :** SEMAINE DU 23 NOV.
 **Lignes :**
+
 - JEU 26 · ✓ Réveil musculaire · Effectuée · Séance libre ›
 - MAR 24 · Dos · À confirmer · Séance libre · ↷ déplacée du 21 ›
 - SAM 21 · × Course · Manquée · Cardio base ›
@@ -2447,6 +2582,7 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 - SAM 14 · / Course · Annulée · Cardio base ›
 
 **Vide (SUI-07) :**
+
 > Aucune séance passée
 > Tes séances apparaîtront ici dès qu'elles seront faites, manquées ou annulées.
 
@@ -2455,15 +2591,19 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 ### États à gérer
 
 #### Chargement
+
 Lignes grises de la même hauteur.
 
 #### Vide
+
 Écran SUI-07.
 
 #### Erreur
+
 Message + « Réessayer ».
 
 #### Chargement des suivantes
+
 Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « Réessayer » apparaît en bas.
 
 ### Réponses API attendues
@@ -2483,6 +2623,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 - Passage automatique en « à confirmer » et « manquée » (US-27) : en MVP, une séance passée non faite reste « planifiée » et n'apparaît donc pas.
 
 ### Tâches techniques
+
 - [ ] Backend : `historyRepository.readHistory(userId, today, limit, offset)` : rendez-vous + nom de séance + programme + séance réalisée (`LEFT JOIN workout_session`) ; condition `ws.status IN ('completed','unfinished') OR (ws.id IS NULL AND a.status IN ('to_confirm','missed','cancelled') AND a.planned_date < ?)` ; colonne calculée `COALESCE(DATE(ws.started_at), a.planned_date) AS history_date` ; `ORDER BY history_date DESC, a.id DESC LIMIT ? OFFSET ?` (en chaînes)
 - [ ] Backend : vérifier avec `EXPLAIN` que l'index `ix_appointment_calendar` est utilisé
 - [ ] Backend : `historyActions.browse` (demande 21 lignes pour savoir s'il en reste : `has_more`)
@@ -2497,6 +2638,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 - [ ] Tests : E2E : historique vide, puis après une séance terminée ; axe sur SUI-05 et SUI-07
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, vide, erreur et chargement des suivantes testés
 - [ ] Mobile-first 375 px
@@ -2545,6 +2687,7 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 ### Éléments affichés
 
 #### Séance effectuée (SUI-06)
+
 **Ligne 1 :** Effectuée jeudi 19 novembre · 07:02
 **Ligne 2 :** Force 8 semaines · semaine 3
 **Chiffres :** 52 min · durée · 1 760 kg · tonnage · 6 / 10 · objectifs atteints
@@ -2553,6 +2696,7 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 **Bouton :** Corriger les résultats (US-37, masqué en MVP)
 
 #### Séance manquée (SUI-06b)
+
 **Étiquette :** • MANQUÉE
 **Ligne :** Prévue samedi 21 novembre · sans heure · Cardio base
 **Bloc :** Prévu · Tapis de course · 30 min · 9 km/h · 1 %
@@ -2564,15 +2708,19 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 ### États à gérer
 
 #### Chargement
+
 Structure grise.
 
 #### Séance sans charge
+
 Pas de tonnage affiché.
 
 #### Séance inachevée
+
 Étiquette « INACHEVÉE », séries non faites affichées « Non faite ».
 
 #### Introuvable / Erreur
+
 Messages ci-dessus.
 
 ### Réponses API attendues
@@ -2588,6 +2736,7 @@ Messages ci-dessus.
 - Numéro de semaine du programme : affiché seulement quand les programmes existent (V1) ; en MVP, « Séance libre ».
 
 ### Tâches techniques
+
 - [ ] Backend : `historyActions.read(appointmentId, userId)` : `readHistoryAppointment` (rendez-vous + séance + programme, filtré par `owner_user_id`) ; s'il y a une séance réalisée → fonctions `readWorkout…` de l'US-28 ; sinon → `readVersionBlocks`, `readVersionExercises`, `readVersionSets` (prévu de la version d'origine)
 - [ ] Backend : `GET /api/history/:appointmentId` → `authenticate` → `validate({ params })` → action
 - [ ] Shared : `getSetGap`, `isObjectiveReached`, `countReachedObjectives`, `computeTonnage`, `computeDurationSeconds` (déjà créés, réutilisés) ; `formatSetValues` (« 8 × 62,5 kg », « 1:10 »)
@@ -2599,6 +2748,7 @@ Messages ci-dessus.
 - [ ] Tests : E2E : de la liste au détail ; axe sur SUI-06 et SUI-06b
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement, chiffres de SUI-06 retrouvés sur les données d'exemple
 - [ ] Tableau lisible au lecteur d'écran
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
@@ -2665,12 +2815,15 @@ En MVP, l'onglet Planning n'affichait qu'une liste simple. Il devient le vrai ca
 ### États à gérer
 
 #### Chargement
+
 Grille grise, navigation utilisable.
 
 #### Erreur
+
 « Impossible de charger ton planning. » + « Réessayer ».
 
 #### Séance en cours
+
 « Une séance est en cours » à la place de « Démarrer ».
 
 ### Réponses API attendues
@@ -2683,6 +2836,7 @@ Grille grise, navigation utilisable.
 - Déplacer, annuler, confirmer (US-25 à US-27).
 
 ### Tâches techniques
+
 - [ ] Backend : `readAppointmentsBetween` élargi : rendez-vous **prévus** dans la plage **ou réalisés** dans la plage (`a.planned_date BETWEEN ? AND ? OR DATE(ws.started_at) BETWEEN ? AND ?`), avec `initial_date`, `moved_manually`, programme et numéro de semaine
 - [ ] Shared : `getAppointmentDisplayDate(row)` (date réelle si faite), `buildDayEntries(rows, day)` (séances du jour + rappels grisés), `buildMonthGrid(year, month)` (semaines du lundi au dimanche), `getProgramWeekNumber(program, date)`
 - [ ] Frontend : `features/appointment/pages/PlanningPage.tsx` (Mois / Semaine), `MonthGrid.tsx`, `WeekList.tsx`, `DayAppointments.tsx`, `AppointmentRow.tsx`, `AppointmentDetailPage.tsx` (CAL-04), `AppointmentActionsMenu.tsx`, `CreateChoiceSheet.tsx` (CAL-01b)
@@ -2691,6 +2845,7 @@ Grille grise, navigation utilisable.
 - [ ] Tests : E2E navigation mois / semaine / jour ; axe sur CAL-01, CAL-02, CAL-03
 
 ### Definition of Done
+
 - [ ] Exemple CAL-10 vérifié sur les données de démonstration
 - [ ] Code relu et fusionné via pull request
 
@@ -2738,6 +2893,7 @@ Une séance qu'on sait qu'on ne fera pas ne doit pas finir « manquée ».
 ### États à gérer
 
 #### Envoi
+
 Boutons désactivés.
 
 ### Réponses API attendues
@@ -2751,6 +2907,7 @@ Boutons désactivés.
 - Annuler toutes les séances d'un programme (US-21).
 
 ### Tâches techniques
+
 - [ ] BDD : `appointment.cancelled_at` + contrainte (migration 002)
 - [ ] Backend : `cancelAppointment(id, userId)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status IN ('planned','to_confirm') AND NOT EXISTS (SELECT 1 FROM workout_session WHERE appointment_id = appointment.id)` ; 0 ligne → relire pour 404 / 409
 - [ ] Backend : `markAppointmentNotificationsRead(appointmentId)` ; `PATCH /api/appointments/:id/cancel`
@@ -2758,6 +2915,7 @@ Boutons désactivés.
 - [ ] Tests : back : annulation, `cancelled_at` rempli, commencée → 409, la contrainte refuse `cancelled` sans date
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-27 · Confirmer une séance passée (À confirmer, Manquée)
@@ -2812,9 +2970,11 @@ L'historique (US-35) affiche maintenant des séances « À confirmer » et « Ma
 ### États à gérer
 
 #### Envoi
+
 Boutons désactivés.
 
 #### Déjà traitée ailleurs
+
 Rechargement de l'état réel.
 
 ### Réponses API attendues
@@ -2832,6 +2992,7 @@ Rechargement de l'état réel.
 - Centre de notifications (US-46).
 
 ### Tâches techniques
+
 - [ ] Backend : tâche `updateAppointmentStatuses()` toutes les 5 min, pour chaque fuseau : `UPDATE appointment SET status = 'to_confirm' WHERE status = 'planned' AND planned_date < ?` (aujourd'hui) puis `UPDATE … SET status = 'missed' WHERE status = 'to_confirm' AND planned_date <= ?` (aujourd'hui − 4 jours) ; les rendez-vous avec une séance réalisée sont exclus
 - [ ] Backend : notifications créées par `INSERT … SELECT` sur les rendez-vous concernés, sans doublon grâce à l'index unique (`ON DUPLICATE KEY UPDATE id = id`)
 - [ ] Backend : `markNotDone(id, userId)` : `to_confirm` → `missed`, notification « à confirmer » lue, **pas** de notification « manquée »
@@ -2841,6 +3002,7 @@ Rechargement de l'état réel.
 - [ ] Tests : unitaires `getMissedDeadline`
 
 ### Definition of Done
+
 - [ ] Tâche planifiée testée sans attendre minuit
 - [ ] Code relu et fusionné via pull request
 
@@ -2890,9 +3052,11 @@ Un rendez-vous tombe à l'eau : on décale la séance au lendemain, ou même à 
 ### États à gérer
 
 #### Envoi
+
 Boutons désactivés.
 
 #### Séance démarrée entre-temps
+
 Refus et rechargement.
 
 ### Réponses API attendues
@@ -2907,6 +3071,7 @@ Refus et rechargement.
 - Changer le jour de toutes les semaines (US-20).
 
 ### Tâches techniques
+
 - [ ] Shared : `computeAppointmentStatus(plannedDate, today)` (planned / to_confirm / missed selon la règle des 72 h) : fonction pure, utilisée aussi par US-27
 - [ ] Backend : `readAppointmentForUpdate`, `moveAppointment(id, date, time, status)` : `UPDATE appointment SET initial_date = COALESCE(initial_date, planned_date), planned_date = ?, planned_time = ?, moved_manually = TRUE, status = ? WHERE id = ?`
 - [ ] Backend : `deleteAppointmentNotifications(appointmentId, types)`, `createAppointmentNotification(appointmentId, type)`
@@ -2916,6 +3081,7 @@ Refus et rechargement.
 - [ ] Tests : E2E exemple CAL-05b
 
 ### Definition of Done
+
 - [ ] Exemple CAL-05b reproduit en test d'intégration
 - [ ] Code relu et fusionné via pull request
 
@@ -2974,9 +3140,11 @@ L'en-tête des 4 onglets affiche l'accès aux notifications (cloche ou pastille,
 ### États à gérer
 
 #### Chargement / Erreur
+
 Comme les autres listes.
 
 #### Élément supprimé
+
 NOT-07e.
 
 ### Réponses API attendues
@@ -2997,6 +3165,7 @@ NOT-07e.
 - Création des notifications (US-27, US-40, US-48).
 
 ### Tâches techniques
+
 - [ ] Backend : `notificationRepository.readNotifications(userId, limit, offset)`, `countUnreadNotifications(userId)`, `markNotificationRead(id, userId)`, `markAllNotificationsRead(userId)` ; `notificationRouter.ts`
 - [ ] Backend : la route `/read-all` et `/unread-count` **déclarées avant** `/:id`
 - [ ] Frontend : `NotificationBell.tsx` (en-tête, `aria-label` avec le nombre), `NotificationsPage.tsx`, `NotificationItem.tsx`, `useUnreadCount` (rafraîchi à chaque changement de page)
@@ -3005,6 +3174,7 @@ NOT-07e.
 - [ ] Tests : E2E notification → séance → compteur diminué ; axe
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 # Sprint 07 · Créer un programme
@@ -3065,15 +3235,19 @@ L'Accueil (US-44) affiche maintenant la section « Mes programmes » avec le pro
 ### États à gérer
 
 #### Chargement
+
 Cartes grises.
 
 #### Erreur
+
 « Impossible de charger tes programmes. » + « Réessayer ».
 
 #### Vide
+
 PRO-01v.
 
 #### Introuvable
+
 « Programme introuvable » + retour à la liste.
 
 ### Réponses API attendues
@@ -3086,6 +3260,7 @@ PRO-01v.
 - Créer, modifier, abandonner, supprimer, réutiliser (US-18 à US-22).
 
 ### Tâches techniques
+
 - [ ] BDD : statuts de `program` avec `draft` (migration 003)
 - [ ] Backend : `programRepository.readPrograms(userId, status)` avec, par programme, le nombre de rendez-vous et de rendez-vous passés et faits (sous-requêtes `COUNT`)
 - [ ] Backend : `readProgram(id, userId)`, `readProgramSchedules(id)`, `readProgramAppointments(id)` (avec la séance réalisée liée)
@@ -3099,6 +3274,7 @@ PRO-01v.
 - [ ] Tests : E2E liste → détail ; axe sur PRO-01, PRO-07, PRO-13
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Tâche planifiée testée sans attendre minuit (date passée en paramètre)
 - [ ] Code relu et fusionné via pull request
@@ -3157,12 +3333,15 @@ Un programme évite de planifier chaque séance à la main : on décrit une sema
 ### États à gérer
 
 #### Enregistrement du brouillon / création en cours
+
 Boutons désactivés.
 
 #### Erreur API
+
 Message, saisie conservée.
 
 #### Séance « À configurer »
+
 « Créer le programme » désactivé avec l'explication.
 
 ### Réponses API attendues
@@ -3179,6 +3358,7 @@ Message, saisie conservée.
 - Modifier un programme créé (US-20, US-21).
 
 ### Tâches techniques
+
 - [ ] Shared : `programDraftSchema` (nom 0 à 160, dates, jours 1 à 7, séances avec `weekday`, `planned_time`, `name`, `session: SessionDraft`) ; `listWeekdayDates(start, end, weekday)` ; `countProgramAppointments`
 - [ ] Backend : `programRepository.createProgram` (statut `draft`), `updateProgramInfo`, `updateProgramStatus`
 - [ ] Backend : `weeklyScheduleRepository.createWeeklySchedule(programId, templateId, weekday, time)`, `deleteDraftSchedules(programId)`
@@ -3191,6 +3371,7 @@ Message, saisie conservée.
 - [ ] Tests : E2E parcours complet PRO-02 → PRO-06 ; axe
 
 ### Definition of Done
+
 - [ ] Nombre de rendez-vous vérifié à la main sur un exemple
 - [ ] Code relu et fusionné via pull request
 
@@ -3242,6 +3423,7 @@ Exemple : Jambes le jeudi à 07:00, Fractionné le jeudi à 12:30 et Course le s
 ### États à gérer
 
 #### Retrait annulable
+
 Toast 5 s, `aria-live`.
 
 ### Réponses API attendues
@@ -3253,11 +3435,13 @@ Enregistrées avec le brouillon (US-18).
 - Changer un jour après la création (US-20).
 
 ### Tâches techniques
+
 - [ ] Frontend : `AddSessionOnDaySheet.tsx` (PRO-03a), `EditProgramInfoPage` en mode brouillon (PRO-03b), retrait par glissement + bouton poubelle, `UndoToast`
 - [ ] Shared : `countProgramAppointments(start, end, sessions)` utilisé pour tous les compteurs
 - [ ] Tests : unitaires compteurs (24 → 30, 24 → 12) ; front : retrait + annulation, décocher le dernier jour d'une séance
 
 ### Definition of Done
+
 - [ ] Compteurs vérifiés sur l'exemple de la maquette
 - [ ] Code relu et fusionné via pull request
 
@@ -3306,6 +3490,7 @@ On se rend souvent compte après coup qu'on préfère faire le squat avant les f
 ### États à gérer
 
 #### Glissement en cours
+
 Élément soulevé, emplacement visible.
 
 ### Réponses API attendues
@@ -3317,12 +3502,14 @@ Aucune route propre : l'ordre part avec l'enregistrement de la séance.
 - Réordonner pendant la séance en cours.
 
 ### Tâches techniques
+
 - [ ] Outillage : installer `@dnd-kit/core` et `@dnd-kit/sortable` (`--ignore-scripts`) : accessible au clavier et au toucher
 - [ ] Frontend : actions du reducer `moveBlock`, `moveExercise`, `moveSet` (fonctions pures, testées)
 - [ ] Frontend : `SortableList.tsx` générique ; annonces `aria-live` en français
 - [ ] Tests : reducer : déplacements aux bords (premier, dernier) ; E2E : glisser au clavier
 
 ### Definition of Done
+
 - [ ] Testé au toucher, à la souris et au clavier
 - [ ] Code relu et fusionné via pull request
 
@@ -3380,12 +3567,15 @@ On ajuste ses séances au fil des semaines (plus de charge, un exercice en plus)
 ### États à gérer
 
 #### Rien n'a changé
+
 « Valider » inactif.
 
 #### Rendez-vous démarré entre-temps
+
 Il est retiré de la liste avec un message.
 
 #### Erreur API
+
 Message, brouillon conservé.
 
 ### Réponses API attendues
@@ -3405,6 +3595,7 @@ Message, brouillon conservé.
 - Déplacer (US-25), règle hebdomadaire (US-20).
 
 ### Tâches techniques
+
 - [ ] Backend : `readVersionTree(versionId)` (blocs, exercices, séries) et conversion en `SessionDraft`
 - [ ] Backend : `GET /api/appointments/:id/session` : la version actuelle en brouillon + `can_apply_to_following` + liste des rendez-vous concernés par chaque portée
 - [ ] Backend : `readNextVersionNumber(templateId)` ; `createSessionVersion(templateId, n)` et création de l'arbre (fonctions de l'US-23)
@@ -3419,6 +3610,7 @@ Message, brouillon conservé.
 - [ ] Tests : E2E : modifier « Jambes » et les suivantes, vérifier deux dates
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Code relu et fusionné via pull request
 
@@ -3470,12 +3662,15 @@ L'emploi du temps change en cours de cycle : passer la course du samedi au diman
 ### États à gérer
 
 #### Aucun changement
+
 « Valider » inactif.
 
 #### Calcul de l'aperçu
+
 Liste en chargement.
 
 #### Séance en cours dans le programme
+
 Elle n'est jamais déplacée.
 
 ### Réponses API attendues
@@ -3490,6 +3685,7 @@ Elle n'est jamais déplacée.
 - Abandonner (US-21).
 
 ### Tâches techniques
+
 - [ ] Shared : `planScheduleChange(program, schedules, appointments, changes, today)` : fonction pure qui renvoie les rendez-vous à déplacer, à créer, à annuler et inchangés (utilisée pour l'aperçu et l'application)
 - [ ] Backend : `deactivateWeeklySchedule(id, at)`, `createWeeklySchedule`, `readFutureAppointmentsForUpdate(programId, today)` (`FOR UPDATE`), `moveAppointmentsToSchedule`, `createAppointments`, `cancelAppointments`, `createProgramChange(programId, type, old, new)`
 - [ ] Backend : `programActions.previewSchedule` et `programActions.updateSchedule` dans `withTransaction`
@@ -3498,6 +3694,7 @@ Elle n'est jamais déplacée.
 - [ ] Tests : E2E samedi → dimanche
 
 ### Definition of Done
+
 - [ ] L'aperçu et l'application donnent exactement le même résultat (test)
 - [ ] Code relu et fusionné via pull request
 
@@ -3549,9 +3746,11 @@ Une blessure, un changement d'objectif : il faut pouvoir arrêter sans perdre ce
 ### États à gérer
 
 #### Action en cours
+
 Boutons désactivés.
 
 #### Erreur
+
 Message, programme inchangé.
 
 ### Réponses API attendues
@@ -3566,6 +3765,7 @@ Message, programme inchangé.
 - Réutiliser (US-22).
 
 ### Tâches techniques
+
 - [ ] BDD : `appointment.cancelled_at` (migration 002)
 - [ ] Backend : `countProgramStartedSessions(programId)`, `readProgramInProgressSession(programId)`
 - [ ] Backend : `cancelFutureProgramAppointments(programId, today)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE program_id = ? AND status = 'planned' AND planned_date >= ? AND id NOT IN (SELECT appointment_id FROM workout_session)`
@@ -3576,6 +3776,7 @@ Message, programme inchangé.
 - [ ] Tests : E2E abandon et suppression
 
 ### Definition of Done
+
 - [ ] Test « aucune ligne orpheline » après suppression
 - [ ] Code relu et fusionné via pull request
 
@@ -3632,9 +3833,11 @@ Le bouton « Corriger les résultats », masqué en MVP, apparaît sur SUI-06, B
 ### États à gérer
 
 #### Rien n'a changé
+
 « Enregistrer » inactif.
 
 #### Erreur
+
 Message, saisies conservées.
 
 ### Réponses API attendues
@@ -3653,6 +3856,7 @@ Message, saisies conservées.
 - Modifier le prévu (US-17).
 
 ### Tâches techniques
+
 - [ ] Backend : `correctWorkoutSet` : `_actual`, `validated_at = COALESCE(validated_at, NOW(3))`, `updated_at = NOW(3)` ; contexte : séance `completed` ou `unfinished` de l'utilisateur
 - [ ] Backend : ajout et suppression réutilisent US-32 avec le statut de séance terminé autorisé
 - [ ] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus
@@ -3660,6 +3864,7 @@ Message, saisies conservées.
 - [ ] Tests : back : correction, `validated_at` conservé, `updated_at` rempli, prévu inchangé, séance en cours → 409, record corrigé à la baisse retiré
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-38 · Déclarer une séance faite après coup
@@ -3709,6 +3914,7 @@ On a fait la séance sans l'appli : elle doit compter quand même.
 ### États à gérer
 
 #### Aucune série confirmée
+
 « Enregistrer » demande : « Aucune série n'est confirmée. Enregistrer quand même comme inachevée ? »
 
 ### Réponses API attendues
@@ -3722,12 +3928,14 @@ On a fait la séance sans l'appli : elle doit compter quand même.
 - Déclarer une séance qui n'était pas prévue (créer d'abord une séance libre à la date passée, US-23).
 
 ### Tâches techniques
+
 - [ ] Backend : `declareDone` dans `withTransaction` : verrou, statut, `createWorkoutSession` avec `started_at` déclaré et statut `completed` (ou `unfinished`), copie du prévu (US-28), mise à jour des séries confirmées, rendez-vous `attended`, notifications lues
 - [ ] Backend : colonne ou drapeau « déclarée après coup » : à décider (proposition : `workout_session.declared_afterwards BOOLEAN`, migration)
 - [ ] Frontend : `DeclareAfterwardsPage.tsx` (CAL-08b)
 - [ ] Tests : back : séance créée à la date réelle, séries non confirmées non validées, notifications lues, déjà effectuée → 409
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-52 · Filtrer l'historique
@@ -3778,6 +3986,7 @@ L'historique du MVP (US-35) reçoit une pastille de filtres et les flèches ‹ 
 ### États à gérer
 
 #### Aucun résultat
+
 SUI-05v.
 
 ### Réponses API attendues
@@ -3789,12 +3998,14 @@ SUI-05v.
 - Recherche par nom de séance.
 
 ### Tâches techniques
+
 - [ ] Backend : `readHistory` et `countHistory` reçoivent des morceaux de SQL constants pour la période, le programme (`a.program_id = ?` ou `a.program_id IS NULL` pour « Séance libre ») et les statuts (avec `query` pour `IN (?)`)
 - [ ] Shared : `historyQuerySchema`, `getPeriodRange` (US-41)
 - [ ] Frontend : `HistoryFilterSheet.tsx`, `ActiveFilterChips` (réutilisé de l'US-08), `PeriodNavigator`
 - [ ] Tests : back : combinaisons, « Séance libre », exemple SUI-05g = 3 ; E2E filtre puis retour arrière
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 # Sprint 10 · Entraînement avancé
@@ -3844,6 +4055,7 @@ Une machine prise, une bonne forme du jour : la séance réelle s'écarte du pr�
 ### États à gérer
 
 #### Ajout en cours
+
 Bouton désactivé.
 
 ### Réponses API attendues
@@ -3857,6 +4069,7 @@ Bouton désactivé.
 - Modifier le prévu (US-17).
 
 ### Tâches techniques
+
 - [ ] BDD : provenance par les colonnes `source_*` à `NULL` (D-18)
 - [ ] Backend : `createWorkoutSet`, `createWorkoutExercise`, `createWorkoutBlock` (positions = max + 1), `deleteAddedWorkoutSet` (seulement si `source_planned_set_id IS NULL`)
 - [ ] Backend : `POST /api/workout-sessions/:id/blocks`, `POST /api/workout-blocks/:id/exercises`, `POST /api/workout-exercises/:id/sets`, `DELETE /api/workout-sets/:id`
@@ -3864,6 +4077,7 @@ Bouton désactivé.
 - [ ] Tests : back : ajout, suppression d'un ajouté, refus sur un prévu, séance terminée → 409
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-49 · Chronométrer un exercice en durée ou en cardio
@@ -3917,9 +4131,11 @@ En MVP, la durée se saisissait à la main (US-29). Elle se mesure maintenant, e
 ### États à gérer
 
 #### Pause
+
 Temps figé, bouton « Reprendre ».
 
 #### Retour d'arrière-plan
+
 Temps recalculé ; si le minuteur est arrivé à 0 pendant ce temps, la série est validée.
 
 ### Réponses API attendues
@@ -3936,12 +4152,14 @@ Validation par la route de l'US-29.
 - Minuteur de bloc (US-31).
 
 ### Tâches techniques
+
 - [ ] Frontend : `useStopwatch` (chrono à partir de l'heure de départ, pause cumulée), réutilisation de `useCountdown` et `useTimerAlerts`
 - [ ] Frontend : `DurationTimer.tsx` (B5b, B5c), `CardioStepTimer.tsx` (B5d, B5e), ouverture automatique de `CardioReadingSheet` (B5f)
 - [ ] Tests : unitaires faux minuteurs : pause / reprise, arrêt avant la fin, validation à 0 une seule fois
 - [ ] Tests : E2E gainage 1 min accéléré (faux temps)
 
 ### Definition of Done
+
 - [ ] Vérifié sur un vrai téléphone, écran verrouillé puis rouvert
 - [ ] Code relu et fusionné via pull request
 
@@ -4001,9 +4219,11 @@ Les écrans A7e, A7f, B5g et B5h, laissés de côté par les US-15, US-29 et US-
 ### États à gérer
 
 #### Un seul côté fait
+
 Série « incomplète », côté fait enregistré.
 
 #### Abandon entre les deux côtés
+
 Le côté fait reste ; la série compte comme non faite dans « séries réalisées ».
 
 ### Réponses API attendues
@@ -4020,6 +4240,7 @@ Le côté fait reste ; la série compte comme non faite dans « séries réalis�
 - Objectif de répétitions différent par côté (non prévu par la maquette).
 
 ### Tâches techniques
+
 - [ ] BDD : migration 005 : `template_block_exercise.is_per_side BOOLEAN NOT NULL DEFAULT FALSE` ; `planned_set.weight_left_kg` et `weight_right_kg DECIMAL(9,3) NULL` ; mêmes colonnes copiées dans `workout_exercise.is_per_side`, `workout_set.weight_left_planned_kg`, `weight_right_planned_kg`
 - [ ] BDD : table `workout_set_side (workout_set_id, side ENUM('left','right'), reps_actual, weight_actual_kg, duration_actual_seconds, validated_at, PRIMARY KEY (workout_set_id, side))`, clé étrangère vers `workout_set` en `RESTRICT`
 - [ ] Shared : `sessionDraftSchema` : `is_per_side`, charges gauche / droite (seulement si `is_per_side`) ; `computeTonnage` et `formatSetSummary` gèrent les deux côtés
@@ -4030,6 +4251,7 @@ Le côté fait reste ; la série compte comme non faite dans « séries réalis�
 - [ ] Tests : E2E curl à charge différente G / D
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Code relu et fusionné via pull request
 
@@ -4087,9 +4309,11 @@ L'onglet « Exercices » du Suivi apparaît ; la fiche exercice affiche le lien 
 ### États à gérer
 
 #### Aucun exercice réalisé
+
 « Tes exercices apparaîtront ici après ta première séance. »
 
 #### Chargement / Erreur
+
 Comme les autres écrans du Suivi.
 
 ### Réponses API attendues
@@ -4102,6 +4326,7 @@ Comme les autres écrans du Suivi.
 - Records dans le Résumé et notifications (US-40).
 
 ### Tâches techniques
+
 - [ ] Backend : `progressRepository.readDoneExercises(userId, search)` (dernière date, groupé par exercice) ; `readExerciseSets(userId, exerciseId)` : séries validées des séances `completed` / `unfinished`, avec date réelle et statut de séance
 - [ ] Shared : `estimateOneRepMax(weight, reps)` (Epley, `null` au-delà de 10 rép.), `buildProgressSeries(sets, metric)` (un point par séance, `isPartial` si inachevée), `computeExerciseRecords(sets, profile)`, `getAvailableMetrics(sets)`
 - [ ] Outillage : bibliothèque de graphiques (proposition : Recharts, `--ignore-scripts`) avec texte alternatif
@@ -4110,6 +4335,7 @@ Comme les autres écrans du Suivi.
 - [ ] Tests : E2E fiche → « Ma progression »
 
 ### Definition of Done
+
 - [ ] Chiffres de SUI-09 retrouvés sur les données d'exemple
 - [ ] Graphique doublé d'un équivalent texte
 - [ ] Code relu et fusionné via pull request
@@ -4157,6 +4383,7 @@ Un record battu, c'est la meilleure motivation.
 ### États à gérer
 
 #### Aucun record sur la période
+
 Carte masquée.
 
 ### Réponses API attendues
@@ -4168,12 +4395,14 @@ Carte masquée.
 - Table de records (interdite par RM-051).
 
 ### Tâches techniques
+
 - [ ] Backend : à la fin d'une séance (US-34) et après correction (US-37) : `readPreviousBestSets(userId, exerciseIds, excludeSessionId)`, comparaison avec `computeExerciseRecords`, création de la notification (`INSERT`, sans doublon)
 - [ ] Backend : `readRecentRecords(userId, from, to)` pour le Résumé
 - [ ] Shared : `detectNewRecords(previousSets, sessionSets, profile)` (fonction pure)
 - [ ] Tests : unitaires `detectNewRecords` (égalité = pas de record, première séance = pas de notification) ; back : notification unique, correction à la baisse
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-41 · Résumé du suivi (régularité et travail)
@@ -4228,12 +4457,15 @@ L'onglet Suivi s'ouvre maintenant sur « Résumé » ; l'Historique devient le 2
 ### États à gérer
 
 #### Chargement
+
 Cartes grises de même taille (SUI-01b).
 
 #### Erreur
+
 SUI-01c.
 
 #### Vide
+
 SUI-04.
 
 ### Réponses API attendues
@@ -4246,6 +4478,7 @@ SUI-04.
 - Muscles (US-50), records (US-40).
 
 ### Tâches techniques
+
 - [ ] Backend : `countAppointmentsByStatus(userId, from, to, today)` : une requête avec `SUM(CASE …)` pour chaque catégorie (faites = séance `completed`, inachevées = `unfinished`, à venir = `planned` et date ≥ aujourd'hui…) et `SUM(moved_manually)` pour les décalées
 - [ ] Backend : `readWorkTotals(userId, from, to)` : séances faites, somme des durées, tonnage (séries validées)
 - [ ] Shared : `getPeriodRange(period, date)`, `getComparisonRange(from, consultedDate)` (même durée, plafonnée au dernier jour du mois précédent), `formatDelta(value)`
@@ -4254,6 +4487,7 @@ SUI-04.
 - [ ] Tests : E2E ; axe sur SUI-01 à SUI-04
 
 ### Definition of Done
+
 - [ ] Exemples SUI-01 et SUI-02 reproduits en tests d'intégration
 - [ ] Code relu et fusionné via pull request
 
@@ -4299,6 +4533,7 @@ On a tendance à toujours travailler les mêmes muscles : la carte le rend visib
 ### États à gérer
 
 #### Aucune série sur la période
+
 « Aucun muscle travaillé sur cette période. »
 
 ### Réponses API attendues
@@ -4314,11 +4549,13 @@ On a tendance à toujours travailler les mêmes muscles : la carte le rend visib
 - Corps en 3D manipulable (V3).
 
 ### Tâches techniques
+
 - [ ] Backend : `readMuscleSets(userId, from, to)` : `SUM(CASE em.role WHEN 'primary' THEN 1 ELSE 0.5 END)` par muscle, sur les séries validées des séances `completed` / `unfinished`, en excluant les groupes cardio et étirements
 - [ ] Frontend : `MuscleMapCard.tsx` (SVG face / dos, zones par code de muscle, intensité + liste texte)
 - [ ] Tests : back : exemple SUI-02 reproduit ; série non validée ignorée
 
 ### Definition of Done
+
 - [ ] Exemple SUI-02 vérifié
 - [ ] Code relu et fusionné via pull request
 
@@ -4377,15 +4614,19 @@ Voir des illustrations qui nous ressemblent rend les exercices plus parlants. Le
 ### États à gérer
 
 #### Sans modification
+
 « Enregistrer » inactif.
 
 #### Enregistrement en cours
+
 Bouton désactivé.
 
 #### Erreur
+
 Sous le champ (pseudo) ou bandeau (réseau), saisies conservées.
 
 #### Succès
+
 Confirmation 4 s, annoncée aux lecteurs d'écran.
 
 ### Réponses API attendues
@@ -4401,6 +4642,7 @@ Confirmation 4 s, annoncée aux lecteurs d'écran.
 - Mot de passe et suppression (US-47, US-06).
 
 ### Tâches techniques
+
 - [ ] Shared : `updateProfileSchema` : `username` (règles de l'inscription), `sex` (`female` / `male`) ; `email` absent du schéma (`.strict()` refuse le champ)
 - [ ] Backend : `userRepository.updateUserProfile(userId, username, sex)` ; `ER_DUP_ENTRY` → 409
 - [ ] Backend : `PATCH /api/users/me` → `checkOrigin` → `authenticate` → `validate` → `userActions.updateProfile`
@@ -4413,6 +4655,7 @@ Confirmation 4 s, annoncée aux lecteurs d'écran.
 - [ ] Tests : E2E : passer en Homme → l'illustration du catalogue change
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Groupe Femme / Homme accessible (`radiogroup`)
 - [ ] Code relu et fusionné via pull request
@@ -4467,9 +4710,11 @@ Certains comptent en livres ou en miles ; d'autres s'entraînent sans son ou san
 ### États à gérer
 
 #### Enregistrement
+
 Interrupteur désactivé le temps de la requête ; en cas d'échec, il revient à sa valeur et un message s'affiche.
 
 #### Navigateur sans notifications
+
 Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 
 ### Réponses API attendues
@@ -4487,6 +4732,7 @@ Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 - Notifications du centre (US-46).
 
 ### Tâches techniques
+
 - [ ] BDD : colonnes existantes de `user` : `weight_unit`, `distance_unit`, `sound_enabled`, `vibration_enabled`, `timer_notification_enabled`, `home_metric`
 - [ ] Shared : `preferencesSchema` (partiel : un ou plusieurs champs)
 - [ ] Shared : `toDisplayWeight(kg, unit)`, `fromDisplayWeight(value, unit)` (1 lb = 0,45359237 kg), `toDisplayDistance(meters, unit)`, `fromDisplayDistance` ; `formatWeight`, `formatDistance` utilisent les préférences
@@ -4500,6 +4746,7 @@ Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 - [ ] Tests : E2E : passer en lb → la fiche de progression et la saisie affichent des lb
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés sur Android et iPhone
 - [ ] Aucune valeur en lb ou mi stockée en base
 - [ ] Code relu et fusionné via pull request
@@ -4553,9 +4800,11 @@ Un mot de passe peut avoir fuité ou été partagé : il faut pouvoir le changer
 ### États à gérer
 
 #### Envoi
+
 Bouton désactivé.
 
 #### Erreur
+
 Champs vidés, messages sous les champs.
 
 ### Réponses API attendues
@@ -4575,6 +4824,7 @@ Champs vidés, messages sous les champs.
 - Déconnexion des autres appareils.
 
 ### Tâches techniques
+
 - [ ] Shared : `changePasswordSchema` : 3 champs, règles de l'inscription, `refine` sur l'égalité
 - [ ] Backend : `userRepository.readUserPasswordHash(userId)`, `updateUserPassword(userId, hash)`
 - [ ] Backend : `PUT /api/users/me/password` → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action (vérifier, hacher, enregistrer, 204)
@@ -4583,6 +4833,7 @@ Champs vidés, messages sous les champs.
 - [ ] Tests : front : champs vidés après erreur, bouton inactif
 
 ### Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Aucun mot de passe dans les logs ni dans les réponses
 - [ ] Code relu et fusionné via pull request
@@ -4633,12 +4884,15 @@ C'est le droit à l'effacement du RGPD, obligatoire dès que l'appli accueille d
 ### États à gérer
 
 #### Suppression en cours
+
 Boutons désactivés, statut annoncé.
 
 #### Échec
+
 Message, compte intact.
 
 #### Succès
+
 Écran final, session fermée.
 
 ### Réponses API attendues
@@ -4658,6 +4912,7 @@ Message, compte intact.
 - Délai de grâce (suppression immédiate).
 
 ### Tâches techniques
+
 - [ ] Backend : `accountRepository` : une fonction `DELETE` par table, dans l'ordre : `notification` → `workout_set` → `workout_exercise` → `workout_block` → `workout_session` → `appointment` → `weekly_schedule` → `program_change` → `program` (enfants avant parents, `source_program_id` remis à `NULL` avant) → `planned_set` → `template_block_exercise` → `template_block` → `session_version` → `session_template` → exercices personnels (`exercise_text`, `exercise_category`, `exercise_muscle`, `exercise_equipment`, `exercise_measure`, puis `exercise`, après avoir remis à `NULL` les `source_exercise_id` qui pointent vers eux) → `user`
 - [ ] Backend : chaque `DELETE` filtré par l'utilisateur (jointures jusqu'à `owner_user_id`)
 - [ ] Backend : `DELETE /api/users/me` (corps : mot de passe) → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action dans `withTransaction`, puis `clearAuthCookie`
@@ -4666,6 +4921,7 @@ Message, compte intact.
 - [ ] Tests : E2E : suppression complète puis tentative de connexion
 
 ### Definition of Done
+
 - [ ] Test « aucune ligne restante » couvrant toutes les tables
 - [ ] Code relu et fusionné via pull request
 
@@ -4712,12 +4968,14 @@ En tant qu'utilisateur, je veux installer Fulgora sur l'écran d'accueil de mon 
 - Utilisation complète hors connexion (enregistrer une séance sans réseau).
 
 ### Tâches techniques
+
 - [ ] Outillage : `vite-plugin-pwa` (`--ignore-scripts`) ou manifeste + service worker écrits à la main (proposition : le plugin)
 - [ ] Frontend : `manifest.webmanifest` (nom, icônes 192 et 512, `display: standalone`, `theme_color`, `background_color`), page hors connexion
 - [ ] Frontend : le service worker ne met jamais en cache les réponses de `/api`
 - [ ] Tests : Lighthouse PWA ; E2E mode hors connexion
 
 ### Definition of Done
+
 - [ ] Installation vérifiée sur Android et iPhone
 - [ ] Code relu et fusionné via pull request
 
@@ -4767,6 +5025,7 @@ Ces formats sont très utilisés en préparation physique : enchaîner les exerc
 ### États à gérer
 
 #### Objectif manquant
+
 « objectif à régler » sur l'exercice, « Valider le bloc » désactivé.
 
 ### Réponses API attendues
@@ -4782,12 +5041,14 @@ Ces formats sont très utilisés en préparation physique : enchaîner les exerc
 - Minuteur et saisie pendant la séance (US-31).
 
 ### Tâches techniques
+
 - [ ] Shared : `BLOCK_TYPES` : `isAvailable` à vrai pour les 3 types ; `sessionDraftSchema` : règles propres à chaque type (`superRefine`)
 - [ ] Backend : `createTemplateBlock` enregistre `planned_rounds` et `time_limit_seconds`
 - [ ] Frontend : `TimedBlockSettings.tsx` ; `formatBlockSummary`
 - [ ] Tests : schéma : circuit sans tours → refusé ; AMRAP sans durée → refusé ; for_time sans durée → accepté
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-31 · Minuteur de bloc (Circuit, AMRAP, For Time)
@@ -4833,6 +5094,7 @@ Un AMRAP de 12 minutes se joue contre la montre : il faut le temps et le compte 
 ### États à gérer
 
 #### Bloc en cours
+
 Les autres blocs restent accessibles.
 
 ### Réponses API attendues
@@ -4850,12 +5112,14 @@ Les autres blocs restent accessibles.
 - Saisie série par série dans un bloc chronométré.
 
 ### Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Backend : `updateWorkoutBlockResult(blockId, rounds, extraReps, duration)` (contexte vérifié comme pour une série, `touchWorkoutSession`)
 - [ ] Frontend : `BlockTimer.tsx` selon le type ; réutilisation de `useCountdown` / `useStopwatch`
 - [ ] Tests : back : résultat enregistré, séance terminée → 409 ; unitaires du compteur de tours
 
 ### Definition of Done
+
 - [ ] Écrans maquettés et validés avant le développement
 - [ ] Code relu et fusionné via pull request
 
@@ -4909,9 +5173,11 @@ En tant qu'utilisateur, je veux créer mon propre exercice afin d'ajouter ce qui
 ### États à gérer
 
 #### Envoi
+
 Bouton désactivé.
 
 #### Erreur API
+
 Message + saisie conservée.
 
 ### Réponses API attendues
@@ -4931,6 +5197,7 @@ Message + saisie conservée.
 - Partager un exercice.
 
 ### Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Shared : `createExerciseSchema` ; `slugify(name)`
 - [ ] Backend : `exerciseRepository.createExercise`, `createExerciseCategories`, `createExerciseMuscles`, `createExerciseEquipments`, `createExerciseMeasures`, `createExerciseTexts` (une fonction = une requête, insertion multiple avec `VALUES ?`)
@@ -4941,6 +5208,7 @@ Message + saisie conservée.
 - [ ] Tests : E2E : créer puis retrouver par la recherche
 
 ### Definition of Done
+
 - [ ] Maquette du formulaire validée avant le développement
 - [ ] Code relu et fusionné via pull request
 
@@ -4990,9 +5258,11 @@ On peut vouloir changer les instructions d'un exercice, ou retirer de sa liste u
 ### États à gérer
 
 #### Exercice déjà utilisé
+
 Avertissement avant modification.
 
 #### Archivé
+
 Badge « Archivé » sur la fiche.
 
 ### Réponses API attendues
@@ -5011,6 +5281,7 @@ Badge « Archivé » sur la fiche.
 - Supprimer définitivement un exercice.
 
 ### Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Backend : `countExerciseUsage(exerciseId)` : séries réalisées (`workout_exercise` lié à une séance `completed` ou `unfinished`)
 - [ ] Backend : `copyExercise` (exercice + liaisons + textes, dans `withTransaction`), `updateExercise`, `archiveExercise`, `unarchiveExercise`
@@ -5019,6 +5290,7 @@ Badge « Archivé » sur la fiche.
 - [ ] Tests : back : commun jamais modifié ; personnel non utilisé modifié en place ; personnel utilisé → copie + ancien archivé ; archivé absent du catalogue mais présent dans l'historique
 
 ### Definition of Done
+
 - [ ] Maquettes validées avant le développement
 - [ ] Code relu et fusionné via pull request
 
@@ -5067,6 +5339,7 @@ Un cycle qui a marché se refait souvent, avec de nouvelles dates.
 ### États à gérer
 
 #### Copie en cours
+
 Boutons désactivés.
 
 ### Réponses API attendues
@@ -5079,12 +5352,14 @@ Boutons désactivés.
 - Partager un programme avec un autre utilisateur.
 
 ### Tâches techniques
+
 - [ ] Backend : `copyProgram` dans `withTransaction` : nouveau programme, pour chaque règle active une nouvelle séance préparée (copie de la dernière version) et une nouvelle règle, puis génération des rendez-vous (US-18)
 - [ ] Backend : `POST /api/programs/:id/copy`
 - [ ] Frontend : `ReuseProgramPage.tsx`
 - [ ] Tests : back : copie indépendante (modifier la copie ne touche pas l'original) ; aucun résultat ni statut copié
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 ## US-42 · Indicateur d'accueil
@@ -5132,21 +5407,26 @@ Un chiffre visible chaque jour (« 2 séances cette semaine ») entretient la mo
 - Indicateurs personnalisés.
 
 ### Tâches techniques
+
 - [ ] Shared : `HOME_METRICS` (code, libellé)
 - [ ] Backend : réutilise `GET /api/progress/summary?period=week`
 - [ ] Frontend : `HomeMetric.tsx` à l'Accueil
 - [ ] Tests : affichage selon la préférence, « Aucun » masque
 
 ### Definition of Done
+
 - [ ] Code relu et fusionné via pull request
 
 # Definition of Done commune
+
 **Fonctionnel**
+
 - Tous les critères d'acceptation sont vérifiés dans le navigateur, sur mobile (375 px) et sur ordinateur.
 - L'écran correspond aux maquettes citées dans la carte.
 - Les textes affichés sont en français, sans faute.
 
 **Accessibilité (RM-064)**
+
 - Contraste d'au moins 4,5 pour 1 pour le texte.
 - Tout se fait au clavier, et l'élément sélectionné est bien visible (focus).
 - Chaque bouton, champ et image a un libellé compréhensible.
@@ -5154,16 +5434,19 @@ Un chiffre visible chaque jour (« 2 séances cette semaine ») entretient la mo
 - Une alerte sonore ou une vibration a toujours un équivalent visuel (RM-061).
 
 **Sécurité**
+
 - Toutes les données reçues sont vérifiées côté serveur.
 - Un utilisateur ne peut lire ou modifier que ses propres données (test 404 sur la donnée d'un autre).
 - Aucune requête SQL n'est construite en collant du texte : toujours des paramètres `?`.
 - Aucun secret dans le code ni dans les commits.
 
 **Qualité**
+
 - Les routes du serveur ont leurs tests (cas normal et cas d'erreur), et ils passent.
 - `npm run check` (Biome) et la vérification TypeScript ne signalent aucune erreur.
 - Les conventions de nommage sont respectées (`docs/naming-conventions.md`).
 
 **Livraison**
+
 - Le travail est sur une branche dédiée, fusionné dans `dev` après relecture, puis dans `main` à la livraison d'une version.
 - La carte Trello est déplacée dans « Terminé ».

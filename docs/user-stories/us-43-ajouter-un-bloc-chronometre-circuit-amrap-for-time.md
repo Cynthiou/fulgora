@@ -42,6 +42,7 @@ Ces formats sont très utilisés en préparation physique : enchaîner les exerc
 ## États à gérer
 
 ### Objectif manquant
+
 « objectif à régler » sur l'exercice, « Valider le bloc » désactivé.
 
 ## Réponses API attendues
@@ -57,10 +58,12 @@ Ces formats sont très utilisés en préparation physique : enchaîner les exerc
 - Minuteur et saisie pendant la séance (US-31).
 
 ## Tâches techniques
+
 - [ ] Shared : `BLOCK_TYPES` : `isAvailable` à vrai pour les 3 types ; `sessionDraftSchema` : règles propres à chaque type (`superRefine`)
 - [ ] Backend : `createTemplateBlock` enregistre `planned_rounds` et `time_limit_seconds`
 - [ ] Frontend : `TimedBlockSettings.tsx` ; `formatBlockSummary`
 - [ ] Tests : schéma : circuit sans tours → refusé ; AMRAP sans durée → refusé ; for_time sans durée → accepté
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

@@ -46,9 +46,11 @@ Une blessure, un changement d'objectif : il faut pouvoir arrêter sans perdre ce
 ## États à gérer
 
 ### Action en cours
+
 Boutons désactivés.
 
 ### Erreur
+
 Message, programme inchangé.
 
 ## Réponses API attendues
@@ -63,6 +65,7 @@ Message, programme inchangé.
 - Réutiliser (US-22).
 
 ## Tâches techniques
+
 - [ ] BDD : `appointment.cancelled_at` (migration 002)
 - [ ] Backend : `countProgramStartedSessions(programId)`, `readProgramInProgressSession(programId)`
 - [ ] Backend : `cancelFutureProgramAppointments(programId, today)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE program_id = ? AND status = 'planned' AND planned_date >= ? AND id NOT IN (SELECT appointment_id FROM workout_session)`
@@ -73,5 +76,6 @@ Message, programme inchangé.
 - [ ] Tests : E2E abandon et suppression
 
 ## Definition of Done
+
 - [ ] Test « aucune ligne orpheline » après suppression
 - [ ] Code relu et fusionné via pull request

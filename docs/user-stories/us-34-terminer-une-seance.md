@@ -41,11 +41,13 @@ Le résumé, c'est la récompense : durée, séries faites, volume soulevé.
 ## Éléments affichés
 
 ### Confirmation
+
 **Titre :** Terminer la séance ?
 **Message :** 1 série n'est pas faite. Elle restera non faite dans ton historique.
 **Actions :** « Terminer » · « Continuer ma séance »
 
 ### Résumé (B6)
+
 **Titre :** Résumé · Haut du corps · jeudi 26 novembre
 **Étiquette :** ✓ TERMINÉE (ou INACHEVÉE)
 **Chiffres :** 48 min · 17 / 18 séries · 3 240 kg volume
@@ -55,12 +57,15 @@ Le résumé, c'est la récompense : durée, séries faites, volume soulevé.
 ## États à gérer
 
 ### Terminaison en cours
+
 Boutons désactivés.
 
 ### Erreur API
+
 Message « Impossible de terminer la séance. Réessaie. » + « Réessayer » ; l'état réel est rechargé.
 
 ### Aucune série validée
+
 Voir À PRÉCISER.
 
 ## Réponses API attendues
@@ -79,6 +84,7 @@ Voir À PRÉCISER.
 - Détection et notification des records (US-40).
 
 ## Tâches techniques
+
 - [ ] Backend : `workoutSessionRepository.completeWorkoutSession(id, userId)` : même forme que l'abandon avec `status = 'completed'`
 - [ ] Backend : `workoutSessionActions.complete` : 0 ligne → 404 / 409 ; sinon relire l'arbre et renvoyer le résumé
 - [ ] Backend : `POST /api/workout-sessions/:id/complete`
@@ -91,6 +97,7 @@ Voir À PRÉCISER.
 - [ ] Tests : E2E : séance complète → résumé avec les bons chiffres ; axe sur B6
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Chiffres du résumé vérifiés à la main sur un exemple
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

@@ -51,15 +51,19 @@ Voir des illustrations qui nous ressemblent rend les exercices plus parlants. Le
 ## États à gérer
 
 ### Sans modification
+
 « Enregistrer » inactif.
 
 ### Enregistrement en cours
+
 Bouton désactivé.
 
 ### Erreur
+
 Sous le champ (pseudo) ou bandeau (réseau), saisies conservées.
 
 ### Succès
+
 Confirmation 4 s, annoncée aux lecteurs d'écran.
 
 ## Réponses API attendues
@@ -75,6 +79,7 @@ Confirmation 4 s, annoncée aux lecteurs d'écran.
 - Mot de passe et suppression (US-47, US-06).
 
 ## Tâches techniques
+
 - [ ] Shared : `updateProfileSchema` : `username` (règles de l'inscription), `sex` (`female` / `male`) ; `email` absent du schéma (`.strict()` refuse le champ)
 - [ ] Backend : `userRepository.updateUserProfile(userId, username, sex)` ; `ER_DUP_ENTRY` → 409
 - [ ] Backend : `PATCH /api/users/me` → `checkOrigin` → `authenticate` → `validate` → `userActions.updateProfile`
@@ -87,6 +92,7 @@ Confirmation 4 s, annoncée aux lecteurs d'écran.
 - [ ] Tests : E2E : passer en Homme → l'illustration du catalogue change
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Groupe Femme / Homme accessible (`radiogroup`)
 - [ ] Code relu et fusionné via pull request

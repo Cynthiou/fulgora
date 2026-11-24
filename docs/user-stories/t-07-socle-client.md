@@ -44,6 +44,7 @@ Chaque page charge des données, peut échouer et doit afficher un état vide. S
 - Barre d'onglets et mise en page (US-44).
 
 ## Tâches techniques
+
 - [ ] Frontend : `services/apiError.ts` + mise à jour de `apiFetch`
 - [ ] Frontend : `contexts/AuthContext.tsx` + `hooks/useAuth.ts`
 - [ ] Frontend : `components/ProtectedRoute.tsx`
@@ -52,5 +53,6 @@ Chaque page charge des données, peut échouer et doit afficher un état vide. S
 - [ ] Tests : `apiFetch` (erreur lue), `ProtectedRoute` (redirection), `StatusBadge` (symbole + texte)
 
 ## Definition of Done
+
 - [ ] Tests verts
 - [ ] axe sans violation sur les composants communs

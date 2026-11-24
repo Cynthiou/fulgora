@@ -2,7 +2,6 @@
 
 Une carte par fichier, dans l'ordre des sprints. Le plan, les décisions et les règles communes sont dans `docs/backlog.md`.
 
-
 ## Sprint 0 · Socle technique
 
 - [T-01 · Outils de qualité et de test](t-01-outils-de-qualite-et-de-test.md)

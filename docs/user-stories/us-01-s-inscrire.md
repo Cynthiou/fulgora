@@ -76,18 +76,23 @@ Toutes les données de Fulgora sont personnelles : séances, programmes, résult
 ## États à gérer
 
 ### Formulaire vide
+
 Bouton actif ; la validation se fait à l'envoi.
 
 ### Erreur de validation
+
 Résumé en haut + message sous chaque champ, icône + texte + bordure (jamais la couleur seule). Mot de passe vidé.
 
 ### Inscription en cours
+
 Bouton « Création du compte… » désactivé, champs en lecture seule, statut annoncé « Création du compte en cours ».
 
 ### Échec réseau
+
 « Connexion impossible. Réessaie. » en haut, données conservées.
 
 ### Succès
+
 Écran « Compte créé », puis Accueil.
 
 ## Réponses API attendues
@@ -107,6 +112,7 @@ Bouton « Création du compte… » désactivé, champs en lecture seule, statut
 - Pages CGU et Politique de confidentialité (contenu à rédiger à part).
 
 ## Tâches techniques
+
 - [ ] BDD : utiliser `user` avec `terms_accepted_at` (migration 004) ; unicité par `uq_user_username` et `uq_user_email`
 - [ ] Shared : `shared/user.ts` : `signupSchema` (règles ci-dessus, `terms_accepted` doit valoir `true`) et type `PublicUser` (sans hachage)
 - [ ] Backend : `userRepository.createUser` : `INSERT INTO user (username, email, password_hash, terms_accepted_at) VALUES (?, ?, ?, NOW(3))`
@@ -126,6 +132,7 @@ Bouton « Création du compte… » désactivé, champs en lecture seule, statut
 - [ ] Sécurité : limiteur de tentatives actif ; aucun mot de passe dans les logs
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
 - [ ] États formulaire, erreur, envoi, échec réseau et succès implémentés et testés
 - [ ] Développé en mobile-first : conçu à 375 px puis élargi, vérifié sur tablette et ordinateur

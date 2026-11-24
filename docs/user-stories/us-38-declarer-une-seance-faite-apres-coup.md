@@ -45,6 +45,7 @@ On a fait la séance sans l'appli : elle doit compter quand même.
 ## États à gérer
 
 ### Aucune série confirmée
+
 « Enregistrer » demande : « Aucune série n'est confirmée. Enregistrer quand même comme inachevée ? »
 
 ## Réponses API attendues
@@ -58,10 +59,12 @@ On a fait la séance sans l'appli : elle doit compter quand même.
 - Déclarer une séance qui n'était pas prévue (créer d'abord une séance libre à la date passée, US-23).
 
 ## Tâches techniques
+
 - [ ] Backend : `declareDone` dans `withTransaction` : verrou, statut, `createWorkoutSession` avec `started_at` déclaré et statut `completed` (ou `unfinished`), copie du prévu (US-28), mise à jour des séries confirmées, rendez-vous `attended`, notifications lues
 - [ ] Backend : colonne ou drapeau « déclarée après coup » : à décider (proposition : `workout_session.declared_afterwards BOOLEAN`, migration)
 - [ ] Frontend : `DeclareAfterwardsPage.tsx` (CAL-08b)
 - [ ] Tests : back : séance créée à la date réelle, séries non confirmées non validées, notifications lues, déjà effectuée → 409
 
 ## Definition of Done
+
 - [ ] Code relu et fusionné via pull request

@@ -47,6 +47,7 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 **Onglets :** Résumé · Historique · Exercices (seul Historique en MVP)
 **Groupe :** SEMAINE DU 23 NOV.
 **Lignes :**
+
 - JEU 26 · ✓ Réveil musculaire · Effectuée · Séance libre ›
 - MAR 24 · Dos · À confirmer · Séance libre · ↷ déplacée du 21 ›
 - SAM 21 · × Course · Manquée · Cardio base ›
@@ -54,6 +55,7 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 - SAM 14 · / Course · Annulée · Cardio base ›
 
 **Vide (SUI-07) :**
+
 > Aucune séance passée
 > Tes séances apparaîtront ici dès qu'elles seront faites, manquées ou annulées.
 
@@ -62,15 +64,19 @@ L'historique répond à « qu'est-ce que j'ai fait, et quand ? », y compris les
 ## États à gérer
 
 ### Chargement
+
 Lignes grises de la même hauteur.
 
 ### Vide
+
 Écran SUI-07.
 
 ### Erreur
+
 Message + « Réessayer ».
 
 ### Chargement des suivantes
+
 Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « Réessayer » apparaît en bas.
 
 ## Réponses API attendues
@@ -90,6 +96,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 - Passage automatique en « à confirmer » et « manquée » (US-27) : en MVP, une séance passée non faite reste « planifiée » et n'apparaît donc pas.
 
 ## Tâches techniques
+
 - [ ] Backend : `historyRepository.readHistory(userId, today, limit, offset)` : rendez-vous + nom de séance + programme + séance réalisée (`LEFT JOIN workout_session`) ; condition `ws.status IN ('completed','unfinished') OR (ws.id IS NULL AND a.status IN ('to_confirm','missed','cancelled') AND a.planned_date < ?)` ; colonne calculée `COALESCE(DATE(ws.started_at), a.planned_date) AS history_date` ; `ORDER BY history_date DESC, a.id DESC LIMIT ? OFFSET ?` (en chaînes)
 - [ ] Backend : vérifier avec `EXPLAIN` que l'index `ix_appointment_calendar` est utilisé
 - [ ] Backend : `historyActions.browse` (demande 21 lignes pour savoir s'il en reste : `has_more`)
@@ -104,6 +111,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 - [ ] Tests : E2E : historique vide, puis après une séance terminée ; axe sur SUI-05 et SUI-07
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, vide, erreur et chargement des suivantes testés
 - [ ] Mobile-first 375 px

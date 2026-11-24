@@ -44,6 +44,7 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 - Protection de branche sur GitHub (réglage du dépôt, fait à la main par Cynthia).
 
 ## Tâches techniques
+
 - [ ] Outillage : installer `vitest`, `supertest`, `@types/supertest` dans `server` (`--ignore-scripts`)
 - [ ] Outillage : installer `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` dans `client`
 - [ ] Outillage : installer `@playwright/test` et `@axe-core/playwright` à la racine
@@ -54,6 +55,7 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 - [ ] Tests : un test unitaire témoin par workspace et un test E2E témoin (la page de connexion s'affiche)
 
 ## Definition of Done
+
 - [ ] Les 4 scripts fonctionnent en local
 - [ ] Une PR de test volontairement cassée est bien refusée par la CI
 - [ ] Aucune trace de Claude dans les commits ni dans la PR

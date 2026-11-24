@@ -48,9 +48,11 @@ Certains comptent en livres ou en miles ; d'autres s'entraînent sans son ou san
 ## États à gérer
 
 ### Enregistrement
+
 Interrupteur désactivé le temps de la requête ; en cas d'échec, il revient à sa valeur et un message s'affiche.
 
 ### Navigateur sans notifications
+
 Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 
 ## Réponses API attendues
@@ -68,6 +70,7 @@ Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 - Notifications du centre (US-46).
 
 ## Tâches techniques
+
 - [ ] BDD : colonnes existantes de `user` : `weight_unit`, `distance_unit`, `sound_enabled`, `vibration_enabled`, `timer_notification_enabled`, `home_metric`
 - [ ] Shared : `preferencesSchema` (partiel : un ou plusieurs champs)
 - [ ] Shared : `toDisplayWeight(kg, unit)`, `fromDisplayWeight(value, unit)` (1 lb = 0,45359237 kg), `toDisplayDistance(meters, unit)`, `fromDisplayDistance` ; `formatWeight`, `formatDistance` utilisent les préférences
@@ -81,6 +84,7 @@ Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 - [ ] Tests : E2E : passer en lb → la fiche de progression et la saisie affichent des lb
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés sur Android et iPhone
 - [ ] Aucune valeur en lb ou mi stockée en base
 - [ ] Code relu et fusionné via pull request

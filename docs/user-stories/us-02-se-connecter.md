@@ -54,18 +54,23 @@ En tant qu'utilisateur inscrit, je veux me connecter avec mon pseudo ou mon adre
 ## États à gérer
 
 ### Connexion initiale
+
 Formulaire vide, mot de passe masqué.
 
 ### Erreur d'identifiants
+
 Message unique en haut, icône + texte + bordure, annoncé aux lecteurs d'écran ; mot de passe vidé, focus dessus.
 
 ### Chargement
+
 Bouton désactivé, statut annoncé « Connexion en cours ».
 
 ### Échec réseau
+
 Même emplacement que l'erreur, données conservées.
 
 ### Session déjà valide
+
 Pas de formulaire : redirection vers l'Accueil.
 
 ## Réponses API attendues
@@ -83,6 +88,7 @@ Pas de formulaire : redirection vers l'Accueil.
 - « Se souvenir de moi » (la durée est fixe : 7 jours).
 
 ## Tâches techniques
+
 - [ ] Shared : `loginSchema` : `identifier` (1 à 254 caractères), `password` (1 à 128)
 - [ ] Backend : `userRepository.readUserByIdentifier` : `SELECT id, username, email, sex, password_hash FROM user WHERE email = ? OR username = ? LIMIT 1` (même valeur deux fois, mise en minuscules pour l'e-mail)
 - [ ] Backend : `userRepository.readUser(id)` : l'utilisateur sans hachage, pour `/me`
@@ -99,6 +105,7 @@ Pas de formulaire : redirection vers l'Accueil.
 - [ ] Tests : E2E : connexion puis rechargement → toujours connectée ; page privée → connexion → retour sur la page privée
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
 - [ ] États connexion, erreur, chargement et échec réseau implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur

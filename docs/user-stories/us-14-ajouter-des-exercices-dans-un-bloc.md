@@ -51,17 +51,21 @@ On construit sa séance avec les mêmes outils que pour chercher un exercice : r
 ## États à gérer
 
 ### Aucune sélection
+
 Bouton d'ajout désactivé.
 
 ### Limite atteinte
+
 Au-delà de 30 exercices dans le bloc : « 30 exercices au maximum par bloc », cartes non sélectionnables.
 
 ### Exercice devenu indisponible
+
 Refusé à l'enregistrement (US-23) avec son nom.
 
 ## Réponses API attendues
 
 Validation dans la route de l'US-23 :
+
 - Exercice d'un autre utilisateur, archivé ou inexistant : `422`, code `EXERCISE_NOT_AVAILABLE`, avec le nom ou l'identifiant
 - Plus de 30 exercices dans un bloc : `400`
 
@@ -72,6 +76,7 @@ Validation dans la route de l'US-23 :
 - Créer un exercice personnel depuis la sélection (US-10).
 
 ## Tâches techniques
+
 - [ ] Backend : `exerciseRepository.readAvailableExerciseIds(userId, ids)` (avec `query`) : `SELECT id FROM exercise WHERE id IN (?) AND is_archived = FALSE AND (owner_user_id IS NULL OR owner_user_id = ?)`
 - [ ] Frontend : `ExerciseListPage` reçoit `selectionMode` (`"block"` ou `"catalog"`) ; `useExerciseSelection` (liste ordonnée d'identifiants, `toggle`, `clear`)
 - [ ] Frontend : `components/SelectableExerciseCard.tsx` (`aria-pressed`, libellé « sélectionné, 1 sur 3 »)
@@ -83,6 +88,7 @@ Validation dans la route de l'US-23 :
 - [ ] Tests : E2E : bloc → sélection de 3 exercices → retour, ordre respecté ; catalogue → Sélectionner → Ajouter à une séance → éditeur
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Sélection utilisable au clavier et au lecteur d'écran
 - [ ] Code relu et fusionné via pull request

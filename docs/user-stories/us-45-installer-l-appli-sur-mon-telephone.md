@@ -41,11 +41,13 @@ En tant qu'utilisateur, je veux installer Fulgora sur l'écran d'accueil de mon 
 - Utilisation complète hors connexion (enregistrer une séance sans réseau).
 
 ## Tâches techniques
+
 - [ ] Outillage : `vite-plugin-pwa` (`--ignore-scripts`) ou manifeste + service worker écrits à la main (proposition : le plugin)
 - [ ] Frontend : `manifest.webmanifest` (nom, icônes 192 et 512, `display: standalone`, `theme_color`, `background_color`), page hors connexion
 - [ ] Frontend : le service worker ne met jamais en cache les réponses de `/api`
 - [ ] Tests : Lighthouse PWA ; E2E mode hors connexion
 
 ## Definition of Done
+
 - [ ] Installation vérifiée sur Android et iPhone
 - [ ] Code relu et fusionné via pull request

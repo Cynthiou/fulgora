@@ -39,6 +39,7 @@ Le téléphone peut être prêté, ou l'appli ouverte sur l'ordinateur d'une sal
 **Bouton :** Se déconnecter
 
 ### Confirmation (séance en cours)
+
 **Titre :** Te déconnecter ?
 **Message :** Ta séance en cours restera enregistrée. Tu pourras la reprendre à ta prochaine connexion.
 **Actions :** « Se déconnecter » · « Annuler »
@@ -46,9 +47,11 @@ Le téléphone peut être prêté, ou l'appli ouverte sur l'ordinateur d'une sal
 ## États à gérer
 
 ### Déconnexion en cours
+
 Bouton désactivé.
 
 ### Erreur API
+
 Le cookie est quand même effacé côté client par la redirection ; message « Déconnexion impossible. Réessaie. » si le serveur ne répond pas, avec « Réessayer ».
 
 ## Réponses API attendues
@@ -67,6 +70,7 @@ Le cookie est quand même effacé côté client par la redirection ; message « 
 - Suppression du compte (US-06).
 
 ## Tâches techniques
+
 - [ ] Backend : `authActions.logout` : `clearAuthCookie(res)` avec les mêmes options que la pose, 204
 - [ ] Backend : `POST /api/auth/logout` → `checkOrigin` → `authenticate` → action
 - [ ] Frontend : `authService.logout`
@@ -77,6 +81,7 @@ Le cookie est quand même effacé côté client par la redirection ; message « 
 - [ ] Tests : E2E : déconnexion sans séance ; déconnexion avec séance en cours (confirmation, puis reprise possible après reconnexion)
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Confirmation accessible (focus piégé dans la modale, Échap ferme)
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

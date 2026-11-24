@@ -44,9 +44,11 @@ On peut vouloir changer les instructions d'un exercice, ou retirer de sa liste u
 ## États à gérer
 
 ### Exercice déjà utilisé
+
 Avertissement avant modification.
 
 ### Archivé
+
 Badge « Archivé » sur la fiche.
 
 ## Réponses API attendues
@@ -65,6 +67,7 @@ Badge « Archivé » sur la fiche.
 - Supprimer définitivement un exercice.
 
 ## Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Backend : `countExerciseUsage(exerciseId)` : séries réalisées (`workout_exercise` lié à une séance `completed` ou `unfinished`)
 - [ ] Backend : `copyExercise` (exercice + liaisons + textes, dans `withTransaction`), `updateExercise`, `archiveExercise`, `unarchiveExercise`
@@ -73,5 +76,6 @@ Badge « Archivé » sur la fiche.
 - [ ] Tests : back : commun jamais modifié ; personnel non utilisé modifié en place ; personnel utilisé → copie + ancien archivé ; archivé absent du catalogue mais présent dans l'historique
 
 ## Definition of Done
+
 - [ ] Maquettes validées avant le développement
 - [ ] Code relu et fusionné via pull request

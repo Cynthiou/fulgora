@@ -55,11 +55,13 @@ C'est le cœur de l'appli à la salle : un appui quand on a fait comme prévu, q
 **Bas :** Suivant : Tractions ›
 
 ### Panneau « Modifier »
+
 **Titre :** Ce que tu as réellement fait · Série 2
 **Champs :** Répétitions · prévu 10 · Charge (kg) · prévu 40 (boutons − / +)
 **Actions :** Valider · Annuler
 
 ### Relevé cardio
+
 **Titre :** Étape 2 · Durée · Distance (km) · Vitesse moy. (km/h) · Inclinaison moy. (%) · Calories · « Valider l'étape 2 »
 
 **Série vide :** « Indique au moins une valeur pour valider la série. »
@@ -68,12 +70,15 @@ C'est le cœur de l'appli à la salle : un appui quand on a fait comme prévu, q
 ## États à gérer
 
 ### Validation en cours
+
 Bouton désactivé ; la série passe tout de suite en « validée » (affichage optimiste).
 
 ### Erreur API
+
 Retour à l'état précédent + message + « Réessayer ».
 
 ### Séance clôturée entre-temps (4 h)
+
 Message de RM-065 et retour au résumé.
 
 ## Réponses API attendues
@@ -96,6 +101,7 @@ Message de RM-065 et retour au résumé.
 - Corriger après la fin de la séance (US-37).
 
 ## Tâches techniques
+
 - [ ] Backend : `workoutSessionRepository.readWorkoutSetContext(setId, userId)` : série + statut de la séance + `exercise_id` (jointures `workout_exercise` → `workout_block` → `workout_session`, `WHERE wset.id = ? AND ws.owner_user_id = ?`)
 - [ ] Backend : `updateWorkoutSetActual(setId, values)` : met à jour les 8 colonnes `_actual` et `validated_at = COALESCE(validated_at, NOW(3))` ; **jamais** les colonnes `_planned`
 - [ ] Backend : `touchWorkoutSession(id)` : `UPDATE workout_session SET last_activity_at = NOW(3) WHERE id = ?`
@@ -112,6 +118,7 @@ Message de RM-065 et retour au résumé.
 - [ ] Tests : E2E : valider 3 séries d'un exercice, puis passer au suivant ; axe sur B3 et le panneau
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] Zones − / + d'au moins 44 px, utilisables d'une main
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

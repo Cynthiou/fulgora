@@ -48,9 +48,11 @@ En tant qu'utilisateur, je veux créer mon propre exercice afin d'ajouter ce qui
 ## États à gérer
 
 ### Envoi
+
 Bouton désactivé.
 
 ### Erreur API
+
 Message + saisie conservée.
 
 ## Réponses API attendues
@@ -70,6 +72,7 @@ Message + saisie conservée.
 - Partager un exercice.
 
 ## Tâches techniques
+
 - [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
 - [ ] Shared : `createExerciseSchema` ; `slugify(name)`
 - [ ] Backend : `exerciseRepository.createExercise`, `createExerciseCategories`, `createExerciseMuscles`, `createExerciseEquipments`, `createExerciseMeasures`, `createExerciseTexts` (une fonction = une requête, insertion multiple avec `VALUES ?`)
@@ -80,5 +83,6 @@ Message + saisie conservée.
 - [ ] Tests : E2E : créer puis retrouver par la recherche
 
 ## Definition of Done
+
 - [ ] Maquette du formulaire validée avant le développement
 - [ ] Code relu et fusionné via pull request

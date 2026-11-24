@@ -50,9 +50,11 @@ L'onglet « Exercices » du Suivi apparaît ; la fiche exercice affiche le lien 
 ## États à gérer
 
 ### Aucun exercice réalisé
+
 « Tes exercices apparaîtront ici après ta première séance. »
 
 ### Chargement / Erreur
+
 Comme les autres écrans du Suivi.
 
 ## Réponses API attendues
@@ -65,6 +67,7 @@ Comme les autres écrans du Suivi.
 - Records dans le Résumé et notifications (US-40).
 
 ## Tâches techniques
+
 - [ ] Backend : `progressRepository.readDoneExercises(userId, search)` (dernière date, groupé par exercice) ; `readExerciseSets(userId, exerciseId)` : séries validées des séances `completed` / `unfinished`, avec date réelle et statut de séance
 - [ ] Shared : `estimateOneRepMax(weight, reps)` (Epley, `null` au-delà de 10 rép.), `buildProgressSeries(sets, metric)` (un point par séance, `isPartial` si inachevée), `computeExerciseRecords(sets, profile)`, `getAvailableMetrics(sets)`
 - [ ] Outillage : bibliothèque de graphiques (proposition : Recharts, `--ignore-scripts`) avec texte alternatif
@@ -73,6 +76,7 @@ Comme les autres écrans du Suivi.
 - [ ] Tests : E2E fiche → « Ma progression »
 
 ## Definition of Done
+
 - [ ] Chiffres de SUI-09 retrouvés sur les données d'exemple
 - [ ] Graphique doublé d'un équivalent texte
 - [ ] Code relu et fusionné via pull request

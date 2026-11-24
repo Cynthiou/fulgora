@@ -41,6 +41,7 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 ## Éléments affichés
 
 ### Séance effectuée (SUI-06)
+
 **Ligne 1 :** Effectuée jeudi 19 novembre · 07:02
 **Ligne 2 :** Force 8 semaines · semaine 3
 **Chiffres :** 52 min · durée · 1 760 kg · tonnage · 6 / 10 · objectifs atteints
@@ -49,6 +50,7 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 **Bouton :** Corriger les résultats (US-37, masqué en MVP)
 
 ### Séance manquée (SUI-06b)
+
 **Étiquette :** • MANQUÉE
 **Ligne :** Prévue samedi 21 novembre · sans heure · Cardio base
 **Bloc :** Prévu · Tapis de course · 30 min · 9 km/h · 1 %
@@ -60,15 +62,19 @@ Voir l'écart entre le prévu et le réalisé, série par série, aide à ajuste
 ## États à gérer
 
 ### Chargement
+
 Structure grise.
 
 ### Séance sans charge
+
 Pas de tonnage affiché.
 
 ### Séance inachevée
+
 Étiquette « INACHEVÉE », séries non faites affichées « Non faite ».
 
 ### Introuvable / Erreur
+
 Messages ci-dessus.
 
 ## Réponses API attendues
@@ -84,6 +90,7 @@ Messages ci-dessus.
 - Numéro de semaine du programme : affiché seulement quand les programmes existent (V1) ; en MVP, « Séance libre ».
 
 ## Tâches techniques
+
 - [ ] Backend : `historyActions.read(appointmentId, userId)` : `readHistoryAppointment` (rendez-vous + séance + programme, filtré par `owner_user_id`) ; s'il y a une séance réalisée → fonctions `readWorkout…` de l'US-28 ; sinon → `readVersionBlocks`, `readVersionExercises`, `readVersionSets` (prévu de la version d'origine)
 - [ ] Backend : `GET /api/history/:appointmentId` → `authenticate` → `validate({ params })` → action
 - [ ] Shared : `getSetGap`, `isObjectiveReached`, `countReachedObjectives`, `computeTonnage`, `computeDurationSeconds` (déjà créés, réutilisés) ; `formatSetValues` (« 8 × 62,5 kg », « 1:10 »)
@@ -95,6 +102,7 @@ Messages ci-dessus.
 - [ ] Tests : E2E : de la liste au détail ; axe sur SUI-06 et SUI-06b
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement, chiffres de SUI-06 retrouvés sur les données d'exemple
 - [ ] Tableau lisible au lecteur d'écran
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

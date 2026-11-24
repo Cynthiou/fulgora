@@ -50,12 +50,15 @@ L'onglet Suivi s'ouvre maintenant sur « Résumé » ; l'Historique devient le 2
 ## États à gérer
 
 ### Chargement
+
 Cartes grises de même taille (SUI-01b).
 
 ### Erreur
+
 SUI-01c.
 
 ### Vide
+
 SUI-04.
 
 ## Réponses API attendues
@@ -68,6 +71,7 @@ SUI-04.
 - Muscles (US-50), records (US-40).
 
 ## Tâches techniques
+
 - [ ] Backend : `countAppointmentsByStatus(userId, from, to, today)` : une requête avec `SUM(CASE …)` pour chaque catégorie (faites = séance `completed`, inachevées = `unfinished`, à venir = `planned` et date ≥ aujourd'hui…) et `SUM(moved_manually)` pour les décalées
 - [ ] Backend : `readWorkTotals(userId, from, to)` : séances faites, somme des durées, tonnage (séries validées)
 - [ ] Shared : `getPeriodRange(period, date)`, `getComparisonRange(from, consultedDate)` (même durée, plafonnée au dernier jour du mois précédent), `formatDelta(value)`
@@ -76,5 +80,6 @@ SUI-04.
 - [ ] Tests : E2E ; axe sur SUI-01 à SUI-04
 
 ## Definition of Done
+
 - [ ] Exemples SUI-01 et SUI-02 reproduits en tests d'intégration
 - [ ] Code relu et fusionné via pull request

@@ -42,6 +42,7 @@ En tant que développeuse, je veux faire évoluer la base avec des migrations nu
 - Données de départ (T-08).
 
 ## Tâches techniques
+
 - [ ] BDD : `001` = le schéma actuel de `schema.sql`
 - [ ] BDD : `002` : `appointment.cancelled_at` + contrainte `ck_appointment_cancelled_at`
 - [ ] BDD : `003` : `program.status` avec `draft`
@@ -51,5 +52,6 @@ En tant que développeuse, je veux faire évoluer la base avec des migrations nu
 - [ ] Tests : base vide → 4 versions ; relance → rien ; reset en production → refus
 
 ## Definition of Done
+
 - [ ] Base de développement et base de test migrées sans erreur
 - [ ] `schema.sql` mis à jour pour refléter l'état final (documentation)

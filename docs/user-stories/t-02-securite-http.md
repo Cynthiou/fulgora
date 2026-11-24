@@ -51,6 +51,7 @@ Le jeton de connexion est dans un cookie : le navigateur l'envoie tout seul. San
 - Validation des données (T-03).
 
 ## Tâches techniques
+
 - [ ] Outillage : installer `helmet` et `express-rate-limit` (`--ignore-scripts`)
 - [ ] Backend : `app.ts` : `app.disable("x-powered-by")`, `helmet()`, `express.json({ limit: "100kb" })`
 - [ ] Backend : créer `server/src/utils/httpError.ts` : classe `HttpError(status, code, message, field?)`
@@ -61,6 +62,7 @@ Le jeton de connexion est dans un cookie : le navigateur l'envoie tout seul. San
 - [ ] Tests : 403 sans origine, 403 mauvaise origine, 200 bonne origine, GET non bloqué, 429 au 6ᵉ essai, `X-Powered-By` absent, 500 sans détail
 
 ## Definition of Done
+
 - [ ] Tous les tests de la checklist passent
 - [ ] Aucun secret ni origine en dur dans le code
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript

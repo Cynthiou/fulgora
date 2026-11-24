@@ -49,9 +49,11 @@ En MVP, la durée se saisissait à la main (US-29). Elle se mesure maintenant, e
 ## États à gérer
 
 ### Pause
+
 Temps figé, bouton « Reprendre ».
 
 ### Retour d'arrière-plan
+
 Temps recalculé ; si le minuteur est arrivé à 0 pendant ce temps, la série est validée.
 
 ## Réponses API attendues
@@ -68,11 +70,13 @@ Validation par la route de l'US-29.
 - Minuteur de bloc (US-31).
 
 ## Tâches techniques
+
 - [ ] Frontend : `useStopwatch` (chrono à partir de l'heure de départ, pause cumulée), réutilisation de `useCountdown` et `useTimerAlerts`
 - [ ] Frontend : `DurationTimer.tsx` (B5b, B5c), `CardioStepTimer.tsx` (B5d, B5e), ouverture automatique de `CardioReadingSheet` (B5f)
 - [ ] Tests : unitaires faux minuteurs : pause / reprise, arrêt avant la fin, validation à 0 une seule fois
 - [ ] Tests : E2E gainage 1 min accéléré (faux temps)
 
 ## Definition of Done
+
 - [ ] Vérifié sur un vrai téléphone, écran verrouillé puis rouvert
 - [ ] Code relu et fusionné via pull request

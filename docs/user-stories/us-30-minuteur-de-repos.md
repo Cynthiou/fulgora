@@ -52,15 +52,19 @@ Sans minuteur intégré, il faut ouvrir une autre application à chaque série.
 ## États à gérer
 
 ### Repos en cours
+
 Temps en gros, boutons actifs.
 
 ### 10 dernières secondes
+
 Cadre noir, annonce unique.
 
 ### Fin du repos
+
 Alerte, puis retour à l'exercice.
 
 ### Navigateur sans son ni vibration
+
 Seul le signal visuel ; aucune erreur.
 
 ## Réponses API attendues
@@ -74,6 +78,7 @@ Aucune : tout se passe dans le navigateur.
 - Repos conservé après fermeture de l'appli.
 
 ## Tâches techniques
+
 - [ ] Shared : `getRestDuration(set, exercise)` (série → exercice → 90 s)
 - [ ] Frontend : `hooks/useCountdown.ts` : `endsAt`, `secondsLeft` calculé à partir de `Date.now()`, `addSeconds`, `skip`, nettoyage de l'intervalle
 - [ ] Frontend : `hooks/useTimerAlerts.ts` : bips (Web Audio API, contexte audio créé au premier appui de l'utilisateur), `navigator.vibrate` seulement s'il existe, chaque alerte déclenchée une seule fois
@@ -85,6 +90,7 @@ Aucune : tout se passe dans le navigateur.
 - [ ] Tests : E2E : valider une série → repos → Passer ; axe sur B4
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés sur un vrai téléphone (Android et iPhone)
 - [ ] Aucune information portée par le son seul
 - [ ] Code relu et fusionné via pull request

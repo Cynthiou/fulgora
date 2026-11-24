@@ -43,6 +43,7 @@ Une séance préparée, c'est savoir exactement quoi faire en arrivant à la sal
 **Boutons :** Ajouter un bloc · Enregistrer la séance
 
 ### Confirmation de sortie
+
 **Titre :** Quitter sans enregistrer ?
 **Message :** Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue.
 **Actions :** « Quitter » · « Continuer la séance »
@@ -50,9 +51,11 @@ Une séance préparée, c'est savoir exactement quoi faire en arrivant à la sal
 ## États à gérer
 
 ### Brouillon vide
+
 Un seul appel à l'action : « Ajouter un bloc ».
 
 ### Brouillon modifié
+
 Confirmation de sortie active.
 
 ## Réponses API attendues
@@ -65,6 +68,7 @@ Aucune route propre : l'enregistrement est livré par l'US-23.
 - Séance d'un programme (US-18).
 
 ## Tâches techniques
+
 - [ ] Shared : `shared/session-template.ts` : types `SessionDraft`, `DraftBlock`, `DraftExercise`, `PlannedSetValues` ; `sessionDraftSchema` (Zod) avec toutes les bornes (voir US-15)
 - [ ] Frontend : `features/session-template/hooks/sessionDraftReducer.ts` : fonction pure, actions `setName`, `setDate`, `setTime`, `addBlock`, `removeBlock`, `restoreBlock`, `moveBlock`, `addExercises`, `removeExercise`, `updateExerciseRest`, `addSet`, `duplicateLastSet`, `updateSet`, `removeSet`
 - [ ] Frontend : `features/session-template/hooks/useSessionDraft.ts` (`useReducer` + `isDirty`)
@@ -76,6 +80,7 @@ Aucune route propre : l'enregistrement est livré par l'US-23.
 - [ ] Tests : front : nom obligatoire, avertissement « pas d'exercice », confirmation de sortie
 
 ## Definition of Done
+
 - [ ] Reducer couvert par des tests unitaires
 - [ ] Confirmation de sortie testée (retour ‹ et fermeture)
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

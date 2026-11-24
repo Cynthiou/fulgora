@@ -45,24 +45,29 @@ Savoir quels muscles travaillent, comment faire le mouvement et quelles erreurs 
 **Image absente :** « Illustration non disponible » (texte alternatif : « Mon tirage élastique, illustration non disponible »)
 
 **Erreur :**
+
 > Impossible de charger la fiche
 > Vérifie ta connexion internet, puis réessaie.
-Bouton « Réessayer »
+> Bouton « Réessayer »
 
 **Introuvable :** « Exercice introuvable » + bouton « Retour au catalogue »
 
 ## États à gérer
 
 ### Chargement
+
 Nom dans l'en-tête, contenu gris, bouton d'ajout désactivé, statut annoncé.
 
 ### Erreur
+
 Message + « Réessayer » ; le retour reste disponible ; bouton d'ajout masqué.
 
 ### Exercice personnel sans illustration
+
 Badge + emplacement réservé avec texte visible.
 
 ### Introuvable (404)
+
 Message + retour au catalogue.
 
 ## Réponses API attendues
@@ -79,6 +84,7 @@ Message + retour au catalogue.
 - Modifier ou personnaliser l'exercice (US-11).
 
 ## Tâches techniques
+
 - [ ] Backend : `exerciseRepository.readExercise(id, userId)` : même condition de visibilité que US-07
 - [ ] Backend : `readExerciseMuscles(id)` (nom + rôle, principaux d'abord), `readExerciseEquipments(id)`, `readExerciseMeasures(id)` (code + libellé), `readExerciseTexts(id)` (`ORDER BY type, position`), `readExerciseCategories(id)` : une fonction = une requête
 - [ ] Backend : `exerciseActions.read` : appelle les 6 fonctions l'une après l'autre, 404 si l'exercice est absent
@@ -93,6 +99,7 @@ Message + retour au catalogue.
 - [ ] Tests : E2E : liste → fiche → retour (filtres conservés) ; axe sur la fiche complète
 
 ## Definition of Done
+
 - [ ] Critères d'acceptation vérifiés manuellement
 - [ ] États chargement, erreur, introuvable et exercice personnel testés
 - [ ] Mobile-first 375 px ; en-tête et bouton du bas fixes
