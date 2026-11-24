@@ -1,4 +1,4 @@
-/* Fulgora brand: colors, fonts and the two themes.
+/* Fulgora brand v2 ("light mockup, no halo"): colors, fonts, sizes and the two themes.
    The values come from the brand guidelines (docs/brand-guidelines.md). */
 
 @import "tailwindcss";
@@ -7,77 +7,77 @@
   themes: false;
 }
 
-/* Dark theme: the default one, used at the gym. */
+/* Light theme: the default one. */
+@plugin "daisyui/theme" {
+  name: "fulgora-light";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #ffffff; /* surface: cards, fields, tab bar */
+  --color-base-200: #eceff3; /* page background */
+  --color-base-300: #e2e5ea; /* borders */
+  --color-base-content: #0b1220; /* main text */
+
+  --color-primary: #ff6b35; /* action: ONE orange button per screen */
+  --color-primary-content: #0b1220;
+  --color-secondary: #2563eb; /* brand: logo, active tab, progress, links */
+  --color-secondary-content: #ffffff;
+  --color-accent: #0e7490; /* overlines and field labels */
+  --color-accent-content: #ffffff;
+  --color-neutral: #0b1220;
+  --color-neutral-content: #f8fafc;
+
+  --color-info: #2563eb;
+  --color-info-content: #ffffff;
+  --color-success: #16a34a; /* done */
+  --color-success-content: #0b1220;
+  --color-warning: #d97706; /* to confirm */
+  --color-warning-content: #0b1220;
+  --color-error: #dc2626; /* missed, error, destructive */
+  --color-error-content: #ffffff;
+
+  --radius-box: 10px;
+  --radius-field: 8px;
+  --radius-selector: 4px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Dark theme: used when the phone is in dark mode. */
 @plugin "daisyui/theme" {
   name: "fulgora-dark";
-  default: true;
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #0f172a;
-  --color-base-200: #1e293b;
-  --color-base-300: #334155;
+  --color-base-100: #141e33;
+  --color-base-200: #0b1220;
+  --color-base-300: #26324a;
   --color-base-content: #f8fafc;
 
-  --color-primary: #fd7240;
-  --color-primary-content: #0f172a;
-  --color-secondary: #2563eb;
-  --color-secondary-content: #ffffff;
+  --color-primary: #ff6b35;
+  --color-primary-content: #0b1220;
+  --color-secondary: #60a5fa;
+  --color-secondary-content: #0b1220;
   --color-accent: #22d3ee;
-  --color-accent-content: #0f172a;
-  --color-neutral: #0b1222;
-  --color-neutral-content: #f8fafc;
+  --color-accent-content: #0b1220;
+  --color-neutral: #f8fafc;
+  --color-neutral-content: #0b1220;
 
   --color-info: #60a5fa;
-  --color-info-content: #0f172a;
-  --color-success: #22c55e;
-  --color-success-content: #0f172a;
-  --color-warning: #f59e0b;
-  --color-warning-content: #0f172a;
-  --color-error: #f87171;
-  --color-error-content: #0f172a;
-
-  --radius-box: 0.75rem;
-  --radius-field: 0.5rem;
-  --radius-selector: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 1;
-  --noise: 0;
-}
-
-/* Light theme. */
-@plugin "daisyui/theme" {
-  name: "fulgora-light";
-  color-scheme: light;
-
-  --color-base-100: #ffffff;
-  --color-base-200: #f1f5f9;
-  --color-base-300: #e2e8f0;
-  --color-base-content: #0f172a;
-
-  --color-primary: #fd7240;
-  --color-primary-content: #0f172a;
-  --color-secondary: #2563eb;
-  --color-secondary-content: #ffffff;
-  --color-accent: #0891b2;
-  --color-accent-content: #ffffff;
-  --color-neutral: #0f172a;
-  --color-neutral-content: #f8fafc;
-
-  --color-info: #1d4ed8;
-  --color-info-content: #ffffff;
-  --color-success: #15803d;
-  --color-success-content: #ffffff;
-  --color-warning: #b45309;
-  --color-warning-content: #ffffff;
+  --color-info-content: #0b1220;
+  --color-success: #16a34a;
+  --color-success-content: #0b1220;
+  --color-warning: #d97706;
+  --color-warning-content: #0b1220;
   --color-error: #dc2626;
   --color-error-content: #ffffff;
 
-  --radius-box: 0.75rem;
-  --radius-field: 0.5rem;
-  --radius-selector: 0.5rem;
+  --radius-box: 10px;
+  --radius-field: 8px;
+  --radius-selector: 4px;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -85,10 +85,77 @@
   --noise: 0;
 }
 
-/* Fonts: Saira Condensed for titles and numbers, Inter for text. */
+/* Colors that DaisyUI does not have: they change with the theme. */
+:root,
+[data-theme="fulgora-light"] {
+  --fulgora-soft: #f3f5f8;
+  --fulgora-muted: #5b6576;
+  --fulgora-faint: #8a93a3;
+  --fulgora-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme="fulgora-dark"] {
+  --fulgora-soft: #1e293b;
+  --fulgora-muted: #94a3b8;
+  --fulgora-faint: #64748b;
+  --fulgora-shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --fulgora-soft: #1e293b;
+    --fulgora-muted: #94a3b8;
+    --fulgora-faint: #64748b;
+    --fulgora-shadow-card: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Extra design tokens: each one creates Tailwind classes (bg-soft, text-muted, rounded-card, h-btn...). */
+@theme inline {
+  --color-soft: var(--fulgora-soft);
+  --color-muted: var(--fulgora-muted);
+  --color-faint: var(--fulgora-faint);
+  --color-status-done: #16a34a;
+  --color-status-pending: #d97706;
+  --color-status-missed: #dc2626;
+  --color-status-cancelled: #64748b;
+
+  --shadow-card: var(--fulgora-shadow-card);
+}
+
 @theme {
-  --font-display: "Saira Condensed", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  --font-display: "Saira Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  --text-overline: 11px;
+  --text-overline--line-height: 1.2;
+  --text-overline--letter-spacing: 0.14em;
+  --text-overline--font-weight: 700;
+  --text-display-sm: 24px;
+  --text-display-sm--line-height: 0.9;
+  --text-display-md: 32px;
+  --text-display-md--line-height: 0.9;
+  --text-display-lg: 44px;
+  --text-display-lg--line-height: 0.9;
+  --text-display-xl: 58px;
+  --text-display-xl--line-height: 0.9;
+
+  --radius-chip: 4px;
+  --radius-ctl: 6px;
+  --radius-btn: 8px;
+  --radius-card: 10px;
+  --radius-hero: 12px;
+
+  --shadow-action: 0 10px 24px rgba(255, 107, 53, 0.32);
+  --shadow-nav-active: 0 10px 22px rgba(37, 99, 235, 0.35);
+
+  --spacing-tap: 44px;
+  --spacing-btn: 56px;
+  --spacing-field: 54px;
+  --spacing-nav: 62px;
+  --spacing-nav-fab: 52px;
+
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Titles use the display font, slanted like the logo. */

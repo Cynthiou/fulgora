@@ -1,10 +1,10 @@
-import logoDark from "../assets/logo/fulgora-logo-dark-bg.svg";
+import logo from "../assets/logo/fulgora-logo-light-bg.svg";
 
 // Temporary page: it only checks that the brand (logo, fonts, colors) works.
 function HomePage() {
   return (
     <section className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <img src={logoDark} alt="Fulgora" className="h-12 w-auto self-start" />
+      <img src={logo} alt="Fulgora" className="h-12 w-auto self-start" />
       <h1 className="text-4xl">Ton carnet d'entraînement</h1>
       <p>Prépare tes séances, note ce que tu fais, suis tes progrès.</p>
       <div className="flex flex-wrap gap-2">
