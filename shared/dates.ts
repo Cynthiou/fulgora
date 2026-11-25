@@ -118,6 +118,15 @@ export function listMonthGrid(yearMonth: string): (string | null)[][] {
   return weeks;
 }
 
+// "2026-11-19" -> "19 novembre" (inside a sentence, "prévue le 19 novembre").
+export function formatDayMonth(date: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "long",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
+
 // "2026-11-28" -> "Séance le samedi 28 novembre" (the date picker, A2b).
 export function formatSessionDate(date: string): string {
   const long = formatLongDate(date);
