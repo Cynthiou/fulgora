@@ -9,6 +9,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
+import LoginPage from "./features/user/pages/LoginPage";
 import SignupPage from "./features/user/pages/SignupPage";
 import HomePage from "./pages/HomePage";
 
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       // Public pages
       { path: "/inscription", element: <SignupPage /> },
+      { path: "/connexion", element: <LoginPage /> },
     ],
   },
 ]);

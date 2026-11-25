@@ -1,6 +1,7 @@
 import { createContext, type ReactNode, useEffect, useState } from "react";
 import type { PublicUser } from "shared";
-import { apiFetch, isAbortError } from "../services/api";
+import { readMe } from "../features/user/services/authService";
+import { isAbortError } from "../services/api";
 
 // Who is connected, shared with every page through React context.
 export type AuthContextValue = {
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: Props) {
   useEffect(() => {
     const controller = new AbortController();
 
-    apiFetch<PublicUser>("/auth/me", { signal: controller.signal })
+    readMe(controller.signal)
       .then((me) => {
         setUser(me);
         setIsLoading(false);
