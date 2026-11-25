@@ -198,6 +198,12 @@ test("captures the screens of the MVP", async ({ page }) => {
   );
   await shoot(page, "profil");
 
+  // NOT-02v : la liste de notifications, vide pour un compte neuf (US-46)
+  await page.goto("/");
+  await page.getByRole("link", { name: "Notifications" }).click();
+  await expect(page.getByText("Aucune notification")).toBeVisible();
+  await shoot(page, "not-02-notifications");
+
   // B1 séance prévue, B2 séance en cours, B3 série, B4 repos
   await planSessionToday(page, "Jambes");
   await page.goto("/");

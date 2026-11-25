@@ -18,6 +18,7 @@ import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
 import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
+import NotificationsPage from "./features/notification/pages/NotificationsPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
             element: <PageLayout />,
             children: [
               { path: "/profil", element: <ProfilePage /> },
+              { path: "/notifications", element: <NotificationsPage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
               // A past session, planned against done (SUI-06)

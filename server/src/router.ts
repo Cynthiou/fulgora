@@ -7,6 +7,7 @@ import {
 } from "./modules/exercise/exerciseActions.js";
 import exerciseRouter from "./modules/exercise/exerciseRouter.js";
 import historyRouter from "./modules/history/historyRouter.js";
+import notificationRouter from "./modules/notification/notificationRouter.js";
 import authRouter from "./modules/user/authRouter.js";
 import userRouter from "./modules/user/userRouter.js";
 import workoutBlockRouter from "./modules/workout-session/workoutBlockRouter.js";
@@ -34,5 +35,6 @@ router.use("/workout-sets", workoutSetRouter);
 router.use("/workout-blocks", workoutBlockRouter);
 router.use("/workout-exercises", workoutExerciseRouter);
 router.use("/history", historyRouter);
+router.use("/notifications", notificationRouter);
 
 export default router;

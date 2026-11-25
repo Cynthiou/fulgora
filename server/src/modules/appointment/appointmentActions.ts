@@ -13,6 +13,7 @@ import {
 import { withTransaction } from "../../database/withTransaction.js";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
+import { markAppointmentNotificationsRead } from "../notification/notificationRepository.js";
 import {
   assertSessionContentValid,
   writeSessionTree,
@@ -294,6 +295,13 @@ export const markNotDone: RequestHandler = async (req, res) => {
       "Cette séance a déjà été faite, annulée ou déclarée manquée.",
     );
   }
+
+  // The question has its answer: no notification is left unread, and none
+  // is created for the missed status (RM-067).
+  await markAppointmentNotificationsRead(id, [
+    "session_to_confirm",
+    "session_missed",
+  ]);
 
   res.json({ status: "missed" });
 };

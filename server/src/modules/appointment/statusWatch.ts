@@ -1,5 +1,9 @@
 import { addDays, CONFIRM_DAYS_AFTER, todayIn } from "shared";
 import {
+  createAppointmentNotifications,
+  listAppointmentsWithStatus,
+} from "../notification/notificationRepository.js";
+import {
   listUserTimezones,
   markPastAppointmentsToConfirm,
   markUnansweredAppointmentsMissed,
@@ -21,6 +25,19 @@ export async function updateAppointmentStatuses(
     missed += await markUnansweredAppointmentsMissed(
       timezone,
       addDays(today, -CONFIRM_DAYS_AFTER),
+    );
+
+    // One notification per appointment and per type; the second run adds
+    // nothing (RM-056, DT-16).
+    await createAppointmentNotifications(
+      "session_to_confirm",
+      "Séance à confirmer",
+      await listAppointmentsWithStatus(timezone, "to_confirm"),
+    );
+    await createAppointmentNotifications(
+      "session_missed",
+      "Séance manquée",
+      await listAppointmentsWithStatus(timezone, "missed"),
     );
   }
   return { toConfirm, missed };
