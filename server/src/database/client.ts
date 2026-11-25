@@ -7,6 +7,9 @@ const client = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  // A DATE column is a calendar day, not a moment: keep it as "YYYY-MM-DD"
+  // instead of a JavaScript Date that would shift with the time zone.
+  dateStrings: ["DATE"],
 });
 
 export default client;
