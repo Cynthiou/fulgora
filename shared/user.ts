@@ -68,3 +68,13 @@ export function formatSignupErrorSummary(fieldCount: number): string {
   const fields = fieldCount === 1 ? "1 champ" : `${fieldCount} champs`;
   return `${fields} à corriger. Le compte n'a pas été créé.`;
 }
+
+// Login form (US-02): username OR e-mail, and the password (RM-002).
+// No format rule here: a wrong shape simply gives "identifiants incorrects",
+// never a hint about which part is wrong.
+export const loginSchema = z.object({
+  identifier: requiredString.pipe(z.string().max(254)),
+  password: requiredString.pipe(z.string().max(128)),
+});
+
+export type LoginPayload = z.input<typeof loginSchema>;
