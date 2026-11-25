@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatTimeOfDay, todayIn, todayInParis } from "./dates.js";
+import {
+  addDays,
+  formatLongDate,
+  formatTimeOfDay,
+  todayIn,
+  todayInParis,
+} from "./dates.js";
 
 describe("todayIn", () => {
   it("gives the calendar day of the time zone, not of UTC", () => {
@@ -42,5 +48,21 @@ describe("formatTimeOfDay", () => {
 
   it("pads the hour on two digits", () => {
     expect(formatTimeOfDay("2026-11-25T06:05:00.000Z", "UTC")).toBe("06:05");
+  });
+});
+
+describe("addDays", () => {
+  it("shifts a date forwards and backwards, across months and years", () => {
+    expect(addDays("2026-11-26", 1)).toBe("2026-11-27");
+    expect(addDays("2026-11-26", -31)).toBe("2026-10-26");
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addDays("2024-03-01", -1)).toBe("2024-02-29");
+  });
+});
+
+describe("formatLongDate", () => {
+  it("writes the weekday, the day and the month in French", () => {
+    expect(formatLongDate("2026-11-26")).toBe("Jeudi 26 novembre");
+    expect(formatLongDate("2026-08-01")).toBe("Samedi 1 août");
   });
 });

@@ -34,3 +34,21 @@ export function formatTimeOfDay(
     minute: "2-digit",
   }).format(date);
 }
+
+// The calendar day "YYYY-MM-DD" shifted by a number of days (negative = past).
+export function addDays(date: string, days: number): string {
+  const shifted = new Date(`${date}T00:00:00Z`);
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return shifted.toISOString().slice(0, 10);
+}
+
+// "2026-11-26" -> "Jeudi 26 novembre" (the home page title).
+export function formatLongDate(date: string): string {
+  const text = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date(`${date}T00:00:00Z`));
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}

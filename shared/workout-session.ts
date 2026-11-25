@@ -5,4 +5,7 @@ export type CurrentWorkoutSession = {
   session_name: string;
   // ISO date-time of the real start, for example "2026-11-25T17:34:00.000Z".
   started_at: string;
+  // "6 / 11 séries" on the home page (D-08: a cardio step counts as a set).
+  validated_sets: number;
+  planned_sets: number;
 };
