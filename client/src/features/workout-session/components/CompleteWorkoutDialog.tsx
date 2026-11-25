@@ -1,3 +1,4 @@
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 
 type Props = {
@@ -19,6 +20,7 @@ function CompleteWorkoutDialog({ missingCount, onConfirm, onCancel }: Props) {
 
   return (
     <ConfirmDialog
+      icon={checkIcon}
       title="Terminer la séance ?"
       message={message}
       confirmLabel="Terminer"

@@ -1,3 +1,4 @@
+import stopIcon from "../../../assets/icons/ui/app/stop.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 
 type Props = {
@@ -10,6 +11,8 @@ type Props = {
 function AbandonWorkoutDialog({ onConfirm, onCancel }: Props) {
   return (
     <ConfirmDialog
+      tone="danger"
+      icon={stopIcon}
       title="Abandonner cette séance ?"
       message="Tes séries faites seront gardées dans ton historique. Tu ne pourras pas reprendre cette séance."
       confirmLabel="Abandonner"
