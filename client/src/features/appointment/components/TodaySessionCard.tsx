@@ -65,7 +65,8 @@ function TodaySessionCard({ appointment, detail, currentSession }: Props) {
         </div>
 
         <div className="flex items-end gap-2">
-          <h3 className="min-w-0 flex-1 truncate text-display-xl">
+          {/* A long name wraps instead of being cut (03-2). */}
+          <h3 className="line-clamp-2 min-w-0 flex-1 text-display-xl">
             {appointment.session_name}
           </h3>
           <Link
