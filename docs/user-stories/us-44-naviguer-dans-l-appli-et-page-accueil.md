@@ -115,24 +115,24 @@ Le bouton devient « Ajouter des exercices » (RM-018).
 
 ## Tâches techniques
 
-- [ ] Backend : `appointmentRepository.readAppointmentsBetween(userId, from, to)` : rendez-vous + nom de séance + programme + séance réalisée liée (`LEFT JOIN workout_session`), `WHERE a.owner_user_id = ? AND a.planned_date BETWEEN ? AND ?`, tri `planned_date, planned_time IS NULL, planned_time, id`
-- [ ] Backend : `appointmentRepository.countVersionContent(versionIds)` : nombre de blocs et d'exercices par version (pour « 1 bloc · 3 exercices »)
-- [ ] Backend : `appointmentActions.browse` ; `GET /api/appointments` → `authenticate` → `validate({ query: dateRangeSchema })` (62 jours max)
-- [ ] Backend : `GET /api/workout-sessions/current` (livré avec US-28 ; en attendant, renvoie `null`)
-- [ ] Shared : `dateRangeSchema` ; `formatLongDate` (« Jeudi 26 novembre ») ; `sortDayAppointments` (heure puis sans heure)
-- [ ] Frontend : `components/AppLayout.tsx` (en-tête : titre, avatar), `components/TabBar.tsx` (4 `NavLink`, `aria-current`), `pages/NotFoundPage.tsx`
-- [ ] Frontend : `App.tsx` : routes publiques (`/inscription`, `/connexion`), routes privées dans `ProtectedRoute` + `AppLayout`, routes plein écran (`/seances/nouvelle`, `/entrainement/:id`) sans `AppLayout`
-- [ ] Frontend : `features/appointment/services/appointmentService.ts` : `readAppointments(from, to)`
-- [ ] Frontend : `features/appointment/hooks/useTodayAppointments.ts`, `features/workout-session/hooks/useCurrentWorkoutSession.ts`
-- [ ] Frontend : `pages/HomePage.tsx` : `TodaySessionCard`, `TodaySelector`, `QuickActions`, `ProgramsSummary` (vide en MVP)
-- [ ] Frontend : états chargement / erreur / vide ; statut `aria-live`
-- [ ] Tests : back : plage de dates, séances d'un autre exclues, tri sans heure en dernier
-- [ ] Tests : front : `TabBar` met `aria-current` sur le bon onglet ; Accueil débutant / actif / en cours
-- [ ] Tests : E2E : navigation au clavier entre les 4 onglets ; page privée sans connexion → connexion → retour ; axe sur les 5 états de l'Accueil
+- [x] Backend : `appointmentRepository.readAppointmentsBetween(userId, from, to)` : rendez-vous + nom de séance + programme + séance réalisée liée (`LEFT JOIN workout_session`), `WHERE a.owner_user_id = ? AND a.planned_date BETWEEN ? AND ?`, tri `planned_date, planned_time IS NULL, planned_time, id`
+- [x] Backend : `appointmentRepository.countVersionContent(versionIds)` : nombre de blocs et d'exercices par version (pour « 1 bloc · 3 exercices »)
+- [x] Backend : `appointmentActions.browse` ; `GET /api/appointments` → `authenticate` → `validate({ query: dateRangeSchema })` (62 jours max)
+- [x] Backend : `GET /api/workout-sessions/current` (livré avec US-28 ; en attendant, renvoie `null`)
+- [x] Shared : `dateRangeSchema` ; `formatLongDate` (« Jeudi 26 novembre ») ; `sortDayAppointments` (heure puis sans heure)
+- [x] Frontend : `components/AppLayout.tsx` (en-tête : titre, avatar), `components/TabBar.tsx` (4 `NavLink`, `aria-current`), `pages/NotFoundPage.tsx`
+- [x] Frontend : `App.tsx` : routes publiques (`/inscription`, `/connexion`), routes privées dans `ProtectedRoute` + `AppLayout`, routes plein écran (`/seances/nouvelle`, `/entrainement/:id`) sans `AppLayout`
+- [x] Frontend : `features/appointment/services/appointmentService.ts` : `readAppointments(from, to)`
+- [x] Frontend : `features/appointment/hooks/useTodayAppointments.ts`, `features/workout-session/hooks/useCurrentWorkoutSession.ts`
+- [x] Frontend : `pages/HomePage.tsx` : `TodaySessionCard`, `TodaySelector`, `QuickActions`, `ProgramsSummary` (vide en MVP)
+- [x] Frontend : états chargement / erreur / vide ; statut `aria-live`
+- [x] Tests : back : plage de dates, séances d'un autre exclues, tri sans heure en dernier
+- [x] Tests : front : `TabBar` met `aria-current` sur le bon onglet ; Accueil débutant / actif / en cours
+- [x] Tests : E2E : navigation au clavier entre les 4 onglets ; page privée sans connexion → connexion → retour ; axe sur les 5 états de l'Accueil
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] 5 états de l'Accueil implémentés et testés
+- [x] 5 états de l'Accueil implémentés et testés
 - [ ] Mobile-first 375 px, onglets à 44 px, vérifié sur tablette et ordinateur
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
