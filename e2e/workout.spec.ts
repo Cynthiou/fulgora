@@ -251,3 +251,47 @@ test("finishes a session and shows the summary with the right figures", async ({
   await page.getByRole("link", { name: "Retour au planning" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Planning");
 });
+
+test("a session already finished never offers to start again", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+  await planSessionToday(page, "Pecs");
+  await page.reload();
+
+  // Start it and finish it
+  await page.getByRole("link", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+  await page.getByRole("link", { name: "Exercices", exact: true }).click();
+  await page.getByRole("button", { name: "Terminer la séance" }).click();
+  await page.getByRole("button", { name: "Terminer", exact: true }).click();
+  await expect(page.getByText("Terminée")).toBeVisible();
+
+  // Back home: the status and the summary, no "Démarrer"
+  await page.goto("/");
+  await expectHomePage(page);
+  await expect(page.getByText("Effectuée")).toBeVisible();
+  await expect(page.getByText(/1 \/ 2 séries/)).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Démarrer la séance/ }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Reprendre ma séance" }),
+  ).toHaveCount(0);
+
+  // The planning says the same, and the detail offers the summary
+  await page.goto("/planning");
+  await expect(page.getByText("Effectuée")).toBeVisible();
+  await page.goto("/");
+  await page.getByRole("link", { name: "Voir le résumé" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pecs");
+});

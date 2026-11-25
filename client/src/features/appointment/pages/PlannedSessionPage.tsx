@@ -4,6 +4,7 @@ import {
   type CurrentWorkoutSession,
   formatLongDate,
   formatSessionContent,
+  getAppointmentStatus,
   getBlockLabel,
 } from "shared";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
@@ -140,9 +141,18 @@ function PlannedSessionPage() {
             <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
               <div className="flex items-center justify-between gap-2">
                 <StatusBadge
-                  status={
-                    appointment.status === "attended" ? "completed" : "planned"
-                  }
+                  status={getAppointmentStatus({
+                    status: appointment.status,
+                    workout_session:
+                      appointment.workout_session === null
+                        ? null
+                        : {
+                            ...appointment.workout_session,
+                            started_at: "",
+                            validated_sets: 0,
+                            planned_sets: 0,
+                          },
+                  })}
                 />
                 {appointment.program_name !== null && (
                   <span className="text-overline uppercase text-accent">
@@ -215,11 +225,17 @@ function PlannedSessionPage() {
               >
                 Reprendre ma séance
               </Link>
-            ) : workout !== null || appointment.status === "cancelled" ? (
+            ) : workout !== null ? (
+              // Done or given up: it never starts again (RM-038)
+              <Link
+                to={`/suivi/historique/${appointment.id}`}
+                className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold"
+              >
+                Voir le résumé
+              </Link>
+            ) : appointment.status === "cancelled" ? (
               <p className="text-center font-semibold text-muted">
-                {appointment.status === "cancelled"
-                  ? "Ce rendez-vous est annulé."
-                  : "Cette séance a été faite."}
+                Ce rendez-vous est annulé.
               </p>
             ) : exerciseCount === 0 ? (
               <>

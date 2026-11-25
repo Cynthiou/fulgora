@@ -27,18 +27,21 @@ import {
 import {
   type AppointmentRow,
   countVersionContent,
+  countWorkoutSetsBySession,
   createAppointment,
   readAppointment,
   readAppointmentsBetween,
   readVersionBlocks,
   readVersionExercises,
   type VersionContentRow,
+  type WorkoutSetCountRow,
 } from "./appointmentRepository.js";
 
 // Turns a database row into what the client receives.
 function toListItem(
   row: AppointmentRow,
   content: VersionContentRow | undefined,
+  sets: WorkoutSetCountRow | undefined,
 ): AppointmentListItem {
   return {
     id: row.id,
@@ -64,6 +67,8 @@ function toListItem(
             id: row.workout_session_id,
             status: row.workout_status,
             started_at: row.started_at.toISOString(),
+            validated_sets: sets?.validated ?? 0,
+            planned_sets: sets?.planned ?? 0,
           },
   };
 }
@@ -81,8 +86,22 @@ export const browse: RequestHandler = async (req, res) => {
     contents.map((content) => [content.session_version_id, content]),
   );
 
+  const workoutIds = rows
+    .map((row) => row.workout_session_id)
+    .filter((id): id is number => id !== null);
+  const setCounts = await countWorkoutSetsBySession(workoutIds);
+  const setsByWorkout = new Map(
+    setCounts.map((count) => [count.workout_session_id, count]),
+  );
+
   const items = rows.map((row) =>
-    toListItem(row, contentByVersion.get(row.session_version_id)),
+    toListItem(
+      row,
+      contentByVersion.get(row.session_version_id),
+      row.workout_session_id === null
+        ? undefined
+        : setsByWorkout.get(row.workout_session_id),
+    ),
   );
   res.json(items);
 };

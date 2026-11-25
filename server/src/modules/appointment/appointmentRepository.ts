@@ -266,3 +266,36 @@ export async function readVersionSets(
   );
   return rows as VersionSetRow[];
 }
+
+export type WorkoutSetCountRow = {
+  workout_session_id: number;
+  planned: number;
+  validated: number;
+};
+
+// "17 / 18 séries" for several realized sessions at once. Uses query, not
+// execute, because of the list in IN (?) (common rule 8).
+export async function countWorkoutSetsBySession(
+  workoutSessionIds: number[],
+  db: Queryable = client,
+): Promise<WorkoutSetCountRow[]> {
+  if (workoutSessionIds.length === 0) {
+    return [];
+  }
+  const [rows] = await db.query<Rows[]>(
+    `SELECT wb.workout_session_id,
+            COUNT(*) AS planned,
+            COUNT(wset.validated_at) AS validated
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+      WHERE wb.workout_session_id IN (?)
+      GROUP BY wb.workout_session_id`,
+    [workoutSessionIds],
+  );
+  return rows.map((row) => ({
+    workout_session_id: Number(row.workout_session_id),
+    planned: Number(row.planned),
+    validated: Number(row.validated),
+  }));
+}

@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { StatusCode } from "./status.js";
 import { dateSchema } from "./validation.js";
 
 // An appointment is a planned session on a date (see data-model.md).
@@ -32,8 +33,49 @@ export type AppointmentListItem = {
     id: number;
     status: WorkoutStatus;
     started_at: string;
+    // "17 / 18 séries" once the session is over
+    validated_sets: number;
+    planned_sets: number;
   } | null;
 };
+
+// The status to show on a card or a row: the realized session decides once
+// it exists, the appointment otherwise (RM-059).
+export function getAppointmentStatus(
+  item: Pick<AppointmentListItem, "status" | "workout_session">,
+): StatusCode {
+  if (item.workout_session !== null) {
+    switch (item.workout_session.status) {
+      case "completed":
+        return "completed";
+      case "unfinished":
+        return "unfinished";
+      default:
+        // Still running: the card shows its own "En cours" badge
+        return "planned";
+    }
+  }
+  switch (item.status) {
+    case "to_confirm":
+      return "to_confirm";
+    case "missed":
+      return "missed";
+    case "cancelled":
+      return "cancelled";
+    default:
+      return "planned";
+  }
+}
+
+// True when the session was done and cannot be started again (RM-038).
+export function isWorkoutOver(
+  item: Pick<AppointmentListItem, "workout_session">,
+): boolean {
+  return (
+    item.workout_session !== null &&
+    item.workout_session.status !== "in_progress"
+  );
+}
 
 // A planning query covers 62 days at most (two months of calendar).
 export const MAX_RANGE_DAYS = 62;

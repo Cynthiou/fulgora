@@ -186,6 +186,8 @@ describe("HomePage", () => {
           id: 9,
           status: "in_progress",
           started_at: current.started_at,
+          validated_sets: current.validated_sets,
+          planned_sets: current.planned_sets,
         },
       }),
     ]);
@@ -258,5 +260,57 @@ describe("HomePage · raccourcis (écran 03)", () => {
     expect(
       screen.getByRole("link", { name: "Voir mon historique" }),
     ).toBeTruthy();
+  });
+});
+
+describe("HomePage · séance déjà faite (correction 5)", () => {
+  it("shows the status and the summary, never « Démarrer », once the session is over", async () => {
+    readCurrentMock.mockResolvedValue(null);
+    readAppointmentsMock.mockResolvedValue([
+      appointment({
+        id: 7,
+        status: "attended",
+        session_name: "Haut du corps",
+        workout_session: {
+          id: 12,
+          status: "completed",
+          started_at: `${today}T06:04:00.000Z`,
+          validated_sets: 17,
+          planned_sets: 18,
+        },
+      }),
+    ]);
+    renderHome();
+    await waitForContent();
+
+    expect(screen.getByText("Effectuée")).toBeTruthy();
+    expect(screen.getByText(/17 \/ 18 séries/)).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Voir le résumé" }).getAttribute("href"),
+    ).toBe("/suivi/historique/7");
+    expect(screen.queryByText(/Démarrer la séance/)).toBeNull();
+  });
+
+  it("says « Inachevée » after an abandon", async () => {
+    readCurrentMock.mockResolvedValue(null);
+    readAppointmentsMock.mockResolvedValue([
+      appointment({
+        id: 8,
+        status: "attended",
+        workout_session: {
+          id: 13,
+          status: "unfinished",
+          started_at: `${today}T06:04:00.000Z`,
+          validated_sets: 2,
+          planned_sets: 11,
+        },
+      }),
+    ]);
+    renderHome();
+    await waitForContent();
+
+    expect(screen.getByText("Inachevée")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Voir le résumé" })).toBeTruthy();
+    expect(screen.queryByText(/Démarrer la séance/)).toBeNull();
   });
 });

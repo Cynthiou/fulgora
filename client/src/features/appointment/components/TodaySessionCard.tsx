@@ -4,9 +4,12 @@ import {
   type CurrentWorkoutSession,
   formatSessionContent,
   formatTimeOfDay,
+  getAppointmentStatus,
+  isWorkoutOver,
 } from "shared";
 import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
 import Icon from "../../../components/Icon";
+import StatusBadge from "../../../components/StatusBadge";
 
 type Props = {
   appointment: AppointmentListItem;
@@ -16,14 +19,20 @@ type Props = {
 
 const PRIMARY_LINK =
   "flex h-btn items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
+const SECONDARY_LINK =
+  "flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold";
 
 // Screen 03: the card of the selected session of the day. Time and program on
 // the first line, the name in big, what it holds, then the main action.
+// A session already done or given up never offers to start again (RM-038):
+// it shows its status and the way to its summary.
 function TodaySessionCard({ appointment, currentSession }: Props) {
   const isInProgress =
     currentSession !== null &&
     appointment.workout_session?.id === currentSession.id;
   const anotherIsInProgress = currentSession !== null && !isInProgress;
+  const isOver = isWorkoutOver(appointment);
+  const workout = appointment.workout_session;
 
   return (
     <article
@@ -37,6 +46,8 @@ function TodaySessionCard({ appointment, currentSession }: Props) {
           <p className="rounded-chip bg-primary px-2 py-1 text-overline uppercase text-primary-content">
             <span aria-hidden="true">● </span>En cours
           </p>
+        ) : isOver ? (
+          <StatusBadge status={getAppointmentStatus(appointment)} />
         ) : (
           <p className="font-display text-display-sm">
             {appointment.planned_time ?? "Sans heure"}
@@ -67,6 +78,11 @@ function TodaySessionCard({ appointment, currentSession }: Props) {
           Commencée à {formatTimeOfDay(currentSession.started_at)} ·{" "}
           {currentSession.validated_sets} / {currentSession.planned_sets} séries
         </p>
+      ) : isOver && workout !== null ? (
+        <p className="text-muted">
+          Commencée à {formatTimeOfDay(workout.started_at)} ·{" "}
+          {workout.validated_sets} / {workout.planned_sets} séries
+        </p>
       ) : (
         <p className="text-muted">
           {formatSessionContent(
@@ -82,6 +98,13 @@ function TodaySessionCard({ appointment, currentSession }: Props) {
           className={PRIMARY_LINK}
         >
           Reprendre ma séance
+        </Link>
+      ) : isOver ? (
+        <Link
+          to={`/suivi/historique/${appointment.id}`}
+          className={SECONDARY_LINK}
+        >
+          Voir le résumé
         </Link>
       ) : anotherIsInProgress ? (
         // One session at a time (RM-040): no start while another one runs.

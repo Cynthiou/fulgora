@@ -3,6 +3,7 @@ import {
   addDays,
   formatLongDate,
   formatSessionContent,
+  getAppointmentStatus,
   todayInParis,
 } from "shared";
 import EmptyState from "../../../components/EmptyState";
@@ -73,7 +74,7 @@ function PlanningPage() {
                       item.block_count,
                       item.exercise_count,
                     )}
-                    <StatusBadge status="planned" />
+                    <StatusBadge status={getAppointmentStatus(item)} />
                   </span>
                 </Link>
               </li>
