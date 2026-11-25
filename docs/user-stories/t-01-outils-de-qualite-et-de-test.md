@@ -45,17 +45,17 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 
 ## Tâches techniques
 
-- [ ] Outillage : installer `vitest`, `supertest`, `@types/supertest` dans `server` (`--ignore-scripts`)
-- [ ] Outillage : installer `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` dans `client`
-- [ ] Outillage : installer `@playwright/test` et `@axe-core/playwright` à la racine
-- [ ] Outillage : ajouter les scripts `typecheck`, `test`, `test:e2e` à la racine et dans chaque workspace
-- [ ] Outillage : `vitest.config.ts` serveur (environnement node) et client (environnement jsdom)
-- [ ] Outillage : `playwright.config.ts` : un projet mobile 375 px et un projet ordinateur 1280 px, `webServer` qui lance `npm run dev`
-- [ ] CI : `.github/workflows/ci.yml` : `npm ci --ignore-scripts`, `check`, `typecheck`, migration de `fulgora_test`, `test`
-- [ ] Tests : un test unitaire témoin par workspace et un test E2E témoin (la page de connexion s'affiche)
+- [x] Outillage : installer `vitest`, `supertest`, `@types/supertest` dans `server` (`--ignore-scripts`)
+- [x] Outillage : installer `vitest`, `@testing-library/react`, `@testing-library/user-event`, `jsdom` dans `client`
+- [x] Outillage : installer `@playwright/test` et `@axe-core/playwright` à la racine
+- [x] Outillage : ajouter les scripts `typecheck`, `test`, `test:e2e` à la racine et dans chaque workspace
+- [x] Outillage : `vitest.config.ts` serveur (environnement node) et client (environnement jsdom)
+- [x] Outillage : `playwright.config.ts` : un projet mobile 375 px et un projet ordinateur 1280 px, `webServer` qui lance `npm run dev`
+- [x] CI : `.github/workflows/ci.yml` : `npm ci --ignore-scripts`, `check`, `typecheck`, migration de `fulgora_test`, `test`
+- [x] Tests : un test unitaire témoin par workspace et un test E2E témoin (la page de connexion s'affiche)
 
 ## Definition of Done
 
-- [ ] Les 4 scripts fonctionnent en local
+- [x] Les 4 scripts fonctionnent en local
 - [ ] Une PR de test volontairement cassée est bien refusée par la CI
-- [ ] Aucune trace de Claude dans les commits ni dans la PR
+- [x] Aucune trace de Claude dans les commits ni dans la PR

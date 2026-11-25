@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    # A throwaway MySQL 8 just for this run. The password is not a secret:
+    # the database lives a few minutes inside the runner and is then destroyed.
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ci_password
+          MYSQL_DATABASE: fulgora_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -pci_password"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ci_password
+      DB_NAME: fulgora_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Biome
+        run: npm run check
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Migrate test database
+        run: npm run db:migrate
+
+      - name: Tests
+        run: npm test

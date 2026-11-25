@@ -52,17 +52,17 @@ Le jeton de connexion est dans un cookie : le navigateur l'envoie tout seul. San
 
 ## Tâches techniques
 
-- [ ] Outillage : installer `helmet` et `express-rate-limit` (`--ignore-scripts`)
-- [ ] Backend : `app.ts` : `app.disable("x-powered-by")`, `helmet()`, `express.json({ limit: "100kb" })`
-- [ ] Backend : créer `server/src/utils/httpError.ts` : classe `HttpError(status, code, message, field?)`
-- [ ] Backend : créer `server/src/middlewares/checkOrigin.ts` : méthodes concernées, lecture `Origin` puis `Referer` (origine extraite avec `new URL`), comparaison exacte avec `ALLOWED_ORIGINS`
-- [ ] Backend : créer `server/src/middlewares/rateLimiters.ts` : `authLimiter` (5 / 15 min) et `apiLimiter` (300 / 15 min), réponse au format commun
-- [ ] Backend : remplacer le gestionnaire d'erreurs de `app.ts` : `HttpError` → son statut et son JSON ; autre erreur → log serveur + 500 générique
-- [ ] Backend : ajouter `ALLOWED_ORIGINS` dans `.env.sample` (jamais dans `.env` versionné)
-- [ ] Tests : 403 sans origine, 403 mauvaise origine, 200 bonne origine, GET non bloqué, 429 au 6ᵉ essai, `X-Powered-By` absent, 500 sans détail
+- [x] Outillage : installer `helmet` et `express-rate-limit` (`--ignore-scripts`)
+- [x] Backend : `app.ts` : `app.disable("x-powered-by")`, `helmet()`, `express.json({ limit: "100kb" })`
+- [x] Backend : créer `server/src/utils/httpError.ts` : classe `HttpError(status, code, message, field?)`
+- [x] Backend : créer `server/src/middlewares/checkOrigin.ts` : méthodes concernées, lecture `Origin` puis `Referer` (origine extraite avec `new URL`), comparaison exacte avec `ALLOWED_ORIGINS`
+- [x] Backend : créer `server/src/middlewares/rateLimiters.ts` : `authLimiter` (5 / 15 min) et `apiLimiter` (300 / 15 min), réponse au format commun
+- [x] Backend : remplacer le gestionnaire d'erreurs de `app.ts` : `HttpError` → son statut et son JSON ; autre erreur → log serveur + 500 générique
+- [x] Backend : ajouter `ALLOWED_ORIGINS` dans `.env.sample` (jamais dans `.env` versionné)
+- [x] Tests : 403 sans origine, 403 mauvaise origine, 200 bonne origine, GET non bloqué, 429 au 6ᵉ essai, `X-Powered-By` absent, 500 sans détail
 
 ## Definition of Done
 
-- [ ] Tous les tests de la checklist passent
-- [ ] Aucun secret ni origine en dur dans le code
+- [x] Tous les tests de la checklist passent
+- [x] Aucun secret ni origine en dur dans le code
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript

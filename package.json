@@ -12,11 +12,16 @@
     "dev:server": "npm run dev -w server",
     "check": "biome check .",
     "check:fix": "biome check --write .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
     "db:migrate": "npm run db:migrate -w server",
     "db:seed": "npm run db:seed -w server"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.1",
     "@biomejs/biome": "^2.6.0",
+    "@playwright/test": "^1.65.1",
     "concurrently": "^9.1.2"
   }
 }
