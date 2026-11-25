@@ -177,13 +177,62 @@ test("abandons the session after a set: unfinished, sets kept, nothing left in p
     .getByRole("button", { name: "Abandonner" })
     .click();
 
+  // The summary (B6), unfinished
   await expect(page.getByText("Inachevée")).toBeVisible();
   await expect(page.getByText("1 / 2", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("1 / 2 · 10 rép. · série 2 non faite"),
+  ).toBeVisible();
   await expectNoA11yViolation(page);
 
-  await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+  await page.goto("/");
   await expectHomePage(page);
   await expect(
     page.getByRole("link", { name: "Reprendre ma séance" }),
   ).toHaveCount(0);
+});
+
+test("finishes a session and shows the summary with the right figures", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+  await planSessionToday(page, "Complète");
+  await page.reload();
+  await page.getByRole("link", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("link", { name: /0 \/ 2 séries/ }).click();
+
+  // Two sets: 10 reps as planned, then 8 reps
+  await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await page
+    .getByRole("button", { name: "Diminuer Répétitions · prévu 10" })
+    .click();
+  await page
+    .getByRole("button", { name: "Diminuer Répétitions · prévu 10" })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Valider la série 2" })
+    .click();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+  await page.getByRole("link", { name: "Retour aux exercices" }).click();
+
+  await page.getByRole("button", { name: "Terminer la séance" }).click();
+  await expect(page.getByText("Terminer la séance ?")).toBeVisible();
+  await expect(
+    page.getByText("Toutes les séries sont faites. Ton résumé t'attend."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Terminer", exact: true }).click();
+
+  await expect(page.getByText("Terminée")).toBeVisible();
+  await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 / 2 · 10, 8 rép.")).toBeVisible();
+  await expect(page.getByText("0 kg")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("link", { name: "Retour au planning" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Planning");
 });
