@@ -149,3 +149,41 @@ describe("GET /api/auth/me", () => {
     expect(response.body).toEqual(loggedIn.body);
   });
 });
+
+describe("POST /api/auth/logout", () => {
+  it("expires the cookie, so the next /me answers 401", async () => {
+    // An agent behaves like a browser: it keeps the cookies it receives,
+    // and drops a cookie that has expired.
+    const browser = request.agent(app);
+    const loggedIn = await browser
+      .post("/api/auth/login")
+      .set("Origin", ORIGIN)
+      .send({ identifier: account.username, password: account.password });
+    expect(loggedIn.status).toBe(200);
+    expect((await browser.get("/api/auth/me")).status).toBe(200);
+
+    const response = await browser
+      .post("/api/auth/logout")
+      .set("Origin", ORIGIN);
+
+    expect(response.status).toBe(204);
+    const cookie = readSetCookie(response.headers);
+    expect(cookie).toContain("fulgora_token=;");
+    expect(cookie).toContain("Expires=Thu, 01 Jan 1970");
+    expect((await browser.get("/api/auth/me")).status).toBe(401);
+  });
+
+  it("answers 401 without a cookie", async () => {
+    const response = await request(app)
+      .post("/api/auth/logout")
+      .set("Origin", ORIGIN);
+
+    expect(response.status).toBe(401);
+  });
+
+  it("answers 403 without an allowed origin", async () => {
+    const response = await request(app).post("/api/auth/logout");
+
+    expect(response.status).toBe(403);
+  });
+});

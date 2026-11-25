@@ -3,7 +3,7 @@ import { loginSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { authLimiter } from "../../middlewares/rateLimiters.js";
 import { validate } from "../../middlewares/validate.js";
-import { login, readMe } from "./authActions.js";
+import { login, logout, readMe } from "./authActions.js";
 
 const authRouter = express.Router();
 
@@ -13,5 +13,6 @@ authRouter.post("/login", authLimiter, validate({ body: loginSchema }), login);
 
 // Private: only the owner of a valid cookie gets an answer.
 authRouter.get("/me", authenticate, readMe);
+authRouter.post("/logout", authenticate, logout);
 
 export default authRouter;

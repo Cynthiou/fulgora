@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import type { LoginPayload, PublicUser } from "shared";
-import { setAuthCookie } from "../../utils/authCookie.js";
+import { clearAuthCookie, setAuthCookie } from "../../utils/authCookie.js";
 import { HttpError } from "../../utils/httpError.js";
 import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { signToken } from "../../utils/token.js";
@@ -58,4 +58,12 @@ export const readMe: RequestHandler = async (req, res) => {
   }
 
   res.json(user);
+};
+
+// POST /api/auth/logout: the browser forgets the cookie. Nothing is deleted
+// in the database; a session in progress stays in progress (US-03).
+// Known limit (D-13): the token itself stays valid until it expires.
+export const logout: RequestHandler = (_req, res) => {
+  clearAuthCookie(res);
+  res.sendStatus(204);
 };
