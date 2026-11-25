@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  actualSetSchema,
   countPlannedSets,
   countValidatedSets,
+  formatActualValues,
   formatElapsed,
   formatSetProgress,
+  getSetGap,
+  isEmptySet,
+  isObjectiveReached,
+  plannedAsActual,
   startWorkoutSchema,
+  toActualValues,
   toPlannedValues,
   type WorkoutSetRow,
 } from "./workout-session.js";
@@ -106,6 +113,64 @@ describe("workout session helpers (US-28)", () => {
     );
     expect(startWorkoutSchema.safeParse({ appointment_id: 0 }).success).toBe(
       false,
+    );
+  });
+});
+
+describe("validating a set (US-29)", () => {
+  const planned = set(1, false);
+
+  it("accepts the actual values within the limits of the plan", () => {
+    expect(actualSetSchema.safeParse(plannedAsActual(planned)).success).toBe(
+      true,
+    );
+    expect(
+      actualSetSchema.safeParse({ ...plannedAsActual(planned), reps: 1001 })
+        .success,
+    ).toBe(false);
+    expect("rest_after_seconds" in actualSetSchema.shape).toBe(false);
+  });
+
+  it("refuses a set with nothing done", () => {
+    const empty = toActualValues(planned);
+    expect(isEmptySet(empty)).toBe(true);
+    expect(isEmptySet({ ...empty, reps: 0, weight_kg: 0 })).toBe(true);
+    expect(isEmptySet({ ...empty, reps: 1 })).toBe(false);
+  });
+
+  it("tells the gap with the plan and whether the objective is reached", () => {
+    const asPlanned = set(1, true);
+    expect(getSetGap(asPlanned)).toBe("=");
+    expect(isObjectiveReached(asPlanned)).toBe(true);
+
+    const heavier = { ...asPlanned, weight_actual_kg: 42.5 };
+    expect(getSetGap(heavier)).toBe("▲ 2,5 kg");
+    expect(isObjectiveReached(heavier)).toBe(true);
+
+    const fewer = { ...asPlanned, reps_actual: 9 };
+    expect(getSetGap(fewer)).toBe("▼ 1 rép.");
+    expect(isObjectiveReached(fewer)).toBe(false);
+
+    const shorter = {
+      ...asPlanned,
+      reps_planned: null,
+      reps_actual: null,
+      weight_planned_kg: null,
+      weight_actual_kg: null,
+      duration_planned_seconds: 60,
+      duration_actual_seconds: 42,
+    };
+    expect(getSetGap(shorter)).toBe("▼ 18 s");
+    expect(isObjectiveReached(shorter)).toBe(false);
+    expect(isObjectiveReached(set(1, false))).toBe(false);
+  });
+
+  it("writes the actual values of a set", () => {
+    expect(formatActualValues(set(1, true), ["reps", "weight"])).toBe(
+      "10 rép. · 40 kg",
+    );
+    expect(formatActualValues(set(1, false), ["reps", "weight"])).toBe(
+      "Aucun objectif",
     );
   });
 });

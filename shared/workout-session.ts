@@ -1,7 +1,13 @@
 import * as z from "zod";
 import type { AppointmentStatus, WorkoutStatus } from "./appointment.js";
 import type { MeasureCode } from "./catalog.js";
-import type { BlockType, PlannedSetValues } from "./session-template.js";
+import {
+  type BlockType,
+  formatDuration,
+  formatSetValues,
+  type PlannedSetValues,
+  plannedSetSchema,
+} from "./session-template.js";
 
 // --- The session in progress (home page, profile) ---------------------------
 
@@ -169,4 +175,113 @@ export function formatElapsed(startedAt: string, now: Date): string {
   const rest = seconds % 60;
   const minSec = `${hours > 0 ? String(minutes).padStart(2, "0") : minutes}:${String(rest).padStart(2, "0")}`;
   return hours > 0 ? `${hours}:${minSec}` : minSec;
+}
+
+// --- Validating a set (US-29) ---------------------------------------------------
+
+// What the user really did on one set: the same measures and limits as the
+// plan, without the rest (the rest belongs to the plan).
+export const actualSetSchema = plannedSetSchema.omit({
+  rest_after_seconds: true,
+});
+export type ActualSetValues = z.output<typeof actualSetSchema>;
+
+// The actual side of a set, in the shape of the form.
+export function toActualValues(set: WorkoutSetRow): ActualSetValues {
+  return {
+    reps: set.reps_actual,
+    weight_kg: set.weight_actual_kg,
+    duration_seconds: set.duration_actual_seconds,
+    distance_meters: set.distance_actual_meters,
+    speed_kmh: set.speed_actual_kmh,
+    resistance: set.resistance_actual,
+    incline_percent: set.incline_actual_percent,
+    calories: set.calories_actual,
+  };
+}
+
+// The planned values as a starting point for the actual ones ("fait comme
+// prévu" = one tap).
+export function plannedAsActual(set: WorkoutSetRow): ActualSetValues {
+  const { rest_after_seconds: _rest, ...values } = toPlannedValues(set);
+  return values;
+}
+
+// A set with nothing in it, or zeros only, cannot be validated.
+export function isEmptySet(values: ActualSetValues): boolean {
+  return Object.values(values).every((value) => value === null || value === 0);
+}
+
+const ACTUAL_FIELDS: (keyof ActualSetValues)[] = [
+  "reps",
+  "weight_kg",
+  "duration_seconds",
+  "distance_meters",
+  "speed_kmh",
+  "incline_percent",
+  "resistance",
+  "calories",
+];
+
+function formatGapValue(field: keyof ActualSetValues, amount: number): string {
+  const format = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
+  switch (field) {
+    case "reps":
+      return `${format.format(amount)} rép.`;
+    case "weight_kg":
+      return `${format.format(amount)} kg`;
+    case "duration_seconds":
+      return formatDuration(amount);
+    case "distance_meters":
+      return `${format.format(amount / 1000)} km`;
+    case "speed_kmh":
+      return `${format.format(amount)} km/h`;
+    case "incline_percent":
+      return `${format.format(amount)} %`;
+    case "resistance":
+      return `résistance ${format.format(amount)}`;
+    case "calories":
+      return `${format.format(amount)} kcal`;
+  }
+}
+
+// How the actual set compares with the plan: "=" when identical, otherwise
+// the first difference, "▲ 2,5 kg" (more) or "▼ 1 rép." (less).
+export function getSetGap(set: WorkoutSetRow): string {
+  const planned = plannedAsActual(set);
+  const actual = toActualValues(set);
+  for (const field of ACTUAL_FIELDS) {
+    const before = planned[field] ?? 0;
+    const after = actual[field] ?? 0;
+    if (before !== after) {
+      const amount = Math.round(Math.abs(after - before) * 1000) / 1000;
+      return `${after > before ? "▲" : "▼"} ${formatGapValue(field, amount)}`;
+    }
+  }
+  return "=";
+}
+
+// True when every planned value was reached or passed.
+export function isObjectiveReached(set: WorkoutSetRow): boolean {
+  const planned = plannedAsActual(set);
+  const actual = toActualValues(set);
+  return ACTUAL_FIELDS.every((field) => {
+    const target = planned[field];
+    if (target === null) {
+      return true;
+    }
+    const done = actual[field];
+    return done !== null && done >= target;
+  });
+}
+
+// "10 rép. · 40 kg" for the values really done.
+export function formatActualValues(
+  set: WorkoutSetRow,
+  codes: MeasureCode[],
+): string {
+  return formatSetValues(
+    { ...toActualValues(set), rest_after_seconds: null },
+    codes,
+  );
 }

@@ -9,6 +9,7 @@ import exerciseRouter from "./modules/exercise/exerciseRouter.js";
 import authRouter from "./modules/user/authRouter.js";
 import userRouter from "./modules/user/userRouter.js";
 import workoutSessionRouter from "./modules/workout-session/workoutSessionRouter.js";
+import workoutSetRouter from "./modules/workout-session/workoutSetRouter.js";
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.get("/categories", authenticate, browseCategories);
 router.get("/equipments", authenticate, browseEquipments);
 router.use("/appointments", appointmentRouter);
 router.use("/workout-sessions", workoutSessionRouter);
+router.use("/workout-sets", workoutSetRouter);
 
 export default router;

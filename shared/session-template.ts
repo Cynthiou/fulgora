@@ -285,7 +285,10 @@ export function countDraftExercises(draft: SessionDraft): number {
 }
 
 // "Classique · Force", or "Classique · Bloc 1" without a title (US-13).
-export function getBlockLabel(block: DraftBlock, index: number): string {
+export function getBlockLabel(
+  block: Pick<DraftBlock, "block_type" | "name">,
+  index: number,
+): string {
   const title =
     block.name !== null && block.name.trim() !== ""
       ? block.name.trim()

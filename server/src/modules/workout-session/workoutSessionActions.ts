@@ -146,7 +146,7 @@ function toNumber(value: string | number | null): number | null {
   return value === null ? null : Number(value);
 }
 
-function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
+export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
   return {
     id: row.id,
     position: row.position,

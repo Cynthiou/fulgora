@@ -1,4 +1,4 @@
-import type { BlockType, WorkoutStatus } from "shared";
+import type { ActualSetValues, BlockType, WorkoutStatus } from "shared";
 import client, {
   type Queryable,
   type Result,
@@ -253,4 +253,80 @@ export async function readWorkoutSets(
     [workoutSessionId],
   );
   return rows as WorkoutSetDbRow[];
+}
+
+export type WorkoutSetContextRow = {
+  id: number;
+  workout_session_id: number;
+  exercise_id: number;
+  status: WorkoutStatus;
+};
+
+// One set with what the action must know: whose session, its status and the
+// exercise (for the allowed measures). Null when it is not the user's (404).
+export async function readWorkoutSetContext(
+  setId: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<WorkoutSetContextRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT wset.id, ws.id AS workout_session_id, we.exercise_id, ws.status
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE wset.id = ? AND ws.owner_user_id = ?`,
+    [setId, userId],
+  );
+  return (rows[0] as WorkoutSetContextRow | undefined) ?? null;
+}
+
+// Writes what was really done. The _planned columns are never touched
+// (RM-041); the first validation date is kept (RM-049).
+export async function updateWorkoutSetActual(
+  setId: number,
+  values: ActualSetValues,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE workout_set
+        SET reps_actual = ?, weight_actual_kg = ?, duration_actual_seconds = ?,
+            distance_actual_meters = ?, speed_actual_kmh = ?, resistance_actual = ?,
+            incline_actual_percent = ?, calories_actual = ?,
+            validated_at = COALESCE(validated_at, NOW(3))
+      WHERE id = ?`,
+    [
+      values.reps,
+      values.weight_kg,
+      values.duration_seconds,
+      values.distance_meters,
+      values.speed_kmh,
+      values.resistance,
+      values.incline_percent,
+      values.calories,
+      setId,
+    ],
+  );
+}
+
+// Every recorded action pushes the inactivity clock back (RM-065, DT-18).
+export async function touchWorkoutSession(
+  workoutSessionId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    "UPDATE workout_session SET last_activity_at = NOW(3) WHERE id = ?",
+    [workoutSessionId],
+  );
+}
+
+export async function readWorkoutSet(
+  setId: number,
+  db: Queryable = client,
+): Promise<WorkoutSetDbRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT * FROM workout_set WHERE id = ?",
+    [setId],
+  );
+  return (rows[0] as WorkoutSetDbRow | undefined) ?? null;
 }
