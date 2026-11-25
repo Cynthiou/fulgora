@@ -1,6 +1,9 @@
 -- Fulgora database schema (MySQL 8.0.16+)
 -- Source: MLD proposed on 2026-11-23, tested on MySQL 8.0 (25 tables).
 -- Change from the proposal: workout_set.updated_at is NULL until a correction (RM-049).
+-- This file documents the current state of the database. The database itself is
+-- built by the numbered files in database/migrations/ (npm run db:migrate).
+-- Reflects migrations 001 to 004.
 
 
 CREATE TABLE `user` (
@@ -8,7 +11,9 @@ CREATE TABLE `user` (
   username VARCHAR(50) NOT NULL,
   email VARCHAR(254) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  terms_accepted_at DATETIME(3) NOT NULL,
   sex ENUM('female','male') NULL,
+  timezone VARCHAR(64) NOT NULL DEFAULT 'Europe/Paris',
   home_metric VARCHAR(40) NULL,
   weight_unit ENUM('kg','lb') NOT NULL DEFAULT 'kg',
   distance_unit ENUM('km','mi') NOT NULL DEFAULT 'km',
@@ -182,7 +187,7 @@ CREATE TABLE program (
   description TEXT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  status ENUM('programmed','in_progress','finished','abandoned') NOT NULL DEFAULT 'programmed',
+  status ENUM('draft','programmed','in_progress','finished','abandoned') NOT NULL DEFAULT 'programmed',
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id), KEY ix_program_owner (owner_user_id,status),
@@ -227,6 +232,7 @@ CREATE TABLE appointment (
   planned_time TIME NULL,
   moved_manually BOOLEAN NOT NULL DEFAULT FALSE,
   status ENUM('planned','to_confirm','missed','cancelled','attended') NOT NULL DEFAULT 'planned',
+  cancelled_at DATETIME(3) NULL,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id), KEY ix_appointment_calendar (owner_user_id,planned_date,planned_time),
@@ -235,7 +241,8 @@ CREATE TABLE appointment (
   CONSTRAINT fk_appointment_version FOREIGN KEY (session_version_id) REFERENCES session_version(id) ON DELETE RESTRICT,
   CONSTRAINT fk_appointment_program FOREIGN KEY (program_id) REFERENCES program(id) ON DELETE RESTRICT,
   CONSTRAINT fk_appointment_schedule FOREIGN KEY (weekly_schedule_id) REFERENCES weekly_schedule(id) ON DELETE RESTRICT,
-  CONSTRAINT ck_appointment_schedule_program CHECK (weekly_schedule_id IS NULL OR program_id IS NOT NULL)
+  CONSTRAINT ck_appointment_schedule_program CHECK (weekly_schedule_id IS NULL OR program_id IS NOT NULL),
+  CONSTRAINT ck_appointment_cancelled_at CHECK ((status = 'cancelled') = (cancelled_at IS NOT NULL))
 ) ENGINE=InnoDB;
 
 CREATE TABLE workout_session (
@@ -247,6 +254,8 @@ CREATE TABLE workout_session (
   ended_at DATETIME(3) NULL,
   last_activity_at DATETIME(3) NOT NULL COMMENT 'Last confirmed user action, for 4-hour inactivity policy',
   comment TEXT NULL,
+  auto_closed BOOLEAN NOT NULL DEFAULT FALSE,
+  declared_afterwards BOOLEAN NOT NULL DEFAULT FALSE,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   active_owner_user_id BIGINT UNSIGNED GENERATED ALWAYS AS (CASE WHEN status='in_progress' THEN owner_user_id ELSE NULL END) STORED,

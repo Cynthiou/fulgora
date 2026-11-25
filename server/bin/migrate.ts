@@ -1,41 +1,42 @@
-// Creates the database from schema.sql.
-// Warning: the database is deleted first, so every row is lost.
+// Applies the missing migrations to the database named in .env.
+//   npm run db:migrate          -> only what is missing, never erases anything
+//   npm run db:reset            -> drops the database first (refused in production)
 import "dotenv/config";
-import fs from "node:fs";
-import path from "node:path";
-import mysql from "mysql2/promise";
+import {
+  migrateDatabase,
+  ResetRefusedError,
+} from "../src/database/migrations.js";
 
-const schemaPath = path.join(import.meta.dirname, "../database/schema.sql");
-
-async function migrate() {
-  const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
-
-  // No "database" option here: the database does not exist yet.
-  const connection = await mysql.createConnection({
-    host: DB_HOST,
-    port: Number(DB_PORT),
-    user: DB_USER,
-    password: DB_PASSWORD,
-    multipleStatements: true, // schema.sql holds many CREATE TABLE
-  });
-
-  try {
-    await connection.query(`DROP DATABASE IF EXISTS \`${DB_NAME}\``);
-    await connection.query(
-      `CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci`,
-    );
-    await connection.query(`USE \`${DB_NAME}\``);
-
-    const schema = fs.readFileSync(schemaPath, "utf8");
-    await connection.query(schema);
-
-    console.info(`Database "${DB_NAME}" created from schema.sql`);
-  } finally {
-    await connection.end();
+// Credentials come from the environment only, never from the code.
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === "") {
+    throw new Error(`Missing environment variable ${name}`);
   }
+  return value;
 }
 
-migrate().catch((error) => {
-  console.error("Migration failed:", error.message);
+async function main() {
+  const reset = process.argv.includes("--reset");
+
+  await migrateDatabase(
+    {
+      host: requireEnv("DB_HOST"),
+      port: Number(requireEnv("DB_PORT")),
+      user: requireEnv("DB_USER"),
+      password: requireEnv("DB_PASSWORD"),
+      database: requireEnv("DB_NAME"),
+    },
+    { reset },
+  );
+}
+
+main().catch((error: unknown) => {
+  if (error instanceof ResetRefusedError) {
+    console.error(error.message);
+  } else {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Migration failed:", message);
+  }
   process.exitCode = 1;
 });

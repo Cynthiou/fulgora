@@ -8,7 +8,8 @@
     "typecheck": "tsc",
     "test": "vitest run",
     "db:migrate": "tsx bin/migrate.ts",
-    "db:seed": "tsx bin/seed.ts"
+    "db:seed": "tsx bin/seed.ts",
+    "db:reset": "tsx bin/migrate.ts --reset"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
