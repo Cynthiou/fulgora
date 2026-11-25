@@ -39,3 +39,28 @@ export async function expectHomePage(page: Page) {
     page.getByText(formatLongDate(todayInParis()), { exact: true }),
   ).toBeVisible();
 }
+
+// Screenshots are taken on demand: CAPTURE=1 npx playwright test …
+export const CAPTURE = process.env.CAPTURE === "1";
+const CAPTURE_DIRECTORY = "design/captures";
+
+// One screen, in the two themes, in design/captures/. Does nothing when
+// the captures are not asked for.
+export async function shoot(page: Page, name: string) {
+  if (!CAPTURE) {
+    return;
+  }
+  for (const [theme, suffix] of [
+    ["fulgora-light", "clair"],
+    ["fulgora-dark", "sombre"],
+  ] as const) {
+    await page.evaluate((value) => {
+      document.documentElement.setAttribute("data-theme", value);
+    }, theme);
+    await page.waitForTimeout(120);
+    await page.screenshot({
+      path: `${CAPTURE_DIRECTORY}/${name}-${suffix}.png`,
+      fullPage: true,
+    });
+  }
+}

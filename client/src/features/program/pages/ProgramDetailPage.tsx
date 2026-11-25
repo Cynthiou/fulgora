@@ -11,6 +11,7 @@ import {
   getAvailableProgramActions,
   getProgramWeekIndex,
   groupProgramWeeks,
+  isDoneAnotherDay,
   isWorkoutOver,
   PROGRAM_STATUS_LABELS,
   type ProgramDetailFull,
@@ -49,6 +50,13 @@ function countDaysUntil(start: string, today: string): number {
   const from = Date.parse(`${today}T00:00:00Z`);
   const to = Date.parse(`${start}T00:00:00Z`);
   return Math.round((to - from) / 86_400_000);
+}
+
+function formatDaysUntil(days: number): string {
+  if (days <= 0) {
+    return "Commence aujourd'hui";
+  }
+  return days === 1 ? "Commence demain" : `Commence dans ${days} jours`;
 }
 
 // Screens PRO-07, PRO-07c and PRO-13: one program, in three faces. Coming:
@@ -130,6 +138,10 @@ function ProgramDetailPage() {
     .reverse();
   const isOver =
     program?.status === "finished" || program?.status === "abandoned";
+  // Sessions done on a day other than the planned one (RM-070).
+  const inAdvance = appointments.filter((item) =>
+    isDoneAnotherDay(item),
+  ).length;
   const cancelled = appointments.filter(
     (item) => getAppointmentStatus(item) === "cancelled",
   ).length;
@@ -207,12 +219,7 @@ function ProgramDetailPage() {
               ) : program.status === "programmed" ? (
                 <>
                   <h2 className="text-display-md">
-                    {countDaysUntil(program.start_date, today) <= 0
-                      ? "Commence aujourd'hui"
-                      : `Commence dans ${countDaysUntil(
-                          program.start_date,
-                          today,
-                        )} jours`}
+                    {formatDaysUntil(countDaysUntil(program.start_date, today))}
                   </h2>
                   <p className="text-[13px] font-medium text-muted">
                     {formatLongDate(program.start_date)}
@@ -292,7 +299,17 @@ function ProgramDetailPage() {
                 </section>
               </>
             ) : (
-              <ProgramWeekGrid weeks={weeks} />
+              <>
+                <ProgramWeekGrid weeks={weeks} />
+                {/* A session done on another day stays in its week (PRO-07d) */}
+                {inAdvance > 0 && (
+                  <p className="text-xs text-muted">
+                    <span aria-hidden="true">↷ </span>
+                    {inAdvance} faite{inAdvance > 1 ? "s" : ""} en avance,
+                    comptée{inAdvance > 1 ? "s" : ""} dans sa semaine.
+                  </p>
+                )}
+              </>
             )}
 
             {/* PRO-07: the session of the day, the only one with a start */}

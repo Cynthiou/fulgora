@@ -80,20 +80,20 @@ PRO-01v.
 
 ## Tâches techniques
 
-- [ ] BDD : statuts de `program` avec `draft` (migration 003)
-- [ ] Backend : `programRepository.readPrograms(userId, status)` avec, par programme, le nombre de rendez-vous et de rendez-vous passés et faits (sous-requêtes `COUNT`)
-- [ ] Backend : `readProgram(id, userId)`, `readProgramSchedules(id)`, `readProgramAppointments(id)` (avec la séance réalisée liée)
-- [ ] Backend : `programActions.browse`, `programActions.read` ; `programRouter.ts` (`GET /api/programs`, `GET /api/programs/:id`)
-- [ ] Backend : tâche planifiée `updateProgramStatuses(today)` toutes les 5 min : `UPDATE program SET status = 'in_progress' WHERE status = 'programmed' AND start_date <= ?` ; `UPDATE program SET status = 'finished' WHERE status = 'in_progress' AND end_date < ?` ; création des notifications « Programme terminé » (`INSERT … SELECT` pour les programmes passés à `finished`, sans doublon), trace dans `program_change`
-- [ ] Shared : `computeProgramProgress(appointments, today)` (passées, faites, pourcentage), `groupAppointmentsByWeek`, `getAvailableProgramActions(program, hasStartedSession, hasInProgressSession)`
-- [ ] Frontend : `features/program/pages/ProgramListPage.tsx`, `ProgramDetailPage.tsx` ; composants `ProgramCard`, `ProgramProgress`, `ProgramWeekList`, `ProgramActionsMenu`
-- [ ] Frontend : section « Mes programmes » de l'Accueil, lien « Mes programmes » du Planning
-- [ ] Routing : `/programmes`, `/programmes/:id`
-- [ ] Tests : unitaires `computeProgramProgress`, `getAvailableProgramActions` (chaque état) ; back : liste filtrée, programme d'un autre → 404, `updateProgramStatuses` au jour du début et au lendemain de la fin, notification créée une seule fois
-- [ ] Tests : E2E liste → détail ; axe sur PRO-01, PRO-07, PRO-13
+- [x] BDD : statuts de `program` avec `draft` (migration 003)
+- [x] Backend : `programRepository.readPrograms(userId, status)` avec, par programme, le nombre de rendez-vous et de rendez-vous passés et faits (sous-requêtes `COUNT`)
+- [x] Backend : `readProgram(id, userId)`, `readProgramSchedules(id)`, `readProgramAppointments(id)` (avec la séance réalisée liée)
+- [x] Backend : `programActions.browse`, `programActions.read` ; `programRouter.ts` (`GET /api/programs`, `GET /api/programs/:id`)
+- [x] Backend : tâche planifiée `updateProgramStatuses(today)` toutes les 5 min : `UPDATE program SET status = 'in_progress' WHERE status = 'programmed' AND start_date <= ?` ; `UPDATE program SET status = 'finished' WHERE status = 'in_progress' AND end_date < ?` ; création des notifications « Programme terminé » (`INSERT … SELECT` pour les programmes passés à `finished`, sans doublon), trace dans `program_change`
+- [x] Shared : `computeProgramProgress(appointments, today)` (passées, faites, pourcentage), `groupAppointmentsByWeek`, `getAvailableProgramActions(program, hasStartedSession, hasInProgressSession)`
+- [x] Frontend : `features/program/pages/ProgramListPage.tsx`, `ProgramDetailPage.tsx` ; composants `ProgramCard`, `ProgramProgress`, `ProgramWeekList`, `ProgramActionsMenu`
+- [x] Frontend : section « Mes programmes » de l'Accueil, lien « Mes programmes » du Planning
+- [x] Routing : `/programmes`, `/programmes/:id`
+- [x] Tests : unitaires `computeProgramProgress`, `getAvailableProgramActions` (chaque état) ; back : liste filtrée, programme d'un autre → 404, `updateProgramStatuses` au jour du début et au lendemain de la fin, notification créée une seule fois
+- [x] Tests : E2E liste → détail ; axe sur PRO-01, PRO-07, PRO-13
 
 ## Definition of Done
 
-- [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Tâche planifiée testée sans attendre minuit (date passée en paramètre)
+- [x] Critères d'acceptation vérifiés manuellement
+- [x] Tâche planifiée testée sans attendre minuit (date passée en paramètre)
 - [ ] Code relu et fusionné via pull request

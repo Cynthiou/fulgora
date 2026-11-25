@@ -1,34 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
 import { createEmptySet, todayInParis } from "shared";
-import { E2E_ORIGIN, expectHomePage, signUp } from "./helpers";
+import { CAPTURE, E2E_ORIGIN, expectHomePage, shoot, signUp } from "./helpers";
 
 // Screenshots of every screen, light theme then dark, at the size of a phone.
 // Not part of the normal suite: run it on purpose with
 //   CAPTURE=1 npx playwright test e2e/captures.spec.ts --project=mobile
 // The files land in design/captures/, which Cynthia compares with the
 // wireframes of design/wireframes-png/.
-const CAPTURE = process.env.CAPTURE === "1";
-const DIRECTORY = "design/captures";
-
 test.use({ viewport: { width: 390, height: 844 } });
 test.skip(!CAPTURE, "Captures are taken on demand (CAPTURE=1).");
-
-// One screen, in the two themes.
-async function shoot(page: Page, name: string) {
-  for (const [theme, suffix] of [
-    ["fulgora-light", "clair"],
-    ["fulgora-dark", "sombre"],
-  ] as const) {
-    await page.evaluate((value) => {
-      document.documentElement.setAttribute("data-theme", value);
-    }, theme);
-    await page.waitForTimeout(120);
-    await page.screenshot({
-      path: `${DIRECTORY}/${name}-${suffix}.png`,
-      fullPage: true,
-    });
-  }
-}
 
 type CatalogItem = { id: number; name: string; measure_codes: string[] };
 
@@ -226,9 +206,7 @@ test("captures the screens of the MVP", async ({ page }) => {
     "Vérifier les changements",
   );
   await shoot(page, "cal-06b-verifier-les-changements");
-  await page
-    .getByRole("button", { name: "Revenir", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Revenir", exact: true }).click();
   // Leaving a changed draft asks first (the name went back, the draft is
   // still seen as touched).
   await page.getByRole("button", { name: "Retour" }).click();

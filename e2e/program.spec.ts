@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { addDays, getWeekday, todayInParis } from "shared";
-import { expectHomePage, signUp } from "./helpers";
+import { expectHomePage, shoot, signUp } from "./helpers";
 
 async function expectNoA11yViolation(page: Page) {
   const results = await new AxeBuilder({ page }).analyze();
@@ -85,6 +85,47 @@ test("creates a program, fills its sessions and plans the whole period", async (
   // The session is really in the Planning, on its day
   await page.goto(`/planning?vue=jour&jour=${start}`);
   await expect(page.getByRole("link", { name: /Haut du corps/ })).toBeVisible();
+
+  // PRO-01 then PRO-07c: the list, its filters, and the detail of a
+  // program still to come (US-48)
+  await page.goto("/programmes");
+  await expect(page.getByRole("link", { name: /Hypertrophie/ })).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("tab", { name: "Terminés" }).click();
+  await expect(page.getByText("Aucun programme dans cet état")).toBeVisible();
+  await page.getByRole("tab", { name: "À venir" }).click();
+
+  await page.getByRole("link", { name: /Hypertrophie/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Hypertrophie",
+  );
+  await expect(page.getByText("À venir").first()).toBeVisible();
+  await expect(page.getByText(/^Commence/)).toBeVisible();
+  await expect(page.getByText(/Première séance/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Semaines" })).toBeVisible();
+  await shoot(page, "pro-07c-programme-a-venir");
+  await expectNoA11yViolation(page);
+
+  // The ⋯ menu only announces what is not built yet (PRO-07b)
+  await page.getByRole("button", { name: "Actions du programme" }).click();
+  await expect(page.getByText("Modifier le programme")).toBeVisible();
+  await shoot(page, "pro-07b-actions-du-programme");
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Fermer" }).click();
+});
+
+// US-48: a program of somebody else is never shown.
+test("a program that is not yours says it does not exist", async ({ page }) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+
+  await page.goto("/programmes/999999");
+  await expect(page.getByText("Programme introuvable")).toBeVisible();
+  await page.getByRole("link", { name: "Voir mes programmes" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Mes programmes",
+  );
 });
 
 // The button of a day is named by its full name (the three letters are

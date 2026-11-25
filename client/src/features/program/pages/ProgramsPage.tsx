@@ -7,14 +7,20 @@ import {
   todayInParis,
 } from "shared";
 import gridIcon from "../../../assets/icons/ui/app/grid.svg";
+import pencilIcon from "../../../assets/icons/ui/app/pencil.svg";
 import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import PageHeader from "../../../components/PageHeader";
 import { isAbortError } from "../../../services/api";
-import { type ProgramListItem, readPrograms } from "../services/programService";
+import {
+  deleteProgramDraft,
+  type ProgramListItem,
+  readPrograms,
+} from "../services/programService";
 
 const PRIMARY_LINK =
   "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action";
@@ -66,6 +72,20 @@ function ProgramsPage() {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [filter, setFilter] = useState<FilterCode>("all");
+  const [removing, setRemoving] = useState<number | null>(null);
+
+  // A draft is thrown away from the list itself (PRO-01b, RM-071).
+  async function remove(id: number) {
+    setRemoving(id);
+    try {
+      await deleteProgramDraft(id);
+      setItems((current) => current.filter((item) => item.id !== id));
+    } catch {
+      setError("Impossible de supprimer ce brouillon.");
+    } finally {
+      setRemoving(null);
+    }
+  }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is listed on purpose, it re-runs the load
   useEffect(() => {
@@ -176,18 +196,24 @@ function ProgramsPage() {
                   : Math.round((item.ready_count / item.session_count) * 100);
               return (
                 <li key={item.id}>
-                  <Link
-                    to={
+                  <div
+                    className={`flex flex-col gap-2 rounded-card bg-base-100 p-3.5 ${
                       isDraft
-                        ? `/programmes/${item.id}/seances`
-                        : `/programmes/${item.id}`
-                    }
-                    className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-3.5 shadow-card"
+                        ? "border border-dashed border-primary/60"
+                        : "border border-base-300 shadow-card"
+                    }`}
                   >
                     <span className="flex items-center justify-between gap-2">
-                      <b className="truncate text-base font-extrabold">
+                      <Link
+                        to={
+                          isDraft
+                            ? `/programmes/${item.id}/seances`
+                            : `/programmes/${item.id}`
+                        }
+                        className="min-w-0 flex-1 truncate text-base font-extrabold"
+                      >
                         {item.name}
-                      </b>
+                      </Link>
                       <span
                         className={`shrink-0 rounded-chip px-2 py-[3px] text-[10px] font-extrabold uppercase tracking-[0.06em] ${
                           STATUS_CHIP[status] ?? ""
@@ -218,11 +244,54 @@ function ProgramsPage() {
                         </span>
                       </span>
                     ) : (
-                      <span className="text-xs font-medium leading-[1.45] text-muted">
-                        {item.appointment_count} séances dans le Planning
+                      // How far the program has gone (PRO-01)
+                      <span className="flex items-center gap-2.5">
+                        <span
+                          aria-hidden="true"
+                          className="h-1.5 flex-1 overflow-hidden rounded-chip bg-track"
+                        >
+                          <span
+                            className="block h-full bg-secondary"
+                            style={{
+                              width: `${
+                                item.appointment_count === 0
+                                  ? 0
+                                  : Math.round(
+                                      (item.past_count /
+                                        item.appointment_count) *
+                                        100,
+                                    )
+                              }%`,
+                            }}
+                          />
+                        </span>
+                        <span className="shrink-0 text-[11.5px] font-bold leading-[1.45] text-muted">
+                          {item.past_count} / {item.appointment_count} séances
+                        </span>
                       </span>
                     )}
-                  </Link>
+
+                    {isDraft && (
+                      <div className="grid grid-cols-2 gap-2.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => remove(item.id)}
+                          disabled={removing === item.id}
+                          className="flex h-11 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
+                        >
+                          <Icon src={trashIcon} className="size-4" />
+                          Supprimer
+                        </button>
+                        <Link
+                          to={`/programmes/${item.id}/seances`}
+                          className="flex h-11 items-center justify-center gap-2 rounded-btn border border-secondary text-sm font-bold text-secondary"
+                        >
+                          <Icon src={pencilIcon} className="size-4" />
+                          Reprendre
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </li>
               );
             })}
