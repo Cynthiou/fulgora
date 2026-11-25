@@ -28,7 +28,11 @@ export type SessionDraftAction =
   | { type: "setName"; name: string }
   | { type: "setDate"; date: string }
   | { type: "setTime"; time: string | null }
-  | { type: "addBlock"; blockType: BlockType }
+  // The key may be given by the page, to open the new block right away.
+  | { type: "addBlock"; blockType: BlockType; key?: string }
+  | { type: "setBlockName"; key: string; name: string | null }
+  | { type: "setBlockInstructions"; key: string; instructions: string | null }
+  | { type: "setBlockType"; key: string; blockType: BlockType }
   | { type: "removeBlock"; key: string }
   | { type: "restoreBlock"; block: DraftBlock; index: number }
   | { type: "moveBlock"; from: number; to: number }
@@ -123,7 +127,7 @@ export function sessionDraftReducer(
 
     case "addBlock": {
       const block: DraftBlock = {
-        key: nextKey(),
+        key: action.key ?? nextKey(),
         block_type: action.blockType,
         name: null,
         instructions: null,
@@ -131,6 +135,27 @@ export function sessionDraftReducer(
       };
       return { ...draft, blocks: [...draft.blocks, block] };
     }
+
+    case "setBlockName":
+      return updateBlock(draft, action.key, (block) =>
+        block.name === action.name ? block : { ...block, name: action.name },
+      );
+
+    case "setBlockInstructions":
+      return updateBlock(draft, action.key, (block) =>
+        block.instructions === action.instructions
+          ? block
+          : { ...block, instructions: action.instructions },
+      );
+
+    // Changing the type of a block that holds exercises is US-17 (D-03):
+    // here the type only changes on an empty block.
+    case "setBlockType":
+      return updateBlock(draft, action.key, (block) =>
+        block.block_type === action.blockType || block.exercises.length > 0
+          ? block
+          : { ...block, block_type: action.blockType },
+      );
 
     case "removeBlock": {
       const blocks = draft.blocks.filter((block) => block.key !== action.key);

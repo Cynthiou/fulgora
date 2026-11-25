@@ -235,3 +235,49 @@ describe("sessionDraftReducer", () => {
     expect(current.blocks[0]?.exercises[0]?.sets).toHaveLength(20);
   });
 });
+
+describe("sessionDraftReducer · block details (US-13)", () => {
+  it("uses the key given with addBlock and changes the title and the note", () => {
+    const draft = apply(
+      base,
+      { type: "addBlock", blockType: "note", key: "my-block" },
+      { type: "setBlockName", key: "my-block", name: "Rappels" },
+      {
+        type: "setBlockInstructions",
+        key: "my-block",
+        instructions: "Respirer.",
+      },
+    );
+
+    expect(draft.blocks[0]).toMatchObject({
+      key: "my-block",
+      block_type: "note",
+      name: "Rappels",
+      instructions: "Respirer.",
+    });
+  });
+
+  it("changes the type of an empty block only", () => {
+    const empty = apply(base, {
+      type: "addBlock",
+      blockType: "classic",
+      key: "b",
+    });
+    expect(
+      sessionDraftReducer(empty, {
+        type: "setBlockType",
+        key: "b",
+        blockType: "warm_up",
+      }).blocks[0]?.block_type,
+    ).toBe("warm_up");
+
+    const { draft, blockKey } = draftWithExercises();
+    expect(
+      sessionDraftReducer(draft, {
+        type: "setBlockType",
+        key: blockKey,
+        blockType: "note",
+      }),
+    ).toBe(draft);
+  });
+});
