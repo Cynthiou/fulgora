@@ -9,7 +9,8 @@
     "test": "vitest run",
     "db:migrate": "tsx bin/migrate.ts",
     "db:seed": "tsx bin/seed.ts",
-    "db:reset": "tsx bin/migrate.ts --reset"
+    "db:reset": "tsx bin/migrate.ts --reset",
+    "db:seed:dev": "tsx bin/seedDev.ts"
   },
   "dependencies": {
     "argon2": "^0.45.2",
