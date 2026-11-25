@@ -72,16 +72,65 @@ export type CatalogExercise = {
 // 20 exercises per page; the server fixes it, the client never sends it.
 export const EXERCISE_PAGE_SIZE = 20;
 
-// GET /api/exercises?offset=40 (the offset arrives as text in the address).
+export const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
+
+// "2,5" in the address -> [2, 5]. Ten choices at most per filter.
+const idListSchema = z
+  .string()
+  .regex(/^[1-9]\d*(,[1-9]\d*)*$/, { error: "Filtre invalide." })
+  .transform((text) => text.split(",").map(Number))
+  .pipe(
+    z
+      .array(z.number().int().positive())
+      .max(10, { error: "10 choix au maximum." }),
+  );
+
+// "beginner,advanced" in the address -> ["beginner", "advanced"].
+const difficultyListSchema = z
+  .string()
+  .regex(/^[a-z_]+(,[a-z_]+)*$/, { error: "Difficulté inconnue." })
+  .transform((text) => text.split(","))
+  .pipe(
+    z.array(z.enum(DIFFICULTIES, { error: "Difficulté inconnue." })).max(3),
+  );
+
+// GET /api/exercises?offset=40&search=squat&category_ids=5&equipment_ids=3,4&difficulties=beginner
+// Everything arrives as text in the address. The filters combine with AND;
+// the choices inside one filter are an OR (US-08).
 export const exerciseQuerySchema = z.object({
   offset: z
     .string()
     .regex(/^\d+$/, { error: "Décalage invalide." })
     .transform(Number)
     .optional(),
+  search: z.string().max(60, { error: "60 caractères au maximum." }).optional(),
+  category_ids: idListSchema.optional(),
+  equipment_ids: idListSchema.optional(),
+  difficulties: difficultyListSchema.optional(),
 });
 
 export type ExerciseQuery = z.output<typeof exerciseQuerySchema>;
+// The filters alone, without the page offset.
+export type ExerciseFilters = Omit<ExerciseQuery, "offset">;
+
+// In a LIKE, "%" and "_" are wildcards and "\" the escape character: a typed
+// "50%" must be searched as is. The server wraps the result with "%".
+export function escapeLike(text: string): string {
+  return text.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
+// "3 résultats pour « squat » · Jambes", "18 résultats", "1 résultat".
+export function formatResultCount(
+  total: number,
+  search: string,
+  filterLabels: string[],
+): string {
+  const results = `${total} ${total === 1 ? "résultat" : "résultats"}`;
+  const forSearch = search === "" ? "" : ` pour « ${search} »`;
+  const labels =
+    filterLabels.length === 0 ? "" : ` · ${filterLabels.join(" · ")}`;
+  return `${results}${forSearch}${labels}`;
+}
 
 // One card of the catalog list.
 export type ExerciseListItem = {

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  escapeLike,
   exerciseQuerySchema,
   formatExerciseCount,
   formatExerciseMeta,
+  formatResultCount,
   getExerciseImage,
 } from "./catalog.js";
 
@@ -14,6 +16,74 @@ describe("exerciseQuerySchema", () => {
 
   it.each(["-1", "1.5", "abc", ""])("refuses the offset %j", (offset) => {
     expect(exerciseQuerySchema.safeParse({ offset }).success).toBe(false);
+  });
+
+  it("reads the filters from their text form", () => {
+    expect(
+      exerciseQuerySchema.parse({
+        search: "squat",
+        category_ids: "5,2",
+        equipment_ids: "4",
+        difficulties: "beginner,advanced",
+      }),
+    ).toEqual({
+      search: "squat",
+      category_ids: [5, 2],
+      equipment_ids: [4],
+      difficulties: ["beginner", "advanced"],
+    });
+  });
+
+  it("refuses a search of more than 60 characters", () => {
+    expect(
+      exerciseQuerySchema.safeParse({ search: "a".repeat(60) }).success,
+    ).toBe(true);
+    expect(
+      exerciseQuerySchema.safeParse({ search: "a".repeat(61) }).success,
+    ).toBe(false);
+  });
+
+  it.each(["0", "1,abc", "1,,2", "-3", "1,2,3,4,5,6,7,8,9,10,11"])(
+    "refuses the id list %j",
+    (category_ids) => {
+      expect(exerciseQuerySchema.safeParse({ category_ids }).success).toBe(
+        false,
+      );
+    },
+  );
+
+  it("refuses an unknown difficulty", () => {
+    expect(
+      exerciseQuerySchema.safeParse({ difficulties: "expert" }).success,
+    ).toBe(false);
+    expect(
+      exerciseQuerySchema.safeParse({ difficulties: "beginner,expert" })
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe("escapeLike", () => {
+  it("protects the LIKE wildcards and the backslash", () => {
+    expect(escapeLike("50%")).toBe("50\\%");
+    expect(escapeLike("a_b")).toBe("a\\_b");
+    expect(escapeLike("c:\\dir")).toBe("c:\\\\dir");
+    expect(escapeLike("squat")).toBe("squat");
+  });
+});
+
+describe("formatResultCount", () => {
+  it("writes the count, the search term and the active filters", () => {
+    expect(formatResultCount(3, "squat", ["Jambes"])).toBe(
+      "3 résultats pour « squat » · Jambes",
+    );
+    expect(formatResultCount(18, "", [])).toBe("18 résultats");
+    expect(formatResultCount(1, "", ["Barre", "Haltères"])).toBe(
+      "1 résultat · Barre · Haltères",
+    );
+    expect(formatResultCount(0, "squaat", [])).toBe(
+      "0 résultats pour « squaat »",
+    );
   });
 });
 
