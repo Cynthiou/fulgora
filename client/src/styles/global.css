@@ -259,6 +259,8 @@
   --shadow-next: 0 8px 20px rgba(37, 99, 235, 0.12);
   /* The round button of the Planning (CAL-01) */
   --shadow-fab: 0 12px 26px rgba(37, 99, 235, 0.4);
+  /* The card of the set being done (B3a) */
+  --shadow-set: 0 10px 26px rgba(255, 107, 53, 0.14);
 
   --spacing-tap: 44px;
   --spacing-btn: 56px;

@@ -321,7 +321,7 @@ test("adds a set and an exercise during the session, and removes the added set",
     .getByRole("link")
     .first()
     .click();
-  await page.getByRole("button", { name: "+ Ajouter une série" }).click();
+  await page.getByRole("button", { name: "Ajouter une série" }).click();
   await expect(page.getByText("Ajoutée").first()).toBeVisible();
 
   // The added set goes away; the planned ones have no trash (RM-048)

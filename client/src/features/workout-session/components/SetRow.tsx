@@ -8,9 +8,9 @@ import {
   toPlannedValues,
   type WorkoutSetRow,
 } from "shared";
-import pencilIcon from "../../../assets/icons/ui/actions/pencil.svg";
-import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import pencilIcon from "../../../assets/icons/ui/app/pencil.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import Icon from "../../../components/Icon";
 import CardioStepTimer from "./CardioStepTimer";
 import DurationTimer from "./DurationTimer";
@@ -18,6 +18,8 @@ import DurationTimer from "./DurationTimer";
 type Props = {
   set: WorkoutSetRow;
   index: number;
+  // How many sets the exercise holds, for "Série 2 / 3"
+  total: number;
   profile: MeasureProfile;
   measureCodes: MeasureCode[];
   isBodyweight: boolean;
@@ -35,12 +37,13 @@ type Props = {
 };
 
 // Screen B3a: one set of the exercise.
-// Done: a compact grey line "✓ Série 1 · 10 rép. · 40 kg ›".
-// Active: the planned values in big cells, "Valider la série 2", a pencil.
-// Upcoming: "Série 3 · prévu 10 rép. · 40 kg", "Faire" and a trash can.
+// Done: a white line with a green check, "Série 1 · 10 rép. · 40 kg".
+// Active: the planned values in big slanted numbers, "Valider la série 2".
+// Upcoming: "Série 3 · prévu 10 rép. · 40 kg" and "Faire".
 function SetRow({
   set,
   index,
+  total,
   profile,
   measureCodes,
   isBodyweight,
@@ -62,19 +65,21 @@ function SetRow({
         <button
           type="button"
           onClick={onEdit}
-          className="flex w-full items-center gap-2 rounded-card border border-base-300 bg-soft p-3 text-left"
+          className="flex w-full items-center gap-2.5 rounded-card border border-base-300 bg-base-100 px-3.5 py-2.5 text-left shadow-card"
         >
-          <span className="flex min-w-0 flex-1 items-center gap-2 font-semibold">
-            <span aria-hidden="true" className="text-status-done">
-              ✓
-            </span>
+          <span
+            aria-hidden="true"
+            className="grid size-[22px] shrink-0 place-items-center rounded-full bg-status-done text-white"
+          >
+            <Icon src={checkIcon} className="size-3" />
+          </span>
+          <b className="min-w-0 flex-1 truncate text-[13px] font-bold">
             {label}
             <span className="sr-only">validée, corriger</span>
-          </span>
-          <span className="shrink-0 text-sm text-muted">
+          </b>
+          <span className="shrink-0 text-[12.5px] font-medium leading-[1.45] text-muted">
             {formatActualValues(set, measureCodes, isBodyweight)}
           </span>
-          <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
         </button>
       </li>
     );
@@ -83,75 +88,88 @@ function SetRow({
   if (state === "active") {
     const parts = describeSet(toPlannedValues(set), measureCodes, isBodyweight);
     return (
-      <li className="flex flex-col gap-4 rounded-card border-2 border-primary bg-base-100 p-4 shadow-card">
-        <div className="flex items-center justify-between gap-2">
-          <p className="flex items-center gap-2 text-overline uppercase text-accent">
-            {label}
-            {set.is_added && (
-              <span className="rounded-chip border border-base-300 px-2 py-0.5 text-base-content">
-                Ajoutée
+      <li className="flex flex-col gap-2.5">
+        <div className="flex flex-col items-center gap-3 rounded-hero border-[1.5px] border-primary bg-base-100 p-4 shadow-set">
+          <div className="flex w-full items-center justify-between gap-2">
+            <p className="flex items-center gap-2 font-sans text-overline uppercase not-italic text-action-text">
+              {label} / {total}
+              {set.is_added && (
+                <span className="rounded-chip border border-base-300 px-2 py-0.5 text-base-content">
+                  Ajoutée
+                </span>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onEdit}
+              disabled={isPending}
+              aria-label={`Modifier ${noun} ${index + 1}`}
+              className="-m-[5px] grid size-tap place-items-center disabled:opacity-60"
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-[34px] place-items-center rounded-btn bg-soft"
+              >
+                <Icon src={pencilIcon} className="size-4" />
               </span>
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={isPending}
-            aria-label={`Modifier ${noun} ${index + 1}`}
-            className="flex size-tap items-center justify-center rounded-btn text-secondary disabled:opacity-60"
-          >
-            <Icon src={pencilIcon} className="size-5" />
-          </button>
+            </button>
+          </div>
+
+          {/* An exercise in time shows its objective inside the timer. */}
+          {profile === "duration" ? null : parts.length === 0 ? (
+            <p className="text-sm text-muted">
+              Aucun objectif prévu : indique ce que tu as fait.
+            </p>
+          ) : (
+            // The planned values, read only, in big numbers (B3a)
+            <ul className="flex flex-wrap items-baseline justify-center gap-2.5">
+              {parts.map((part, position) => {
+                const [value, ...unit] = part.split(" ");
+                return (
+                  <li key={part} className="flex items-baseline gap-2.5">
+                    <span
+                      className={`font-display text-[72px] font-extrabold uppercase italic leading-none ${
+                        position === 0 ? "" : "text-secondary"
+                      }`}
+                    >
+                      {value}
+                    </span>
+                    <span className="text-[13px] font-semibold leading-[1.45] text-muted">
+                      {unit.join(" ")}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {profile === "duration" ? (
+            // B5b and B5c: the app counts the time of the set (US-49)
+            <DurationTimer
+              plannedSeconds={set.duration_planned_seconds}
+              isPending={isPending}
+              onDone={onTimed}
+            />
+          ) : isCardio ? (
+            // B5d and B5e: the stage is launched, then the reading (US-49)
+            <CardioStepTimer
+              plannedSeconds={set.duration_planned_seconds}
+              stageLabel={label}
+              isPending={isPending}
+              onStop={onTimed}
+            />
+          ) : null}
         </div>
 
-        {/* An exercise in time shows its objective inside the timer. */}
-        {profile === "duration" ? null : parts.length === 0 ? (
-          <p className="text-muted">
-            Aucun objectif prévu : indique ce que tu as fait.
-          </p>
-        ) : (
-          // The planned values, read only, one cell each (B3a)
-          <ul
-            className={`grid divide-x divide-base-300 overflow-hidden rounded-card border border-base-300 ${
-              parts.length > 2 ? "grid-cols-3" : "grid-cols-2"
-            }`}
-          >
-            {parts.map((part) => {
-              const [value, ...unit] = part.split(" ");
-              return (
-                <li key={part} className="flex flex-col items-center py-3">
-                  <span className="font-display text-display-lg leading-none">
-                    {value}
-                  </span>
-                  <span className="text-sm text-muted">{unit.join(" ")}</span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        {profile === "duration" ? (
-          // B5b and B5c: the app counts the time of the set (US-49)
-          <DurationTimer
-            plannedSeconds={set.duration_planned_seconds}
-            isPending={isPending}
-            onDone={onTimed}
-          />
-        ) : isCardio ? (
-          // B5d and B5e: the stage is launched, then the reading (US-49)
-          <CardioStepTimer
-            plannedSeconds={set.duration_planned_seconds}
-            stageLabel={label}
-            isPending={isPending}
-            onStop={onTimed}
-          />
-        ) : (
+        {/* The mockup puts the orange button right under the card (B3a). */}
+        {profile !== "duration" && !isCardio && (
           <button
             type="button"
             onClick={parts.length === 0 ? onEdit : onValidate}
             disabled={isPending}
-            className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+            className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
           >
+            <Icon src={checkIcon} className="size-[18px]" />
             Valider {noun} {index + 1}
           </button>
         )}
@@ -160,28 +178,26 @@ function SetRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-2 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
-      <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
-        <span className="font-semibold">{label}</span>
-        {set.is_added && (
-          <span className="rounded-chip border border-base-300 px-2 text-overline uppercase">
-            Ajoutée
-          </span>
-        )}
-        <span className="text-sm text-muted">
-          prévu{" "}
-          {formatSetValues(
-            toPlannedValues(set),
-            measureCodes,
-            isBodyweight,
-          ).toLowerCase()}
+    <li className="flex items-center gap-2.5 rounded-card border border-base-300 bg-base-100/55 px-3.5 py-2.5">
+      <b className="shrink-0 text-[13px] font-bold">{label}</b>
+      {set.is_added && (
+        <span className="shrink-0 rounded-chip border border-base-300 px-2 text-overline uppercase">
+          Ajoutée
         </span>
+      )}
+      <span className="min-w-0 flex-1 truncate text-xs font-medium leading-[1.45] text-muted">
+        ·{" "}
+        {`prévu ${formatSetValues(
+          toPlannedValues(set),
+          measureCodes,
+          isBodyweight,
+        ).toLowerCase()}`}
       </span>
       <button
         type="button"
         onClick={onPick}
         aria-label={`Faire ${noun} ${index + 1}`}
-        className="min-h-tap shrink-0 rounded-btn border border-base-300 bg-base-100 px-4 font-semibold"
+        className="min-h-tap shrink-0 px-1 text-[13px] font-semibold text-secondary"
       >
         Faire
       </button>
@@ -192,9 +208,9 @@ function SetRow({
           onClick={onRemove}
           disabled={isPending}
           aria-label={`Retirer ${noun} ${index + 1}`}
-          className="flex size-tap shrink-0 items-center justify-center text-secondary disabled:opacity-60"
+          className="grid size-tap shrink-0 place-items-center text-status-missed disabled:opacity-60"
         >
-          <Icon src={trashIcon} className="size-5" />
+          <Icon src={trashIcon} className="size-[18px]" />
         </button>
       )}
     </li>

@@ -147,8 +147,8 @@ describe("WorkoutExercisePage", () => {
     expect(screen.getByText("Exercice 1 / 2 · repos 1 min 30 s")).toBeTruthy();
     expect(screen.getByText("Série 1").textContent).toContain("Série 1");
     expect(screen.getByText("10 rép. · 40 kg")).toBeTruthy();
-    expect(screen.getByText("Série 2")).toBeTruthy();
-    expect(screen.getByText("prévu 10 rép. · 40 kg")).toBeTruthy();
+    expect(screen.getByText(/Série 2 \/ 3/)).toBeTruthy();
+    expect(screen.getByText(/prévu 10 rép. · 40 kg/)).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "Faire la série 3" }),
     ).toBeTruthy();
@@ -192,7 +192,7 @@ describe("WorkoutExercisePage", () => {
       weight_actual_kg: values.weight_kg,
     }));
     const user = renderPage();
-    await screen.findByText("Série 2");
+    await screen.findByText(/Série 2 \/ 3/);
 
     await user.click(screen.getByRole("button", { name: "Faire la série 3" }));
     expect(
@@ -236,7 +236,7 @@ describe("WorkoutExercisePage", () => {
       new ApiError(0, "NETWORK_ERROR", "Connexion impossible. Réessaie."),
     );
     const user = renderPage();
-    await screen.findByText("Série 2");
+    await screen.findByText(/Série 2 \/ 3/);
 
     await user.click(
       screen.getByRole("button", { name: /^Modifier la série/ }),
@@ -300,9 +300,7 @@ describe("WorkoutExercisePage · ajouter et retirer une série (US-32)", () => {
     const user = renderPage();
     await screen.findByText("Développé couché");
 
-    await user.click(
-      screen.getByRole("button", { name: "+ Ajouter une série" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Ajouter une série" }));
 
     expect(addSetMock).toHaveBeenCalledWith(11);
   });

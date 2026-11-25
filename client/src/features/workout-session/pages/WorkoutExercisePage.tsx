@@ -12,8 +12,10 @@ import {
   type WorkoutExerciseTree,
   type WorkoutSetRow,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import eyeIcon from "../../../assets/icons/ui/app/eye.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
@@ -206,10 +208,10 @@ function WorkoutExercisePage() {
   const backLink = (
     <Link
       to={`/entrainement/${sessionId}`}
-      className="flex min-h-tap items-center gap-1 pr-2 font-semibold text-secondary"
+      aria-label="Retour"
+      className="grid size-tap shrink-0 place-items-center rounded-btn"
     >
-      <Icon src={chevronLeftIcon} className="size-6" />
-      Exercices
+      <Icon src={chevronLeftIcon} className="size-[22px]" />
     </Link>
   );
 
@@ -244,22 +246,41 @@ function WorkoutExercisePage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex min-h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2 py-2">
+      <header className="sticky top-0 z-10 flex min-h-[58px] items-center gap-1.5 bg-base-200 pr-3 pl-2">
         {backLink}
         {exercise !== undefined && exercise !== null && (
-          <div className="flex min-w-0 flex-col">
-            <h1 className="truncate text-display-sm">{exercise.name}</h1>
-            <p className="text-sm text-muted">
-              Exercice {position + 1} / {exercises.length}
-              {formatRest(exercise.default_rest_seconds) === null
-                ? ""
-                : ` · repos ${formatRest(exercise.default_rest_seconds)}`}
-            </p>
-          </div>
+          <>
+            <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+              <Link
+                to={`/entrainement/${sessionId}`}
+                className="self-start text-[10px] font-bold uppercase tracking-[0.14em] text-secondary"
+              >
+                <span aria-hidden="true">‹ </span>Exercices
+              </Link>
+              <h1 className="truncate pt-0.5 font-display text-display-sm leading-[1.25]">
+                {exercise.name}
+              </h1>
+              <p className="truncate text-xs font-medium leading-[1.45] text-muted">
+                Exercice {position + 1} / {exercises.length}
+                {formatRest(exercise.default_rest_seconds) === null
+                  ? ""
+                  : ` · repos ${formatRest(exercise.default_rest_seconds)}`}
+              </p>
+            </span>
+            {/* The eye of the mockup opens the sheet of the exercise (B3a). */}
+            <Link
+              to={`/catalogue/${exercise.exercise_id}`}
+              state={{ name: exercise.name }}
+              aria-label={`Fiche de ${exercise.name}`}
+              className="grid size-tap shrink-0 place-items-center rounded-btn border border-base-300 bg-base-100 shadow-card"
+            >
+              <Icon src={eyeIcon} className="size-[22px]" />
+            </Link>
+          </>
         )}
       </header>
 
-      <div className="flex flex-1 flex-col gap-4 p-4 pb-28">
+      <div className="flex flex-1 flex-col gap-2.5 px-[18px] pt-1 pb-28">
         {isLoading && <LoadingState label="Chargement de l'exercice…" />}
 
         {!isLoading &&
@@ -290,7 +311,7 @@ function WorkoutExercisePage() {
               {session.status !== "in_progress" && (
                 <p
                   role="status"
-                  className="rounded-card border border-base-300 bg-base-100 p-4 text-muted"
+                  className="rounded-card border border-base-300 bg-base-100 p-4 text-sm text-muted shadow-card"
                 >
                   Cette séance n'est plus en cours.
                 </p>
@@ -303,12 +324,13 @@ function WorkoutExercisePage() {
                 />
               )}
 
-              <ul aria-label="Séries" className="flex flex-col gap-3">
+              <ul aria-label="Séries" className="flex flex-col gap-2.5">
                 {exercise.sets.map((set, index) => (
                   <SetRow
                     key={set.id}
                     set={set}
                     index={index}
+                    total={exercise.sets.length}
                     profile={getMeasureProfile(
                       exercise.measure_codes,
                       exercise.is_bodyweight,
@@ -341,9 +363,10 @@ function WorkoutExercisePage() {
                   type="button"
                   onClick={addSet}
                   disabled={isChanging}
-                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                  className="flex h-13 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
                 >
-                  + Ajouter une série
+                  <Icon src={plusIcon} className="size-[18px]" />
+                  Ajouter une série
                 </button>
               )}
             </>
@@ -351,21 +374,21 @@ function WorkoutExercisePage() {
       </div>
 
       {!isLoading && exercise !== undefined && exercise !== null && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
           <div className="mx-auto max-w-md">
             {next !== undefined ? (
               <Link
                 to={`/entrainement/${sessionId}/exercices/${next.id}`}
                 onClick={() => setPickedIndex(null)}
-                className="flex h-12 items-center justify-center gap-1 rounded-btn border border-base-300 bg-base-100 font-semibold"
+                className="flex h-12 items-center justify-center gap-1 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
               >
                 Suivant : {next.name}
-                <Icon src={chevronRightIcon} className="size-5" />
+                <Icon src={chevronRightIcon} className="size-[18px]" />
               </Link>
             ) : (
               <Link
                 to={`/entrainement/${sessionId}`}
-                className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold"
+                className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
               >
                 Retour aux exercices
               </Link>
