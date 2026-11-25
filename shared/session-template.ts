@@ -299,3 +299,140 @@ export function formatBlockCount(count: number): string {
 export function formatExerciseCountShort(count: number): string {
   return `${count} ${count > 1 ? "exercices" : "exercice"}`;
 }
+
+// --- Exercises of a block (US-14, US-15) ------------------------------------
+
+// What the catalog hands to the editor for each chosen exercise.
+export type SelectedExercise = {
+  exercise_id: number;
+  name: string;
+  measure_codes: MeasureCode[];
+};
+
+// The four set layouts of US-15, decided by the measures of the exercise.
+export type ExerciseProfile =
+  | "reps_weight"
+  | "bodyweight"
+  | "duration"
+  | "cardio"
+  | "none";
+
+const CARDIO_CODES: MeasureCode[] = [
+  "distance",
+  "speed",
+  "resistance",
+  "incline",
+  "calories",
+];
+
+export function getExerciseProfile(codes: MeasureCode[]): ExerciseProfile {
+  if (codes.some((code) => CARDIO_CODES.includes(code))) {
+    return "cardio";
+  }
+  if (codes.includes("reps")) {
+    return codes.includes("weight") ? "reps_weight" : "bodyweight";
+  }
+  if (codes.includes("duration")) {
+    return "duration";
+  }
+  return "none";
+}
+
+// The first set of a new exercise: 10 reps, or 1 min, or a 10 min stage
+// (cardio); the weight stays empty (US-15).
+export function createDefaultSet(codes: MeasureCode[]): PlannedSetValues {
+  const set = createEmptySet();
+  switch (getExerciseProfile(codes)) {
+    case "reps_weight":
+    case "bodyweight":
+      return { ...set, reps: 10 };
+    case "duration":
+      return { ...set, duration_seconds: 60 };
+    case "cardio":
+      return { ...set, duration_seconds: 600 };
+    default:
+      return set;
+  }
+}
+
+// "1 min 30", "45 s", "2 min", "1 h 05".
+export function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  if (hours > 0) {
+    return `${hours} h ${String(minutes).padStart(2, "0")}`;
+  }
+  if (minutes === 0) {
+    return `${rest} s`;
+  }
+  return rest === 0 ? `${minutes} min` : `${minutes} min ${rest}`;
+}
+
+const numberFormat = new Intl.NumberFormat("fr-FR", {
+  maximumFractionDigits: 2,
+});
+
+function describeSet(set: PlannedSetValues, codes: MeasureCode[]): string[] {
+  const parts: string[] = [];
+  if (set.reps !== null) {
+    parts.push(`${numberFormat.format(set.reps)} rép.`);
+  }
+  if (set.weight_kg !== null) {
+    // Without a "weight" measure, the load is an added weight (bodyweight).
+    const unit = codes.includes("weight") ? "kg" : "kg lest";
+    parts.push(`${numberFormat.format(set.weight_kg)} ${unit}`);
+  }
+  if (set.duration_seconds !== null) {
+    parts.push(formatDuration(set.duration_seconds));
+  }
+  if (set.distance_meters !== null) {
+    parts.push(`${numberFormat.format(set.distance_meters / 1000)} km`);
+  }
+  if (set.speed_kmh !== null) {
+    parts.push(`${numberFormat.format(set.speed_kmh)} km/h`);
+  }
+  if (set.incline_percent !== null) {
+    parts.push(`${numberFormat.format(set.incline_percent)} %`);
+  }
+  if (set.resistance !== null) {
+    parts.push(`résistance ${numberFormat.format(set.resistance)}`);
+  }
+  if (set.calories !== null) {
+    parts.push(`${numberFormat.format(set.calories)} kcal`);
+  }
+  return parts;
+}
+
+function sameValues(a: PlannedSetValues, b: PlannedSetValues): boolean {
+  return (Object.keys(a) as (keyof PlannedSetValues)[]).every(
+    (key) => a[key] === b[key],
+  );
+}
+
+// "1 série · 10 rép. · 40 kg", "3 séries · 8 rép.", "1 étape · 10 min",
+// "3 étapes". The values are shown only when every set has the same ones.
+export function formatSetSummary(
+  exercise: Pick<DraftExercise, "sets" | "measure_codes">,
+): string {
+  const count = exercise.sets.length;
+  const isCardio = getExerciseProfile(exercise.measure_codes) === "cardio";
+  let noun: string;
+  if (isCardio) {
+    noun = count > 1 ? "étapes" : "étape";
+  } else {
+    noun = count > 1 ? "séries" : "série";
+  }
+  const first = exercise.sets[0];
+  if (first === undefined) {
+    return `0 ${noun}`;
+  }
+  const allSame = exercise.sets.every((set) => sameValues(set, first));
+  const parts = allSame ? describeSet(first, exercise.measure_codes) : [];
+  return [`${count} ${noun}`, ...parts].join(" · ");
+}
+
+// "1 sélectionné", "3 sélectionnés".
+export function formatSelectedCount(count: number): string {
+  return `${count} ${count > 1 ? "sélectionnés" : "sélectionné"}`;
+}

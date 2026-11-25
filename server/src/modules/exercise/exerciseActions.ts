@@ -4,6 +4,7 @@ import {
   type ExerciseListItem,
   type ExerciseListResponse,
   type ExerciseQuery,
+  type MeasureCode,
 } from "shared";
 import { readUserId } from "../../utils/requestUser.js";
 import {
@@ -25,6 +26,10 @@ function toListItem(row: ExerciseRow): ExerciseListItem {
     image_female_url: row.image_female_url,
     image_male_url: row.image_male_url,
     is_personal: row.is_personal === 1,
+    measure_codes:
+      row.measure_codes === null
+        ? []
+        : (row.measure_codes.split(",") as MeasureCode[]),
   };
 }
 

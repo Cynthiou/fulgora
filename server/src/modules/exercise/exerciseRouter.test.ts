@@ -78,6 +78,7 @@ describe("GET /api/exercises", () => {
       equipment_names: expect.any(String),
       image_female_url: expect.any(String),
       image_male_url: expect.any(String),
+      measure_codes: expect.arrayContaining([expect.any(String)]),
       is_personal: false,
     });
   });

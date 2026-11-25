@@ -48,6 +48,7 @@ function exercise(id: number, name: string): ExerciseListItem {
     image_female_url: `/images/${id}-female.jpg`,
     image_male_url: `/images/${id}-male.jpg`,
     is_personal: false,
+    measure_codes: ["reps", "weight"],
   };
 }
 

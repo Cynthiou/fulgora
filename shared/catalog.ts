@@ -145,6 +145,8 @@ export type ExerciseListItem = {
   image_female_url: string | null;
   image_male_url: string | null;
   is_personal: boolean;
+  // The measures planned for this exercise (RM-010), to pre-fill a set (US-14)
+  measure_codes: MeasureCode[];
 };
 
 export type ExerciseListResponse = {

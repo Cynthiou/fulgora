@@ -15,6 +15,8 @@ export type ExerciseRow = {
   category_name: string | null;
   // "Barre · Haltères", built by GROUP_CONCAT
   equipment_names: string | null;
+  // "reps,weight", built by GROUP_CONCAT; null without any measure
+  measure_codes: string | null;
 };
 
 // The WHERE of the catalog: who can see what (RM-007), then the filters.
@@ -77,7 +79,11 @@ export async function readExercises(
             (SELECT GROUP_CONCAT(eq.name ORDER BY eq.name SEPARATOR ' · ')
                FROM exercise_equipment ee
                JOIN equipment eq ON eq.id = ee.equipment_id
-              WHERE ee.exercise_id = e.id) AS equipment_names
+              WHERE ee.exercise_id = e.id) AS equipment_names,
+            (SELECT GROUP_CONCAT(m.code ORDER BY m.id SEPARATOR ',')
+               FROM exercise_measure em
+               JOIN measure m ON m.id = em.measure_id
+              WHERE em.exercise_id = e.id) AS measure_codes
        FROM exercise e
       WHERE ${where.sql}
       ORDER BY e.name, e.id
@@ -121,4 +127,23 @@ export async function readEquipments(
     "SELECT id, code, name FROM equipment ORDER BY name",
   );
   return rows as ReferenceRow[];
+}
+
+// Among the given ids, the ones this user may put in a session: visible
+// (RM-007) and not archived. Uses query because of IN (?). Empty in, empty out.
+export async function readAvailableExerciseIds(
+  userId: number,
+  ids: number[],
+  db: Queryable = client,
+): Promise<number[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const [rows] = await db.query<Rows[]>(
+    `SELECT id FROM exercise
+      WHERE id IN (?) AND is_archived = FALSE
+        AND (owner_user_id IS NULL OR owner_user_id = ?)`,
+    [ids, userId],
+  );
+  return rows.map((row) => Number(row.id));
 }

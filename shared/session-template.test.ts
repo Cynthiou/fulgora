@@ -5,13 +5,18 @@ import {
   BLOCK_TYPE_LABELS,
   BLOCK_TYPES,
   countDraftExercises,
+  createDefaultSet,
   createEmptyDraft,
   createEmptySet,
   type DraftBlock,
   draftBlockSchema,
   formatBlockCount,
+  formatDuration,
   formatRangeMessage,
+  formatSelectedCount,
+  formatSetSummary,
   getBlockLabel,
+  getExerciseProfile,
   plannedSetSchema,
   SET_LIMITS,
   sessionDraftSchema,
@@ -220,5 +225,89 @@ describe("BLOCK_TYPES", () => {
       BLOCK_TYPES.filter((info) => info.isAvailable).map((info) => info.code),
     ).toEqual([...AVAILABLE_BLOCK_TYPES]);
     expect(BLOCK_TYPE_LABELS.for_time).toBe("For Time");
+  });
+});
+
+describe("exercise profiles and default sets (US-14)", () => {
+  it("finds the profile from the measures", () => {
+    expect(getExerciseProfile(["reps", "weight"])).toBe("reps_weight");
+    expect(getExerciseProfile(["reps"])).toBe("bodyweight");
+    expect(getExerciseProfile(["duration"])).toBe("duration");
+    expect(getExerciseProfile(["duration", "distance", "calories"])).toBe(
+      "cardio",
+    );
+    expect(getExerciseProfile([])).toBe("none");
+  });
+
+  it("pre-fills the first set: 10 reps, 1 min, or a 10 min stage", () => {
+    expect(createDefaultSet(["reps", "weight"])).toMatchObject({
+      reps: 10,
+      weight_kg: null,
+    });
+    expect(createDefaultSet(["duration"]).duration_seconds).toBe(60);
+    expect(createDefaultSet(["duration", "speed"]).duration_seconds).toBe(600);
+    expect(createDefaultSet([])).toEqual(createEmptySet());
+  });
+});
+
+describe("formatSetSummary", () => {
+  it("sums up the sets with their shared values", () => {
+    const set = { ...createEmptySet(), reps: 10, weight_kg: 40 };
+    expect(
+      formatSetSummary({ measure_codes: ["reps", "weight"], sets: [set] }),
+    ).toBe("1 série · 10 rép. · 40 kg");
+    expect(
+      formatSetSummary({
+        measure_codes: ["reps"],
+        sets: [
+          { ...createEmptySet(), reps: 8, weight_kg: 10 },
+          { ...createEmptySet(), reps: 8, weight_kg: 10 },
+          { ...createEmptySet(), reps: 8, weight_kg: 10 },
+        ],
+      }),
+    ).toBe("3 séries · 8 rép. · 10 kg lest");
+    expect(
+      formatSetSummary({
+        measure_codes: ["duration"],
+        sets: [{ ...createEmptySet(), duration_seconds: 60 }],
+      }),
+    ).toBe("1 série · 1 min");
+  });
+
+  it("counts stages for cardio and hides values that differ", () => {
+    expect(
+      formatSetSummary({
+        measure_codes: ["duration", "distance"],
+        sets: [{ ...createEmptySet(), duration_seconds: 600 }],
+      }),
+    ).toBe("1 étape · 10 min");
+    expect(
+      formatSetSummary({
+        measure_codes: ["duration", "distance"],
+        sets: [
+          { ...createEmptySet(), duration_seconds: 600 },
+          { ...createEmptySet(), duration_seconds: 300, distance_meters: 1500 },
+          { ...createEmptySet(), duration_seconds: 600 },
+        ],
+      }),
+    ).toBe("3 étapes");
+    expect(
+      formatSetSummary({
+        measure_codes: ["reps", "weight"],
+        sets: [
+          { ...createEmptySet(), reps: 10, weight_kg: 40 },
+          { ...createEmptySet(), reps: 8, weight_kg: 45 },
+        ],
+      }),
+    ).toBe("2 séries");
+  });
+
+  it("writes durations and selected counts in French", () => {
+    expect(formatDuration(90)).toBe("1 min 30");
+    expect(formatDuration(45)).toBe("45 s");
+    expect(formatDuration(120)).toBe("2 min");
+    expect(formatDuration(3900)).toBe("1 h 05");
+    expect(formatSelectedCount(1)).toBe("1 sélectionné");
+    expect(formatSelectedCount(3)).toBe("3 sélectionnés");
   });
 });
