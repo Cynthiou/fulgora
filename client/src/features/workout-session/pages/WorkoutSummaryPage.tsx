@@ -63,9 +63,9 @@ function WorkoutSummaryPage() {
       {!isLoading && session !== null && error === null && !notFound && (
         <>
           <header className="flex flex-col gap-1">
-            <p className="text-overline uppercase text-accent">Résumé</p>
-            <h1 className="text-display-md">{session.session_name}</h1>
+            <h1 className="text-display-md">Résumé</h1>
             <p className="text-muted">
+              {session.session_name} ·{" "}
               {formatLongDate(startDate).charAt(0).toLowerCase() +
                 formatLongDate(startDate).slice(1)}
             </p>
@@ -149,8 +149,19 @@ function WorkoutSummaryPage() {
 
       {!isLoading && session !== null && (
         <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
-          <div className="mx-auto max-w-md">
-            {/* "Corriger les résultats" arrives with US-37. */}
+          <div className="mx-auto flex max-w-md flex-col gap-2">
+            {/* Correcting the results arrives with US-37. */}
+            <button
+              type="button"
+              disabled
+              aria-describedby="fix-results-soon"
+              className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+            >
+              Corriger les résultats
+            </button>
+            <p id="fix-results-soon" className="sr-only">
+              Corriger les résultats arrive bientôt.
+            </p>
             <Link to="/planning" className={PRIMARY_LINK}>
               Retour au planning
             </Link>

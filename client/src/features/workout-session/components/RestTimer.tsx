@@ -67,18 +67,20 @@ function RestTimer({
       aria-labelledby="rest-title"
       className={`mx-auto flex min-h-screen max-w-md flex-col items-center justify-between p-6 text-center ${frame}`}
     >
-      <div className="flex flex-col gap-1">
-        <p className="text-overline uppercase text-accent">Repos</p>
+      <div className="flex w-full flex-col gap-1 text-left">
         <h1 id="rest-title" className="text-display-md">
-          {exerciseName}
+          Repos
         </h1>
+        <p className={isLast ? "text-neutral-content/80" : "text-muted"}>
+          {exerciseName}
+        </p>
+      </div>
+
+      <div className="flex w-full flex-col items-center gap-6">
         <p className={isLast ? "text-neutral-content/80" : "text-muted"}>
           Repos · {formatRestTitle(durationSeconds)}
           {isSetRest ? " pour cette série" : " par défaut"}
         </p>
-      </div>
-
-      <div className="flex flex-col items-center gap-6">
         <p
           aria-hidden="true"
           className={`font-display text-[5rem] leading-none ${
@@ -90,12 +92,12 @@ function RestTimer({
         <p aria-live="polite" className="font-semibold">
           {isOver ? "Repos terminé" : announcement}
         </p>
-        <div className="flex gap-3">
+        <div className="flex w-full gap-3">
           <button
             type="button"
             onClick={() => addSeconds(-15)}
             disabled={isOver}
-            className="h-12 rounded-btn border border-base-300 bg-base-100 px-5 font-semibold text-base-content disabled:opacity-60"
+            className="h-12 flex-1 rounded-btn border border-base-300 bg-base-100 font-semibold text-base-content disabled:opacity-60"
           >
             − 15 s
           </button>
@@ -103,7 +105,7 @@ function RestTimer({
             type="button"
             onClick={() => addSeconds(15)}
             disabled={isOver}
-            className="h-12 rounded-btn border border-base-300 bg-base-100 px-5 font-semibold text-base-content disabled:opacity-60"
+            className="h-12 flex-1 rounded-btn border border-base-300 bg-base-100 font-semibold text-base-content disabled:opacity-60"
           >
             + 15 s
           </button>

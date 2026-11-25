@@ -107,9 +107,9 @@ describe("WorkoutSummaryPage", () => {
     renderPage();
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Haut du corps" }),
+      await screen.findByRole("heading", { level: 1, name: "Résumé" }),
     ).toBeTruthy();
-    expect(screen.getByText("jeudi 26 novembre")).toBeTruthy();
+    expect(screen.getByText("Haut du corps · jeudi 26 novembre")).toBeTruthy();
     expect(screen.getByText("Terminée")).toBeTruthy();
     expect(screen.getByText("48 min")).toBeTruthy();
     expect(screen.getByText("4 / 5")).toBeTruthy();
