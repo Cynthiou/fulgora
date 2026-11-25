@@ -8,12 +8,15 @@ import {
   getAppointmentStatus,
   getBlockLabel,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import dotsIcon from "../../../assets/icons/ui/app/dots.svg";
+import playIcon from "../../../assets/icons/ui/app/play.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
-import StatusBadge from "../../../components/StatusBadge";
+import PageHeader from "../../../components/PageHeader";
+import StatusChip from "../../../components/StatusChip";
 import { ApiError } from "../../../services/apiError";
 import AlreadyInProgressDialog from "../../workout-session/components/AlreadyInProgressDialog";
 import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
@@ -29,7 +32,7 @@ import {
 } from "../services/appointmentService";
 
 const PRIMARY_BUTTON =
-  "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60";
+  "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60";
 
 // Screen B1: a planned session, read-only, with "Démarrer la séance". Starting
 // copies the plan on the server and opens the session in progress (B2).
@@ -147,39 +150,30 @@ function PlannedSessionPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label="Retour"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="text-display-sm">Séance</h1>
-          {appointment !== null && (
-            <p className="truncate text-sm text-muted">
-              {formatLongDate(appointment.planned_date)}
-            </p>
-          )}
-        </div>
-        {appointment !== null && (
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(true)}
-            aria-haspopup="dialog"
-            aria-label="Actions de la séance"
-            className="flex size-tap items-center justify-center rounded-btn text-secondary"
-          >
-            <span aria-hidden="true" className="text-xl leading-none">
-              ⋯
-            </span>
-          </button>
-        )}
-      </header>
+      <PageHeader
+        onBack={goBack}
+        title="Séance"
+        subtitle={
+          appointment === null
+            ? undefined
+            : formatLongDate(appointment.planned_date)
+        }
+        action={
+          appointment === null ? undefined : (
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(true)}
+              aria-haspopup="dialog"
+              aria-label="Actions de la séance"
+              className="grid size-tap shrink-0 place-items-center rounded-btn text-muted"
+            >
+              <Icon src={dotsIcon} className="size-[22px]" />
+            </button>
+          )
+        }
+      />
 
-      <div className="flex flex-1 flex-col gap-6 p-4 pb-28">
+      <div className="flex flex-1 flex-col gap-3.5 px-[18px] pt-1 pb-28">
         {isLoading && <LoadingState label="Chargement de la séance…" />}
 
         {!isLoading && notFound && (
@@ -206,18 +200,19 @@ function PlannedSessionPage() {
             {flash !== null && (
               <p
                 role="status"
-                className="flex gap-2 rounded-card border border-base-300 bg-soft p-3 font-semibold"
+                className="flex items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
               >
-                <span aria-hidden="true" className="text-status-done">
-                  ✓
-                </span>
+                <Icon
+                  src={checkIcon}
+                  className="size-[18px] shrink-0 text-status-done"
+                />
                 {flash}
               </p>
             )}
 
-            <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
-                <StatusBadge
+                <StatusChip
                   status={getAppointmentStatus({
                     status: appointment.status,
                     workout_session:
@@ -232,20 +227,20 @@ function PlannedSessionPage() {
                   })}
                 />
                 {appointment.program_name !== null && (
-                  <span className="text-overline uppercase text-accent">
+                  <span className="font-sans text-overline uppercase not-italic text-accent">
                     {appointment.program_name}
                   </span>
                 )}
               </div>
               <h2
-                className={`text-display-md ${
+                className={`text-display-session ${
                   isCancelled ? "text-muted line-through" : ""
                 }`}
               >
                 {appointment.session_name}
               </h2>
               {appointment.initial_date !== null && !isCancelled && (
-                <p className="text-sm text-muted">
+                <p className="text-right text-xs font-medium leading-[1.35] text-muted">
                   <span aria-hidden="true">↷ </span>
                   Prévue le {formatDayMonth(appointment.initial_date)} ·
                   déplacée au {formatDayMonth(appointment.planned_date)}
@@ -254,7 +249,7 @@ function PlannedSessionPage() {
               {isCancelled ? (
                 // CAL-07c: what was planned, then when it was given up
                 <>
-                  <p className="text-muted">
+                  <p className="text-right text-xs font-medium leading-[1.35] text-muted">
                     Prévue{" "}
                     {formatLongDate(appointment.planned_date).toLocaleLowerCase(
                       "fr-FR",
@@ -264,13 +259,13 @@ function PlannedSessionPage() {
                       : ` · ${appointment.planned_time}`}
                   </p>
                   {appointment.cancelled_at !== null && (
-                    <p className="text-muted">
+                    <p className="text-right text-xs font-medium leading-[1.35] text-muted">
                       Annulée le {formatDayTime(appointment.cancelled_at)}
                     </p>
                   )}
                 </>
               ) : (
-                <p className="text-muted">
+                <p className="text-right text-xs font-medium leading-[1.35] text-muted">
                   {formatLongDate(appointment.planned_date)}
                   {appointment.planned_time === null
                     ? ""
@@ -288,11 +283,12 @@ function PlannedSessionPage() {
               // CAL-08c: what the answer did, and what is still possible
               <p
                 role="status"
-                className="flex gap-2 rounded-card border border-base-300 bg-soft p-3 font-semibold"
+                className="flex items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
               >
-                <span aria-hidden="true" className="text-status-done">
-                  ✓
-                </span>
+                <Icon
+                  src={checkIcon}
+                  className="size-[18px] shrink-0 text-status-done"
+                />
                 Séance marquée comme manquée. Tu pourras toujours la déclarer
                 faite plus tard.
               </p>
@@ -316,35 +312,60 @@ function PlannedSessionPage() {
 
             <section
               aria-labelledby="blocks-title"
-              className="flex flex-col gap-3"
+              className="flex flex-col gap-2.5"
             >
-              <h2
-                id="blocks-title"
-                className="font-sans text-overline not-italic uppercase text-accent"
-              >
+              <h2 id="blocks-title" className="sr-only">
                 Blocs
               </h2>
               {appointment.blocks.length === 0 ? (
-                <p className="text-muted">
+                <p className="text-sm text-muted">
                   Cette séance n'a pas encore de bloc.
                 </p>
               ) : (
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-2.5">
                   {appointment.blocks.map((block, index) => (
                     <li
                       key={block.id}
-                      className="flex flex-col gap-1 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
+                      className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
                     >
-                      <span className="font-semibold">
+                      {/* "Classique · Force": the type in bold, then the
+                          name of the block (B1). */}
+                      <span className="text-[15px] font-extrabold">
                         {getBlockLabel(block, index)}
                       </span>
-                      <span className="text-sm text-muted">
-                        {block.exercises.length === 0
-                          ? "Aucun exercice"
-                          : block.exercises
-                              .map((exercise) => exercise.name)
-                              .join(" · ")}
-                      </span>
+                      {block.exercises.length === 0 ? (
+                        <span className="text-xs text-muted">
+                          Aucun exercice
+                        </span>
+                      ) : (
+                        <ol className="flex flex-col">
+                          {block.exercises.map((exercise, position) => (
+                            <li
+                              key={exercise.id}
+                              className={`flex items-center gap-3 ${
+                                position === 0
+                                  ? ""
+                                  : "mt-2.5 border-t border-base-300 pt-2.5"
+                              }`}
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="w-[18px] shrink-0 text-[11px] font-bold text-muted"
+                              >
+                                {String(position + 1).padStart(2, "0")}
+                              </span>
+                              <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                                {exercise.name}
+                              </span>
+                              {exercise.set_summary !== null && (
+                                <span className="shrink-0 whitespace-nowrap text-[12.5px] font-medium leading-[1.45] text-muted">
+                                  {exercise.set_summary}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -359,7 +380,7 @@ function PlannedSessionPage() {
       </div>
 
       {!isLoading && appointment !== null && error === null && !notFound && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
           <div className="mx-auto flex max-w-md flex-col gap-2">
             {workout !== null && workout.status === "in_progress" ? (
               <Link
@@ -372,7 +393,7 @@ function PlannedSessionPage() {
               // Done or given up: it never starts again (RM-038)
               <Link
                 to={`/suivi/historique/${appointment.id}`}
-                className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold"
+                className="flex h-13 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
               >
                 Voir le résumé
               </Link>
@@ -405,7 +426,8 @@ function PlannedSessionPage() {
                   "Démarrage…"
                 ) : (
                   <>
-                    <span aria-hidden="true">{"▶ "}</span>Démarrer la séance
+                    <Icon src={playIcon} className="size-[18px]" />
+                    Démarrer la séance
                   </>
                 )}
               </button>

@@ -5,11 +5,11 @@ import { STATUSES, type StatusCode } from "shared";
 // colour. The word is always there, so the colour is never the only clue.
 const CHIP: Record<StatusCode, string> = {
   planned: "bg-secondary/10 text-secondary",
-  completed: "bg-status-done/10 text-status-done",
-  unfinished: "bg-status-pending/10 text-status-pending",
-  to_confirm: "bg-status-pending/10 text-status-pending",
-  missed: "bg-status-missed/10 text-status-missed",
-  cancelled: "bg-status-cancelled/10 text-status-cancelled",
+  completed: "bg-status-done/10 text-status-done-text",
+  unfinished: "bg-status-pending/10 text-status-pending-text",
+  to_confirm: "bg-status-pending/10 text-status-pending-text",
+  missed: "bg-status-missed/10 text-status-missed-text",
+  cancelled: "bg-status-cancelled/10 text-status-cancelled-text",
   moved: "bg-neutral/[0.06] text-muted",
 };
 

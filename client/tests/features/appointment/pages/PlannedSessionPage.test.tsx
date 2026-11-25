@@ -115,7 +115,9 @@ describe("PlannedSessionPage", () => {
       screen.getByText("Jeudi 26 novembre · 18:30 · 1 bloc · 2 exercices"),
     ).toBeTruthy();
     expect(screen.getByText("Classique · Force")).toBeTruthy();
-    expect(screen.getByText("Développé couché · Tractions")).toBeTruthy();
+    // The mockup B1 numbers the exercises, one line each.
+    expect(screen.getByText("Développé couché")).toBeTruthy();
+    expect(screen.getByText("Tractions")).toBeTruthy();
 
     const button = screen.getByRole("button", { name: /Démarrer la séance/ });
     await user.click(button);

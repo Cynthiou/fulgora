@@ -131,6 +131,13 @@
      10 px bold (A7a chip), under the 4.5:1 of RM-064: a darker teal
      is used for a small word on a teal ground. */
   --fulgora-accent-text: #0b5c73;
+  /* A status word written on its own tint: the colours of the charter fall
+     under the 4.5:1 of RM-064 in 11 px bold, so the word uses a darker shade
+     (the tint and the dots keep the colours of the mockups). */
+  --fulgora-done-text: #15803d;
+  --fulgora-pending-text: #92400e;
+  --fulgora-missed-text: #b91c1c;
+  --fulgora-cancelled-text: #475569;
   /* The word "À suivre" of the mockups is written in the orange of the
      action. On the light page it only reaches 2.45:1, under the 4.5:1 of
      RM-064, so small orange text uses this darker orange. */
@@ -150,6 +157,10 @@
   --fulgora-rule: #3a4763;
   --fulgora-dash: #3a4763;
   --fulgora-accent-text: #22d3ee;
+  --fulgora-done-text: #16a34a;
+  --fulgora-pending-text: #d97706;
+  --fulgora-missed-text: #f87171;
+  --fulgora-cancelled-text: #94a3b8;
   --fulgora-action-text: #ff6b35;
   --fulgora-shadow-card:
     inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -166,6 +177,10 @@
     --fulgora-rule: #3a4763;
     --fulgora-dash: #3a4763;
     --fulgora-accent-text: #22d3ee;
+    --fulgora-done-text: #16a34a;
+    --fulgora-pending-text: #d97706;
+    --fulgora-missed-text: #f87171;
+    --fulgora-cancelled-text: #94a3b8;
     --fulgora-action-text: #ff6b35;
     --fulgora-shadow-card:
       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -184,6 +199,10 @@
   --color-rule: var(--fulgora-rule);
   --color-dash: var(--fulgora-dash);
   --color-accent-text: var(--fulgora-accent-text);
+  --color-status-done-text: var(--fulgora-done-text);
+  --color-status-pending-text: var(--fulgora-pending-text);
+  --color-status-missed-text: var(--fulgora-missed-text);
+  --color-status-cancelled-text: var(--fulgora-cancelled-text);
   --color-action-text: var(--fulgora-action-text);
   --color-status-done: #16a34a;
   --color-status-pending: #d97706;
@@ -213,6 +232,15 @@
   --text-display-page: 40px;
   --text-display-page--line-height: 1;
   --text-display-lg: 44px;
+  /* The name of a session on its own screen (B1) */
+  --text-display-session: 46px;
+  --text-display-session--line-height: 1;
+  /* The name of a session on its own screen (B1) */
+  --text-display-session: 46px;
+  --text-display-session--line-height: 1;
+  /* The name of a session on its own screen (B1) */
+  --text-display-session: 46px;
+  --text-display-session--line-height: 1;
   --text-display-lg--line-height: 0.9;
   --text-display-xl: 58px;
   --text-display-xl--line-height: 0.9;

@@ -6,7 +6,9 @@ import {
   toPlannedValues,
   type WorkoutExerciseTree,
 } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import playIcon from "../../../assets/icons/ui/app/play.svg";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -15,13 +17,17 @@ type Props = {
 };
 
 // Screen B2: one exercise of the session in progress, with its progress
-// ("1 / 3 séries") and the plan ("3 séries · 10 rép. · 40 kg"). Touching it
-// opens the exercise, set by set (B3).
+// ("1 / 3 séries") and the plan ("3 séries · 10 rép. · 40 kg"). The round
+// mark on the left says where it stands: started (orange, ringed), done
+// (green check) or still to do (empty circle). Touching it opens the
+// exercise, set by set (B3).
 function WorkoutExerciseRow({ sessionId, exercise }: Props) {
   const isCardio =
     getMeasureProfile(exercise.measure_codes, exercise.is_bodyweight) ===
     "cardio";
   const hasStarted = exercise.sets.some((set) => set.validated_at !== null);
+  const isDone = exercise.sets.every((set) => set.validated_at !== null);
+  const isRunning = hasStarted && !isDone;
   const planned = {
     measure_codes: exercise.measure_codes,
     is_bodyweight: exercise.is_bodyweight,
@@ -32,22 +38,36 @@ function WorkoutExerciseRow({ sessionId, exercise }: Props) {
     <li>
       <Link
         to={`/entrainement/${sessionId}/exercices/${exercise.id}`}
-        className="flex items-center gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
+        className={`flex items-center gap-3 rounded-card bg-base-100 p-3 shadow-card ${
+          isRunning ? "border-[1.5px] border-primary" : "border border-base-300"
+        }`}
       >
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="font-semibold">{exercise.name}</span>
-          {/* Started: how far it has gone. Untouched: what is planned (B2). */}
-          {hasStarted ? (
-            <span className="text-sm font-semibold text-secondary">
-              {formatSetProgress(exercise, isCardio)}
-            </span>
-          ) : (
-            <span className="text-sm text-muted">
-              {formatSetSummary(planned)}
-            </span>
-          )}
+        <span
+          aria-hidden="true"
+          className={`grid size-7 shrink-0 place-items-center rounded-full ${
+            isRunning
+              ? "bg-primary text-primary-content"
+              : isDone
+                ? "bg-status-done text-white"
+                : "border-[1.5px] border-rule"
+          }`}
+        >
+          {isRunning && <Icon src={playIcon} className="size-[11px]" />}
+          {isDone && <Icon src={checkIcon} className="size-3.5" />}
         </span>
-        <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-sm font-bold">{exercise.name}</span>
+          {/* Started: how far it has gone. Untouched: what is planned (B2). */}
+          <span className="truncate text-xs font-medium leading-[1.45] text-muted">
+            {hasStarted
+              ? formatSetProgress(exercise, isCardio)
+              : formatSetSummary(planned)}
+          </span>
+        </span>
+        <Icon
+          src={chevronRightIcon}
+          className="size-[18px] shrink-0 text-faint"
+        />
       </Link>
     </li>
   );

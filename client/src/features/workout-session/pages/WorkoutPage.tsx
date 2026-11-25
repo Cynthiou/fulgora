@@ -6,8 +6,10 @@ import {
   getBlockLabel,
   type SelectedExercise,
 } from "shared";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import StatusBadge from "../../../components/StatusBadge";
 import { ApiError } from "../../../services/apiError";
 import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
@@ -173,7 +175,7 @@ function WorkoutPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <div className="flex flex-1 flex-col gap-6 p-4 pb-32">
+      <div className="flex flex-1 flex-col gap-2 px-[18px] pt-1.5 pb-32">
         {isLoading && <WorkoutSkeleton />}
 
         {!isLoading && notFound && (
@@ -197,18 +199,19 @@ function WorkoutPage() {
 
         {!isLoading && session !== null && error === null && !notFound && (
           <>
-            <header className="flex flex-col gap-1">
-              <h1 className="text-display-md">{session.session_name}</h1>
-              <div className="flex items-center justify-between gap-3">
+            {/* The name, what the session is doing, and the chrono in
+                its dark pill (B2). */}
+            <header className="flex items-center gap-2.5 pb-1.5">
+              <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                <h1 className="truncate text-[26px] leading-none">
+                  {session.session_name}
+                </h1>
                 {isInProgress ? (
-                  <p className="text-overline uppercase text-muted">
-                    <span aria-hidden="true" className="text-primary">
-                      ●{" "}
-                    </span>
+                  <p className="truncate text-xs font-semibold leading-[1.45] text-action-text">
                     En cours · {session.program_name ?? "séance libre"}
                   </p>
                 ) : (
-                  <p className="flex items-center gap-2 text-sm text-muted">
+                  <p className="flex items-center gap-2 text-xs text-muted">
                     <StatusBadge
                       status={
                         session.status === "completed"
@@ -219,16 +222,17 @@ function WorkoutPage() {
                     {session.program_name ?? "séance libre"}
                   </p>
                 )}
-                {chrono !== null && isInProgress && (
-                  <p className="rounded-btn border border-base-300 bg-base-100 px-3 py-1 font-display text-display-sm">
-                    <span className="sr-only">Durée de la séance </span>
-                    <span aria-hidden="true" className="text-primary">
-                      ●{" "}
-                    </span>
-                    {chrono}
-                  </p>
-                )}
-              </div>
+              </span>
+              {chrono !== null && isInProgress && (
+                <p className="flex h-[34px] shrink-0 items-center gap-2 rounded-full bg-pick px-3 text-sm font-extrabold text-pick-content">
+                  <span className="sr-only">Durée de la séance </span>
+                  <span
+                    aria-hidden="true"
+                    className="size-2 rounded-full bg-primary"
+                  />
+                  {chrono}
+                </p>
+              )}
             </header>
 
             {session.auto_closed && <AutoClosedNotice />}
@@ -264,24 +268,26 @@ function WorkoutPage() {
                 <button
                   type="button"
                   onClick={() => setIsConfirmingAbandon(true)}
-                  className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+                  className="h-13 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
                 >
                   Abandonner
                 </button>
               </div>
             )}
 
-            <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
+            <div className="flex flex-col gap-1.5 pb-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold">Séries réalisées</span>
-                <span className="font-display text-display-sm">
+                <span className="text-overline uppercase text-muted">
+                  Séries réalisées
+                </span>
+                <span className="text-[13px] font-extrabold">
                   {countValidatedSets(session)} / {countPlannedSets(session)}
                 </span>
               </div>
-              {/* How far the session has gone, as on the wireframe (B2) */}
+              {/* How far the session has gone (B2) */}
               <div
                 aria-hidden="true"
-                className="h-2 overflow-hidden rounded-chip bg-soft"
+                className="h-1.5 overflow-hidden rounded-chip bg-track"
               >
                 <div
                   className="h-full rounded-chip bg-secondary"
@@ -304,7 +310,7 @@ function WorkoutPage() {
               <section
                 key={block.id}
                 aria-labelledby={`block-${block.id}`}
-                className="flex flex-col gap-3"
+                className="flex flex-col gap-2 pt-1"
               >
                 <h2
                   id={`block-${block.id}`}
@@ -313,7 +319,7 @@ function WorkoutPage() {
                   {getBlockLabel(block, index)}
                 </h2>
                 {block.block_type === "note" ? (
-                  <p className="rounded-card border border-base-300 bg-base-100 p-4 text-muted shadow-card">
+                  <p className="rounded-card border border-base-300 bg-base-100 p-4 text-sm leading-[1.45] text-muted shadow-card">
                     {block.instructions ?? "Note vide"}
                   </p>
                 ) : (
@@ -334,14 +340,15 @@ function WorkoutPage() {
             ))}
 
             {isInProgress && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 pt-1">
                 <Link
                   to={`/entrainement/${id}/exercices`}
-                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold"
+                  className="flex h-13 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary"
                 >
-                  + Ajouter un exercice ou un bloc
+                  <Icon src={plusIcon} className="size-[18px]" />
+                  Ajouter un exercice ou un bloc
                 </Link>
-                <p className="text-sm text-muted">
+                <p className="text-xs text-muted">
                   Une série en plus s'ajoute depuis l'exercice.
                 </p>
               </div>
@@ -351,11 +358,11 @@ function WorkoutPage() {
       </div>
 
       {!isLoading && session !== null && !isInProgress && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
           <div className="mx-auto max-w-md">
             <Link
               to={`/entrainement/${id}/resume`}
-              className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
+              className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action"
             >
               Voir le résumé
             </Link>
@@ -379,13 +386,13 @@ function WorkoutPage() {
       )}
 
       {!isLoading && session !== null && isInProgress && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
-          <div className="mx-auto flex max-w-md gap-3">
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
+          <div className="mx-auto grid max-w-md grid-cols-[1fr_1.6fr] gap-2.5">
             <button
               type="button"
               onClick={() => setIsConfirmingAbandon(true)}
               disabled={isEnding}
-              className="h-btn flex-1 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+              className="h-btn rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
             >
               Abandonner
             </button>
@@ -393,7 +400,7 @@ function WorkoutPage() {
               type="button"
               onClick={() => setIsConfirmingEnd(true)}
               disabled={isEnding}
-              className="h-btn flex-[1.6] rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+              className="h-btn rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
             >
               {isEnding ? "Un instant…" : "Terminer la séance"}
             </button>

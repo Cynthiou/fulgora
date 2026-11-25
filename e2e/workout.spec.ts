@@ -63,7 +63,7 @@ test("starts the session of the day, survives a reload and resumes it from the h
   ).toBeVisible();
   await expect(page.getByText("En cours · séance libre")).toBeVisible();
   await expect(
-    page.getByText(/^Durée de la séance ● \d+:\d{2}$/),
+    page.getByText(/^Durée de la séance \d+:\d{2}$/),
   ).toBeVisible();
   await expect(page.getByText("0 / 2", { exact: true })).toBeVisible();
   await expect(page.getByText("2 séries · 10 rép.")).toBeVisible();
@@ -72,7 +72,7 @@ test("starts the session of the day, survives a reload and resumes it from the h
   // The chrono keeps counting after a reload (computed from the start time)
   await page.waitForTimeout(2000);
   await page.reload();
-  const chrono = page.getByText(/^Durée de la séance ● \d+:\d{2}$/);
+  const chrono = page.getByText(/^Durée de la séance \d+:\d{2}$/);
   await expect(chrono).toBeVisible();
   const text = (await chrono.textContent()) ?? "";
   const seconds = Number(text.split(":").at(-1));
@@ -334,7 +334,7 @@ test("adds a set and an exercise during the session, and removes the added set",
   // One more exercise, in a new block (B2)
   await page.getByRole("link", { name: "Exercices", exact: true }).click();
   await page
-    .getByRole("link", { name: "+ Ajouter un exercice ou un bloc" })
+    .getByRole("link", { name: "Ajouter un exercice ou un bloc" })
     .click();
   await expect(
     page.getByText("Sélection pour la séance en cours"),
