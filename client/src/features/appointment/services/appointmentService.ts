@@ -81,3 +81,11 @@ export function moveAppointment(
     }),
   });
 }
+
+// POST /api/appointments/:id/not-done: "Pas faite" (US-27). The session
+// becomes missed, and can still be declared done later.
+export function markAppointmentNotDone(
+  id: number,
+): Promise<{ status: string }> {
+  return apiFetch(`/appointments/${id}/not-done`, { method: "POST" });
+}

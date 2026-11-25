@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import PlannedSessionPage from "../../../../src/features/appointment/pages/PlannedSessionPage";
 import {
   cancelAppointment,
+  markAppointmentNotDone,
   moveAppointment,
   readAppointment,
 } from "../../../../src/features/appointment/services/appointmentService";
@@ -21,6 +22,7 @@ vi.mock(
     readAppointment: vi.fn(),
     cancelAppointment: vi.fn(),
     moveAppointment: vi.fn(),
+    markAppointmentNotDone: vi.fn(),
   }),
 );
 vi.mock(
@@ -33,6 +35,7 @@ vi.mock(
 const readAppointmentMock = vi.mocked(readAppointment);
 const cancelAppointmentMock = vi.mocked(cancelAppointment);
 const moveAppointmentMock = vi.mocked(moveAppointment);
+const notDoneMock = vi.mocked(markAppointmentNotDone);
 const startMock = vi.mocked(startWorkoutSession);
 const readCurrentMock = vi.mocked(readCurrentWorkoutSession);
 
@@ -405,5 +408,61 @@ describe("PlannedSessionPage · déplacer (US-25)", () => {
       (screen.getByRole("button", { name: /Déplacer/ }) as HTMLButtonElement)
         .disabled,
     ).toBe(true);
+  });
+});
+
+describe("PlannedSessionPage · confirmer une séance passée (US-27)", () => {
+  beforeEach(() => {
+    readAppointmentMock.mockReset();
+    notDoneMock.mockReset();
+    readCurrentMock.mockReset();
+    readCurrentMock.mockResolvedValue(null);
+  });
+
+  it("asks the question and marks the session missed", async () => {
+    const toConfirm = {
+      ...planned,
+      planned_date: "2026-11-24",
+      status: "to_confirm" as const,
+    };
+    readAppointmentMock.mockResolvedValue(toConfirm);
+    notDoneMock.mockResolvedValue({ status: "missed" });
+    const user = renderPage();
+    await screen.findByText("Tu as fait cette séance ?");
+
+    expect(
+      screen.getByText(
+        "Sans réponse, elle passera « Manquée » le samedi 28 novembre à 00 h.",
+      ),
+    ).toBeTruthy();
+    // Writing the results after the fact is US-38
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Je l'ai faite",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+
+    readAppointmentMock.mockResolvedValue({ ...toConfirm, status: "missed" });
+    await user.click(screen.getByRole("button", { name: "Pas faite" }));
+
+    expect(notDoneMock).toHaveBeenCalledWith(12);
+    expect(
+      await screen.findByText(/Séance marquée comme manquée/),
+    ).toBeTruthy();
+  });
+
+  it("never offers to start a session waiting for an answer", async () => {
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      planned_date: "2026-11-24",
+      status: "to_confirm" as const,
+    });
+    renderPage();
+    await screen.findByText("Tu as fait cette séance ?");
+
+    expect(screen.queryByText(/Démarrer la séance/)).toBeNull();
+    expect(screen.getByText("Dis-nous si tu l'as faite.")).toBeTruthy();
   });
 });

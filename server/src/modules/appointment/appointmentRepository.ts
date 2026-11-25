@@ -372,3 +372,75 @@ export async function moveAppointment(
     [plannedDate, plannedTime, status, id],
   );
 }
+
+// --- Past sessions: to confirm, then missed (US-27) -------------------------
+
+// The time zones of the users, to compute "today" where they live (D-12).
+export async function listUserTimezones(
+  db: Queryable = client,
+): Promise<string[]> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT DISTINCT timezone FROM `user`",
+  );
+  return rows.map((row) => String(row.timezone));
+}
+
+// A planned session whose day is past waits for an answer (RM-052). A
+// session that was started is never touched (RM-053).
+export async function markPastAppointmentsToConfirm(
+  timezone: string,
+  today: string,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE appointment a
+       JOIN \`user\` u ON u.id = a.owner_user_id
+        SET a.status = 'to_confirm'
+      WHERE u.timezone = ?
+        AND a.status = 'planned'
+        AND a.planned_date < ?
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [timezone, today],
+  );
+  return result.affectedRows;
+}
+
+// Without an answer for 72 hours, the session is missed (RM-052).
+export async function markUnansweredAppointmentsMissed(
+  timezone: string,
+  lastDay: string,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE appointment a
+       JOIN \`user\` u ON u.id = a.owner_user_id
+        SET a.status = 'missed'
+      WHERE u.timezone = ?
+        AND a.status = 'to_confirm'
+        AND a.planned_date <= ?
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [timezone, lastDay],
+  );
+  return result.affectedRows;
+}
+
+// "Pas faite" (RM-067): the session goes to missed right away. Says whether
+// it did, so the action can answer 404 or 409.
+export async function markAppointmentNotDone(
+  id: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<boolean> {
+  const [result] = await db.execute<Result>(
+    `UPDATE appointment a
+        SET a.status = 'missed'
+      WHERE a.id = ? AND a.owner_user_id = ?
+        AND a.status IN ('to_confirm', 'planned')
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [id, userId],
+  );
+  return result.affectedRows === 1;
+}

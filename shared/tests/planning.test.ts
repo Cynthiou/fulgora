@@ -266,7 +266,9 @@ describe("computeAppointmentStatus", () => {
   });
 
   it("names the moment a session becomes missed", () => {
-    expect(formatConfirmDeadline("2026-11-24")).toBe("28 novembre à 00 h");
+    expect(formatConfirmDeadline("2026-11-24")).toBe(
+      "samedi 28 novembre à 00 h",
+    );
   });
 });
 

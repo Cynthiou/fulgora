@@ -12,6 +12,7 @@ import {
   browse,
   cancel,
   createFree,
+  markNotDone,
   move,
   read,
 } from "./appointmentActions.js";
@@ -74,6 +75,14 @@ appointmentRouter.patch(
   authenticate,
   validate({ params: idParamSchema, body: moveAppointmentSchema }),
   move,
+);
+
+// POST /api/appointments/:id/not-done: "Pas faite" (US-27).
+appointmentRouter.post(
+  "/:id/not-done",
+  authenticate,
+  validate({ params: idParamSchema }),
+  markNotDone,
 );
 
 export default appointmentRouter;

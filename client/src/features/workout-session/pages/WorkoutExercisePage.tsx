@@ -123,15 +123,9 @@ function WorkoutExercisePage() {
     );
   }
 
-  // The rest starts as soon as the set is validated (RM-023 for its length),
-  // except after the very last set of the session: there is nothing left to
-  // rest for, so the exercises come back right away (correction US-30).
+  // The rest starts as soon as the set is validated (RM-023 for its length).
   function startRest(set: WorkoutSetRow, index: number) {
     if (exercise === undefined || exercise === null) {
-      return;
-    }
-    if (isLastSetOfSession(set)) {
-      navigate(`/entrainement/${sessionId}`);
       return;
     }
     setRest({
@@ -141,10 +135,24 @@ function WorkoutExercisePage() {
     });
   }
 
-  function validateAsPlanned(set: WorkoutSetRow, index: number) {
-    validation.validate(set, plannedAsActual(set));
+  // What happens once a set is recorded: the rest, or the way out when the
+  // session has nothing left to do (correction US-30). In that case the
+  // server answer is waited for, so the next screen sees the set as done.
+  function afterValidation(
+    set: WorkoutSetRow,
+    index: number,
+    saving: Promise<void>,
+  ) {
     setPickedIndex(null);
+    if (isLastSetOfSession(set)) {
+      saving.then(() => navigate(`/entrainement/${sessionId}`));
+      return;
+    }
     startRest(set, index);
+  }
+
+  function validateAsPlanned(set: WorkoutSetRow, index: number) {
+    afterValidation(set, index, validation.validate(set, plannedAsActual(set)));
   }
 
   // The time measured by the app (US-49). For an exercise in time the set
@@ -163,21 +171,23 @@ function WorkoutExercisePage() {
       setEditing({ set, index });
       return;
     }
-    validation.validate(set, {
-      ...plannedAsActual(set),
-      duration_seconds: seconds,
-    });
-    setPickedIndex(null);
-    startRest(set, index);
+    afterValidation(
+      set,
+      index,
+      validation.validate(set, {
+        ...plannedAsActual(set),
+        duration_seconds: seconds,
+      }),
+    );
   }
 
   function confirmEdited(values: ActualSetValues) {
     if (editing !== null) {
-      validation.validate(editing.set, values);
+      const saving = validation.validate(editing.set, values);
+      const { set, index } = editing;
       setEditing(null);
       setMeasured(null);
-      setPickedIndex(null);
-      startRest(editing.set, editing.index);
+      afterValidation(set, index, saving);
     }
   }
 

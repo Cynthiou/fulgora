@@ -11,6 +11,7 @@ import {
   addYears,
   DEFAULT_TIMEZONE,
   formatDayMonth,
+  formatLongDate,
   todayIn,
   todayInParis,
 } from "./dates.js";
@@ -189,7 +190,8 @@ export function describeEntry(
 // A session stays "to confirm" for 72 hours counted from midnight after its
 // day; beyond that it is missed (RM-052, RM-068).
 export const CONFIRM_HOURS = 72;
-const CONFIRM_DAYS = 1 + CONFIRM_HOURS / 24;
+// Midnight after the day, plus the 72 hours: four days in all.
+export const CONFIRM_DAYS_AFTER = 1 + CONFIRM_HOURS / 24;
 
 // The three statuses a date can give; the others are decided by the user.
 export type DateStatus = Extract<
@@ -206,12 +208,16 @@ export function computeAppointmentStatus(
   if (plannedDate >= today) {
     return "planned";
   }
-  return today >= addDays(plannedDate, CONFIRM_DAYS) ? "missed" : "to_confirm";
+  return today >= addDays(plannedDate, CONFIRM_DAYS_AFTER)
+    ? "missed"
+    : "to_confirm";
 }
 
-// "28 novembre à 00 h": the moment a session of that day becomes missed.
+// "samedi 28 novembre à 00 h": the moment a session of that day becomes
+// missed without an answer (RM-052).
 export function formatConfirmDeadline(plannedDate: string): string {
-  return `${formatDayMonth(addDays(plannedDate, CONFIRM_DAYS))} à 00 h`;
+  const day = formatLongDate(addDays(plannedDate, CONFIRM_DAYS_AFTER));
+  return `${day.charAt(0).toLocaleLowerCase("fr-FR")}${day.slice(1)} à 00 h`;
 }
 
 // What PATCH /api/appointments/:id/move receives: the new day, and the time

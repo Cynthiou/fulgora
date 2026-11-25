@@ -27,6 +27,7 @@ import {
   countVersionContent,
   countWorkoutSetsBySession,
   createAppointment,
+  markAppointmentNotDone,
   moveAppointment,
   readAppointment,
   readAppointmentForUpdate,
@@ -268,4 +269,31 @@ export const move: RequestHandler = async (req, res) => {
     planned_time: toHourMinute(row.planned_time),
     status: row.status,
   });
+};
+
+// POST /api/appointments/:id/not-done: the user says he did not do this
+// session (US-27, RM-067). It becomes missed, and can still be declared
+// done later (RM-054).
+export const markNotDone: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const done = await markAppointmentNotDone(id, userId);
+  if (!done) {
+    const row = await readAppointment(id, userId);
+    if (row === null) {
+      throw new HttpError(
+        404,
+        "APPOINTMENT_NOT_FOUND",
+        "Cette séance n'existe pas.",
+      );
+    }
+    throw new HttpError(
+      409,
+      "APPOINTMENT_NOT_CONFIRMABLE",
+      "Cette séance a déjà été faite, annulée ou déclarée manquée.",
+    );
+  }
+
+  res.json({ status: "missed" });
 };

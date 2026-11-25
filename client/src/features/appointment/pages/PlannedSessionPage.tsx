@@ -18,11 +18,13 @@ import { ApiError } from "../../../services/apiError";
 import AlreadyInProgressDialog from "../../workout-session/components/AlreadyInProgressDialog";
 import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
 import CancelAppointmentDialog from "../components/CancelAppointmentDialog";
+import ConfirmPastSession from "../components/ConfirmPastSession";
 import MoveAppointmentSheet from "../components/MoveAppointmentSheet";
 import SessionActionsSheet from "../components/SessionActionsSheet";
 import { useAppointment } from "../hooks/useAppointment";
 import {
   cancelAppointment,
+  markAppointmentNotDone,
   moveAppointment,
 } from "../services/appointmentService";
 
@@ -45,6 +47,10 @@ function PlannedSessionPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isSendingCancel, setIsSendingCancel] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  // "Pas faite" (CAL-08)
+  const [isSendingNotDone, setIsSendingNotDone] = useState(false);
+  const [notDoneError, setNotDoneError] = useState<string | null>(null);
+  const [justMissed, setJustMissed] = useState(false);
   // The move sheet (CAL-05)
   const [isMoving, setIsMoving] = useState(false);
   const [isSendingMove, setIsSendingMove] = useState(false);
@@ -61,6 +67,25 @@ function PlannedSessionPage() {
 
   function start() {
     workoutStart.start(id);
+  }
+
+  // "Pas faite" of CAL-08: the session is missed right away (RM-067).
+  async function confirmNotDone() {
+    setIsSendingNotDone(true);
+    setNotDoneError(null);
+    try {
+      await markAppointmentNotDone(id);
+      setJustMissed(true);
+      reload();
+    } catch (caught) {
+      setNotDoneError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible d'enregistrer. Réessaie.",
+      );
+    } finally {
+      setIsSendingNotDone(false);
+    }
   }
 
   // "Confirmer" of CAL-05: the session changes day (US-25).
@@ -116,6 +141,9 @@ function PlannedSessionPage() {
     appointment.status !== "attended";
   // A session done or cancelled never moves (RM-068).
   const canMove = canCancel;
+  // A past session waiting for an answer (US-27, CAL-08)
+  const needsConfirmation =
+    appointment !== null && appointment.status === "to_confirm";
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -256,6 +284,36 @@ function PlannedSessionPage() {
               )}
             </div>
 
+            {justMissed && (
+              // CAL-08c: what the answer did, and what is still possible
+              <p
+                role="status"
+                className="flex gap-2 rounded-card border border-base-300 bg-soft p-3 font-semibold"
+              >
+                <span aria-hidden="true" className="text-status-done">
+                  ✓
+                </span>
+                Séance marquée comme manquée. Tu pourras toujours la déclarer
+                faite plus tard.
+              </p>
+            )}
+
+            {needsConfirmation && (
+              <ConfirmPastSession
+                sessionName={appointment.session_name}
+                plannedDate={appointment.planned_date}
+                plannedTime={appointment.planned_time}
+                programName={appointment.program_name}
+                isSending={isSendingNotDone}
+                error={notDoneError}
+                onNotDone={confirmNotDone}
+                onMove={() => {
+                  setMoveError(null);
+                  setIsMoving(true);
+                }}
+              />
+            )}
+
             <section
               aria-labelledby="blocks-title"
               className="flex flex-col gap-3"
@@ -318,6 +376,11 @@ function PlannedSessionPage() {
               >
                 Voir le résumé
               </Link>
+            ) : needsConfirmation ? (
+              // The answer is given in the card above (CAL-08)
+              <p className="text-center font-semibold text-muted">
+                Dis-nous si tu l'as faite.
+              </p>
             ) : isCancelled ? (
               <p className="text-center font-semibold text-muted">
                 Ce rendez-vous est annulé.
