@@ -90,17 +90,17 @@ Validation dans la route de l'US-23 :
 
 ## Tâches techniques
 
-- [ ] Shared : `BLOCK_TYPES` (code, libellé, description, `isAvailable`) dans `shared/session-template.ts`
-- [ ] Shared : `sessionDraftSchema` : `block_type` limité aux 5 types MVP, note sans exercice (`superRefine`), 20 blocs max, `name` 0 à 160, `instructions` 0 à 2 000
-- [ ] Frontend : `components/BlockTypePicker.tsx` (panneau, une colonne, tuiles indisponibles)
-- [ ] Frontend : `components/BlockEditor.tsx` (A4), `components/BlockCard.tsx` (résumé A8)
-- [ ] Frontend : `components/UndoToast.tsx` (« Annuler » pendant 5 s, `aria-live`)
-- [ ] Frontend : `getBlockLabel(block, index)` (« Classique · Bloc 1 ») dans `shared/`
-- [ ] Tests : schéma : note avec exercice refusée, 21 blocs refusés, type `amrap` refusé
-- [ ] Tests : front : ajout, retrait + annulation, tuile indisponible non sélectionnable
+- [x] Shared : `BLOCK_TYPES` (code, libellé, description, `isAvailable`) dans `shared/session-template.ts`
+- [x] Shared : `sessionDraftSchema` : `block_type` limité aux 5 types MVP, note sans exercice (`superRefine`), 20 blocs max, `name` 0 à 160, `instructions` 0 à 2 000
+- [x] Frontend : `components/BlockTypePicker.tsx` (panneau, une colonne, tuiles indisponibles)
+- [x] Frontend : `components/BlockEditor.tsx` (A4), `components/BlockCard.tsx` (résumé A8)
+- [x] Frontend : `components/UndoToast.tsx` (« Annuler » pendant 5 s, `aria-live`)
+- [x] Frontend : `getBlockLabel(block, index)` (« Classique · Bloc 1 ») dans `shared/`
+- [x] Tests : schéma : note avec exercice refusée, 21 blocs refusés, type `amrap` refusé
+- [x] Tests : front : ajout, retrait + annulation, tuile indisponible non sélectionnable
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Panneau utilisable au clavier, focus rendu au bouton à la fermeture
+- [x] Panneau utilisable au clavier, focus rendu au bouton à la fermeture
 - [ ] Code relu et fusionné via pull request

@@ -75,23 +75,23 @@ Message + « Réessayer », brouillon intact.
 
 ## Tâches techniques
 
-- [ ] BDD : tables `session_template`, `session_version`, `template_block`, `template_block_exercise`, `planned_set`, `appointment`
-- [ ] Shared : `freeSessionSchema` : `planned_date` (dans la plage), `planned_time` facultatif, `session: sessionDraftSchema`
-- [ ] Backend : `sessionTemplateRepository` (toutes avec `db: Queryable`) : `createSessionTemplate` (`INSERT INTO session_template (owner_user_id, name) VALUES (?, ?)`), `createSessionVersion` (`… VALUES (?, 1)`), `createTemplateBlock`, `createTemplateBlockExercise`, `createPlannedSet`
-- [ ] Backend : `appointmentRepository.createAppointment` : `INSERT INTO appointment (owner_user_id, session_version_id, planned_date, planned_time, status) VALUES (?, ?, ?, ?, 'planned')`
-- [ ] Backend : `appointmentActions.createFree`, dans `withTransaction` : 1) `readAvailableExerciseIds` → 422 si un exercice manque ; 2) `readExerciseMeasureCodes` → 422 si une mesure n'est pas prévue ; 3) template, version 1 ; 4) pour chaque bloc, exercice, série : création avec position = index + 1 ; 5) rendez-vous ; 6) 201
-- [ ] Backend : `POST /api/appointments` → `checkOrigin` → `authenticate` → `validate({ body: freeSessionSchema })` → action
-- [ ] Backend : « aujourd'hui » pour la plage de dates calculé en `Europe/Paris` (`shared/dates.ts` : `todayInParis()`)
-- [ ] Frontend : `appointmentService.createFreeSession(payload)`
-- [ ] Frontend : `components/DatePickerSheet.tsx` (A2b), `pages/SessionSavedPage.tsx` (A9) ou état de succès dans l'éditeur
-- [ ] Frontend : bouton « + » du Planning et de l'Accueil → choix « Séance libre » (« Programme » masqué en MVP)
-- [ ] Tests : back : séance complète → toutes les lignes avec positions 1, 2, 3 ; séance vide acceptée ; exercice interdit au 3ᵉ bloc → **aucune ligne dans aucune des 6 tables** ; date hors plage → 400 ; double envoi → 2 séances (le client empêche le double envoi : tester le bouton désactivé côté front)
-- [ ] Tests : front : bouton désactivé pendant l'envoi, brouillon conservé après erreur
-- [ ] Tests : E2E : parcours A1 → A9 complet, la séance apparaît à l'Accueil le bon jour
+- [x] BDD : tables `session_template`, `session_version`, `template_block`, `template_block_exercise`, `planned_set`, `appointment`
+- [x] Shared : `freeSessionSchema` : `planned_date` (dans la plage), `planned_time` facultatif, `session: sessionDraftSchema`
+- [x] Backend : `sessionTemplateRepository` (toutes avec `db: Queryable`) : `createSessionTemplate` (`INSERT INTO session_template (owner_user_id, name) VALUES (?, ?)`), `createSessionVersion` (`… VALUES (?, 1)`), `createTemplateBlock`, `createTemplateBlockExercise`, `createPlannedSet`
+- [x] Backend : `appointmentRepository.createAppointment` : `INSERT INTO appointment (owner_user_id, session_version_id, planned_date, planned_time, status) VALUES (?, ?, ?, ?, 'planned')`
+- [x] Backend : `appointmentActions.createFree`, dans `withTransaction` : 1) `readAvailableExerciseIds` → 422 si un exercice manque ; 2) `readExerciseMeasureCodes` → 422 si une mesure n'est pas prévue ; 3) template, version 1 ; 4) pour chaque bloc, exercice, série : création avec position = index + 1 ; 5) rendez-vous ; 6) 201
+- [x] Backend : `POST /api/appointments` → `checkOrigin` → `authenticate` → `validate({ body: freeSessionSchema })` → action
+- [x] Backend : « aujourd'hui » pour la plage de dates calculé en `Europe/Paris` (`shared/dates.ts` : `todayInParis()`)
+- [x] Frontend : `appointmentService.createFreeSession(payload)`
+- [x] Frontend : `components/DatePickerSheet.tsx` (A2b), `pages/SessionSavedPage.tsx` (A9) ou état de succès dans l'éditeur
+- [x] Frontend : bouton « + » du Planning et de l'Accueil → choix « Séance libre » (« Programme » masqué en MVP)
+- [x] Tests : back : séance complète → toutes les lignes avec positions 1, 2, 3 ; séance vide acceptée ; exercice interdit au 3ᵉ bloc → **aucune ligne dans aucune des 6 tables** ; date hors plage → 400 ; double envoi → 2 séances (le client empêche le double envoi : tester le bouton désactivé côté front)
+- [x] Tests : front : bouton désactivé pendant l'envoi, brouillon conservé après erreur
+- [x] Tests : E2E : parcours A1 → A9 complet, la séance apparaît à l'Accueil le bon jour
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Transaction testée (aucune ligne orpheline après échec)
+- [x] Transaction testée (aucune ligne orpheline après échec)
 - [ ] Mobile-first 375 px
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

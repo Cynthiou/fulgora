@@ -45,14 +45,14 @@ Chaque page charge des données, peut échouer et doit afficher un état vide. S
 
 ## Tâches techniques
 
-- [ ] Frontend : `services/apiError.ts` + mise à jour de `apiFetch`
-- [ ] Frontend : `contexts/AuthContext.tsx` + `hooks/useAuth.ts`
-- [ ] Frontend : `components/ProtectedRoute.tsx`
-- [ ] Frontend : `components/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx`, `StatusBadge.tsx`
-- [ ] Shared : `shared/status.ts` : liste des statuts, libellés et symboles (une seule source pour toutes les pages)
-- [ ] Tests : `apiFetch` (erreur lue), `ProtectedRoute` (redirection), `StatusBadge` (symbole + texte)
+- [x] Frontend : `services/apiError.ts` + mise à jour de `apiFetch`
+- [x] Frontend : `contexts/AuthContext.tsx` + `hooks/useAuth.ts`
+- [x] Frontend : `components/ProtectedRoute.tsx`
+- [x] Frontend : `components/LoadingState.tsx`, `ErrorState.tsx`, `EmptyState.tsx`, `StatusBadge.tsx`
+- [x] Shared : `shared/status.ts` : liste des statuts, libellés et symboles (une seule source pour toutes les pages)
+- [x] Tests : `apiFetch` (erreur lue), `ProtectedRoute` (redirection), `StatusBadge` (symbole + texte)
 
 ## Definition of Done
 
-- [ ] Tests verts
-- [ ] axe sans violation sur les composants communs
+- [x] Tests verts
+- [x] axe sans violation sur les composants communs

@@ -85,22 +85,22 @@ Message + retour au catalogue.
 
 ## Tâches techniques
 
-- [ ] Backend : `exerciseRepository.readExercise(id, userId)` : même condition de visibilité que US-07
-- [ ] Backend : `readExerciseMuscles(id)` (nom + rôle, principaux d'abord), `readExerciseEquipments(id)`, `readExerciseMeasures(id)` (code + libellé), `readExerciseTexts(id)` (`ORDER BY type, position`), `readExerciseCategories(id)` : une fonction = une requête
-- [ ] Backend : `exerciseActions.read` : appelle les 6 fonctions l'une après l'autre, 404 si l'exercice est absent
-- [ ] Backend : `GET /api/exercises/:id` → `authenticate` → `validate({ params: idParamSchema })` → action
-- [ ] Shared : type `ExerciseDetail` ; `formatMuscleRoleLabel(count)` (« Principal » / « Principaux »)
-- [ ] Frontend : `exerciseService.readExercise(id)`, `hooks/useExercise.ts`
-- [ ] Frontend : `pages/ExerciseDetailPage.tsx` ; composants `MuscleMap.tsx` (image + texte alternatif listant les muscles), `ExerciseTextList.tsx` (`<ol>` pour les instructions), `MeasureList.tsx`
-- [ ] Frontend : bouton « Ajouter à une séance » fixe en bas (mène au choix de séance, voir US-14)
-- [ ] Routing : `/catalogue/:id` ; nom passé par l'état de navigation pour l'afficher pendant le chargement
-- [ ] Tests : back : fiche complète, exercice personnel d'un autre → 404, identifiant texte → 400, mesures limitées à celles de l'exercice
-- [ ] Tests : front : principaux / secondaires, section alternatives masquée si vide, image absente
-- [ ] Tests : E2E : liste → fiche → retour (filtres conservés) ; axe sur la fiche complète
+- [x] Backend : `exerciseRepository.readExercise(id, userId)` : même condition de visibilité que US-07
+- [x] Backend : `readExerciseMuscles(id)` (nom + rôle, principaux d'abord), `readExerciseEquipments(id)`, `readExerciseMeasures(id)` (code + libellé), `readExerciseTexts(id)` (`ORDER BY type, position`), `readExerciseCategories(id)` : une fonction = une requête
+- [x] Backend : `exerciseActions.read` : appelle les 6 fonctions l'une après l'autre, 404 si l'exercice est absent
+- [x] Backend : `GET /api/exercises/:id` → `authenticate` → `validate({ params: idParamSchema })` → action
+- [x] Shared : type `ExerciseDetail` ; `formatMuscleRoleLabel(count)` (« Principal » / « Principaux »)
+- [x] Frontend : `exerciseService.readExercise(id)`, `hooks/useExercise.ts`
+- [x] Frontend : `pages/ExerciseDetailPage.tsx` ; composants `MuscleMap.tsx` (image + texte alternatif listant les muscles), `ExerciseTextList.tsx` (`<ol>` pour les instructions), `MeasureList.tsx`
+- [x] Frontend : bouton « Ajouter à une séance » fixe en bas (mène au choix de séance, voir US-14)
+- [x] Routing : `/catalogue/:id` ; nom passé par l'état de navigation pour l'afficher pendant le chargement
+- [x] Tests : back : fiche complète, exercice personnel d'un autre → 404, identifiant texte → 400, mesures limitées à celles de l'exercice
+- [x] Tests : front : principaux / secondaires, section alternatives masquée si vide, image absente
+- [x] Tests : E2E : liste → fiche → retour (filtres conservés) ; axe sur la fiche complète
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] États chargement, erreur, introuvable et exercice personnel testés
+- [x] États chargement, erreur, introuvable et exercice personnel testés
 - [ ] Mobile-first 375 px ; en-tête et bouton du bas fixes
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

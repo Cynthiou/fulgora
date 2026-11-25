@@ -71,17 +71,17 @@ Le cookie est quand même effacé côté client par la redirection ; message « 
 
 ## Tâches techniques
 
-- [ ] Backend : `authActions.logout` : `clearAuthCookie(res)` avec les mêmes options que la pose, 204
-- [ ] Backend : `POST /api/auth/logout` → `checkOrigin` → `authenticate` → action
-- [ ] Frontend : `authService.logout`
-- [ ] Frontend : `ProfilePage.tsx` (minimale en MVP : pseudo, adresse, bouton) ; bouton Se déconnecter
-- [ ] Frontend : avant de déconnecter, `readCurrentWorkoutSession` : s'il y a une séance en cours, ouvrir la confirmation
-- [ ] Frontend : `AuthContext.logout` : vide l'utilisateur et navigue vers `/connexion` avec `replace: true`
-- [ ] Tests : back : 204, cookie expiré, `/me` ensuite → 401
+- [x] Backend : `authActions.logout` : `clearAuthCookie(res)` avec les mêmes options que la pose, 204
+- [x] Backend : `POST /api/auth/logout` → `checkOrigin` → `authenticate` → action
+- [x] Frontend : `authService.logout`
+- [x] Frontend : `ProfilePage.tsx` (minimale en MVP : pseudo, adresse, bouton) ; bouton Se déconnecter
+- [x] Frontend : avant de déconnecter, `readCurrentWorkoutSession` : s'il y a une séance en cours, ouvrir la confirmation
+- [x] Frontend : `AuthContext.logout` : vide l'utilisateur et navigue vers `/connexion` avec `replace: true`
+- [x] Tests : back : 204, cookie expiré, `/me` ensuite → 401
 - [ ] Tests : E2E : déconnexion sans séance ; déconnexion avec séance en cours (confirmation, puis reprise possible après reconnexion)
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Confirmation accessible (focus piégé dans la modale, Échap ferme)
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Confirmation accessible (focus piégé dans la modale, Échap ferme)
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

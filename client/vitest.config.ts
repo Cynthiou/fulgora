@@ -7,5 +7,7 @@ export default defineConfig({
   test: {
     // jsdom gives tests a fake browser (document, elements) without a screen.
     environment: "jsdom",
+    // Runs before every test file: cleans the DOM between tests.
+    setupFiles: ["./src/test-setup.ts"],
   },
 });

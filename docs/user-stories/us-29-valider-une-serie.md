@@ -102,23 +102,23 @@ Message de RM-065 et retour au résumé.
 
 ## Tâches techniques
 
-- [ ] Backend : `workoutSessionRepository.readWorkoutSetContext(setId, userId)` : série + statut de la séance + `exercise_id` (jointures `workout_exercise` → `workout_block` → `workout_session`, `WHERE wset.id = ? AND ws.owner_user_id = ?`)
-- [ ] Backend : `updateWorkoutSetActual(setId, values)` : met à jour les 8 colonnes `_actual` et `validated_at = COALESCE(validated_at, NOW(3))` ; **jamais** les colonnes `_planned`
-- [ ] Backend : `touchWorkoutSession(id)` : `UPDATE workout_session SET last_activity_at = NOW(3) WHERE id = ?`
-- [ ] Backend : `workoutSessionActions.validateSet` dans `withTransaction` : contexte → 404 / 409 → mesures autorisées (`readExerciseMeasureCodes`) → série non vide → mise à jour → `touch` → 200
-- [ ] Backend : `PUT /api/workout-sets/:id` → `checkOrigin` → `authenticate` → `validate` → action
-- [ ] Shared : `actualSetSchema` (mêmes bornes que le prévu) ; `isEmptySet(values)` ; `getSetGap(set)` (« ▲ 2,5 kg », « ▼ 1 rép. », « = ») ; `isObjectiveReached(set)`
-- [ ] Frontend : `workoutSessionService.validateSet(id, values)`
-- [ ] Frontend : `hooks/useValidateSet.ts` (affichage optimiste + retour arrière)
-- [ ] Frontend : `pages/WorkoutExercisePage.tsx` (B3), `components/SetRow.tsx`, `components/ActualSetSheet.tsx` (panneau Modifier avec − / +), `components/CardioReadingSheet.tsx` (B5f)
-- [ ] Frontend : `components/Stepper.tsx` (− / + avec pas adapté : 1 rép., 2,5 kg, 15 s ; libellés « Diminuer », « Augmenter »)
-- [ ] Tests : unitaires : `isEmptySet`, `getSetGap`, `isObjectiveReached` (répétitions, charge, durée, valeurs vides)
-- [ ] Tests : back : validation ; revalidation garde la 1ʳᵉ date ; série vide → 422 ; durée sur exercice à répétitions → 422 ; séance terminée → 409 ; série d'un autre → 404 ; `last_activity_at` avance ; colonnes `_planned` inchangées
-- [ ] Tests : front : 1 appui = prévu enregistré ; Modifier → valeurs saisies ; retour arrière sur erreur
-- [ ] Tests : E2E : valider 3 séries d'un exercice, puis passer au suivant ; axe sur B3 et le panneau
+- [x] Backend : `workoutSessionRepository.readWorkoutSetContext(setId, userId)` : série + statut de la séance + `exercise_id` (jointures `workout_exercise` → `workout_block` → `workout_session`, `WHERE wset.id = ? AND ws.owner_user_id = ?`)
+- [x] Backend : `updateWorkoutSetActual(setId, values)` : met à jour les 8 colonnes `_actual` et `validated_at = COALESCE(validated_at, NOW(3))` ; **jamais** les colonnes `_planned`
+- [x] Backend : `touchWorkoutSession(id)` : `UPDATE workout_session SET last_activity_at = NOW(3) WHERE id = ?`
+- [x] Backend : `workoutSessionActions.validateSet` dans `withTransaction` : contexte → 404 / 409 → mesures autorisées (`readExerciseMeasureCodes`) → série non vide → mise à jour → `touch` → 200
+- [x] Backend : `PUT /api/workout-sets/:id` → `checkOrigin` → `authenticate` → `validate` → action
+- [x] Shared : `actualSetSchema` (mêmes bornes que le prévu) ; `isEmptySet(values)` ; `getSetGap(set)` (« ▲ 2,5 kg », « ▼ 1 rép. », « = ») ; `isObjectiveReached(set)`
+- [x] Frontend : `workoutSessionService.validateSet(id, values)`
+- [x] Frontend : `hooks/useValidateSet.ts` (affichage optimiste + retour arrière)
+- [x] Frontend : `pages/WorkoutExercisePage.tsx` (B3), `components/SetRow.tsx`, `components/ActualSetSheet.tsx` (panneau Modifier avec − / +), `components/CardioReadingSheet.tsx` (B5f)
+- [x] Frontend : `components/Stepper.tsx` (− / + avec pas adapté : 1 rép., 2,5 kg, 15 s ; libellés « Diminuer », « Augmenter »)
+- [x] Tests : unitaires : `isEmptySet`, `getSetGap`, `isObjectiveReached` (répétitions, charge, durée, valeurs vides)
+- [x] Tests : back : validation ; revalidation garde la 1ʳᵉ date ; série vide → 422 ; durée sur exercice à répétitions → 422 ; séance terminée → 409 ; série d'un autre → 404 ; `last_activity_at` avance ; colonnes `_planned` inchangées
+- [x] Tests : front : 1 appui = prévu enregistré ; Modifier → valeurs saisies ; retour arrière sur erreur
+- [x] Tests : E2E : valider 3 séries d'un exercice, puis passer au suivant ; axe sur B3 et le panneau
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Zones − / + d'au moins 44 px, utilisables d'une main
+- [x] Zones − / + d'au moins 44 px, utilisables d'une main
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

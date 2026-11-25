@@ -89,24 +89,24 @@ Pas de formulaire : redirection vers l'Accueil.
 
 ## Tâches techniques
 
-- [ ] Shared : `loginSchema` : `identifier` (1 à 254 caractères), `password` (1 à 128)
-- [ ] Backend : `userRepository.readUserByIdentifier` : `SELECT id, username, email, sex, password_hash FROM user WHERE email = ? OR username = ? LIMIT 1` (même valeur deux fois, mise en minuscules pour l'e-mail)
-- [ ] Backend : `userRepository.readUser(id)` : l'utilisateur sans hachage, pour `/me`
-- [ ] Backend : `authActions.login` : compte absent → vérifier quand même un hachage factice (même durée de réponse) puis 401 ; mauvais mot de passe → 401 ; sinon cookie + 200
-- [ ] Backend : `authActions.readMe` : renvoie l'utilisateur de `req.userId`
-- [ ] Backend : `authRouter.ts` (dans `modules/user`) : `POST /api/auth/login` → `checkOrigin` → `authLimiter` → `validate` → action ; `GET /api/auth/me` → `authenticate` → action
-- [ ] Frontend : `features/user/services/authService.ts` : `login`, `readMe`
-- [ ] Frontend : `features/user/hooks/useLogin.ts`
-- [ ] Frontend : `features/user/pages/LoginPage.tsx` : `autocomplete` `username` et `current-password`, e-mail pré-rempli depuis l'inscription (paramètre d'adresse)
-- [ ] Frontend : après succès : `AuthContext.login`, retour à la page demandée ou Accueil
-- [ ] Routing : `/connexion` (publique)
-- [ ] Tests : back : connexion par pseudo, par e-mail en majuscules, mauvais mot de passe → 401, compte inconnu → même 401 et même message, 6ᵉ essai → 429, `/me` sans cookie → 401, réponse sans hachage
-- [ ] Tests : front : message unique, mot de passe vidé, double clic = un envoi
-- [ ] Tests : E2E : connexion puis rechargement → toujours connectée ; page privée → connexion → retour sur la page privée
+- [x] Shared : `loginSchema` : `identifier` (1 à 254 caractères), `password` (1 à 128)
+- [x] Backend : `userRepository.readUserByIdentifier` : `SELECT id, username, email, sex, password_hash FROM user WHERE email = ? OR username = ? LIMIT 1` (même valeur deux fois, mise en minuscules pour l'e-mail)
+- [x] Backend : `userRepository.readUser(id)` : l'utilisateur sans hachage, pour `/me`
+- [x] Backend : `authActions.login` : compte absent → vérifier quand même un hachage factice (même durée de réponse) puis 401 ; mauvais mot de passe → 401 ; sinon cookie + 200
+- [x] Backend : `authActions.readMe` : renvoie l'utilisateur de `req.userId`
+- [x] Backend : `authRouter.ts` (dans `modules/user`) : `POST /api/auth/login` → `checkOrigin` → `authLimiter` → `validate` → action ; `GET /api/auth/me` → `authenticate` → action
+- [x] Frontend : `features/user/services/authService.ts` : `login`, `readMe`
+- [x] Frontend : `features/user/hooks/useLogin.ts`
+- [x] Frontend : `features/user/pages/LoginPage.tsx` : `autocomplete` `username` et `current-password`, e-mail pré-rempli depuis l'inscription (paramètre d'adresse)
+- [x] Frontend : après succès : `AuthContext.login`, retour à la page demandée ou Accueil
+- [x] Routing : `/connexion` (publique)
+- [x] Tests : back : connexion par pseudo, par e-mail en majuscules, mauvais mot de passe → 401, compte inconnu → même 401 et même message, 6ᵉ essai → 429, `/me` sans cookie → 401, réponse sans hachage
+- [x] Tests : front : message unique, mot de passe vidé, double clic = un envoi
+- [x] Tests : E2E : connexion puis rechargement → toujours connectée ; page privée → connexion → retour sur la page privée
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
-- [ ] États connexion, erreur, chargement et échec réseau implémentés et testés
+- [x] États connexion, erreur, chargement et échec réseau implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console

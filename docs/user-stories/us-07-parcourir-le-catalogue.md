@@ -78,26 +78,26 @@ Message + « Réessayer » ; si l'erreur arrive pendant le chargement progressif
 
 ## Tâches techniques
 
-- [ ] BDD : s'appuyer sur `exercise`, `exercise_category`, `category`, `exercise_equipment`, `equipment`
-- [ ] Backend : `exerciseRepository.readExercises(userId, filters, limit, offset)` : colonnes `id, slug, name, difficulty, image_female_url, image_male_url, (owner_user_id IS NOT NULL) AS is_personal` + sous-requête du premier groupe (`category_name`) + sous-requête du matériel (`GROUP_CONCAT` des noms séparés par « · »), `WHERE (e.owner_user_id IS NULL OR e.owner_user_id = ?) AND e.is_archived = FALSE`, `ORDER BY e.name LIMIT ? OFFSET ?` (limit et offset en chaînes)
-- [ ] Backend : `exerciseRepository.countExercises(userId, filters)` : même `WHERE`, `COUNT(*)`
-- [ ] Backend : `exerciseActions.browse` : calcule `next_offset` (`offset + 20 < total` sinon `null`)
-- [ ] Backend : `exerciseRouter.ts` : `GET /api/exercises` → `authenticate` → `validate({ query: exerciseQuerySchema })` → action
-- [ ] Shared : `shared/catalog.ts` : `exerciseQuerySchema` (`offset` ≥ 0, `limit` fixé à 20 côté serveur), type `ExerciseListItem`, `getExerciseImage(exercise, sex)` (choix, autre version, sinon `null`)
-- [ ] Frontend : `features/exercise/services/exerciseService.ts` : `readExercises(query)`
-- [ ] Frontend : `features/exercise/hooks/useExercises.ts` : premier chargement, `loadMore`, `isLoadingMore`, `hasMore`, erreur
-- [ ] Frontend : `features/exercise/components/ExerciseCard.tsx`, `ExerciseCardSkeleton.tsx`
-- [ ] Frontend : `features/exercise/pages/ExerciseListPage.tsx` : chargement progressif avec `IntersectionObserver` sur une sentinelle en bas de liste, plus un bouton « Charger plus » de secours (clavier, lecteurs d'écran)
-- [ ] Frontend : position de défilement conservée au retour (état gardé dans la page parente ou `sessionStorage` dans un `try/catch`)
-- [ ] Routing : `/catalogue`
-- [ ] Tests : back : utilisateur A ne voit jamais l'exercice personnel de B ; exercice archivé absent ; `next_offset` exact sur 175 exercices (8 appels, le dernier renvoie `null`)
-- [ ] Tests : unitaires : `getExerciseImage` (4 cas)
-- [ ] Tests : front : cartes affichées, état d'erreur, chargement suivant au clic sur « Charger plus »
-- [ ] Tests : E2E : faire défiler jusqu'au bout ; axe sur les états liste, chargement, erreur
+- [x] BDD : s'appuyer sur `exercise`, `exercise_category`, `category`, `exercise_equipment`, `equipment`
+- [x] Backend : `exerciseRepository.readExercises(userId, filters, limit, offset)` : colonnes `id, slug, name, difficulty, image_female_url, image_male_url, (owner_user_id IS NOT NULL) AS is_personal` + sous-requête du premier groupe (`category_name`) + sous-requête du matériel (`GROUP_CONCAT` des noms séparés par « · »), `WHERE (e.owner_user_id IS NULL OR e.owner_user_id = ?) AND e.is_archived = FALSE`, `ORDER BY e.name LIMIT ? OFFSET ?` (limit et offset en chaînes)
+- [x] Backend : `exerciseRepository.countExercises(userId, filters)` : même `WHERE`, `COUNT(*)`
+- [x] Backend : `exerciseActions.browse` : calcule `next_offset` (`offset + 20 < total` sinon `null`)
+- [x] Backend : `exerciseRouter.ts` : `GET /api/exercises` → `authenticate` → `validate({ query: exerciseQuerySchema })` → action
+- [x] Shared : `shared/catalog.ts` : `exerciseQuerySchema` (`offset` ≥ 0, `limit` fixé à 20 côté serveur), type `ExerciseListItem`, `getExerciseImage(exercise, sex)` (choix, autre version, sinon `null`)
+- [x] Frontend : `features/exercise/services/exerciseService.ts` : `readExercises(query)`
+- [x] Frontend : `features/exercise/hooks/useExercises.ts` : premier chargement, `loadMore`, `isLoadingMore`, `hasMore`, erreur
+- [x] Frontend : `features/exercise/components/ExerciseCard.tsx`, `ExerciseCardSkeleton.tsx`
+- [x] Frontend : `features/exercise/pages/ExerciseListPage.tsx` : chargement progressif avec `IntersectionObserver` sur une sentinelle en bas de liste, plus un bouton « Charger plus » de secours (clavier, lecteurs d'écran)
+- [x] Frontend : position de défilement conservée au retour (état gardé dans la page parente ou `sessionStorage` dans un `try/catch`)
+- [x] Routing : `/catalogue`
+- [x] Tests : back : utilisateur A ne voit jamais l'exercice personnel de B ; exercice archivé absent ; `next_offset` exact sur 175 exercices (8 appels, le dernier renvoie `null`)
+- [x] Tests : unitaires : `getExerciseImage` (4 cas)
+- [x] Tests : front : cartes affichées, état d'erreur, chargement suivant au clic sur « Charger plus »
+- [x] Tests : E2E : faire défiler jusqu'au bout ; axe sur les états liste, chargement, erreur
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] États chargement, chargement progressif et erreur implémentés et testés
+- [x] États chargement, chargement progressif et erreur implémentés et testés
 - [ ] Mobile-first 375 px, vérifié sur tablette et ordinateur
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
