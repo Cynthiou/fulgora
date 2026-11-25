@@ -114,8 +114,13 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
   ).toBeVisible();
   await expectNoA11yViolation(page);
 
-  // Set 1 as planned: one tap
+  // Set 1 as planned: one tap, then the rest (B4)
   await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await expect(page.getByText("Repos · 1 min 30 s par défaut")).toBeVisible();
+  await expect(page.getByText(/^Ensuite : série 2/)).toBeVisible();
+  await page.getByRole("button", { name: "+ 15 s" }).click();
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Passer le repos" }).click();
   await expect(page.getByText("Série 1 validée")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Valider la série 2" }),
@@ -132,6 +137,7 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
     .getByRole("dialog")
     .getByRole("button", { name: "Valider la série 2" })
     .click();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
   await expect(page.getByText("Série 2 validée")).toBeVisible();
   await expect(page.getByText("9 rép.")).toBeVisible();
 
