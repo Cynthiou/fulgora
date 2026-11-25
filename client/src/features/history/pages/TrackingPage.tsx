@@ -1,15 +1,92 @@
+import { groupByWeek } from "shared";
 import EmptyState from "../../../components/EmptyState";
+import ErrorState from "../../../components/ErrorState";
+import HistoryWeekGroup from "../components/HistoryWeekGroup";
+import { useHistory } from "../hooks/useHistory";
 
-// The Suivi tab. The history list arrives with US-35: until then the empty
-// screen SUI-07, so the tab leads somewhere.
+const SKELETON_KEYS = ["a", "b", "c", "d"];
+
+// Grey lines of the same height while the history loads.
+function HistorySkeleton() {
+  return (
+    <div role="status" className="flex flex-col gap-2">
+      <span className="sr-only">Chargement de l'historique</span>
+      {SKELETON_KEYS.map((key) => (
+        <div
+          key={key}
+          className="h-[4.5rem] animate-pulse rounded-card bg-soft motion-reduce:animate-none"
+        />
+      ))}
+    </div>
+  );
+}
+
+// The Suivi tab: the history of past sessions (SUI-05), newest first, by
+// week. The Résumé and Exercices tabs come after the MVP (US-41, US-39).
 function TrackingPage() {
+  const {
+    items,
+    hasMore,
+    isLoading,
+    error,
+    isLoadingMore,
+    loadMoreError,
+    loadMore,
+    retry,
+  } = useHistory();
+
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <h1 className="text-display-md">Suivi</h1>
-      <EmptyState
-        title="Aucune séance passée"
-        message="Tes séances apparaîtront ici dès qu'elles seront faites, manquées ou annulées."
-      />
+      <div className="flex flex-col gap-1">
+        <h1 className="text-display-md">Suivi</h1>
+        <p className="text-overline uppercase text-accent">Historique</p>
+      </div>
+
+      {isLoading && <HistorySkeleton />}
+
+      {!isLoading && error !== null && (
+        <ErrorState
+          title="Impossible de charger ton historique."
+          message="Vérifie ta connexion internet, puis réessaie."
+          onRetry={retry}
+        />
+      )}
+
+      {!isLoading && error === null && items.length === 0 && (
+        <EmptyState
+          title="Aucune séance passée"
+          message="Tes séances apparaîtront ici dès qu'elles seront faites, manquées ou annulées."
+        />
+      )}
+
+      {!isLoading && error === null && items.length > 0 && (
+        <>
+          {groupByWeek(items).map((week) => (
+            <HistoryWeekGroup key={week.monday} week={week} />
+          ))}
+
+          {isLoadingMore && (
+            <div role="status" className="flex flex-col gap-2">
+              <span className="sr-only">Chargement des séances suivantes</span>
+              <div className="h-[4.5rem] animate-pulse rounded-card bg-soft motion-reduce:animate-none" />
+            </div>
+          )}
+
+          {!isLoadingMore && loadMoreError !== null && (
+            <ErrorState title={loadMoreError} onRetry={loadMore} />
+          )}
+
+          {hasMore && !isLoadingMore && loadMoreError === null && (
+            <button
+              type="button"
+              onClick={loadMore}
+              className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+            >
+              Charger plus
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
