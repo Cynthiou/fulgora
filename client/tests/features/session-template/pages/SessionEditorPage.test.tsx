@@ -209,11 +209,7 @@ describe("SessionEditorPage", () => {
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(screen.getByText("Échauffement · Mise en route")).toBeTruthy();
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Ouvrir le bloc Échauffement · Mise en route",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: /^Ouvrir le bloc/ }));
     expect(inputValue(/^Intitulé/)).toBe("Mise en route");
   });
 

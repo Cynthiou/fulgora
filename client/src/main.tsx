@@ -18,6 +18,7 @@ import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
 import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
+import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
@@ -72,6 +73,11 @@ const router = createBrowserRouter([
               {
                 path: "/seances/:appointmentId",
                 element: <PlannedSessionPage />,
+              },
+              // Changing a planned session (US-17)
+              {
+                path: "/seances/:appointmentId/modifier",
+                element: <EditSessionPage />,
               },
               { path: "/entrainement/:id", element: <WorkoutPage /> },
               {

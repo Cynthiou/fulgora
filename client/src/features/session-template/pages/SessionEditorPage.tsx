@@ -12,6 +12,7 @@ import {
   type DraftBlock,
   type DraftExercise,
   dateSchema,
+  diffSessionDrafts,
   formatBlockCount,
   formatLongDate,
   MAX_BLOCKS,
@@ -28,10 +29,14 @@ import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
 import UndoToast from "../../../components/UndoToast";
 import { ApiError } from "../../../services/apiError";
-import { createFreeSession } from "../../appointment/services/appointmentService";
+import {
+  createFreeSession,
+  updateSession,
+} from "../../appointment/services/appointmentService";
 import BlockEditor from "../components/BlockEditor";
 import BlockTypePicker from "../components/BlockTypePicker";
 import DatePickerSheet from "../components/DatePickerSheet";
+import SessionChangesPanel from "../components/SessionChangesPanel";
 import SessionReview from "../components/SessionReview";
 import SessionSavedPanel from "../components/SessionSavedPanel";
 import SetConfigurator from "../components/SetConfigurator";
@@ -59,6 +64,15 @@ function readInitialDate(raw: string | null): string {
 // Exercises handed over by the catalog ("Ajouter à une séance").
 type NavigationState = { exercises?: SelectedExercise[] } | null;
 
+// What the editor needs to change a session already planned (US-17).
+export type EditContext = {
+  appointmentId: number;
+  programName: string | null;
+  // The saved version: the editor opens on it, and the list of changes
+  // (CAL-06b) compares against it
+  savedDraft: SessionDraft;
+};
+
 type InitialState = {
   draft: SessionDraft;
   openBlockKey: string | null;
@@ -71,7 +85,27 @@ type InitialState = {
 function readInitialState(
   state: NavigationState,
   dateParam: string | null,
+  edit: EditContext | undefined,
 ): InitialState {
+  // Changing a saved session: the draft of the detour is taken back only
+  // when it belongs to this very appointment.
+  if (edit !== undefined) {
+    const stored = loadDraft();
+    if (stored === null || stored.appointmentId !== edit.appointmentId) {
+      return { draft: edit.savedDraft, openBlockKey: null, isDirty: false };
+    }
+    const pending = readPendingExercises();
+    const draft =
+      pending === null
+        ? stored.draft
+        : sessionDraftReducer(stored.draft, {
+            type: "addExercises",
+            blockKey: pending.blockKey,
+            exercises: pending.exercises,
+          });
+    return { draft, openBlockKey: stored.openBlockKey, isDirty: true };
+  }
+
   if (state?.exercises !== undefined && state.exercises.length > 0) {
     const key = nextKey();
     const withBlock = sessionDraftReducer(
@@ -87,7 +121,7 @@ function readInitialState(
   }
 
   const stored = loadDraft();
-  if (stored !== null) {
+  if (stored !== null && (stored.appointmentId ?? null) === null) {
     const pending = readPendingExercises();
     const draft =
       pending === null
@@ -160,11 +194,18 @@ function toSaveError(error: unknown, draft: SessionDraft): string {
   return "Impossible d'enregistrer la séance. Ton brouillon est conservé.";
 }
 
+type Props = {
+  // Given by EditSessionPage: the editor then changes a planned session
+  // instead of creating one (US-17).
+  edit?: EditContext;
+};
+
 // Screen A2: a new free session. The draft lives in useSessionDraft; leaving
 // with unsaved changes asks for a confirmation (back arrow and tab closing).
 // A block opens full screen (A4/A6) over the session; the type panel (A3) is
-// a dialog.
-function SessionEditorPage() {
+// a dialog. With an edit context, the same screens change a planned session
+// and the save goes through the list of changes (CAL-06b).
+function SessionEditorPage({ edit }: Props) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -173,6 +214,7 @@ function SessionEditorPage() {
     initial.current = readInitialState(
       location.state as NavigationState,
       searchParams.get("date"),
+      edit,
     );
   }
   const { draft, isDirty, dispatch, markSaved } = useSessionDraft(
@@ -184,8 +226,13 @@ function SessionEditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState<SavedSession | null>(null);
+  // Edit mode: the changes are shown before being written (CAL-06b)
+  const [isReviewing, setIsReviewing] = useState(false);
   // Read in the same instant a second tap arrives: one session, never two.
   const inFlight = useRef(false);
+  // Set just before leaving for the saved session: the exit question must
+  // not pop up on a change that has just been written.
+  const hasSaved = useRef(false);
   const [openBlockKey, setOpenBlockKey] = useState<string | null>(
     initial.current.openBlockKey,
   );
@@ -210,9 +257,13 @@ function SessionEditorPage() {
   // A changed draft is kept in the tab, for the detour through the catalog.
   useEffect(() => {
     if (isDirty) {
-      saveDraft({ draft, openBlockKey });
+      saveDraft({
+        draft,
+        openBlockKey,
+        appointmentId: edit?.appointmentId ?? null,
+      });
     }
-  }, [draft, openBlockKey, isDirty]);
+  }, [draft, openBlockKey, isDirty, edit]);
 
   const blockCount = draft.blocks.length;
   const exerciseCount = countDraftExercises(draft);
@@ -227,7 +278,8 @@ function SessionEditorPage() {
   // In-app navigation with unsaved changes: blocked until the user answers,
   // except towards the catalog selection, which comes back here.
   const blocker = useBlocker(
-    ({ nextLocation }) => isDirty && nextLocation.pathname !== SELECTION_PATH,
+    ({ nextLocation }) =>
+      isDirty && !hasSaved.current && nextLocation.pathname !== SELECTION_PATH,
   );
 
   // Closing or reloading the tab: the browser shows its own question.
@@ -297,9 +349,58 @@ function SessionEditorPage() {
     }
   }
 
+  // Edit mode: what the change does, line by line (CAL-06b).
+  const changes =
+    edit === undefined ? [] : diffSessionDrafts(edit.savedDraft, draft);
+
+  // Checks the name, then shows the changes instead of saving right away.
+  function review() {
+    const result = sessionDraftSchema.safeParse(draft);
+    const nameIssue = result.success
+      ? undefined
+      : result.error.issues.find((issue) => issue.path[0] === "name");
+    if (nameIssue !== undefined) {
+      setNameError(nameIssue.message);
+      nameRef.current?.focus();
+      return;
+    }
+    setNameError(null);
+    setSaveError(null);
+    setIsReviewing(true);
+  }
+
+  // "Valider" of CAL-06b: the change becomes a new version (RM-017).
+  async function confirmEdit() {
+    if (edit === undefined || inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updateSession(edit.appointmentId, "this", draft);
+      hasSaved.current = true;
+      markSaved();
+      clearDraft();
+      navigate(`/seances/${edit.appointmentId}`, {
+        replace: true,
+        state: { flash: "Séance modifiée." },
+      });
+    } catch (error) {
+      setSaveError(toSaveError(error, draft));
+    } finally {
+      inFlight.current = false;
+      setIsSaving(false);
+    }
+  }
+
   function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    save();
+    if (edit === undefined) {
+      save();
+    } else {
+      review();
+    }
   }
 
   function pickBlockType(blockType: BlockType) {
@@ -359,14 +460,22 @@ function SessionEditorPage() {
 
   // The catalog in selection mode; the draft is saved in the tab first.
   function addExercises(blockKey: string) {
-    saveDraft({ draft, openBlockKey: blockKey });
+    saveDraft({
+      draft,
+      openBlockKey: blockKey,
+      appointmentId: edit?.appointmentId ?? null,
+    });
     navigate(`${SELECTION_PATH}?block=${encodeURIComponent(blockKey)}`);
   }
 
   const exitDialog = blocker.state === "blocked" && (
     <ConfirmDialog
       title="Quitter sans enregistrer ?"
-      message="Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
+      message={
+        edit === undefined
+          ? "Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
+          : "Tes changements ne sont pas enregistrés. Si tu quittes, ils seront perdus."
+      }
       confirmLabel="Quitter"
       cancelLabel="Continuer la séance"
       onConfirm={leave}
@@ -384,6 +493,24 @@ function SessionEditorPage() {
 
   if (saved !== null) {
     return <SessionSavedPanel {...saved} />;
+  }
+
+  if (isReviewing && edit !== undefined) {
+    return (
+      <>
+        <SessionChangesPanel
+          sessionName={draft.name}
+          programName={edit.programName}
+          plannedDate={draft.planned_date}
+          changes={changes}
+          isSaving={isSaving}
+          error={saveError}
+          onConfirm={confirmEdit}
+          onBack={() => setIsReviewing(false)}
+        />
+        {exitDialog}
+      </>
+    );
   }
 
   if (
@@ -475,8 +602,14 @@ function SessionEditorPage() {
           <Icon src={chevronLeftIcon} className="size-7" />
         </button>
         <div className="flex min-w-0 flex-col">
-          <h1 className="text-display-sm">Nouvelle séance</h1>
-          <p className="text-sm text-muted">Séance libre</p>
+          <h1 className="text-display-sm">
+            {edit === undefined ? "Nouvelle séance" : "Modifier la séance"}
+          </h1>
+          <p className="truncate text-sm text-muted">
+            {edit === undefined
+              ? "Séance libre"
+              : (edit.programName ?? draft.name)}
+          </p>
         </div>
       </header>
 
@@ -487,34 +620,59 @@ function SessionEditorPage() {
       >
         {/* While saving, nothing can change anymore: one fieldset freezes all. */}
         <fieldset disabled={isSaving} className="flex flex-col gap-6">
-          <button
-            type="button"
-            onClick={() => setIsPickingDate(true)}
-            aria-haspopup="dialog"
-            className="flex h-field items-center justify-between rounded-btn border border-base-300 bg-base-100 px-4 text-left"
-          >
-            <span className="flex flex-col">
-              <span className="text-overline uppercase text-accent">
-                Date *
-              </span>
-              <span className="font-semibold">
-                {formatLongDate(draft.planned_date)}
-              </span>
-            </span>
-            <Icon src={chevronDownIcon} className="size-5 text-muted" />
-          </button>
-          <TextField
-            id="planned_time"
-            label="Heure (facultatif)"
-            type="time"
-            value={draft.planned_time ?? ""}
-            onChange={(event) =>
-              dispatch({
-                type: "setTime",
-                time: event.target.value === "" ? null : event.target.value,
-              })
-            }
-          />
+          {edit === undefined ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsPickingDate(true)}
+                aria-haspopup="dialog"
+                className="flex h-field items-center justify-between rounded-btn border border-base-300 bg-base-100 px-4 text-left"
+              >
+                <span className="flex flex-col">
+                  <span className="text-overline uppercase text-accent">
+                    Date *
+                  </span>
+                  <span className="font-semibold">
+                    {formatLongDate(draft.planned_date)}
+                  </span>
+                </span>
+                <Icon src={chevronDownIcon} className="size-5 text-muted" />
+              </button>
+              <TextField
+                id="planned_time"
+                label="Heure (facultatif)"
+                type="time"
+                value={draft.planned_time ?? ""}
+                onChange={(event) =>
+                  dispatch({
+                    type: "setTime",
+                    time: event.target.value === "" ? null : event.target.value,
+                  })
+                }
+              />
+            </>
+          ) : (
+            // The date and the time belong to the appointment: they change
+            // through "Déplacer" (US-25), never here.
+            <div className="flex flex-col gap-1">
+              <p className="flex h-field items-center rounded-btn border border-base-300 bg-soft px-4">
+                <span className="flex flex-col">
+                  <span className="text-overline uppercase text-accent">
+                    Date
+                  </span>
+                  <span className="font-semibold">
+                    {formatLongDate(draft.planned_date)}
+                    {draft.planned_time === null
+                      ? ""
+                      : ` · ${draft.planned_time}`}
+                  </span>
+                </span>
+              </p>
+              <p className="text-sm text-muted">
+                Pour changer la date ou l'heure : « Déplacer ».
+              </p>
+            </div>
+          )}
           <TextField
             id="session_name"
             label="Nom de la séance"
@@ -611,11 +769,30 @@ function SessionEditorPage() {
             <div className="mx-auto max-w-md">
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={
+                  isSaving || (edit !== undefined && changes.length === 0)
+                }
+                aria-describedby={
+                  edit !== undefined && changes.length === 0
+                    ? "no-change"
+                    : undefined
+                }
                 className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
               >
-                {isSaving ? "Enregistrement…" : "Enregistrer la séance"}
+                {edit !== undefined
+                  ? "Vérifier les changements"
+                  : isSaving
+                    ? "Enregistrement…"
+                    : "Enregistrer la séance"}
               </button>
+              {edit !== undefined && changes.length === 0 && (
+                <p
+                  id="no-change"
+                  className="mt-2 text-center text-sm text-muted"
+                >
+                  Rien n'a changé pour l'instant.
+                </p>
+              )}
             </div>
           </div>
         </fieldset>

@@ -13,6 +13,8 @@ export type StoredDraft = {
   draft: SessionDraft;
   // The block open on screen (A4/A6), to come back to it
   openBlockKey: string | null;
+  // The appointment being modified (US-17), null for a new session
+  appointmentId?: number | null;
 };
 
 export function loadDraft(): StoredDraft | null {

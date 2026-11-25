@@ -130,6 +130,12 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
   const block =
     blockIndex === -1 ? null : storedDraft?.draft.blocks[blockIndex];
   const existingCount = block?.exercises.length ?? 0;
+  // Where the kept draft comes from: a new session, or one being changed.
+  const editedAppointmentId = storedDraft?.appointmentId ?? null;
+  const editorPath =
+    editedAppointmentId === null
+      ? "/seances/nouvelle"
+      : `/seances/${editedAppointmentId}/modifier`;
 
   const selection = useExerciseSelection(
     selectionMode === "block" ? `block:${blockKey ?? ""}` : "catalog",
@@ -287,7 +293,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
   // the selection page was opened directly.
   function backToEditor() {
     if (location.key === "default") {
-      navigate("/seances/nouvelle", { replace: true });
+      navigate(editorPath, { replace: true });
     } else {
       navigate(-1);
     }
@@ -331,7 +337,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
 
   // Block mode without a known block: nothing to select for, back to the editor.
   if (selectionMode === "block" && block === null) {
-    return <Navigate to="/seances/nouvelle" replace />;
+    return <Navigate to={editorPath} replace />;
   }
 
   return (

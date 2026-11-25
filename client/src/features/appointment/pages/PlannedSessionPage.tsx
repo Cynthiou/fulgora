@@ -19,6 +19,7 @@ import {
   readCurrentWorkoutSession,
   startWorkoutSession,
 } from "../../workout-session/services/workoutSessionService";
+import SessionActionsSheet from "../components/SessionActionsSheet";
 import { useAppointment } from "../hooks/useAppointment";
 
 const PRIMARY_BUTTON =
@@ -38,6 +39,10 @@ function PlannedSessionPage() {
   const [inProgress, setInProgress] = useState<CurrentWorkoutSession | null>(
     null,
   );
+  // The "⋯" menu of the header (CAL-04m)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // "Séance modifiée.", handed over by the editor
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   // Read at the very instant of a second tap: one start, never two.
   const inFlight = useRef(false);
 
@@ -104,7 +109,7 @@ function PlannedSessionPage() {
         >
           <Icon src={chevronLeftIcon} className="size-7" />
         </button>
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <h1 className="text-display-sm">Séance</h1>
           {appointment !== null && (
             <p className="truncate text-sm text-muted">
@@ -112,6 +117,19 @@ function PlannedSessionPage() {
             </p>
           )}
         </div>
+        {appointment !== null && (
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            aria-haspopup="dialog"
+            aria-label="Actions de la séance"
+            className="flex size-tap items-center justify-center rounded-btn text-secondary"
+          >
+            <span aria-hidden="true" className="text-xl leading-none">
+              ⋯
+            </span>
+          </button>
+        )}
       </header>
 
       <div className="flex flex-1 flex-col gap-6 p-4 pb-28">
@@ -138,6 +156,18 @@ function PlannedSessionPage() {
 
         {!isLoading && appointment !== null && error === null && !notFound && (
           <>
+            {flash !== null && (
+              <p
+                role="status"
+                className="flex gap-2 rounded-card border border-base-300 bg-soft p-3 font-semibold"
+              >
+                <span aria-hidden="true" className="text-status-done">
+                  ✓
+                </span>
+                {flash}
+              </p>
+            )}
+
             <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
               <div className="flex items-center justify-between gap-2">
                 <StatusBadge
@@ -238,24 +268,14 @@ function PlannedSessionPage() {
                 Ce rendez-vous est annulé.
               </p>
             ) : exerciseCount === 0 ? (
-              <>
-                {/* A session without any exercise cannot start (RM-018);
-                    changing a saved session is US-17. */}
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby="add-exercises-later"
-                  className={PRIMARY_BUTTON}
-                >
-                  Ajouter des exercices
-                </button>
-                <p
-                  id="add-exercises-later"
-                  className="text-center text-sm text-muted"
-                >
-                  Modifier une séance enregistrée arrive bientôt.
-                </p>
-              </>
+              // A session without any exercise cannot start (RM-018): the
+              // editor is the way out (US-17).
+              <Link
+                to={`/seances/${appointment.id}/modifier`}
+                className={PRIMARY_BUTTON}
+              >
+                Ajouter des exercices
+              </Link>
             ) : (
               <button
                 type="button"
@@ -274,6 +294,18 @@ function PlannedSessionPage() {
             )}
           </div>
         </div>
+      )}
+
+      {isMenuOpen && appointment !== null && (
+        <SessionActionsSheet
+          appointmentId={appointment.id}
+          canEdit={
+            appointment.workout_session === null &&
+            appointment.status !== "cancelled" &&
+            appointment.status !== "attended"
+          }
+          onClose={() => setIsMenuOpen(false)}
+        />
       )}
 
       {inProgress !== null && (

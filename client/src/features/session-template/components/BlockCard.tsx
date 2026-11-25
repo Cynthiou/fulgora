@@ -24,13 +24,16 @@ function BlockCard({ block, index, onOpen, onRemove }: Props) {
 
   return (
     <li className="flex items-stretch gap-2 rounded-card border border-base-300 bg-base-100 shadow-card">
+      {/* The button is named by what it shows, the hidden words only add the
+          action: an aria-label that drops the visible text fails axe. */}
       <button
         type="button"
         onClick={onOpen}
-        aria-label={`Ouvrir le bloc ${label}`}
         className="flex min-w-0 flex-1 flex-col gap-1 p-4 text-left"
       >
-        <span className="font-semibold">{label}</span>
+        <span className="font-semibold">
+          <span className="sr-only">Ouvrir le bloc</span> {label}
+        </span>
         <span className="line-clamp-2 text-sm text-muted">{summary}</span>
       </button>
       <button

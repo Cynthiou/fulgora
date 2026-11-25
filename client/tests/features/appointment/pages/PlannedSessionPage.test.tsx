@@ -60,6 +60,10 @@ function renderPage() {
     [
       { path: "/", element: <p>Page accueil</p> },
       { path: "/seances/:appointmentId", element: <PlannedSessionPage /> },
+      {
+        path: "/seances/:appointmentId/modifier",
+        element: <p>Page modifier</p>,
+      },
       { path: "/entrainement/:id", element: <WorkoutStub /> },
     ],
     { initialEntries: ["/", "/seances/12"], initialIndex: 1 },
@@ -169,15 +173,55 @@ describe("PlannedSessionPage", () => {
     expect(await screen.findByText("Page entraînement 55")).toBeTruthy();
   });
 
-  it("cannot start an empty session, and says when it was already done", async () => {
+  it("opens the ⋯ menu and leads to the editor (CAL-04m)", async () => {
+    readAppointmentMock.mockResolvedValue(planned);
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+    expect(screen.getByText("Blocs, exercices, séries")).toBeTruthy();
+    // Moving and cancelling arrive with US-25 and US-26
+    expect(
+      (screen.getByRole("button", { name: /Déplacer/ }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    await user.click(
+      screen.getByRole("button", { name: /Modifier la séance/ }),
+    );
+    expect(await screen.findByText("Page modifier")).toBeTruthy();
+  });
+
+  it("never offers to change a session already done", async () => {
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      status: "attended",
+      workout_session: { id: 8, status: "completed" },
+    });
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+    expect(
+      (
+        screen.getByRole("button", {
+          name: /Modifier la séance/,
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+  });
+
+  it("cannot start an empty session, and leads to the editor instead", async () => {
     readAppointmentMock.mockResolvedValue({ ...planned, blocks: [] });
     renderPage();
     await screen.findByText("Haut du corps");
 
-    const add = screen.getByRole("button", {
-      name: "Ajouter des exercices",
-    }) as HTMLButtonElement;
-    expect(add.disabled).toBe(true);
+    const add = screen.getByRole("link", { name: "Ajouter des exercices" });
+    expect(add.getAttribute("href")).toBe("/seances/12/modifier");
     expect(screen.queryByText(/Démarrer la séance/)).toBeNull();
   });
 

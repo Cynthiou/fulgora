@@ -1,8 +1,11 @@
 import type {
   AppointmentDetail,
   AppointmentListItem,
+  EditableSession,
+  EditScope,
   FreeSessionCreated,
   SessionDraft,
+  SessionEdited,
 } from "shared";
 import { apiFetch } from "../../../services/api";
 
@@ -33,4 +36,25 @@ export function readAppointment(
   signal?: AbortSignal,
 ): Promise<AppointmentDetail> {
   return apiFetch<AppointmentDetail>(`/appointments/${id}`, { signal });
+}
+
+// GET /api/appointments/:id/session: the planned session as a draft, to open
+// the editor on it (US-17).
+export function readEditableSession(
+  id: number,
+  signal?: AbortSignal,
+): Promise<EditableSession> {
+  return apiFetch<EditableSession>(`/appointments/${id}/session`, { signal });
+}
+
+// PUT /api/appointments/:id/session: the change, saved as a new version.
+export function updateSession(
+  id: number,
+  scope: EditScope,
+  session: SessionDraft,
+): Promise<SessionEdited> {
+  return apiFetch<SessionEdited>(`/appointments/${id}/session`, {
+    method: "PUT",
+    body: JSON.stringify({ scope, session }),
+  });
 }

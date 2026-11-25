@@ -161,6 +161,29 @@ test("captures the screens of the MVP", async ({ page }) => {
   await page.getByRole("link", { name: /Démarrer la séance/ }).click();
   await expect(page.getByText("Planifiée")).toBeVisible();
   await shoot(page, "b1-seance-prevue");
+
+  // CAL-04m le menu ⋯, CAL-06 l'éditeur, CAL-06b les changements (US-17)
+  await page.getByRole("button", { name: "Actions de la séance" }).click();
+  await expect(page.getByText("Blocs, exercices, séries")).toBeVisible();
+  await shoot(page, "cal-04m-menu-seance");
+  await page.getByRole("button", { name: /Modifier la séance/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Modifier la séance",
+  );
+  await shoot(page, "cal-06-modifier-la-seance");
+  await page.getByLabel(/^Nom de la séance/).fill("Bas du corps");
+  await page.getByRole("button", { name: "Vérifier les changements" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Vérifier les changements",
+  );
+  await shoot(page, "cal-06b-verifier-les-changements");
+  await page.getByRole("button", { name: "Revenir" }).click();
+  // Leaving a changed draft asks first (the name went back, the draft is
+  // still seen as touched).
+  await page.getByRole("button", { name: "Retour" }).click();
+  await page.getByRole("button", { name: "Quitter" }).click();
+  await expect(page.getByText("Planifiée")).toBeVisible();
+
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
   await expect(page.getByText("En cours · séance libre")).toBeVisible();
   await shoot(page, "b2-seance-en-cours");
