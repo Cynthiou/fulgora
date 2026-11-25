@@ -1,4 +1,5 @@
 import express from "express";
+import userRouter from "./modules/user/userRouter.js";
 
 const router = express.Router();
 
@@ -7,7 +8,7 @@ router.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Each module will plug its own router here, for example:
-// router.use("/exercises", exerciseRouter);
+// Each module plugs its own router here.
+router.use("/users", userRouter);
 
 export default router;
