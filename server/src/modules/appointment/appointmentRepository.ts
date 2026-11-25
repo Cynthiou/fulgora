@@ -104,6 +104,8 @@ export type AppointmentLockRow = {
   id: number;
   status: AppointmentStatus;
   session_version_id: number;
+  // null for a free session (RM-015)
+  program_id: number | null;
 };
 
 // The appointment to start, locked until the transaction ends (FOR UPDATE):
@@ -114,7 +116,7 @@ export async function readAppointmentForUpdate(
   db: Queryable = client,
 ): Promise<AppointmentLockRow | null> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT id, status, session_version_id
+    `SELECT id, status, session_version_id, program_id
        FROM appointment
       WHERE id = ? AND owner_user_id = ?
       FOR UPDATE`,
@@ -172,15 +174,16 @@ export type VersionBlockRow = {
   block_type: BlockType;
   name: string | null;
   position: number;
+  instructions: string | null;
 };
 
-// The blocks of a session version, in order (B1).
+// The blocks of a session version, in order (B1, and the editor of US-17).
 export async function readVersionBlocks(
   versionId: number,
   db: Queryable = client,
 ): Promise<VersionBlockRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT id, block_type, name, position
+    `SELECT id, block_type, name, position, instructions
        FROM template_block
       WHERE session_version_id = ?
       ORDER BY position`,
@@ -298,4 +301,20 @@ export async function countWorkoutSetsBySession(
     planned: Number(row.planned),
     validated: Number(row.validated),
   }));
+}
+
+// Points several appointments at a new version of their session (RM-029).
+// Uses query, not execute, because of the list in IN (?) (common rule 8).
+export async function updateAppointmentsVersion(
+  ids: number[],
+  sessionVersionId: number,
+  db: Queryable = client,
+): Promise<void> {
+  if (ids.length === 0) {
+    return;
+  }
+  await db.query(
+    "UPDATE appointment SET session_version_id = ? WHERE id IN (?)",
+    [sessionVersionId, ids],
+  );
 }

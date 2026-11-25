@@ -23,16 +23,59 @@ export async function createSessionTemplate(
   return result.insertId;
 }
 
-// Version 1 of a new session (RM-016: a session is never edited in place).
+// One version of a session: number 1 at the creation, the next one at every
+// change (RM-016, RM-017: a version is never edited in place).
 export async function createSessionVersion(
   sessionTemplateId: number,
+  versionNumber: number,
   db: Queryable = client,
 ): Promise<number> {
   const [result] = await db.execute<Result>(
-    "INSERT INTO session_version (session_template_id, version_number) VALUES (?, 1)",
-    [sessionTemplateId],
+    "INSERT INTO session_version (session_template_id, version_number) VALUES (?, ?)",
+    [sessionTemplateId, versionNumber],
   );
   return result.insertId;
+}
+
+// The number the next version will take. FOR UPDATE: two changes at the same
+// time wait for each other instead of fighting over the unique index.
+export async function readNextVersionNumber(
+  sessionTemplateId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COALESCE(MAX(version_number), 0) + 1 AS next_number
+       FROM session_version
+      WHERE session_template_id = ?
+      FOR UPDATE`,
+    [sessionTemplateId],
+  );
+  return Number(rows[0]?.next_number ?? 1);
+}
+
+// Which session a version belongs to.
+export async function readVersionTemplateId(
+  sessionVersionId: number,
+  db: Queryable = client,
+): Promise<number | null> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT session_template_id FROM session_version WHERE id = ?",
+    [sessionVersionId],
+  );
+  const id = rows[0]?.session_template_id;
+  return id === undefined ? null : Number(id);
+}
+
+// The name belongs to the session, not to one of its versions (US-17).
+export async function updateSessionTemplateName(
+  sessionTemplateId: number,
+  name: string,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("UPDATE session_template SET name = ? WHERE id = ?", [
+    name,
+    sessionTemplateId,
+  ]);
 }
 
 // One block of a version, at its position (1, 2, 3...), RM-024.
