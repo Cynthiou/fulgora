@@ -73,15 +73,15 @@ Rechargement de l'état réel.
 
 ## Tâches techniques
 
-- [ ] Backend : tâche `updateAppointmentStatuses()` toutes les 5 min, pour chaque fuseau : `UPDATE appointment SET status = 'to_confirm' WHERE status = 'planned' AND planned_date < ?` (aujourd'hui) puis `UPDATE … SET status = 'missed' WHERE status = 'to_confirm' AND planned_date <= ?` (aujourd'hui − 4 jours) ; les rendez-vous avec une séance réalisée sont exclus
-- [ ] Backend : notifications créées par `INSERT … SELECT` sur les rendez-vous concernés, sans doublon grâce à l'index unique (`ON DUPLICATE KEY UPDATE id = id`)
-- [ ] Backend : `markNotDone(id, userId)` : `to_confirm` → `missed`, notification « à confirmer » lue, **pas** de notification « manquée »
-- [ ] Shared : `computeAppointmentStatus` (US-25), `getMissedDeadline(plannedDate)` (« samedi 28 novembre à 00 h »)
-- [ ] Frontend : `ConfirmPastSessionPage.tsx` (CAL-08), messages CAL-08c / NOT-03b
-- [ ] Tests : back avec dates passées en paramètre : J+1 → à confirmer, J+4 → manquée, effectuée jamais touchée, relance sans doublon, « Pas faite » sans notification « manquée »
-- [ ] Tests : unitaires `getMissedDeadline`
+- [x] Backend : tâche `updateAppointmentStatuses()` toutes les 5 min, fuseau par fuseau, les rendez-vous avec une séance réalisée exclus
+- [ ] Backend : notifications : **repoussé à l'US-46**, la table n'existe pas encore
+- [x] Backend : `markAppointmentNotDone(id, userId)` : `to_confirm` → `missed` ; la notification suivra l'US-46
+- [x] Shared : `computeAppointmentStatus` (US-25) et `formatConfirmDeadline(plannedDate)` (« samedi 28 novembre à 00 h »)
+- [x] Frontend : `ConfirmPastSession.tsx` (CAL-08) sur l'écran de la séance, message CAL-08c après la réponse
+- [x] Tests : back : J+1 → à confirmer, J+4 → manquée, séance faite jamais touchée, deuxième passage sans effet, « Pas faite » → manquée, 409 et 404
+- [x] Tests : unitaires `formatConfirmDeadline` et `computeAppointmentStatus`
 
 ## Definition of Done
 
-- [ ] Tâche planifiée testée sans attendre minuit
+- [x] Tâche planifiée testée sans attendre minuit (elle s'appelle directement dans les tests)
 - [ ] Code relu et fusionné via pull request
