@@ -8,8 +8,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import LoginPage from "./features/user/pages/LoginPage";
+import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
 import HomePage from "./pages/HomePage";
 
@@ -21,6 +23,11 @@ const router = createBrowserRouter([
       // Public pages
       { path: "/inscription", element: <SignupPage /> },
       { path: "/connexion", element: <LoginPage /> },
+      // Private pages: never shown without a connected user
+      {
+        element: <ProtectedRoute />,
+        children: [{ path: "/profil", element: <ProfilePage /> }],
+      },
     ],
   },
 ]);

@@ -13,3 +13,8 @@ export function login(payload: LoginPayload): Promise<PublicUser> {
 export function readMe(signal?: AbortSignal): Promise<PublicUser> {
   return apiFetch<PublicUser>("/auth/me", { signal });
 }
+
+// POST /api/auth/logout: the server expires the cookie (204).
+export function logout(): Promise<void> {
+  return apiFetch<void>("/auth/logout", { method: "POST" });
+}
