@@ -112,27 +112,27 @@ Structure grise, chrono masqué tant que l'heure de début n'est pas connue.
 
 ## Tâches techniques
 
-- [ ] BDD : `workout_session`, `workout_block`, `workout_exercise`, `workout_set` ; index unique `uq_one_active_workout_per_user`
-- [ ] Backend : `appointmentRepository.readAppointmentForUpdate(id, userId)` : `SELECT id, status, session_version_id FROM appointment WHERE id = ? AND owner_user_id = ? FOR UPDATE`
-- [ ] Backend : `sessionTemplateRepository.countVersionExercises(versionId)` (jointure `template_block_exercise` → `template_block`)
-- [ ] Backend : `workoutSessionRepository.createWorkoutSession` : `INSERT … (appointment_id, owner_user_id, status, started_at, last_activity_at) VALUES (?, ?, 'in_progress', NOW(3), NOW(3))`
-- [ ] Backend : `copyTemplateBlocks(workoutSessionId, versionId)`, `copyTemplateExercises(workoutSessionId)`, `copyPlannedSets(workoutSessionId)` : trois `INSERT … SELECT` (colonnes `_planned` remplies, `_actual` vides)
-- [ ] Backend : `appointmentRepository.updateAppointmentStatus(id, status)`
-- [ ] Backend : `workoutSessionActions.start`, dans `withTransaction` : verrou → statut → nombre d'exercices → création (lire `ER_DUP_ENTRY` sur `uq_one_active_workout_per_user` → 409 avec l'identifiant de la séance en cours) → copie → `attended` → 201
-- [ ] Backend : `readCurrentWorkoutSession(userId)`, `readWorkoutSession(id, userId)`, `readWorkoutBlocks(id)`, `readWorkoutExercises(id)` (avec nom, groupe et mesures de l'exercice), `readWorkoutSets(id)` ; `workoutSessionActions.read` assemble l'arbre
-- [ ] Backend : routes : `POST /api/workout-sessions` ; `GET /api/workout-sessions/current` **déclarée avant** `GET /api/workout-sessions/:id`
-- [ ] Shared : `shared/workout-session.ts` : types `WorkoutSessionTree`, `WorkoutSetRow` ; `countValidatedSets`, `countPlannedSets`
-- [ ] Frontend : `workoutSessionService` : `startWorkoutSession(appointmentId)`, `readCurrentWorkoutSession()`, `readWorkoutSession(id)`
-- [ ] Frontend : `hooks/useWorkoutSession(id)`, `hooks/useSessionChrono(startedAt)` (calcul à partir de l'heure de début, pas d'un compteur)
-- [ ] Frontend : `pages/PlannedSessionPage.tsx` (B1), `pages/WorkoutPage.tsx` (B2), `components/WorkoutExerciseRow.tsx`, `components/AlreadyInProgressDialog.tsx`
-- [ ] Routing : `/seances/:appointmentId` (B1), `/entrainement/:id` (B2, plein écran)
-- [ ] Tests : back : copie identique au prévu ; 2ᵉ démarrage → 409 ; **deux démarrages simultanés** (`Promise.all`) → un seul 201 ; séance vide → 422 ; rendez-vous d'un autre → 404 ; rendez-vous annulé → 409 ; modifier ensuite une `planned_set` ne change pas `workout_set.*_planned`
-- [ ] Tests : unitaires : `useSessionChrono` avec faux minuteurs
-- [ ] Tests : E2E : démarrer depuis l'Accueil, recharger, « Reprendre ma séance » ; axe sur B1 et B2
+- [x] BDD : `workout_session`, `workout_block`, `workout_exercise`, `workout_set` ; index unique `uq_one_active_workout_per_user`
+- [x] Backend : `appointmentRepository.readAppointmentForUpdate(id, userId)` : `SELECT id, status, session_version_id FROM appointment WHERE id = ? AND owner_user_id = ? FOR UPDATE`
+- [x] Backend : `sessionTemplateRepository.countVersionExercises(versionId)` (jointure `template_block_exercise` → `template_block`)
+- [x] Backend : `workoutSessionRepository.createWorkoutSession` : `INSERT … (appointment_id, owner_user_id, status, started_at, last_activity_at) VALUES (?, ?, 'in_progress', NOW(3), NOW(3))`
+- [x] Backend : `copyTemplateBlocks(workoutSessionId, versionId)`, `copyTemplateExercises(workoutSessionId)`, `copyPlannedSets(workoutSessionId)` : trois `INSERT … SELECT` (colonnes `_planned` remplies, `_actual` vides)
+- [x] Backend : `appointmentRepository.updateAppointmentStatus(id, status)`
+- [x] Backend : `workoutSessionActions.start`, dans `withTransaction` : verrou → statut → nombre d'exercices → création (lire `ER_DUP_ENTRY` sur `uq_one_active_workout_per_user` → 409 avec l'identifiant de la séance en cours) → copie → `attended` → 201
+- [x] Backend : `readCurrentWorkoutSession(userId)`, `readWorkoutSession(id, userId)`, `readWorkoutBlocks(id)`, `readWorkoutExercises(id)` (avec nom, groupe et mesures de l'exercice), `readWorkoutSets(id)` ; `workoutSessionActions.read` assemble l'arbre
+- [x] Backend : routes : `POST /api/workout-sessions` ; `GET /api/workout-sessions/current` **déclarée avant** `GET /api/workout-sessions/:id`
+- [x] Shared : `shared/workout-session.ts` : types `WorkoutSessionTree`, `WorkoutSetRow` ; `countValidatedSets`, `countPlannedSets`
+- [x] Frontend : `workoutSessionService` : `startWorkoutSession(appointmentId)`, `readCurrentWorkoutSession()`, `readWorkoutSession(id)`
+- [x] Frontend : `hooks/useWorkoutSession(id)`, `hooks/useSessionChrono(startedAt)` (calcul à partir de l'heure de début, pas d'un compteur)
+- [x] Frontend : `pages/PlannedSessionPage.tsx` (B1), `pages/WorkoutPage.tsx` (B2), `components/WorkoutExerciseRow.tsx`, `components/AlreadyInProgressDialog.tsx`
+- [x] Routing : `/seances/:appointmentId` (B1), `/entrainement/:id` (B2, plein écran)
+- [x] Tests : back : copie identique au prévu ; 2ᵉ démarrage → 409 ; **deux démarrages simultanés** (`Promise.all`) → un seul 201 ; séance vide → 422 ; rendez-vous d'un autre → 404 ; rendez-vous annulé → 409 ; modifier ensuite une `planned_set` ne change pas `workout_set.*_planned`
+- [x] Tests : unitaires : `useSessionChrono` avec faux minuteurs
+- [x] Tests : E2E : démarrer depuis l'Accueil, recharger, « Reprendre ma séance » ; axe sur B1 et B2
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Test de concurrence vert
+- [x] Test de concurrence vert
 - [ ] Mobile-first 375 px
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
