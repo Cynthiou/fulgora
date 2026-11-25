@@ -21,6 +21,7 @@ import SessionEditorPage from "./features/session-template/pages/SessionEditorPa
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
+import WorkoutExercisePage from "./features/workout-session/pages/WorkoutExercisePage";
 import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
                 element: <PlannedSessionPage />,
               },
               { path: "/entrainement/:id", element: <WorkoutPage /> },
+              {
+                path: "/entrainement/:id/exercices/:exerciseId",
+                element: <WorkoutExercisePage />,
+              },
               // The catalog in selection mode for a block of the draft
               {
                 path: "/seances/nouvelle/exercices",

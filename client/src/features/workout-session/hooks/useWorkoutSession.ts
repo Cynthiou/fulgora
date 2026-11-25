@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { WorkoutSessionTree } from "shared";
+import type { WorkoutSessionTree, WorkoutSetRow } from "shared";
 import { isAbortError } from "../../../services/api";
 import { ApiError } from "../../../services/apiError";
 import { readWorkoutSession } from "../services/workoutSessionService";
@@ -44,11 +44,32 @@ export function useWorkoutSession(id: number) {
     return () => controller.abort();
   }, [id, attempt]);
 
+  // One set changed (validated, corrected): the tree on screen follows.
+  function replaceSet(updated: WorkoutSetRow) {
+    setSession((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            blocks: current.blocks.map((block) => ({
+              ...block,
+              exercises: block.exercises.map((exercise) => ({
+                ...exercise,
+                sets: exercise.sets.map((set) =>
+                  set.id === updated.id ? updated : set,
+                ),
+              })),
+            })),
+          },
+    );
+  }
+
   return {
     session,
     isLoading,
     notFound,
     error,
     reload: () => setAttempt((count) => count + 1),
+    replaceSet,
   };
 }

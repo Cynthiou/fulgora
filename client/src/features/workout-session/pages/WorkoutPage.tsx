@@ -102,6 +102,7 @@ function WorkoutPage() {
                     {block.exercises.map((exercise) => (
                       <WorkoutExerciseRow
                         key={exercise.id}
+                        sessionId={session.id}
                         exercise={exercise}
                       />
                     ))}

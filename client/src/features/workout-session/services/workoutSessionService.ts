@@ -1,6 +1,8 @@
 import type {
+  ActualSetValues,
   CurrentWorkoutSession,
   WorkoutSessionTree,
+  WorkoutSetRow,
   WorkoutStarted,
 } from "shared";
 import { apiFetch } from "../../../services/api";
@@ -30,4 +32,15 @@ export function readWorkoutSession(
   signal?: AbortSignal,
 ): Promise<WorkoutSessionTree> {
   return apiFetch<WorkoutSessionTree>(`/workout-sessions/${id}`, { signal });
+}
+
+// PUT /api/workout-sets/:id: what was really done on a set (US-29).
+export function validateSet(
+  setId: number,
+  values: ActualSetValues,
+): Promise<WorkoutSetRow> {
+  return apiFetch<WorkoutSetRow>(`/workout-sets/${setId}`, {
+    method: "PUT",
+    body: JSON.stringify(values),
+  });
 }
