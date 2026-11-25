@@ -32,9 +32,10 @@ export async function logIn(page: Page, username: string) {
   await page.getByRole("button", { name: "Se connecter" }).click();
 }
 
-// The home page shows today's date as its title.
+// The home page greets the user and dates the day above it (03-2).
 export async function expectHomePage(page: Page) {
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    formatLongDate(todayInParis()),
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^Salut /);
+  await expect(
+    page.getByText(formatLongDate(todayInParis()), { exact: true }),
+  ).toBeVisible();
 }

@@ -464,6 +464,28 @@ export function formatSetSummary(
   return [`${count} ${noun}`, ...parts].join(" · ");
 }
 
+// "4 × 8 · 60 kg", "3 × 1 min": the short line of a planned exercise, as
+// the high fidelity mockups write it (03-2, CAL-04).
+export function formatSetLine(
+  sets: PlannedSetValues[],
+  codes: MeasureCode[],
+  isBodyweight = false,
+): string | null {
+  const first = sets[0];
+  if (first === undefined) {
+    return null;
+  }
+  const allSame = sets.every((set) => sameValues(set, first));
+  const parts = describeSet(first, codes, isBodyweight);
+  if (!allSame || parts.length === 0) {
+    return `${sets.length} × …`;
+  }
+  // The repetitions join the count with a ×, the rest follows with a dot
+  const [head, ...rest] = parts;
+  const headValue = (head ?? "").replace(" rép.", "");
+  return [`${sets.length} × ${headValue}`, ...rest].join(" · ");
+}
+
 // "1 sélectionné", "3 sélectionnés".
 export function formatSelectedCount(count: number): string {
   return `${count} ${count > 1 ? "sélectionnés" : "sélectionné"}`;

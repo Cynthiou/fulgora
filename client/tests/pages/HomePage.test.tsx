@@ -5,16 +5,29 @@ import {
   type AppointmentListItem,
   type CurrentWorkoutSession,
   formatLongDate,
+  type PublicUser,
   todayInParis,
 } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { readAppointments } from "../../src/features/appointment/services/appointmentService";
+import {
+  AuthContext,
+  type AuthContextValue,
+} from "../../src/contexts/AuthContext";
+import {
+  readAppointment,
+  readAppointments,
+} from "../../src/features/appointment/services/appointmentService";
+import { readPrograms } from "../../src/features/program/services/programService";
 import { readCurrentWorkoutSession } from "../../src/features/workout-session/services/workoutSessionService";
 import HomePage from "../../src/pages/HomePage";
 import { ApiError } from "../../src/services/apiError";
 
 vi.mock("../../src/features/appointment/services/appointmentService", () => ({
   readAppointments: vi.fn(),
+  readAppointment: vi.fn(),
+}));
+vi.mock("../../src/features/program/services/programService", () => ({
+  readPrograms: vi.fn(),
 }));
 vi.mock(
   "../../src/features/workout-session/services/workoutSessionService",
@@ -23,6 +36,8 @@ vi.mock(
   }),
 );
 const readAppointmentsMock = vi.mocked(readAppointments);
+const readAppointmentMock = vi.mocked(readAppointment);
+const readProgramsMock = vi.mocked(readPrograms);
 const readCurrentMock = vi.mocked(readCurrentWorkoutSession);
 
 const today = todayInParis();
@@ -46,7 +61,21 @@ function appointment(
   };
 }
 
+// The home page greets the user by name (03-2): it needs the context.
+const lea: PublicUser = {
+  id: 1,
+  username: "lea.m",
+  email: "lea@exemple.fr",
+  sex: "female",
+};
+
 function renderHome() {
+  const auth: AuthContextValue = {
+    user: lea,
+    isLoading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  };
   const router = createMemoryRouter(
     [
       { path: "/", element: <HomePage /> },
@@ -54,7 +83,11 @@ function renderHome() {
     ],
     { initialEntries: ["/"] },
   );
-  render(<RouterProvider router={router} />);
+  render(
+    <AuthContext.Provider value={auth}>
+      <RouterProvider router={router} />
+    </AuthContext.Provider>,
+  );
   return userEvent.setup();
 }
 
@@ -67,17 +100,23 @@ async function waitForContent() {
 describe("HomePage", () => {
   beforeEach(() => {
     readAppointmentsMock.mockReset();
+    readAppointmentMock.mockReset();
+    readAppointmentMock.mockRejectedValue(new ApiError(404, "X", "none"));
+    readProgramsMock.mockReset();
+    readProgramsMock.mockResolvedValue([]);
     readCurrentMock.mockReset();
     readCurrentMock.mockResolvedValue(null);
   });
 
-  it("shows today's date and a loading status first", () => {
+  it("greets the user, dates the day and shows a loading status", () => {
     readAppointmentsMock.mockReturnValue(new Promise(() => {}));
     renderHome();
 
+    // Screen 03-2: "Salut Lucas" is the title, the date is above it
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-      formatLongDate(today),
+      "Salut lea.m",
     );
+    expect(screen.getByText(formatLongDate(today))).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain(
       "Chargement de l'accueil",
     );
@@ -94,9 +133,7 @@ describe("HomePage", () => {
     ).toBeTruthy();
     // Already the main action: not repeated in the quick actions.
     expect(screen.queryByRole("link", { name: "Créer une séance" })).toBeNull();
-    expect(
-      screen.getByRole("link", { name: "Voir mon planning" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Mon planning" })).toBeTruthy();
     expect(screen.getByText(/Aucun programme en cours/)).toBeTruthy();
   });
 
@@ -130,7 +167,7 @@ describe("HomePage", () => {
     const user = renderHome();
     await waitForContent();
 
-    expect(screen.getByText("3 aujourd'hui")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /3 aujourd'hui/ })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 3 }).textContent).toBe(
       "Jambes",
     );
@@ -163,7 +200,8 @@ describe("HomePage", () => {
       screen
         .getByRole("link", { name: "Ajouter des exercices" })
         .getAttribute("href"),
-    ).toBe("/seances/4");
+      // The editor of the session, where the exercises are added (US-17)
+    ).toBe("/seances/4/modifier");
   });
 
   it("puts the session in progress first and hides every other start", async () => {
@@ -225,10 +263,8 @@ describe("HomePage", () => {
     expect(screen.getByRole("alert").textContent).toContain(
       "Impossible de charger tes séances",
     );
-    expect(screen.queryByText("Séance du jour")).toBeNull();
-    expect(
-      screen.getByRole("link", { name: "Voir mon planning" }),
-    ).toBeTruthy();
+    expect(screen.queryByText("Aucune séance prévue")).toBeNull();
+    expect(screen.getByRole("link", { name: "Mon planning" })).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Réessayer" }));
 
@@ -254,12 +290,8 @@ describe("HomePage · raccourcis (écran 03)", () => {
         .getAttribute("href"),
     ).toBe("/seances/nouvelle");
     expect(screen.queryByRole("link", { name: "Créer une séance" })).toBeNull();
-    expect(
-      screen.getByRole("link", { name: "Voir mon planning" }),
-    ).toBeTruthy();
-    expect(
-      screen.getByRole("link", { name: "Voir mon historique" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Mon planning" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Historique" })).toBeTruthy();
   });
 });
 

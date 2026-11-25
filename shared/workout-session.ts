@@ -55,7 +55,13 @@ export type AppointmentDetail = {
     block_type: BlockType;
     name: string | null;
     position: number;
-    exercises: { id: number; exercise_id: number; name: string }[];
+    exercises: {
+      id: number;
+      exercise_id: number;
+      name: string;
+      // "4 × 8 · 60 kg", what the card of the day shows (03-2)
+      set_summary: string | null;
+    }[];
   }[];
 };
 

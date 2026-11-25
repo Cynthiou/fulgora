@@ -1,27 +1,26 @@
 import { NavLink } from "react-router";
-import barbellIcon from "../assets/icons/ui/navigation/barbell.svg";
-import calendarIcon from "../assets/icons/ui/navigation/calendar-month.svg";
-import historyIcon from "../assets/icons/ui/navigation/history.svg";
-import homeIcon from "../assets/icons/ui/navigation/home.svg";
+import calendarIcon from "../assets/icons/ui/app/calendar.svg";
+import chartIcon from "../assets/icons/ui/app/chart.svg";
+import gridIcon from "../assets/icons/ui/app/grid.svg";
+import homeIcon from "../assets/icons/ui/app/home.svg";
 import Icon from "./Icon";
 
 // The four tabs (RM-066). The profile is reached by the avatar, never a 5th tab.
 const TABS = [
   { to: "/", label: "Accueil", icon: homeIcon, end: true },
   { to: "/planning", label: "Planning", icon: calendarIcon, end: false },
-  { to: "/suivi", label: "Suivi", icon: historyIcon, end: false },
-  { to: "/catalogue", label: "Catalogue", icon: barbellIcon, end: false },
+  { to: "/suivi", label: "Suivi", icon: chartIcon, end: false },
+  { to: "/catalogue", label: "Catalogue", icon: gridIcon, end: false },
 ];
 
-// Fixed at the bottom, h-nav tall plus the safe area of the phone, so the
-// labels are never cut. NavLink sets aria-current="page" on the active tab by
-// itself; the active tab is also raised in a round bubble and written in bold,
-// so it is never told by the color alone.
+// Fixed at the bottom, 62 px tall plus the safe area of the phone. The
+// active tab is raised in a blue bubble of 52 px, written in bold and in
+// blue: never the colour alone. NavLink sets aria-current="page" by itself.
 function TabBar() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-base-300 bg-base-100 pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-base-300 bg-base-100 shadow-card pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="mx-auto grid h-nav max-w-md grid-cols-4">
         {TABS.map((tab) => (
@@ -30,27 +29,25 @@ function TabBar() {
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `flex min-h-tap flex-1 flex-col items-center justify-center gap-1 text-xs ${
+                `flex min-h-tap flex-1 flex-col items-center justify-center gap-1 text-[10.5px] ${
                   isActive
-                    ? "font-bold text-secondary"
+                    ? "font-extrabold text-secondary"
                     : "font-semibold text-muted"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span
-                    className={
-                      isActive
-                        ? "flex size-nav-fab -translate-y-[22px] items-center justify-center rounded-full bg-secondary text-secondary-content shadow-nav-active ring-[6px] ring-base-200 transition-all duration-[400ms] ease-bounce motion-reduce:transition-none"
-                        : "flex size-6 items-center justify-center"
-                    }
-                  >
-                    <Icon src={tab.icon} className="size-6" />
-                  </span>
-                  <span className={isActive ? "-translate-y-6" : ""}>
-                    {tab.label}
-                  </span>
+                  {isActive ? (
+                    <span className="-mb-4 grid size-nav-fab -translate-y-[18px] place-items-center rounded-full bg-secondary text-secondary-content shadow-nav-active ring-6 ring-base-200">
+                      <Icon src={tab.icon} className="size-[22px]" />
+                    </span>
+                  ) : (
+                    // The icon keeps the lighter grey of the mockup; the
+                    // label is one step darker so the contrast holds.
+                    <Icon src={tab.icon} className="size-[22px] text-faint" />
+                  )}
+                  {tab.label}
                 </>
               )}
             </NavLink>

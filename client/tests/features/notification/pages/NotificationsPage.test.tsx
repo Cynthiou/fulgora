@@ -139,17 +139,20 @@ describe("NotificationBell (NOT-01)", () => {
     render(<RouterProvider router={router} />);
   }
 
-  it("counts the unread ones, and stops at 9+", () => {
+  it("says how many are unread, and shows the dot of the mockup", () => {
     renderBell(12);
-    expect(
-      screen.getByRole("link", { name: "Notifications, 12 non lues" }),
-    ).toBeTruthy();
-    expect(screen.getByText("9+")).toBeTruthy();
+    const link = screen.getByRole("link", {
+      name: "Notifications, 12 non lues",
+    });
+    expect(link).toBeTruthy();
+    // NOT-01: an orange dot, no figure on the bell
+    expect(link.querySelector(".bg-primary")).not.toBeNull();
   });
 
-  it("shows no badge without any unread one", () => {
+  it("shows no dot without any unread one (NOT-01b)", () => {
     renderBell(0);
-    expect(screen.getByRole("link", { name: "Notifications" })).toBeTruthy();
-    expect(screen.queryByText("0")).toBeNull();
+    const link = screen.getByRole("link", { name: "Notifications" });
+    expect(link).toBeTruthy();
+    expect(link.querySelector(".bg-primary")).toBeNull();
   });
 });

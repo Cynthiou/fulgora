@@ -3,10 +3,14 @@ import {
   type AppointmentDetail,
   type AppointmentListItem,
   computeAppointmentStatus,
+  createEmptySet,
   type DateRange,
   type FreeSessionCreated,
   type FreeSessionInput,
+  formatSetLine,
+  type MeasureCode,
   type MoveAppointmentInput,
+  type PlannedSetValues,
   todayInParis,
   toHourMinute,
 } from "shared";
@@ -35,9 +39,31 @@ import {
   readAppointmentsBetween,
   readVersionBlocks,
   readVersionExercises,
+  readVersionSets,
   type VersionContentRow,
+  type VersionSetRow,
   type WorkoutSetCountRow,
 } from "./appointmentRepository.js";
+
+// MySQL gives decimals back as text (DT-11).
+function toNumber(value: string | number | null): number | null {
+  return value === null ? null : Number(value);
+}
+
+function toPlannedValues(row: VersionSetRow): PlannedSetValues {
+  return {
+    ...createEmptySet(),
+    reps: row.reps,
+    weight_kg: toNumber(row.weight_kg),
+    duration_seconds: row.duration_seconds,
+    distance_meters: toNumber(row.distance_meters),
+    speed_kmh: toNumber(row.speed_kmh),
+    resistance: toNumber(row.resistance),
+    incline_percent: toNumber(row.incline_percent),
+    calories: toNumber(row.calories),
+    rest_after_seconds: row.rest_after_seconds,
+  };
+}
 
 // Turns a database row into what the client receives.
 function toListItem(
@@ -160,6 +186,7 @@ export const read: RequestHandler = async (req, res) => {
   }
   const blocks = await readVersionBlocks(row.session_version_id);
   const exercises = await readVersionExercises(row.session_version_id);
+  const sets = await readVersionSets(row.session_version_id);
 
   const detail: AppointmentDetail = {
     id: row.id,
@@ -187,6 +214,16 @@ export const read: RequestHandler = async (req, res) => {
           id: exercise.id,
           exercise_id: exercise.exercise_id,
           name: exercise.name,
+          // "4 × 8 · 60 kg", the short line of the mockups (03-2)
+          set_summary: formatSetLine(
+            sets
+              .filter((set) => set.template_block_exercise_id === exercise.id)
+              .map(toPlannedValues),
+            exercise.measure_codes === null
+              ? []
+              : (exercise.measure_codes.split(",") as MeasureCode[]),
+            exercise.is_bodyweight === 1,
+          ),
         })),
     })),
   };

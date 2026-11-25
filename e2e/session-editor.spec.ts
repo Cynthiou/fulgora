@@ -314,7 +314,7 @@ test("plans a free session from the home page and finds it there (A1 to A9)", as
   // Back home: the session of the day is there
   await page.getByRole("link", { name: "Retour à l'accueil" }).click();
   await expectHomePage(page);
-  await expect(page.getByText("Séance du jour")).toBeVisible();
+  // Screen 03-2: the card of the day takes the place of the empty state
   await expect(page.getByText("Haut du corps")).toBeVisible();
   await expect(page.getByText("Aucune séance prévue")).toHaveCount(0);
 });

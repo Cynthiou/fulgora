@@ -121,6 +121,8 @@
   --fulgora-faint: #8a93a3;
   --fulgora-shadow-card:
     0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 18px rgba(15, 23, 42, 0.05);
+  /* The card of the day and the other hero cards of the mockups */
+  --fulgora-shadow-hero: 0 10px 30px rgba(15, 23, 42, 0.07);
 }
 
 [data-theme="fulgora-dark"] {
@@ -129,6 +131,7 @@
   --fulgora-faint: #64748b;
   --fulgora-shadow-card:
     inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -138,6 +141,7 @@
     --fulgora-faint: #64748b;
     --fulgora-shadow-card:
       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+    --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -152,6 +156,7 @@
   --color-status-cancelled: #64748b;
 
   --shadow-card: var(--fulgora-shadow-card);
+  --shadow-hero: var(--fulgora-shadow-hero);
 }
 
 @theme {

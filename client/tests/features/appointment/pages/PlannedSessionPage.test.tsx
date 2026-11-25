@@ -57,8 +57,13 @@ const planned: AppointmentDetail = {
       name: "Force",
       position: 1,
       exercises: [
-        { id: 1, exercise_id: 31, name: "Développé couché" },
-        { id: 2, exercise_id: 45, name: "Tractions" },
+        {
+          id: 1,
+          exercise_id: 31,
+          name: "Développé couché",
+          set_summary: "4 × 8 · 60 kg",
+        },
+        { id: 2, exercise_id: 45, name: "Tractions", set_summary: "3 × 10" },
       ],
     },
   ],
