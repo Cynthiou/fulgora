@@ -412,6 +412,10 @@ function SessionEditorPage() {
             dispatch({ type: "updateExerciseRest", ...target, seconds })
           }
           onDone={() => setOpenExerciseKey(null)}
+          onRemove={() => {
+            setOpenExerciseKey(null);
+            removeExercise(openBlockKey, openExerciseKey);
+          }}
         />
         {exitDialog}
       </>
@@ -442,6 +446,10 @@ function SessionEditorPage() {
             removeExercise(openBlockKey, exerciseKey)
           }
           onDone={() => setOpenBlockKey(null)}
+          onRemoveBlock={() => {
+            setOpenBlockKey(null);
+            removeBlock(openBlockKey);
+          }}
         />
         {picker === "change" && (
           <BlockTypePicker
@@ -466,10 +474,10 @@ function SessionEditorPage() {
         >
           <Icon src={chevronLeftIcon} className="size-7" />
         </button>
-        <h1 className="text-display-sm">Nouvelle séance</h1>
-        <span className="ml-auto rounded-chip bg-soft px-2 py-0.5 text-overline uppercase text-accent">
-          Séance libre
-        </span>
+        <div className="flex min-w-0 flex-col">
+          <h1 className="text-display-sm">Nouvelle séance</h1>
+          <p className="text-sm text-muted">Séance libre</p>
+        </div>
       </header>
 
       <form

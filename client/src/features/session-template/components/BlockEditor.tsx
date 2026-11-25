@@ -5,6 +5,7 @@ import {
   MAX_EXERCISES_PER_BLOCK,
 } from "shared";
 import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
+import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
@@ -27,6 +28,8 @@ type Props = {
   onRemoveExercise: (exerciseKey: string) => void;
   // "Enregistrer le bloc" and the back arrow both return to the session
   onDone: () => void;
+  // The trash can of the header (A4): removes the whole block
+  onRemoveBlock: () => void;
 };
 
 // Screens A4 and A6: one block of the draft. Changes apply to the draft as
@@ -42,6 +45,7 @@ function BlockEditor({
   onOpenExercise,
   onRemoveExercise,
   onDone,
+  onRemoveBlock,
 }: Props) {
   const typeLabel = BLOCK_TYPE_LABELS[block.block_type];
   const isNote = block.block_type === "note";
@@ -59,13 +63,21 @@ function BlockEditor({
         >
           <Icon src={chevronLeftIcon} className="size-7" />
         </button>
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <h1 className="text-display-sm">{typeLabel}</h1>
           <p className="truncate text-sm text-muted">
             Bloc {index + 1} ·{" "}
             {sessionName.trim() === "" ? "Nouvelle séance" : sessionName}
           </p>
         </div>
+        <button
+          type="button"
+          onClick={onRemoveBlock}
+          aria-label="Retirer le bloc"
+          className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
+        >
+          <Icon src={trashIcon} className="size-6" />
+        </button>
       </header>
 
       <div className="flex flex-1 flex-col gap-6 p-4 pb-28">
@@ -88,16 +100,22 @@ function BlockEditor({
             </span>
             <span className="font-semibold">{typeLabel}</span>
           </div>
-          {canChangeType && (
-            <button
-              type="button"
-              onClick={onRequestTypeChange}
-              className="min-h-tap px-2 font-semibold text-secondary"
-            >
-              Changer
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onRequestTypeChange}
+            disabled={!canChangeType}
+            aria-describedby={canChangeType ? undefined : "change-type-soon"}
+            className="min-h-tap px-2 font-semibold text-secondary disabled:opacity-60"
+          >
+            Changer
+          </button>
         </div>
+
+        {!canChangeType && (
+          <p id="change-type-soon" className="-mt-4 text-sm text-muted">
+            Changer le type d'un bloc qui a des exercices arrive bientôt.
+          </p>
+        )}
 
         {isNote ? (
           <div className="flex flex-col gap-1.5">

@@ -13,6 +13,7 @@ import {
   type SetValueField,
   validateSetValue,
 } from "shared";
+import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import Icon from "../../../components/Icon";
 import MinSecField from "../../../components/MinSecField";
@@ -21,6 +22,8 @@ import RestInput from "./RestInput";
 
 type Props = {
   exercise: DraftExercise;
+  // "Retirer l'exercice" of the header (A7a)
+  onRemove: () => void;
   onUpdateSet: (index: number, values: Partial<PlannedSetValues>) => void;
   onAddSet: () => void;
   onDuplicateLastSet: () => void;
@@ -48,6 +51,7 @@ const STEPPER: Record<SetValueField, { step: number; decimal: boolean }> = {
 // screen and stays disabled while a field shows an error.
 function SetConfigurator({
   exercise,
+  onRemove,
   onUpdateSet,
   onAddSet,
   onDuplicateLastSet,
@@ -200,17 +204,25 @@ function SetConfigurator({
         >
           <Icon src={chevronLeftIcon} className="size-7" />
         </button>
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <h1 className="truncate text-display-sm">{exercise.name}</h1>
           {exercise.meta !== undefined && exercise.meta !== null && (
             <p className="truncate text-sm text-muted">{exercise.meta}</p>
           )}
         </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Retirer ${exercise.name}`}
+          className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
+        >
+          <Icon src={trashIcon} className="size-6" />
+        </button>
       </header>
 
       <div className="flex flex-1 flex-col gap-5 p-4 pb-28">
-        <div className="flex flex-col gap-1">
-          <p className="text-overline uppercase text-accent">
+        <div className="flex flex-col gap-2">
+          <p className="self-start rounded-chip border border-base-300 px-2 py-1 text-overline uppercase text-accent">
             Préparation · Objectifs prévus
           </p>
           {profile === "none" ? (
@@ -340,7 +352,7 @@ function SetConfigurator({
                   </div>
 
                   {isOpen && (
-                    <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {fields.map((field) => renderField(field, index, set))}
                       {ownRest.includes(index) && (
                         <RestInput
@@ -362,25 +374,27 @@ function SetConfigurator({
 
         {profile !== "none" && (
           <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={addSet}
-              disabled={isFull}
-              aria-describedby={isFull ? "sets-limit" : undefined}
-              className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
-            >
-              + {setNoun}
-            </button>
-            {profile !== "cardio" && (
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={duplicateLastSet}
+                onClick={addSet}
                 disabled={isFull}
-                className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                aria-describedby={isFull ? "sets-limit" : undefined}
+                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
               >
-                Dupliquer la dernière
+                + {setNoun}
               </button>
-            )}
+              {profile !== "cardio" && (
+                <button
+                  type="button"
+                  onClick={duplicateLastSet}
+                  disabled={isFull}
+                  className="flex h-12 flex-1 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                >
+                  Dupliquer la dernière
+                </button>
+              )}
+            </div>
             {isFull && (
               <p id="sets-limit" className="text-sm text-muted">
                 {MAX_SETS_PER_EXERCISE} séries au maximum

@@ -100,7 +100,7 @@ function MinSecField({
           placeholder="—"
           aria-invalid={error === null ? undefined : true}
           aria-describedby={error === null ? undefined : errorId}
-          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 text-center font-semibold ${
+          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 text-center font-display text-display-sm ${
             error === null
               ? "border-base-300"
               : "border-[1.5px] border-status-missed"
