@@ -6,8 +6,10 @@ import {
   useSearchParams,
 } from "react-router";
 import {
+  type BlockType,
   countDraftExercises,
   createEmptyDraft,
+  type DraftBlock,
   dateSchema,
   formatBlockCount,
   MAX_BLOCKS,
@@ -19,7 +21,11 @@ import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg"
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
+import UndoToast from "../../../components/UndoToast";
+import BlockEditor from "../components/BlockEditor";
+import BlockTypePicker from "../components/BlockTypePicker";
 import SessionReview from "../components/SessionReview";
+import { nextKey } from "../hooks/sessionDraftReducer";
 import { useSessionDraft } from "../hooks/useSessionDraft";
 
 // The date comes from the Planning or the home page (?date=), today otherwise.
@@ -29,8 +35,13 @@ function readInitialDate(raw: string | null): string {
     : todayInParis();
 }
 
+// Which panel is open: none, "add" a block, or "change" the open block's type.
+type PickerMode = "closed" | "add" | "change";
+
 // Screen A2: a new free session. The draft lives in useSessionDraft; leaving
 // with unsaved changes asks for a confirmation (back arrow and tab closing).
+// A block opens full screen (A4) over the session; the type panel (A3) is a
+// dialog.
 function SessionEditorPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -40,10 +51,21 @@ function SessionEditorPage() {
   );
   const [nameError, setNameError] = useState<string | null>(null);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
+  const [openBlockKey, setOpenBlockKey] = useState<string | null>(null);
+  const [picker, setPicker] = useState<PickerMode>("closed");
+  // The last removed block, kept 5 seconds for "Annuler".
+  const [removed, setRemoved] = useState<{
+    block: DraftBlock;
+    index: number;
+  } | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
   const blockCount = draft.blocks.length;
   const exerciseCount = countDraftExercises(draft);
+  const openBlockIndex = draft.blocks.findIndex(
+    (block) => block.key === openBlockKey,
+  );
+  const openBlock = openBlockIndex === -1 ? null : draft.blocks[openBlockIndex];
 
   // In-app navigation with unsaved changes: blocked until the user answers.
   const blocker = useBlocker(isDirty);
@@ -83,6 +105,78 @@ function SessionEditorPage() {
     setNameError(null);
     // Saving (session, version 1, blocks, appointment) is delivered by US-23.
     setSaveNotice("L'enregistrement arrive avec l'étape suivante.");
+  }
+
+  function pickBlockType(blockType: BlockType) {
+    if (picker === "add") {
+      const key = nextKey();
+      dispatch({ type: "addBlock", blockType, key });
+      setOpenBlockKey(key);
+    } else if (picker === "change" && openBlockKey !== null) {
+      dispatch({ type: "setBlockType", key: openBlockKey, blockType });
+    }
+    setPicker("closed");
+  }
+
+  function removeBlock(key: string) {
+    const index = draft.blocks.findIndex((block) => block.key === key);
+    const block = draft.blocks[index];
+    if (block === undefined) {
+      return;
+    }
+    dispatch({ type: "removeBlock", key });
+    setRemoved({ block, index });
+  }
+
+  function undoRemove() {
+    if (removed !== null) {
+      dispatch({
+        type: "restoreBlock",
+        block: removed.block,
+        index: removed.index,
+      });
+      setRemoved(null);
+    }
+  }
+
+  if (openBlock !== null && openBlockKey !== null) {
+    return (
+      <>
+        <BlockEditor
+          block={openBlock}
+          index={openBlockIndex}
+          sessionName={draft.name}
+          onChangeName={(name) =>
+            dispatch({ type: "setBlockName", key: openBlockKey, name })
+          }
+          onChangeInstructions={(instructions) =>
+            dispatch({
+              type: "setBlockInstructions",
+              key: openBlockKey,
+              instructions,
+            })
+          }
+          onRequestTypeChange={() => setPicker("change")}
+          onDone={() => setOpenBlockKey(null)}
+        />
+        {picker === "change" && (
+          <BlockTypePicker
+            onPick={pickBlockType}
+            onClose={() => setPicker("closed")}
+          />
+        )}
+        {blocker.state === "blocked" && (
+          <ConfirmDialog
+            title="Quitter sans enregistrer ?"
+            message="Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
+            confirmLabel="Quitter"
+            cancelLabel="Continuer la séance"
+            onConfirm={() => blocker.proceed()}
+            onCancel={() => blocker.reset()}
+          />
+        )}
+      </>
+    );
   }
 
   return (
@@ -165,13 +259,14 @@ function SessionEditorPage() {
           ) : (
             <SessionReview
               blocks={draft.blocks}
-              onRemove={(key) => dispatch({ type: "removeBlock", key })}
+              onOpen={setOpenBlockKey}
+              onRemove={removeBlock}
             />
           )}
 
           <button
             type="button"
-            onClick={() => dispatch({ type: "addBlock", blockType: "classic" })}
+            onClick={() => setPicker("add")}
             disabled={blockCount >= MAX_BLOCKS}
             aria-describedby={
               blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
@@ -218,6 +313,21 @@ function SessionEditorPage() {
           </div>
         </div>
       </form>
+
+      {picker === "add" && (
+        <BlockTypePicker
+          onPick={pickBlockType}
+          onClose={() => setPicker("closed")}
+        />
+      )}
+
+      {removed !== null && (
+        <UndoToast
+          message="Bloc retiré"
+          onUndo={undoRemove}
+          onDismiss={() => setRemoved(null)}
+        />
+      )}
 
       {blocker.state === "blocked" && (
         <ConfirmDialog
