@@ -41,7 +41,7 @@ function ExerciseCard({ exercise, sex, searchTerm = "" }: Props) {
             width={72}
             height={72}
             loading="lazy"
-            className="size-18 shrink-0 rounded-ctl bg-soft object-cover"
+            className="size-18 shrink-0 rounded-ctl bg-white object-contain"
           />
         )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">

@@ -28,7 +28,7 @@ function DetailSkeleton() {
   return (
     <div role="status" className="flex flex-col gap-4">
       <span className="sr-only">Chargement de la fiche</span>
-      <div className="h-56 animate-pulse rounded-card bg-soft motion-reduce:animate-none" />
+      <div className="aspect-[3/2] w-full animate-pulse rounded-card bg-soft motion-reduce:animate-none" />
       <div className="h-6 w-2/3 animate-pulse rounded-chip bg-soft motion-reduce:animate-none" />
       <div className="h-24 animate-pulse rounded-card bg-soft motion-reduce:animate-none" />
       <div className="h-40 animate-pulse rounded-card bg-soft motion-reduce:animate-none" />
@@ -146,7 +146,7 @@ function ExerciseDetailPage() {
               <div
                 role="img"
                 aria-label={`${exercise.name}, illustration non disponible`}
-                className="flex h-56 items-center justify-center rounded-card bg-soft text-center font-semibold text-muted"
+                className="flex aspect-[3/2] w-full items-center justify-center rounded-card bg-soft text-center font-semibold text-muted"
               >
                 Illustration non disponible
               </div>
@@ -154,7 +154,7 @@ function ExerciseDetailPage() {
               <img
                 src={image}
                 alt=""
-                className="h-56 w-full rounded-card bg-soft object-cover"
+                className="aspect-[3/2] w-full rounded-card bg-white object-contain"
               />
             )}
 

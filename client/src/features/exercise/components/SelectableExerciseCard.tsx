@@ -75,7 +75,7 @@ function SelectableExerciseCard({
             width={56}
             height={56}
             loading="lazy"
-            className="size-14 shrink-0 rounded-ctl bg-soft object-cover"
+            className="size-14 shrink-0 rounded-ctl bg-white object-contain"
           />
         )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
