@@ -1,15 +1,21 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { WorkoutSessionTree, WorkoutSetRow } from "shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../../services/apiError";
-import { readWorkoutSession } from "../services/workoutSessionService";
+import {
+  abandonWorkoutSession,
+  readWorkoutSession,
+} from "../services/workoutSessionService";
 import WorkoutPage from "./WorkoutPage";
 
 vi.mock("../services/workoutSessionService", () => ({
   readWorkoutSession: vi.fn(),
+  abandonWorkoutSession: vi.fn(),
 }));
 const readMock = vi.mocked(readWorkoutSession);
+const abandonMock = vi.mocked(abandonWorkoutSession);
 
 function set(position: number, validated: boolean): WorkoutSetRow {
   return {
@@ -87,6 +93,7 @@ function renderPage() {
 describe("WorkoutPage", () => {
   beforeEach(() => {
     readMock.mockReset();
+    abandonMock.mockReset();
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-11-26T07:12:40.000Z"));
   });
@@ -116,6 +123,77 @@ describe("WorkoutPage", () => {
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(true);
+  });
+
+  it("abandons after a confirmation, keeps the sets and shows the session as unfinished", async () => {
+    readMock.mockResolvedValue(tree);
+    abandonMock.mockResolvedValue({
+      ...tree,
+      status: "unfinished",
+      ended_at: "2026-11-26T07:30:00.000Z",
+    });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderPage();
+    await screen.findByRole("heading", { level: 1, name: "Haut du corps" });
+
+    await user.click(screen.getByRole("button", { name: "Abandonner" }));
+    expect(screen.getByText("Abandonner cette séance ?")).toBeTruthy();
+    await user.click(
+      screen.getByRole("button", { name: "Continuer ma séance" }),
+    );
+    expect(abandonMock).not.toHaveBeenCalled();
+    expect(screen.queryByText("Abandonner cette séance ?")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Abandonner" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Abandonner",
+      }),
+    );
+
+    expect(abandonMock).toHaveBeenCalledWith(9);
+    expect(await screen.findByText("Inachevée")).toBeTruthy();
+    expect(screen.queryByText("12:40")).toBeNull();
+    expect(screen.getByText("1 / 3")).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Retour à l'accueil" }),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Abandonner" })).toBeNull();
+  });
+
+  it("shows the message of a session closed after 4 hours, and a retry on error", async () => {
+    readMock.mockResolvedValue({
+      ...tree,
+      status: "unfinished",
+      ended_at: "2026-11-26T11:00:00.000Z",
+      auto_closed: true,
+    });
+    renderPage();
+
+    expect(
+      await screen.findByText(/clôturée après 4 heures sans activité/),
+    ).toBeTruthy();
+
+    readMock.mockResolvedValue(tree);
+    abandonMock.mockRejectedValue(
+      new ApiError(0, "NETWORK_ERROR", "Connexion impossible. Réessaie."),
+    );
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderPage();
+    const buttons = await screen.findAllByRole("button", {
+      name: "Abandonner",
+    });
+    await user.click(buttons[buttons.length - 1] as HTMLElement);
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Abandonner",
+      }),
+    );
+    await waitFor(() => {
+      expect(screen.getByRole("alert").textContent).toContain(
+        "Impossible d'abandonner la séance. Réessaie.",
+      );
+    });
   });
 
   it("answers a missing session", async () => {

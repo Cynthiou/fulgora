@@ -1,10 +1,19 @@
+import { useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { countPlannedSets, countValidatedSets, getBlockLabel } from "shared";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import StatusBadge from "../../../components/StatusBadge";
+import { ApiError } from "../../../services/apiError";
+import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
+import AutoClosedNotice from "../components/AutoClosedNotice";
 import WorkoutExerciseRow from "../components/WorkoutExerciseRow";
 import { useSessionChrono } from "../hooks/useSessionChrono";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
+import {
+  abandonWorkoutSession,
+  readWorkoutSession,
+} from "../services/workoutSessionService";
 
 const PRIMARY_LINK =
   "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
@@ -23,13 +32,46 @@ function WorkoutSkeleton() {
 }
 
 // Screen B2: the session in progress, its chrono and its exercises, in any
-// order. Validating a set (US-29), the rest timer (US-30), giving up (US-33)
-// and finishing (US-34) come next.
+// order. Over (abandoned, closed after 4 hours, finished), the same screen
+// shows the sets read-only with its status. Finishing (US-34) comes next.
 function WorkoutPage() {
   const params = useParams();
   const id = Number(params.id);
-  const { session, isLoading, notFound, error, reload } = useWorkoutSession(id);
-  const chrono = useSessionChrono(session?.started_at ?? null);
+  const { session, isLoading, notFound, error, reload, replaceSession } =
+    useWorkoutSession(id);
+  const isInProgress = session?.status === "in_progress";
+  const chrono = useSessionChrono(isInProgress ? session.started_at : null);
+  const [isConfirmingAbandon, setIsConfirmingAbandon] = useState(false);
+  const [isAbandoning, setIsAbandoning] = useState(false);
+  const [abandonError, setAbandonError] = useState<string | null>(null);
+  const inFlight = useRef(false);
+
+  // "Abandonner": over for good, validated sets kept (RM-045). On failure,
+  // the true state is loaded back (already over: shown as such).
+  async function abandon() {
+    if (inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    setIsConfirmingAbandon(false);
+    setIsAbandoning(true);
+    setAbandonError(null);
+    try {
+      replaceSession(await abandonWorkoutSession(id));
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 409) {
+        const latest = await readWorkoutSession(id).catch(() => null);
+        if (latest !== null) {
+          replaceSession(latest);
+        }
+      } else {
+        setAbandonError("Impossible d'abandonner la séance. Réessaie.");
+      }
+    } finally {
+      inFlight.current = false;
+      setIsAbandoning(false);
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -60,11 +102,23 @@ function WorkoutPage() {
             <header className="flex flex-col gap-1">
               <h1 className="text-display-md">{session.session_name}</h1>
               <div className="flex items-center justify-between gap-3">
-                <p className="text-overline uppercase text-primary">
-                  {session.status === "in_progress" ? "En cours" : "Terminée"} ·{" "}
-                  {session.program_name ?? "séance libre"}
-                </p>
-                {chrono !== null && session.status === "in_progress" && (
+                {isInProgress ? (
+                  <p className="text-overline uppercase text-primary">
+                    En cours · {session.program_name ?? "séance libre"}
+                  </p>
+                ) : (
+                  <p className="flex items-center gap-2 text-sm text-muted">
+                    <StatusBadge
+                      status={
+                        session.status === "completed"
+                          ? "completed"
+                          : "unfinished"
+                      }
+                    />
+                    {session.program_name ?? "séance libre"}
+                  </p>
+                )}
+                {chrono !== null && isInProgress && (
                   <p className="font-display text-display-sm text-primary">
                     <span className="sr-only">Durée de la séance </span>
                     <span aria-hidden="true">● </span>
@@ -73,6 +127,12 @@ function WorkoutPage() {
                 )}
               </div>
             </header>
+
+            {session.auto_closed && <AutoClosedNotice />}
+
+            {abandonError !== null && (
+              <ErrorState title={abandonError} onRetry={abandon} />
+            )}
 
             <div className="flex items-center justify-between rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
               <span className="font-semibold">Séries réalisées</span>
@@ -114,17 +174,37 @@ function WorkoutPage() {
         )}
       </div>
 
-      {!isLoading && session !== null && session.status === "in_progress" && (
+      {!isLoading && session !== null && !isInProgress && (
+        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+          <div className="mx-auto max-w-md">
+            <Link
+              to="/"
+              className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
+            >
+              Retour à l'accueil
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {isConfirmingAbandon && (
+        <AbandonWorkoutDialog
+          onConfirm={abandon}
+          onCancel={() => setIsConfirmingAbandon(false)}
+        />
+      )}
+
+      {!isLoading && session !== null && isInProgress && (
         <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
           <div className="mx-auto flex max-w-md gap-3">
-            {/* Giving up (US-33) and finishing (US-34) arrive next. */}
+            {/* Finishing (US-34) arrives next. */}
             <button
               type="button"
-              disabled
-              aria-describedby="end-later"
+              onClick={() => setIsConfirmingAbandon(true)}
+              disabled={isAbandoning}
               className="h-btn flex-1 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
             >
-              Abandonner
+              {isAbandoning ? "Abandon…" : "Abandonner"}
             </button>
             <button
               type="button"
