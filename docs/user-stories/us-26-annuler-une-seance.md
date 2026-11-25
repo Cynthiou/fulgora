@@ -57,11 +57,11 @@ Boutons désactivés.
 
 ## Tâches techniques
 
-- [ ] BDD : `appointment.cancelled_at` + contrainte (migration 002)
-- [ ] Backend : `cancelAppointment(id, userId)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status IN ('planned','to_confirm') AND NOT EXISTS (SELECT 1 FROM workout_session WHERE appointment_id = appointment.id)` ; 0 ligne → relire pour 404 / 409
-- [ ] Backend : `markAppointmentNotificationsRead(appointmentId)` ; `PATCH /api/appointments/:id/cancel`
-- [ ] Frontend : `CancelAppointmentDialog`, affichage CAL-07c
-- [ ] Tests : back : annulation, `cancelled_at` rempli, commencée → 409, la contrainte refuse `cancelled` sans date
+- [x] BDD : `appointment.cancelled_at` + contrainte (migration 002, déjà en place)
+- [x] Backend : `cancelAppointment(id, userId)`, un seul UPDATE conditionnel ; 0 ligne → relecture pour choisir 404 ou 409
+- [x] Backend : `PATCH /api/appointments/:id/cancel` ; `markAppointmentNotificationsRead` attend les notifications (US-46)
+- [x] Frontend : `CancelAppointmentDialog` (CAL-07), affichage CAL-07c, entrée du menu ⋯
+- [x] Tests : back : annulation, `cancelled_at` rempli, commencée → 409, deux fois → 409, celle d'un autre → 404 ; client : les trois états ; E2E : annuler et garder
 
 ## Definition of Done
 
