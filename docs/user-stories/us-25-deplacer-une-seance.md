@@ -64,15 +64,15 @@ Refus et rechargement.
 
 ## Tâches techniques
 
-- [ ] Shared : `computeAppointmentStatus(plannedDate, today)` (planned / to_confirm / missed selon la règle des 72 h) : fonction pure, utilisée aussi par US-27
-- [ ] Backend : `readAppointmentForUpdate`, `moveAppointment(id, date, time, status)` : `UPDATE appointment SET initial_date = COALESCE(initial_date, planned_date), planned_date = ?, planned_time = ?, moved_manually = TRUE, status = ? WHERE id = ?`
-- [ ] Backend : `deleteAppointmentNotifications(appointmentId, types)`, `createAppointmentNotification(appointmentId, type)`
-- [ ] Backend : `PATCH /api/appointments/:id/move` dans `withTransaction`
-- [ ] Frontend : `MoveAppointmentPage.tsx` (CAL-05)
-- [ ] Tests : unitaires `computeAppointmentStatus` (aujourd'hui, hier, il y a 3 jours, il y a 4 jours, futur) ; back : notifications remplacées, `initial_date` gardée au 2ᵉ déplacement, effectuée → 409
-- [ ] Tests : E2E exemple CAL-05b
+- [x] Shared : `computeAppointmentStatus(plannedDate, today)` et `formatConfirmDeadline`, fonctions pures, réutilisées par l'US-27
+- [x] Backend : `readAppointmentForUpdate`, `moveAppointment(id, date, time, status)` avec `COALESCE(initial_date, planned_date)`
+- [ ] Backend : notifications à remplacer : **repoussé à l'US-46**, il n'y a pas encore de notifications
+- [x] Backend : `PATCH /api/appointments/:id/move` dans `withTransaction`, avec verrou sur le rendez-vous
+- [x] Frontend : `MoveAppointmentSheet.tsx` (CAL-05), ouvert par le menu ⋯, et la ligne « déplacée au » sur l'écran de la séance
+- [x] Tests : unitaires `computeAppointmentStatus` ; back : `initial_date` gardée au 2ᵉ déplacement, statut recalculé, effectuée → 409, hors plage → 400, celle d'un autre → 404
+- [x] Tests : E2E déplacement vers un jour futur et exemple CAL-05b (déplacée à hier, « À confirmer »)
 
 ## Definition of Done
 
-- [ ] Exemple CAL-05b reproduit en test d'intégration
+- [x] Exemple CAL-05b reproduit en test d'intégration et en test de bout en bout (sans la partie notifications)
 - [ ] Code relu et fusionné via pull request
