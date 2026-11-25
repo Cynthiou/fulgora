@@ -159,7 +159,7 @@ test("starts a session from the catalog with « Sélectionner » and « Ajouter 
   await expect(page.getByText("Ajouter 2 exercices")).toBeVisible();
   await expect(page.getByText("Nouvelle séance libre")).toBeVisible();
   await expectNoA11yViolation(page);
-  await page.getByRole("button", { name: "Continuer vers l'éditeur" }).click();
+  await page.getByRole("button", { name: /Nouvelle séance libre/ }).click();
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Nouvelle séance",

@@ -182,9 +182,13 @@ describe("SignupPage", () => {
     const password = screen.getByLabelText(/^Mot de passe/);
 
     expect(password.getAttribute("type")).toBe("password");
-    await user.click(screen.getByRole("button", { name: "Afficher le mot de passe" }));
+    await user.click(
+      screen.getByRole("button", { name: "Afficher le mot de passe" }),
+    );
     expect(password.getAttribute("type")).toBe("text");
-    await user.click(screen.getByRole("button", { name: "Masquer le mot de passe" }));
+    await user.click(
+      screen.getByRole("button", { name: "Masquer le mot de passe" }),
+    );
     expect(password.getAttribute("type")).toBe("password");
   });
 

@@ -31,7 +31,7 @@ function FilterGrid({
   return (
     <fieldset
       id={id}
-      className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
+      className="flex flex-col gap-2.5 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
     >
       <legend className="sr-only">{label}</legend>
       <ul
@@ -47,19 +47,19 @@ function FilterGrid({
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => onToggle(option.id)}
-                className={`flex min-h-tap w-full flex-col items-center justify-center gap-1 rounded-ctl p-2 text-center text-xs ${
+                className={`flex h-[62px] w-full flex-col items-center justify-center gap-1 rounded-btn p-2 text-center text-[11px] font-semibold ${
                   isActive
-                    ? "border-2 border-secondary font-bold"
-                    : "border border-base-300 font-semibold"
+                    ? "border-[1.5px] border-secondary bg-secondary/[0.08] text-secondary"
+                    : "bg-soft"
                 }`}
               >
                 {option.icon !== undefined && (
                   <img
                     src={option.icon}
                     alt=""
-                    width={40}
-                    height={40}
-                    className="size-10"
+                    width={24}
+                    height={24}
+                    className="size-6"
                   />
                 )}
                 <span>
@@ -75,7 +75,7 @@ function FilterGrid({
         <button
           type="button"
           onClick={onClear}
-          className="h-12 rounded-btn border border-base-300 font-semibold"
+          className="h-11 rounded-btn border border-base-300 text-sm font-bold"
         >
           {clearLabel}
         </button>

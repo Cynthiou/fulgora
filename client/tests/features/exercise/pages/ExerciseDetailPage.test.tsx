@@ -164,10 +164,11 @@ describe("ExerciseDetailPage", () => {
 
     expect(screen.getByText("Ajouter 1 exercice")).toBeTruthy();
     expect(screen.getByText("Nouvelle séance libre")).toBeTruthy();
-    expect(screen.getByText("Tu choisiras la date ensuite")).toBeTruthy();
+    // The row of the sheet says what comes next (04-5b).
+    expect(screen.getByText("Choisis une date, puis tes blocs")).toBeTruthy();
 
     await user.click(
-      screen.getByRole("button", { name: "Continuer vers l'éditeur" }),
+      screen.getByRole("button", { name: /Nouvelle séance libre/ }),
     );
 
     expect(

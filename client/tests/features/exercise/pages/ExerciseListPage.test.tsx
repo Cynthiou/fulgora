@@ -458,7 +458,7 @@ describe("ExerciseListPage · selection (US-14)", () => {
     expect(screen.getByText("Exercice 003, Exercice 001")).toBeTruthy();
 
     await user.click(
-      screen.getByRole("button", { name: "Continuer vers l'éditeur" }),
+      screen.getByRole("button", { name: /Nouvelle séance libre/ }),
     );
 
     expect(
