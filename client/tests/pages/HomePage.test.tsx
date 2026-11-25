@@ -235,21 +235,28 @@ describe("HomePage", () => {
   });
 });
 
-describe("HomePage · « + » (US-23)", () => {
-  it("opens the choice of a free session planned today", async () => {
+describe("HomePage · raccourcis (écran 03)", () => {
+  it("shows the shortcuts of the wireframe, without doubling the main action", async () => {
     readAppointmentsMock.mockResolvedValue([]);
     readCurrentMock.mockResolvedValue(null);
     renderHome();
-    const user = userEvent.setup();
     await screen.findByText("Aucune séance prévue");
 
-    await user.click(
-      screen.getByRole("button", { name: "Ajouter une séance" }),
-    );
-
-    expect(screen.getByText("Nouvelle séance")).toBeTruthy();
+    // No "+" in the header: creating goes through the main action (écran 03)
     expect(
-      screen.getByRole("link", { name: /^Séance libre/ }).getAttribute("href"),
-    ).toBe(`/seances/nouvelle?date=${today}`);
+      screen.queryByRole("button", { name: "Ajouter une séance" }),
+    ).toBeNull();
+    expect(
+      screen
+        .getByRole("link", { name: "Créer ma première séance" })
+        .getAttribute("href"),
+    ).toBe("/seances/nouvelle");
+    expect(screen.queryByRole("link", { name: "Créer une séance" })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Voir mon planning" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "Voir mon historique" }),
+    ).toBeTruthy();
   });
 });

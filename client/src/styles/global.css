@@ -85,6 +85,31 @@
   --noise: 0;
 }
 
+/* "theme-dark:hidden" and "theme-light:hidden": show an element in one theme
+   only (the logo exists in two versions). The theme is read from data-theme on
+   <html>; without it, the phone decides. */
+@custom-variant theme-dark {
+  &:where([data-theme="fulgora-dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant theme-light {
+  &:where([data-theme="fulgora-light"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: light) {
+    &:where(:root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
 /* Colors that DaisyUI does not have: they change with the theme. */
 :root,
 [data-theme="fulgora-light"] {

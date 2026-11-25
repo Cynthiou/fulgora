@@ -3,13 +3,14 @@ import { Link } from "react-router";
 import {
   addDays,
   formatLongDate,
+  formatTodayCount,
   sortDayAppointments,
   todayInParis,
 } from "shared";
+import alertCircleIcon from "../assets/icons/ui/states/alert-circle.svg";
 import EmptyState from "../components/EmptyState";
-import ErrorState from "../components/ErrorState";
+import Icon from "../components/Icon";
 import QuickActions from "../components/QuickActions";
-import CreateSessionSheet from "../features/appointment/components/CreateSessionSheet";
 import TodaySelector from "../features/appointment/components/TodaySelector";
 import TodaySessionCard from "../features/appointment/components/TodaySessionCard";
 import { useAppointments } from "../features/appointment/hooks/useAppointments";
@@ -32,7 +33,7 @@ function HomeSkeleton() {
   );
 }
 
-// Screen 03: today's date, the session of the day, the programs, the shortcuts.
+// Screen 03: the date, the session of the day, the programs, the shortcuts.
 function HomePage() {
   const today = todayInParis();
   // One call for two months around today: today's sessions come from it, and
@@ -69,19 +70,32 @@ function HomePage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-display-md">{formatLongDate(today)}</h1>
-        <CreateSessionSheet date={today} />
-      </div>
+      {/* The date names the page; the sections carry the visible titles. */}
+      <h1 className="font-sans text-base font-semibold normal-case not-italic">
+        {formatLongDate(today)}
+      </h1>
 
       {isLoading && <HomeSkeleton />}
 
       {!isLoading && hasFailed && (
-        <ErrorState
-          title="Impossible de charger tes séances"
-          message="Vérifie ta connexion internet, puis réessaie."
-          onRetry={retry}
-        />
+        <div
+          role="alert"
+          className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
+        >
+          <p className="flex items-center gap-2 font-semibold">
+            <Icon
+              src={alertCircleIcon}
+              className="size-6 shrink-0 text-status-missed"
+            />
+            Impossible de charger tes séances
+          </p>
+          <p className="text-muted">
+            Vérifie ta connexion internet, puis réessaie.
+          </p>
+          <button type="button" onClick={retry} className={PRIMARY_LINK}>
+            Réessayer
+          </button>
+        </div>
       )}
 
       {!isLoading && !hasFailed && (
@@ -90,12 +104,16 @@ function HomePage() {
             aria-labelledby="today-title"
             className="flex flex-col gap-3"
           >
-            <h2
-              id="today-title"
-              className="font-sans text-overline not-italic uppercase text-accent"
-            >
-              Séance du jour
-            </h2>
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 id="today-title" className="text-display-sm">
+                Séance du jour
+              </h2>
+              {todayItems.length > 1 && (
+                <p className="text-sm font-semibold text-secondary">
+                  {formatTodayCount(todayItems.length)}
+                </p>
+              )}
+            </div>
             {selected === undefined ? (
               <EmptyState
                 title="Aucune séance prévue"

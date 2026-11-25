@@ -269,11 +269,9 @@ test("plans a free session from the home page and finds it there (A1 to A9)", as
   await page.getByRole("button", { name: "Commencer" }).click();
   await expectHomePage(page);
 
-  // "+" then "Séance libre": the editor opens on today
-  await page.getByRole("button", { name: "Ajouter une séance" }).click();
-  await expect(page.getByText("Nouvelle séance")).toBeVisible();
+  // The main action of the home opens the editor on today (écran 03)
   await expectNoA11yViolation(page);
-  await page.getByRole("link", { name: /^Séance libre/ }).click();
+  await page.getByRole("link", { name: "Créer ma première séance" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Nouvelle séance",
   );
