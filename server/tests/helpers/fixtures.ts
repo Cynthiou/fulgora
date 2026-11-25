@@ -84,11 +84,15 @@ export async function deleteTestUsers(prefix: string): Promise<void> {
   }
 
   const statements = [
+    // The notifications point at the appointments (DT-17): they go first.
+    "DELETE FROM notification WHERE user_id IN (?)",
     "DELETE FROM workout_set WHERE workout_exercise_id IN (SELECT we.id FROM workout_exercise we JOIN workout_block wb ON wb.id = we.workout_block_id JOIN workout_session ws ON ws.id = wb.workout_session_id WHERE ws.owner_user_id IN (?))",
     "DELETE FROM workout_exercise WHERE workout_block_id IN (SELECT wb.id FROM workout_block wb JOIN workout_session ws ON ws.id = wb.workout_session_id WHERE ws.owner_user_id IN (?))",
     "DELETE FROM workout_block WHERE workout_session_id IN (SELECT id FROM workout_session WHERE owner_user_id IN (?))",
     "DELETE FROM workout_session WHERE owner_user_id IN (?)",
     "DELETE FROM appointment WHERE owner_user_id IN (?)",
+    "DELETE FROM weekly_schedule WHERE program_id IN (SELECT id FROM program WHERE owner_user_id IN (?))",
+    "DELETE FROM program WHERE owner_user_id IN (?)",
     "DELETE FROM planned_set WHERE template_block_exercise_id IN (SELECT tbe.id FROM template_block_exercise tbe JOIN template_block tb ON tb.id = tbe.template_block_id JOIN session_version sv ON sv.id = tb.session_version_id JOIN session_template st ON st.id = sv.session_template_id WHERE st.owner_user_id IN (?))",
     "DELETE FROM template_block_exercise WHERE template_block_id IN (SELECT tb.id FROM template_block tb JOIN session_version sv ON sv.id = tb.session_version_id JOIN session_template st ON st.id = sv.session_template_id WHERE st.owner_user_id IN (?))",
     "DELETE FROM template_block WHERE session_version_id IN (SELECT sv.id FROM session_version sv JOIN session_template st ON st.id = sv.session_template_id WHERE st.owner_user_id IN (?))",
