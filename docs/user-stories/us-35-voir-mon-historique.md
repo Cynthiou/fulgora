@@ -97,22 +97,22 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 
 ## Tâches techniques
 
-- [ ] Backend : `historyRepository.readHistory(userId, today, limit, offset)` : rendez-vous + nom de séance + programme + séance réalisée (`LEFT JOIN workout_session`) ; condition `ws.status IN ('completed','unfinished') OR (ws.id IS NULL AND a.status IN ('to_confirm','missed','cancelled') AND a.planned_date < ?)` ; colonne calculée `COALESCE(DATE(ws.started_at), a.planned_date) AS history_date` ; `ORDER BY history_date DESC, a.id DESC LIMIT ? OFFSET ?` (en chaînes)
+- [x] Backend : `historyRepository.readHistory(userId, today, limit, offset)` : rendez-vous + nom de séance + programme + séance réalisée (`LEFT JOIN workout_session`) ; condition `ws.status IN ('completed','unfinished') OR (ws.id IS NULL AND a.status IN ('to_confirm','missed','cancelled') AND a.planned_date < ?)` ; colonne calculée `COALESCE(DATE(ws.started_at), a.planned_date) AS history_date` ; `ORDER BY history_date DESC, a.id DESC LIMIT ? OFFSET ?` (en chaînes)
 - [ ] Backend : vérifier avec `EXPLAIN` que l'index `ix_appointment_calendar` est utilisé
-- [ ] Backend : `historyActions.browse` (demande 21 lignes pour savoir s'il en reste : `has_more`)
-- [ ] Backend : `historyRouter.ts` : `GET /api/history?offset=` → `authenticate` → `validate` → action
-- [ ] Shared : `shared/history.ts` : `getHistoryStatus(row)` (`completed`, `unfinished`, `to_confirm`, `missed`, `cancelled`), `groupByWeek(rows)` (lundi → dimanche), `formatWeekLabel` (« SEMAINE DU 23 NOV. »), `formatDayBadge` (« JEU 26 »)
-- [ ] Shared : `todayInParis()` (déjà créé pour US-23)
-- [ ] Frontend : `features/history/services/historyService.ts`, `hooks/useHistory.ts`
-- [ ] Frontend : `pages/TrackingPage.tsx` (onglet Suivi, Historique seul en MVP), `components/HistoryWeekGroup.tsx`, `components/HistoryRow.tsx` (avec `StatusBadge`)
-- [ ] Routing : `/suivi` et `/suivi/historique`
-- [ ] Tests : unitaires : `getHistoryStatus`, `groupByWeek` (un dimanche reste dans la semaine du lundi précédent), `formatWeekLabel`
-- [ ] Tests : back : ordre par date réelle (prévue le 19, faite le 17 → rangée au 17) ; séance en cours absente ; annulée future absente ; séance d'un autre absente ; `has_more` exact
+- [x] Backend : `historyActions.browse` (demande 21 lignes pour savoir s'il en reste : `has_more`)
+- [x] Backend : `historyRouter.ts` : `GET /api/history?offset=` → `authenticate` → `validate` → action
+- [x] Shared : `shared/history.ts` : `getHistoryStatus(row)` (`completed`, `unfinished`, `to_confirm`, `missed`, `cancelled`), `groupByWeek(rows)` (lundi → dimanche), `formatWeekLabel` (« SEMAINE DU 23 NOV. »), `formatDayBadge` (« JEU 26 »)
+- [x] Shared : `todayInParis()` (déjà créé pour US-23)
+- [x] Frontend : `features/history/services/historyService.ts`, `hooks/useHistory.ts`
+- [x] Frontend : `pages/TrackingPage.tsx` (onglet Suivi, Historique seul en MVP), `components/HistoryWeekGroup.tsx`, `components/HistoryRow.tsx` (avec `StatusBadge`)
+- [x] Routing : `/suivi` et `/suivi/historique`
+- [x] Tests : unitaires : `getHistoryStatus`, `groupByWeek` (un dimanche reste dans la semaine du lundi précédent), `formatWeekLabel`
+- [x] Tests : back : ordre par date réelle (prévue le 19, faite le 17 → rangée au 17) ; séance en cours absente ; annulée future absente ; séance d'un autre absente ; `has_more` exact
 - [ ] Tests : E2E : historique vide, puis après une séance terminée ; axe sur SUI-05 et SUI-07
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] États chargement, vide, erreur et chargement des suivantes testés
+- [x] États chargement, vide, erreur et chargement des suivantes testés
 - [ ] Mobile-first 375 px
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
