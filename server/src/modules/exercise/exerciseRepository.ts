@@ -1,4 +1,4 @@
-import type { Difficulty } from "shared";
+import { type Difficulty, type ExerciseFilters, escapeLike } from "shared";
 import client, { type Queryable, type Rows } from "../../database/client.js";
 
 // One function, one query. No business rule here: the action decides.
@@ -17,20 +17,55 @@ export type ExerciseRow = {
   equipment_names: string | null;
 };
 
-// Who can see what (RM-007): the shared catalog and the user's own exercises,
-// never the personal exercises of others; an archived exercise is hidden.
-const VISIBLE_WHERE =
-  "(e.owner_user_id IS NULL OR e.owner_user_id = ?) AND e.is_archived = FALSE";
+// The WHERE of the catalog: who can see what (RM-007), then the filters.
+// Every piece of SQL is a constant; only the values travel as parameters.
+// The filters combine with AND; inside a filter, the choices are an OR (IN).
+function buildWhere(
+  userId: number,
+  filters: ExerciseFilters,
+): { sql: string; params: unknown[] } {
+  const conditions = [
+    "(e.owner_user_id IS NULL OR e.owner_user_id = ?)",
+    "e.is_archived = FALSE",
+  ];
+  const params: unknown[] = [userId];
 
-// A page of the catalog, sorted by name. LIMIT and OFFSET are passed as
-// strings: a known quirk of mysql2 with execute (common rule 8).
+  if (filters.search !== undefined && filters.search !== "") {
+    // "\" escapes the LIKE wildcards: a typed "%" is searched as a percent sign.
+    conditions.push("e.name LIKE ? ESCAPE '\\\\'");
+    params.push(`%${escapeLike(filters.search)}%`);
+  }
+  if (filters.category_ids !== undefined && filters.category_ids.length > 0) {
+    conditions.push(
+      "EXISTS (SELECT 1 FROM exercise_category ec WHERE ec.exercise_id = e.id AND ec.category_id IN (?))",
+    );
+    params.push(filters.category_ids);
+  }
+  if (filters.equipment_ids !== undefined && filters.equipment_ids.length > 0) {
+    conditions.push(
+      "EXISTS (SELECT 1 FROM exercise_equipment ee WHERE ee.exercise_id = e.id AND ee.equipment_id IN (?))",
+    );
+    params.push(filters.equipment_ids);
+  }
+  if (filters.difficulties !== undefined && filters.difficulties.length > 0) {
+    conditions.push("e.difficulty IN (?)");
+    params.push(filters.difficulties);
+  }
+
+  return { sql: conditions.join(" AND "), params };
+}
+
+// A page of the catalog, sorted by name. Uses query, not execute, because of
+// the lists in IN (?) (common rule 8).
 export async function readExercises(
   userId: number,
+  filters: ExerciseFilters,
   limit: number,
   offset: number,
   db: Queryable = client,
 ): Promise<ExerciseRow[]> {
-  const [rows] = await db.execute<Rows[]>(
+  const where = buildWhere(userId, filters);
+  const [rows] = await db.query<Rows[]>(
     `SELECT e.id, e.slug, e.name, e.difficulty, e.image_female_url, e.image_male_url,
             (e.owner_user_id IS NOT NULL) AS is_personal,
             (SELECT c.name
@@ -44,22 +79,46 @@ export async function readExercises(
                JOIN equipment eq ON eq.id = ee.equipment_id
               WHERE ee.exercise_id = e.id) AS equipment_names
        FROM exercise e
-      WHERE ${VISIBLE_WHERE}
+      WHERE ${where.sql}
       ORDER BY e.name, e.id
       LIMIT ? OFFSET ?`,
-    [userId, String(limit), String(offset)],
+    [...where.params, limit, offset],
   );
   return rows as ExerciseRow[];
 }
 
-// How many exercises the user can see: same WHERE as the list.
+// How many exercises match: same WHERE as the list.
 export async function countExercises(
   userId: number,
+  filters: ExerciseFilters,
   db: Queryable = client,
 ): Promise<number> {
-  const [rows] = await db.execute<Rows[]>(
-    `SELECT COUNT(*) AS total FROM exercise e WHERE ${VISIBLE_WHERE}`,
-    [userId],
+  const where = buildWhere(userId, filters);
+  const [rows] = await db.query<Rows[]>(
+    `SELECT COUNT(*) AS total FROM exercise e WHERE ${where.sql}`,
+    where.params,
   );
   return Number(rows[0]?.total ?? 0);
+}
+
+export type ReferenceRow = { id: number; code: string; name: string };
+
+// The 8 groups, for the filter grid.
+export async function readCategories(
+  db: Queryable = client,
+): Promise<ReferenceRow[]> {
+  const [rows] = await db.query<Rows[]>(
+    "SELECT id, code, name FROM category ORDER BY name",
+  );
+  return rows as ReferenceRow[];
+}
+
+// The equipment list, for the filter grid.
+export async function readEquipments(
+  db: Queryable = client,
+): Promise<ReferenceRow[]> {
+  const [rows] = await db.query<Rows[]>(
+    "SELECT id, code, name FROM equipment ORDER BY name",
+  );
+  return rows as ReferenceRow[];
 }

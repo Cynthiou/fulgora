@@ -9,6 +9,8 @@ import { readUserId } from "../../utils/requestUser.js";
 import {
   countExercises,
   type ExerciseRow,
+  readCategories,
+  readEquipments,
   readExercises,
 } from "./exerciseRepository.js";
 
@@ -26,14 +28,15 @@ function toListItem(row: ExerciseRow): ExerciseListItem {
   };
 }
 
-// GET /api/exercises?offset=: one page of 20 exercises, with the total and
-// the offset of the next page (null when this one was the last).
+// GET /api/exercises?offset=&search=&category_ids=&equipment_ids=&difficulties=
+// One page of 20 exercises matching the filters, with the total and the
+// offset of the next page (null when this one was the last).
 export const browse: RequestHandler = async (req, res) => {
   const userId = readUserId(req);
-  const { offset = 0 } = req.query as unknown as ExerciseQuery;
+  const { offset = 0, ...filters } = req.query as unknown as ExerciseQuery;
 
-  const rows = await readExercises(userId, EXERCISE_PAGE_SIZE, offset);
-  const total = await countExercises(userId);
+  const rows = await readExercises(userId, filters, EXERCISE_PAGE_SIZE, offset);
+  const total = await countExercises(userId, filters);
 
   const nextOffset = offset + EXERCISE_PAGE_SIZE;
   const response: ExerciseListResponse = {
@@ -42,4 +45,14 @@ export const browse: RequestHandler = async (req, res) => {
     next_offset: nextOffset < total ? nextOffset : null,
   };
   res.json(response);
+};
+
+// GET /api/categories: the 8 groups.
+export const browseCategories: RequestHandler = async (_req, res) => {
+  res.json(await readCategories());
+};
+
+// GET /api/equipments: the equipment list.
+export const browseEquipments: RequestHandler = async (_req, res) => {
+  res.json(await readEquipments());
 };
