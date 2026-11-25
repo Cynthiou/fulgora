@@ -85,16 +85,16 @@ Voir À PRÉCISER.
 
 ## Tâches techniques
 
-- [ ] Backend : `workoutSessionRepository.completeWorkoutSession(id, userId)` : même forme que l'abandon avec `status = 'completed'`
-- [ ] Backend : `workoutSessionActions.complete` : 0 ligne → 404 / 409 ; sinon relire l'arbre et renvoyer le résumé
-- [ ] Backend : `POST /api/workout-sessions/:id/complete`
-- [ ] Shared : `computeDurationSeconds(startedAt, endedAt)`, `computeTonnage(sets)`, `countValidatedSets`, `countPlannedSets`, `formatExerciseResult(sets, profile)` (« 3 / 3 · 10, 8, 10 rép. »)
-- [ ] Frontend : `workoutSessionService.completeWorkoutSession(id)`
-- [ ] Frontend : `components/CompleteWorkoutDialog.tsx`, `pages/WorkoutSummaryPage.tsx` (B6, sert aussi après un abandon)
-- [ ] Routing : `/entrainement/:id/resume`
-- [ ] Tests : unitaires : `computeTonnage` (séries non validées ignorées, sans charge, décimales 62,5), `computeDurationSeconds`, `formatExerciseResult`
-- [ ] Tests : back : terminer avec des séries non faites → 200, leur `validated_at` reste vide ; 2ᵉ terminaison → 409 ; d'un autre → 404
-- [ ] Tests : E2E : séance complète → résumé avec les bons chiffres ; axe sur B6
+- [x] Backend : `workoutSessionRepository.completeWorkoutSession(id, userId)` : même forme que l'abandon avec `status = 'completed'`
+- [x] Backend : `workoutSessionActions.complete` : 0 ligne → 404 / 409 ; sinon relire l'arbre et renvoyer le résumé
+- [x] Backend : `POST /api/workout-sessions/:id/complete`
+- [x] Shared : `computeDurationSeconds(startedAt, endedAt)`, `computeTonnage(sets)`, `countValidatedSets`, `countPlannedSets`, `formatExerciseResult(sets, profile)` (« 3 / 3 · 10, 8, 10 rép. »)
+- [x] Frontend : `workoutSessionService.completeWorkoutSession(id)`
+- [x] Frontend : `components/CompleteWorkoutDialog.tsx`, `pages/WorkoutSummaryPage.tsx` (B6, sert aussi après un abandon)
+- [x] Routing : `/entrainement/:id/resume`
+- [x] Tests : unitaires : `computeTonnage` (séries non validées ignorées, sans charge, décimales 62,5), `computeDurationSeconds`, `formatExerciseResult`
+- [x] Tests : back : terminer avec des séries non faites → 200, leur `validated_at` reste vide ; 2ᵉ terminaison → 409 ; d'un autre → 404
+- [x] Tests : E2E : séance complète → résumé avec les bons chiffres ; axe sur B6
 
 ## Definition of Done
 
