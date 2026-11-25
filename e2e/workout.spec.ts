@@ -290,7 +290,10 @@ test("a session already finished never offers to start again", async ({
 
   // The planning says the same, and the detail offers the summary
   await page.goto("/planning");
-  await expect(page.getByText("Effectuée")).toBeVisible();
+  // The day under the grid counts it as done (CAL-01)
+  await expect(
+    page.getByRole("heading", { name: /1 séance · 1 effectuée/ }),
+  ).toBeVisible();
   await page.goto("/");
   await page.getByRole("link", { name: "Voir le résumé" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pecs");

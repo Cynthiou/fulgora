@@ -30,13 +30,20 @@ function WeekList({ weekStart, today, items, onPickDay }: Props) {
         const isToday = day === today;
         return (
           <li key={day} className="flex gap-3">
+            {/* Named by what it shows, with the full date hidden before:
+                an aria-label alone would drop the visible text (axe). */}
             <button
               type="button"
               onClick={() => onPickDay(day)}
-              aria-label={`Voir le ${formatLongDate(day).toLowerCase()}`}
               className="flex w-10 shrink-0 flex-col items-center"
             >
-              <span className="text-overline uppercase text-muted">
+              <span className="sr-only">
+                Voir le {formatLongDate(day).toLocaleLowerCase("fr-FR")}
+              </span>
+              <span
+                aria-hidden="true"
+                className="text-overline uppercase text-muted"
+              >
                 {DAY_NAMES[index]}
               </span>
               <span

@@ -1,6 +1,7 @@
 import {
   type AppointmentListItem,
   getAppointmentStatus,
+  isWorkoutOver,
   sortDayAppointments,
 } from "./appointment.js";
 import { DEFAULT_TIMEZONE, formatDayMonth, todayIn } from "./dates.js";
@@ -156,7 +157,10 @@ export function describeEntry(
   const { item } = entry;
   const origin = item.program === null ? "Séance libre" : item.program.name;
   if (entry.isReminder) {
-    return `Effectuée le ${formatDayMonth(getAppointmentDisplayDate(item, timeZone))}`;
+    const realDay = formatDayMonth(getAppointmentDisplayDate(item, timeZone));
+    return isWorkoutOver(item)
+      ? `Effectuée le ${realDay}`
+      : `Commencée le ${realDay}`;
   }
   const parts = [origin];
   if (isDoneAnotherDay(item, timeZone)) {
