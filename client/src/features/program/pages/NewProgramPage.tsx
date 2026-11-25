@@ -10,10 +10,10 @@ import {
   todayInParis,
   WEEKDAYS,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
-import Icon from "../../../components/Icon";
+import PageHeader from "../../../components/PageHeader";
 import TextField from "../../../components/TextField";
 import { ApiError } from "../../../services/apiError";
+import StepBar from "../components/StepBar";
 import { createProgramDraft } from "../services/programService";
 
 // The date the Planning handed over, today otherwise.
@@ -90,25 +90,15 @@ function NewProgramPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          aria-label="Retour"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <div className="flex min-w-0 flex-col">
-          <h1 className="text-display-sm">Nouveau programme</h1>
-          <p className="text-sm text-muted">
-            Étape 1 / 3 · Informations et jours
-          </p>
-        </div>
-      </header>
+      <PageHeader onBack={() => navigate(-1)} title="Nouveau programme" />
 
-      <form noValidate onSubmit={submit} className="flex flex-col gap-6 p-4">
-        <fieldset disabled={isSaving} className="flex flex-col gap-6">
+      <form
+        noValidate
+        onSubmit={submit}
+        className="flex flex-col gap-3.5 px-[18px] pt-1 pb-4"
+      >
+        <StepBar current={1} label="Informations et jours" />
+        <fieldset disabled={isSaving} className="flex flex-col gap-3.5">
           <TextField
             id="program_name"
             label="Nom du programme"
@@ -130,24 +120,26 @@ function NewProgramPage() {
             maxLength={2000}
             error={errors.description}
           />
-          <TextField
-            id="program_start"
-            label="Début"
-            type="date"
-            required
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-            error={errors.start_date}
-          />
-          <TextField
-            id="program_end"
-            label="Fin"
-            type="date"
-            required
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-            error={errors.end_date}
-          />
+          <div className="grid grid-cols-2 gap-2.5">
+            <TextField
+              id="program_start"
+              label="Début"
+              type="date"
+              required
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+              error={errors.start_date}
+            />
+            <TextField
+              id="program_end"
+              label="Fin"
+              type="date"
+              required
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              error={errors.end_date}
+            />
+          </div>
           <TextField
             id="program_time"
             label="Heure des séances (facultatif)"
@@ -157,21 +149,21 @@ function NewProgramPage() {
             error={errors.planned_time}
           />
 
-          <fieldset className="flex flex-col gap-2">
-            <legend className="font-sans text-overline not-italic uppercase text-accent">
-              Jours de la semaine *
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="font-sans text-overline uppercase not-italic text-accent">
+              Jours d'entraînement *
             </legend>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-[5px]">
               {WEEKDAYS.map((day) => (
                 <button
                   key={day.value}
                   type="button"
                   aria-pressed={weekdays.includes(day.value)}
                   onClick={() => toggleDay(day.value)}
-                  className={`flex h-12 items-center justify-center rounded-btn border font-semibold ${
+                  className={`flex h-11 items-center justify-center rounded-btn text-sm font-extrabold ${
                     weekdays.includes(day.value)
-                      ? "border-neutral bg-neutral text-neutral-content"
-                      : "border-base-300 bg-base-100"
+                      ? "bg-secondary text-secondary-content"
+                      : "border border-base-300 bg-base-100 shadow-card"
                   }`}
                 >
                   <span aria-hidden="true">{day.short}</span>
@@ -179,7 +171,9 @@ function NewProgramPage() {
                 </button>
               ))}
             </div>
-            <p className="text-sm text-muted">{formatWeekdays(weekdays)}</p>
+            <p className="pt-1 text-[13px] font-semibold text-secondary">
+              {formatWeekdays(weekdays)}
+            </p>
             {errors.weekdays !== undefined && (
               <p role="alert" className="text-sm font-semibold">
                 {errors.weekdays}
@@ -187,14 +181,14 @@ function NewProgramPage() {
             )}
           </fieldset>
 
-          <p className="rounded-card border border-base-300 bg-base-100 p-3 text-sm text-muted shadow-card">
+          <p className="rounded-card border border-base-300 bg-base-100 p-3 text-xs leading-[1.45] text-muted shadow-card">
             {formatLongDate(startDate)} → {formatLongDate(endDate)} ·{" "}
             {formatWeekCount(startDate, endDate)}
           </p>
 
           <button
             type="submit"
-            className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+            className="mt-1 flex h-btn w-full items-center justify-center rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
           >
             {isSaving ? "Enregistrement…" : "Suivant"}
           </button>

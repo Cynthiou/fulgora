@@ -105,6 +105,24 @@ export function formatPeriod(startDate: string, endDate: string): string {
   return `du ${from} au ${to}`;
 }
 
+// "2 nov. → 27 déc. 2026": the period of a program on its card (PRO-01).
+// The year is written once, at the end, or twice when they differ.
+export function formatPeriodShort(startDate: string, endDate: string): string {
+  const short = (date: string) =>
+    new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "short",
+    }).format(new Date(`${date}T00:00:00Z`));
+  const startYear = startDate.slice(0, 4);
+  const endYear = endDate.slice(0, 4);
+  const from =
+    startYear === endYear
+      ? short(startDate)
+      : `${short(startDate)} ${startYear}`;
+  return `${from} → ${short(endDate)} ${endYear}`;
+}
+
 // The status a program takes on a date (RM-074); a draft stays a draft.
 export function computeProgramStatus(
   program: { status: ProgramStatus; start_date: string; end_date: string },

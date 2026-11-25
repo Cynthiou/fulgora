@@ -5,6 +5,7 @@ import {
   computeProgramStatus,
   countProgramWeeks,
   formatPeriod,
+  formatPeriodShort,
   formatReadySessions,
   formatWeekCount,
   formatWeekdays,
@@ -72,6 +73,15 @@ describe("the period", () => {
   it("writes the period in words", () => {
     expect(formatPeriod("2026-11-30", "2027-01-10")).toBe(
       "du lundi 30 novembre au dimanche 10 janvier",
+    );
+  });
+
+  it("writes the short period of a card, with the year once (PRO-01)", () => {
+    expect(formatPeriodShort("2026-11-02", "2026-12-27")).toBe(
+      "2 nov. → 27 déc. 2026",
+    );
+    expect(formatPeriodShort("2026-11-30", "2027-01-10")).toBe(
+      "30 nov. 2026 → 10 janv. 2027",
     );
   });
 });

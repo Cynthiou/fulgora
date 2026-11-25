@@ -309,4 +309,25 @@ test("captures the screens of the MVP", async ({ page }) => {
     await expect(page.getByText(/^Fin dans /)).toBeVisible();
     await shoot(page, "b5c-minuteur-en-cours");
   }
+
+  // PRO-01v, PRO-02, PRO-03 et PRO-01 : les programmes (US-18)
+  await page.goto("/programmes");
+  await expect(page.getByText("Aucun programme")).toBeVisible();
+  await shoot(page, "pro-01v-mes-programmes-vide");
+  await page.getByRole("link", { name: /Créer mon premier programme/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Nouveau programme",
+  );
+  await page.getByLabel(/^Nom du programme/).fill("Hypertrophie 6 semaines");
+  await page.getByRole("button", { name: "lundi" }).click();
+  await page.getByRole("button", { name: "jeudi" }).click();
+  await shoot(page, "pro-02-nouveau-programme");
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page.getByText("Séances de la semaine")).toBeVisible();
+  await shoot(page, "pro-03-seances-du-programme");
+  await page.getByRole("link", { name: /^Enregistrer/ }).click();
+  await expect(
+    page.getByRole("link", { name: /Hypertrophie 6 semaines/ }),
+  ).toBeVisible();
+  await shoot(page, "pro-01-mes-programmes");
 });

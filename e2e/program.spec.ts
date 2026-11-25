@@ -44,7 +44,8 @@ test("creates a program, fills its sessions and plans the whole period", async (
   // PRO-03v: one session per chosen day, none ready yet
   await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
   await expect(page.getByText("0 / 1 séance prête")).toBeVisible();
-  await expect(page.getByText("À configurer · aucun exercice")).toBeVisible();
+  // A session without exercise says "À configurer" (PRO-03).
+  await expect(page.getByText("À configurer").first()).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Créer le programme" }),
   ).toBeDisabled();

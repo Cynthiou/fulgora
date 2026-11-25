@@ -2,20 +2,31 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   computeProgramStatus,
-  formatPeriod,
+  formatPeriodShort,
   PROGRAM_STATUS_LABELS,
   todayInParis,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import gridIcon from "../../../assets/icons/ui/app/grid.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
+import PageHeader from "../../../components/PageHeader";
 import { isAbortError } from "../../../services/api";
 import { type ProgramListItem, readPrograms } from "../services/programService";
 
 const PRIMARY_LINK =
-  "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
+  "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action";
+
+// The chip of each state of a program (PRO-01).
+const STATUS_CHIP: Record<string, string> = {
+  draft: "bg-neutral/[0.06] text-muted",
+  upcoming: "bg-secondary/10 text-secondary",
+  in_progress: "bg-primary/10 text-action-text",
+  finished: "bg-status-done/10 text-status-done-text",
+  abandoned: "bg-status-cancelled/10 text-status-cancelled-text",
+};
 
 // "4 programmes · 2 en cours · 1 brouillon" (PRO-01b).
 function describeList(items: ProgramListItem[], today: string): string {
@@ -66,19 +77,17 @@ function ProgramsPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={() => navigate("/planning")}
-          aria-label="Retour"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <h1 className="text-display-sm">Mes programmes</h1>
-      </header>
+      <PageHeader
+        onBack={() => navigate("/planning")}
+        title="Mes programmes"
+        subtitle={
+          isLoading || items.length === 0
+            ? undefined
+            : describeList(items, today)
+        }
+      />
 
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-2.5 px-[18px] pt-1 pb-24">
         {isLoading && <LoadingState label="Chargement des programmes…" />}
 
         {!isLoading && error !== null && (
@@ -91,57 +100,93 @@ function ProgramsPage() {
 
         {!isLoading && error === null && items.length === 0 && (
           <EmptyState
+            centered
+            icon={gridIcon}
             title="Aucun programme"
             message="Un programme planifie tes séances sur plusieurs semaines, automatiquement. Choisis la période et tes jours, les séances arrivent dans ton Planning."
           >
             <Link to="/programmes/nouveau" className={PRIMARY_LINK}>
-              + Créer mon premier programme
+              <Icon src={plusIcon} className="size-[18px]" />
+              Créer mon premier programme
             </Link>
           </EmptyState>
         )}
 
         {!isLoading && error === null && items.length > 0 && (
-          <>
-            <p className="font-semibold">{describeList(items, today)}</p>
-            <ul className="flex flex-col gap-2">
-              {items.map((item) => {
-                const status = computeProgramStatus(item, today);
-                const isDraft = status === "draft";
-                return (
-                  <li key={item.id}>
-                    <Link
-                      to={
-                        isDraft
-                          ? `/programmes/${item.id}/seances`
-                          : `/programmes/${item.id}`
-                      }
-                      className="flex flex-col gap-1 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
-                    >
-                      <span className="text-overline uppercase text-accent">
+          <ul className="flex flex-col gap-2.5">
+            {items.map((item) => {
+              const status = computeProgramStatus(item, today);
+              const isDraft = status === "draft";
+              const ready =
+                item.session_count === 0
+                  ? 0
+                  : Math.round((item.ready_count / item.session_count) * 100);
+              return (
+                <li key={item.id}>
+                  <Link
+                    to={
+                      isDraft
+                        ? `/programmes/${item.id}/seances`
+                        : `/programmes/${item.id}`
+                    }
+                    className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-3.5 shadow-card"
+                  >
+                    <span className="flex items-center justify-between gap-2">
+                      <b className="truncate text-base font-extrabold">
+                        {item.name}
+                      </b>
+                      <span
+                        className={`shrink-0 rounded-chip px-2 py-[3px] text-[10px] font-extrabold uppercase tracking-[0.06em] ${
+                          STATUS_CHIP[status] ?? ""
+                        }`}
+                      >
                         {PROGRAM_STATUS_LABELS[status]}
                       </span>
-                      <span className="font-display text-display-sm">
-                        {item.name}
+                    </span>
+                    <span className="text-xs font-semibold leading-[1.45] text-muted">
+                      {formatPeriodShort(item.start_date, item.end_date)}
+                    </span>
+                    {isDraft ? (
+                      // A draft shows how far it is from being usable
+                      // (RM-071); the mockup draws the same bar (PRO-01b).
+                      <span className="flex items-center gap-2.5">
+                        <span
+                          aria-hidden="true"
+                          className="h-1.5 flex-1 overflow-hidden rounded-chip bg-track"
+                        >
+                          <span
+                            className="block h-full bg-secondary"
+                            style={{ width: `${ready}%` }}
+                          />
+                        </span>
+                        <span className="shrink-0 text-[11.5px] font-bold leading-[1.45] text-muted">
+                          {item.ready_count} / {item.session_count} séances
+                          prêtes
+                        </span>
                       </span>
-                      <span className="text-sm text-muted">
-                        {formatPeriod(item.start_date, item.end_date)}
+                    ) : (
+                      <span className="text-xs font-medium leading-[1.45] text-muted">
+                        {item.appointment_count} séances dans le Planning
                       </span>
-                      <span className="text-sm text-muted">
-                        {isDraft
-                          ? `${item.ready_count} / ${item.session_count} séances prêtes · pas encore dans le Planning`
-                          : `${item.appointment_count} séances dans le Planning`}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-            <Link to="/programmes/nouveau" className={PRIMARY_LINK}>
-              + Créer un programme
-            </Link>
-          </>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
+
+      {!isLoading && error === null && items.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
+          <div className="mx-auto max-w-md">
+            <Link to="/programmes/nouveau" className={PRIMARY_LINK}>
+              <Icon src={plusIcon} className="size-[18px]" />
+              Créer un programme
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
