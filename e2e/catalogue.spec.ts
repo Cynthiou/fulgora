@@ -78,7 +78,7 @@ test("search and filters live in the address and survive a detour", async ({
   ).toBeVisible();
   await expect(page.getByText("Muscles sollicités")).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Ajouter à une séance" }),
+    page.getByRole("button", { name: "Ajouter à une séance" }),
   ).toBeVisible();
   const detail = await new AxeBuilder({ page }).analyze();
   expect(detail.violations).toEqual([]);
