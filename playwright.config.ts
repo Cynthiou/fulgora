@@ -25,11 +25,13 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     // The test server writes into the test database and signs tokens with
     // its own secret: the E2E tests depend on no .env value. (.env never
-    // overrides a variable that is already set.)
+    // overrides a variable that is already set.) The tests sign up and log in
+    // many times from one address, so the auth limit is raised for them.
     env: {
       DB_NAME: "fulgora_test",
       JWT_SECRET: "fulgora-e2e-secret-with-at-least-32-characters",
       ALLOWED_ORIGINS: "http://localhost:3000",
+      AUTH_RATE_LIMIT: "1000",
     },
   },
 });
