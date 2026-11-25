@@ -1,15 +1,18 @@
 import type { ErrorRequestHandler } from "express";
-import { HttpError } from "../utils/httpError.js";
+import type { ValidationField } from "shared";
+import { HttpError, ValidationError } from "../utils/httpError.js";
 
-// Every error answer has the same shape: { error: { code, message, field? } }.
+// Every error answer has the same shape:
+// { error: { code, message, field?, fields? } }.
 function sendError(
   res: Parameters<ErrorRequestHandler>[2],
   status: number,
   code: string,
   message: string,
   field?: string,
+  fields?: ValidationField[],
 ) {
-  res.status(status).json({ error: { code, message, field } });
+  res.status(status).json({ error: { code, message, field, fields } });
 }
 
 // Errors raised by express.json() carry a "type" string.
@@ -25,6 +28,11 @@ function isBodyParserError(err: unknown): err is { type: string } {
 // Last stop for every error. Known errors keep their status and message,
 // unknown ones are logged on the server and hidden behind a generic 500.
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  if (err instanceof ValidationError) {
+    sendError(res, err.status, err.code, err.message, undefined, err.fields);
+    return;
+  }
+
   if (err instanceof HttpError) {
     sendError(res, err.status, err.code, err.message, err.field);
     return;
