@@ -10,8 +10,10 @@ import {
   toYearMonth,
   WEEKDAY_INITIALS,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import BottomSheet from "../../../components/BottomSheet";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -54,119 +56,127 @@ function DatePickerSheet({ value, onConfirm, onClose }: Props) {
   }
 
   const dayButton =
-    "flex h-10 w-full items-center justify-center rounded-btn text-sm font-semibold disabled:opacity-40";
+    "flex h-9 w-full items-center justify-center rounded-btn text-[13px] disabled:opacity-40";
 
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="date-picker-title"
-      onClose={onClose}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-hero border border-base-300 bg-base-100 p-4 text-base-content shadow-card backdrop:bg-neutral/60"
-    >
-      <div className="flex items-center justify-between">
-        <h2 id="date-picker-title" className="text-display-sm">
+    <BottomSheet label="Date de la séance" onClose={onClose} closeLabel={null}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 id="date-picker-title" className="text-[26px] leading-none">
           Date de la séance
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-tap px-2 font-semibold text-secondary"
+          className="min-h-tap px-1 text-sm font-semibold text-secondary"
         >
           Fermer
         </button>
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setMonth(shiftMonth(month, -1))}
-          aria-label="Mois précédent"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-6" />
-        </button>
-        <p aria-live="polite" className="font-semibold">
-          {formatMonthTitle(month)}
-        </p>
-        <button
-          type="button"
-          onClick={() => setMonth(shiftMonth(month, 1))}
-          aria-label="Mois suivant"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronRightIcon} className="size-6" />
-        </button>
-      </div>
-
-      <div aria-hidden="true" className="mt-2 grid grid-cols-7 gap-1">
-        {WEEKDAY_INITIALS.map((initial, index) => (
-          <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: the initials repeat (M, M), only their position tells them apart
-            key={index}
-            className="text-center text-overline uppercase text-muted"
+      <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setMonth(shiftMonth(month, -1))}
+            aria-label="Mois précédent"
+            className="-my-3 grid size-tap place-items-center text-muted"
           >
-            {initial}
-          </span>
-        ))}
-      </div>
-      <fieldset className="mt-1 grid grid-cols-7 gap-1">
-        <legend className="sr-only">
-          Jours de {formatMonthTitle(month).toLowerCase()}
-        </legend>
-        {listMonthGrid(month).flatMap((week, weekIndex) =>
-          week.map((date, dayIndex) =>
-            date === null ? (
-              <span
-                // biome-ignore lint/suspicious/noArrayIndexKey: an empty cell has nothing but its place in the grid
-                key={`empty-${weekIndex}-${dayIndex}`}
-                aria-hidden="true"
-              />
-            ) : (
-              <button
-                key={date}
-                type="button"
-                onClick={() => setChosen(date)}
-                disabled={!isPlannedDateInRange(date, today)}
-                aria-pressed={date === chosen}
-                aria-label={`${formatLongDate(date)}${date === today ? ", aujourd'hui" : ""}`}
-                className={`${dayButton} ${
-                  date === chosen
-                    ? "bg-primary text-primary-content shadow-action"
-                    : date === today
-                      ? "border border-secondary text-secondary"
-                      : "border border-transparent"
-                }`}
-              >
-                {Number(date.slice(8, 10))}
-              </button>
-            ),
-          ),
-        )}
-      </fieldset>
+            <Icon src={chevronLeftIcon} className="size-[18px]" />
+          </button>
+          <p aria-live="polite" className="text-[15px] font-extrabold">
+            {formatMonthTitle(month)}
+          </p>
+          <button
+            type="button"
+            onClick={() => setMonth(shiftMonth(month, 1))}
+            aria-label="Mois suivant"
+            className="-my-3 grid size-tap place-items-center text-muted"
+          >
+            <Icon src={chevronRightIcon} className="size-[18px]" />
+          </button>
+        </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+        <div aria-hidden="true" className="grid grid-cols-7 gap-0.5">
+          {WEEKDAY_INITIALS.map((initial, index) => (
+            <span
+              // biome-ignore lint/suspicious/noArrayIndexKey: the initials repeat (M, M), only their position tells them apart
+              key={index}
+              className="py-0.5 text-center text-[10px] font-bold text-muted"
+            >
+              {initial}
+            </span>
+          ))}
+        </div>
+        <fieldset className="grid grid-cols-7 gap-0.5">
+          <legend className="sr-only">
+            Jours de {formatMonthTitle(month).toLowerCase()}
+          </legend>
+          {listMonthGrid(month).flatMap((week, weekIndex) =>
+            week.map((date, dayIndex) =>
+              date === null ? (
+                <span
+                  // biome-ignore lint/suspicious/noArrayIndexKey: an empty cell has nothing but its place in the grid
+                  key={`empty-${weekIndex}-${dayIndex}`}
+                  aria-hidden="true"
+                />
+              ) : (
+                <button
+                  key={date}
+                  type="button"
+                  onClick={() => setChosen(date)}
+                  disabled={!isPlannedDateInRange(date, today)}
+                  aria-pressed={date === chosen}
+                  aria-label={`${formatLongDate(date)}${date === today ? ", aujourd'hui" : ""}`}
+                  className={`${dayButton} ${
+                    date === chosen
+                      ? "bg-pick font-extrabold text-pick-content"
+                      : date === today
+                        ? "border border-secondary font-bold text-secondary"
+                        : "font-semibold"
+                  }`}
+                >
+                  {Number(date.slice(8, 10))}
+                </button>
+              ),
+            ),
+          )}
+        </fieldset>
+      </div>
+
+      {/* The legend of the mockup, then the date in words (A2b) */}
+      <div className="flex items-center gap-4 text-xs text-muted">
         <button
           type="button"
           onClick={pickToday}
-          className="min-h-tap rounded-btn border border-base-300 bg-base-100 px-3 text-sm font-semibold"
+          className="flex min-h-tap items-center gap-1.5 font-medium"
         >
+          <span
+            aria-hidden="true"
+            className="size-3 rounded-sm border border-secondary"
+          />
           Aujourd'hui
         </button>
-        <p aria-live="polite" className="text-right text-sm">
-          <span className="text-overline uppercase text-accent">Choisie</span>
-          <br />
-          <span className="font-semibold">{formatSessionDate(chosen)}</span>
-        </p>
+        <span className="flex items-center gap-1.5 font-medium">
+          <span aria-hidden="true" className="size-3 rounded-sm bg-pick" />
+          Choisie
+        </span>
       </div>
+      <p aria-live="polite" className="text-sm">
+        Séance le{" "}
+        <b className="font-bold">
+          {formatSessionDate(chosen).replace("Séance le ", "")}
+        </b>
+      </p>
 
       <button
         type="button"
         onClick={() => onConfirm(chosen)}
-        className="mt-4 flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
+        className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action"
       >
+        <Icon src={checkIcon} className="size-[18px]" />
         Valider la date
       </button>
-    </dialog>
+    </BottomSheet>
   );
 }
 

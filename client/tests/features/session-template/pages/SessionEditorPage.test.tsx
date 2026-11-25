@@ -125,7 +125,8 @@ describe("SessionEditorPage", () => {
 
     expect(screen.getByText("Date de la séance")).toBeTruthy();
     expect(screen.getByText("Novembre 2026")).toBeTruthy();
-    expect(screen.getByText("Séance le jeudi 26 novembre")).toBeTruthy();
+    // "Séance le **jeudi 26 novembre**", the day in bold (A2b).
+    expect(screen.getByText("jeudi 26 novembre")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Mois suivant" }));
     expect(screen.getByText("Décembre 2026")).toBeTruthy();
@@ -133,7 +134,7 @@ describe("SessionEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: /^Samedi 28 novembre/ }),
     );
-    expect(screen.getByText("Séance le samedi 28 novembre")).toBeTruthy();
+    expect(screen.getByText("samedi 28 novembre")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Valider la date" }));
 
