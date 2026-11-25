@@ -27,9 +27,10 @@ export async function seedCatalog(
     catalog.difficulties.map((d) => [d.id, d.code]),
   );
 
-  // Safety: never insert the catalog twice.
+  // Safety: never insert the shared catalog twice. Personal exercises
+  // (owner_user_id filled) do not count: they are not the catalog.
   const [rows] = await connection.query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS exerciseCount FROM exercise",
+    "SELECT COUNT(*) AS exerciseCount FROM exercise WHERE owner_user_id IS NULL",
   );
   if (Number(rows[0]?.exerciseCount) > 0) {
     log("The catalog is already in the database: nothing was inserted.");
