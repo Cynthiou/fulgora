@@ -16,9 +16,10 @@ function joinNames(muscles: ExerciseMuscle[]): string {
   return muscles.map((muscle) => muscle.name).join(" · ");
 }
 
-// Screen 05: the muscle map (front and back in one image) and the muscles
-// written under it. The image's alternative text lists the muscles too, and
-// when no map exists yet (D-14) the text alone does the job.
+// Screen 05-1: the card "Muscles". Two lines, the role on the left in grey
+// and the muscles on the right. The map (front and back in one image) comes
+// above when the exercise has one; its alternative text lists the muscles,
+// and when no map exists yet (D-14) the two lines alone do the job.
 function MuscleMap({ exercise, sex }: Props) {
   const map = getExerciseMuscleMap(exercise, sex);
   const primary = exercise.muscles.filter(
@@ -36,33 +37,42 @@ function MuscleMap({ exercise, sex }: Props) {
     .join(", ");
 
   return (
-    <div className="flex flex-col gap-3">
+    <section
+      aria-labelledby="section-muscles"
+      className="flex flex-col gap-2.5 rounded-card border border-base-300 bg-base-100 p-3.5 shadow-card"
+    >
+      <h2
+        id="section-muscles"
+        className="font-sans text-overline uppercase not-italic text-accent"
+      >
+        Muscles
+      </h2>
       {map !== null && (
         <img
           src={map}
           alt={altText}
-          className="mx-auto h-56 w-auto rounded-ctl bg-soft"
+          className="mx-auto h-56 w-auto rounded-ctl bg-white object-contain"
         />
       )}
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+      <dl className="flex flex-col gap-2.5 text-[13px] font-medium leading-[1.5]">
         {primary.length > 0 && (
-          <>
-            <dt className="text-overline uppercase text-accent">
+          <div className="flex gap-2.5">
+            <dt className="w-21 shrink-0 text-muted">
               {formatMuscleRoleLabel("primary", primary.length)}
             </dt>
-            <dd className="font-semibold">{joinNames(primary)}</dd>
-          </>
+            <dd className="font-bold">{joinNames(primary)}</dd>
+          </div>
         )}
         {secondary.length > 0 && (
-          <>
-            <dt className="text-overline uppercase text-accent">
+          <div className="flex gap-2.5">
+            <dt className="w-21 shrink-0 text-muted">
               {formatMuscleRoleLabel("secondary", secondary.length)}
             </dt>
-            <dd className="text-muted">{joinNames(secondary)}</dd>
-          </>
+            <dd>{joinNames(secondary)}</dd>
+          </div>
         )}
       </dl>
-    </div>
+    </section>
   );
 }
 

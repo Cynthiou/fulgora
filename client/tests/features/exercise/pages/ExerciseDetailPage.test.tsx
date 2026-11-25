@@ -118,9 +118,10 @@ describe("ExerciseDetailPage", () => {
     readExerciseMock.mockResolvedValue(squat);
     renderDetail();
 
+    // The name of the exercise is the title of the page (05-1).
     expect(
       await screen.findByRole("heading", {
-        level: 2,
+        level: 1,
         name: "Squat à la barre",
       }),
     ).toBeTruthy();

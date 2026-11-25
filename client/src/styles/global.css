@@ -194,6 +194,9 @@
   --text-display-sm--line-height: 0.9;
   --text-display-md: 32px;
   --text-display-md--line-height: 0.9;
+  /* The big name at the top of a detail page (05-1) */
+  --text-display-page: 40px;
+  --text-display-page--line-height: 1;
   --text-display-lg: 44px;
   --text-display-lg--line-height: 0.9;
   --text-display-xl: 58px;

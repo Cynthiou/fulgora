@@ -78,9 +78,9 @@ test("search and filters live in the address and survive a detour", async ({
     .textContent();
   await firstCard.click();
   await expect(
-    page.getByRole("heading", { level: 2, name: firstName ?? "" }),
+    page.getByRole("heading", { level: 1, name: firstName ?? "" }),
   ).toBeVisible();
-  await expect(page.getByText("Muscles sollicités")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Muscles" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Ajouter à une séance" }),
   ).toBeVisible();

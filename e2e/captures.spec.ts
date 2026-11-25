@@ -122,7 +122,7 @@ test("captures the screens of the MVP", async ({ page }) => {
     .getByRole("link")
     .first()
     .click();
-  await expect(page.getByText("Muscles sollicités")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Muscles" })).toBeVisible();
   await shoot(page, "05-fiche-exercice");
 
   // A2 Nouvelle séance, A3 type de bloc, A4 bloc vide
