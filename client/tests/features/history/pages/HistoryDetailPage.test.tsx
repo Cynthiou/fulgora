@@ -37,6 +37,7 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: actual === null ? null : "2026-11-19T06:10:00.000Z",
+    is_added: false,
   };
 }
 
@@ -66,6 +67,7 @@ const done: HistoryDetail = {
         name: null,
         position: 1,
         instructions: null,
+        is_added: false,
         exercises: [
           {
             id: 11,
@@ -76,6 +78,7 @@ const done: HistoryDetail = {
             measure_codes: ["reps", "weight"],
             is_bodyweight: false,
             default_rest_seconds: 90,
+            is_added: false,
             sets: [
               set(1, [8, 60], [8, 60]),
               set(2, [8, 60], [7, 60]),

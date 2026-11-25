@@ -42,6 +42,7 @@ function set(id: number, validated: boolean): WorkoutSetRow {
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: validated ? "2026-11-26T07:05:00.000Z" : null,
+    is_added: false,
   };
 }
 
@@ -61,6 +62,7 @@ const tree: WorkoutSessionTree = {
       name: "Force",
       position: 1,
       instructions: null,
+      is_added: false,
       exercises: [
         {
           id: 11,
@@ -71,6 +73,7 @@ const tree: WorkoutSessionTree = {
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
           default_rest_seconds: 90,
+          is_added: false,
           sets: [set(1, true), set(2, false), set(3, false)],
         },
         {
@@ -82,6 +85,7 @@ const tree: WorkoutSessionTree = {
           measure_codes: ["reps"],
           is_bodyweight: false,
           default_rest_seconds: 120,
+          is_added: false,
           sets: [set(4, false)],
         },
       ],
@@ -124,6 +128,7 @@ describe("WorkoutExercisePage", () => {
     validateMock.mockResolvedValue({
       ...set(2, true),
       validated_at: "2026-11-26T07:20:00.000Z",
+      is_added: false,
     });
     const user = renderPage();
 

@@ -172,6 +172,8 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
     planned_rest_seconds: row.planned_rest_seconds,
     validated_at:
       row.validated_at === null ? null : row.validated_at.toISOString(),
+    // Nothing behind it in the plan: it was added during the session (D-18)
+    is_added: row.source_planned_set_id === null,
   };
 }
 
@@ -203,6 +205,7 @@ export async function buildTree(
         : (exercise.measure_codes.split(",") as MeasureCode[]),
     is_bodyweight: exercise.is_bodyweight === 1,
     default_rest_seconds: exercise.default_rest_seconds,
+    is_added: exercise.source_template_block_exercise_id === null,
     sets: sets
       .filter((set) => set.workout_exercise_id === exercise.id)
       .map(toSetRow),
@@ -214,6 +217,7 @@ export async function buildTree(
     name: block.name,
     position: block.position,
     instructions: block.instructions,
+    is_added: block.source_template_block_id === null,
     exercises: exerciseTrees.filter((exercise) =>
       exercises.some(
         (row) => row.id === exercise.id && row.workout_block_id === block.id,

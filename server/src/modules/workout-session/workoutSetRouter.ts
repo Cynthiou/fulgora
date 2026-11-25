@@ -2,6 +2,7 @@ import express from "express";
 import { actualSetSchema, idParamSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
+import { removeSet } from "./workoutAddActions.js";
 import { validateSet } from "./workoutSetActions.js";
 
 const workoutSetRouter = express.Router();
@@ -12,6 +13,15 @@ workoutSetRouter.put(
   authenticate,
   validate({ params: idParamSchema, body: actualSetSchema }),
   validateSet,
+);
+
+// DELETE /api/workout-sets/:id: removes a set added during the session
+// (US-32); a planned set never goes away (RM-048).
+workoutSetRouter.delete(
+  "/:id",
+  authenticate,
+  validate({ params: idParamSchema }),
+  removeSet,
 );
 
 export default workoutSetRouter;

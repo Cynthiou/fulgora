@@ -1,7 +1,12 @@
 import express from "express";
-import { idParamSchema, startWorkoutSchema } from "shared";
+import {
+  addWorkoutBlockSchema,
+  idParamSchema,
+  startWorkoutSchema,
+} from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
+import { addBlock } from "./workoutAddActions.js";
 import {
   abandon,
   complete,
@@ -45,6 +50,15 @@ workoutSessionRouter.post(
   authenticate,
   validate({ params: idParamSchema }),
   complete,
+);
+
+// POST /api/workout-sessions/:id/blocks: one more block during the session
+// (US-32), with the exercises chosen in the catalog.
+workoutSessionRouter.post(
+  "/:id/blocks",
+  authenticate,
+  validate({ params: idParamSchema, body: addWorkoutBlockSchema }),
+  addBlock,
 );
 
 export default workoutSessionRouter;

@@ -9,6 +9,8 @@ import exerciseRouter from "./modules/exercise/exerciseRouter.js";
 import historyRouter from "./modules/history/historyRouter.js";
 import authRouter from "./modules/user/authRouter.js";
 import userRouter from "./modules/user/userRouter.js";
+import workoutBlockRouter from "./modules/workout-session/workoutBlockRouter.js";
+import workoutExerciseRouter from "./modules/workout-session/workoutExerciseRouter.js";
 import workoutSessionRouter from "./modules/workout-session/workoutSessionRouter.js";
 import workoutSetRouter from "./modules/workout-session/workoutSetRouter.js";
 
@@ -29,6 +31,8 @@ router.get("/equipments", authenticate, browseEquipments);
 router.use("/appointments", appointmentRouter);
 router.use("/workout-sessions", workoutSessionRouter);
 router.use("/workout-sets", workoutSetRouter);
+router.use("/workout-blocks", workoutBlockRouter);
+router.use("/workout-exercises", workoutExerciseRouter);
 router.use("/history", historyRouter);
 
 export default router;

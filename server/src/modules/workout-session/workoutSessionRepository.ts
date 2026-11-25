@@ -160,6 +160,8 @@ export type WorkoutBlockRow = {
   name: string | null;
   position: number;
   instructions: string | null;
+  // null when the block was added during the session (D-18, RM-043)
+  source_template_block_id: number | null;
 };
 
 export async function readWorkoutBlocks(
@@ -167,7 +169,8 @@ export async function readWorkoutBlocks(
   db: Queryable = client,
 ): Promise<WorkoutBlockRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT id, block_type, name, position, instructions
+    `SELECT id, block_type, name, position, instructions,
+            source_template_block_id
        FROM workout_block
       WHERE workout_session_id = ?
       ORDER BY position`,
@@ -188,6 +191,8 @@ export type WorkoutExerciseRow = {
   // "reps,weight" or null
   measure_codes: string | null;
   is_bodyweight: number;
+  // null when the exercise was added during the session (D-18, RM-043)
+  source_template_block_exercise_id: number | null;
 };
 
 // The exercises of a realized session with what the screen needs to show
@@ -198,7 +203,7 @@ export async function readWorkoutExercises(
 ): Promise<WorkoutExerciseRow[]> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT we.id, we.workout_block_id, we.exercise_id, we.position, we.default_rest_seconds,
-            e.name,
+            we.source_template_block_exercise_id, e.name,
             (SELECT c.name FROM exercise_category ec JOIN category c ON c.id = ec.category_id
               WHERE ec.exercise_id = e.id ORDER BY c.id LIMIT 1) AS category_name,
             (SELECT GROUP_CONCAT(eq.name ORDER BY eq.name SEPARATOR ' · ')
@@ -243,6 +248,8 @@ export type WorkoutSetDbRow = {
   calories_actual: string | null;
   planned_rest_seconds: number | null;
   validated_at: Date | null;
+  // null when the set was added during the session (D-18, RM-043)
+  source_planned_set_id: number | null;
 };
 
 export async function readWorkoutSets(
@@ -381,4 +388,183 @@ export async function completeWorkoutSession(
     [id, userId],
   );
   return result.affectedRows;
+}
+
+// --- Adding during the session (US-32) --------------------------------------
+
+export type WorkoutExerciseContextRow = {
+  id: number;
+  workout_session_id: number;
+  status: WorkoutStatus;
+};
+
+// One exercise of a realized session, with the session it belongs to and the
+// state of that session. Null when it is not the user's (404).
+export async function readWorkoutExerciseContext(
+  workoutExerciseId: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<WorkoutExerciseContextRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT we.id, ws.id AS workout_session_id, ws.status
+       FROM workout_exercise we
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE we.id = ? AND ws.owner_user_id = ?`,
+    [workoutExerciseId, userId],
+  );
+  return (rows[0] as WorkoutExerciseContextRow | undefined) ?? null;
+}
+
+// The place a new set takes at the end of its exercise.
+export async function readNextSetPosition(
+  workoutExerciseId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COALESCE(MAX(position), 0) + 1 AS next_position
+       FROM workout_set
+      WHERE workout_exercise_id = ?
+      FOR UPDATE`,
+    [workoutExerciseId],
+  );
+  return Number(rows[0]?.next_position ?? 1);
+}
+
+// A set added during the session: no planned values, no provenance (RM-043).
+export async function createWorkoutSet(
+  workoutExerciseId: number,
+  position: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `INSERT INTO workout_set (workout_exercise_id, source_planned_set_id, position)
+     VALUES (?, NULL, ?)`,
+    [workoutExerciseId, position],
+  );
+  return result.insertId;
+}
+
+// Removes a set only if it was added during the session (RM-048): a planned
+// set is never deleted, and the caller answers 422.
+export async function deleteAddedWorkoutSet(
+  setId: number,
+  db: Queryable = client,
+): Promise<boolean> {
+  const [result] = await db.execute<Result>(
+    "DELETE FROM workout_set WHERE id = ? AND source_planned_set_id IS NULL",
+    [setId],
+  );
+  return result.affectedRows === 1;
+}
+
+export type WorkoutBlockContextRow = {
+  id: number;
+  workout_session_id: number;
+  status: WorkoutStatus;
+};
+
+// One block of a realized session, with the state of its session.
+export async function readWorkoutBlockContext(
+  workoutBlockId: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<WorkoutBlockContextRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT wb.id, ws.id AS workout_session_id, ws.status
+       FROM workout_block wb
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE wb.id = ? AND ws.owner_user_id = ?`,
+    [workoutBlockId, userId],
+  );
+  return (rows[0] as WorkoutBlockContextRow | undefined) ?? null;
+}
+
+// The place a new exercise takes at the end of its block.
+export async function readNextExercisePosition(
+  workoutBlockId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COALESCE(MAX(position), 0) + 1 AS next_position
+       FROM workout_exercise
+      WHERE workout_block_id = ?
+      FOR UPDATE`,
+    [workoutBlockId],
+  );
+  return Number(rows[0]?.next_position ?? 1);
+}
+
+// An exercise added during the session, with the rest of the catalog.
+export async function createWorkoutExercise(
+  workoutBlockId: number,
+  exerciseId: number,
+  position: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `INSERT INTO workout_exercise (workout_block_id, exercise_id,
+        source_template_block_exercise_id, position)
+     VALUES (?, ?, NULL, ?)`,
+    [workoutBlockId, exerciseId, position],
+  );
+  return result.insertId;
+}
+
+// The place a new block takes at the end of the session.
+export async function readNextBlockPosition(
+  workoutSessionId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COALESCE(MAX(position), 0) + 1 AS next_position
+       FROM workout_block
+      WHERE workout_session_id = ?
+      FOR UPDATE`,
+    [workoutSessionId],
+  );
+  return Number(rows[0]?.next_position ?? 1);
+}
+
+// A block added during the session; always a classic one (RM-043).
+export async function createWorkoutBlock(
+  workoutSessionId: number,
+  name: string | null,
+  position: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `INSERT INTO workout_block (workout_session_id, source_template_block_id,
+        block_type, name, position)
+     VALUES (?, NULL, 'classic', ?, ?)`,
+    [workoutSessionId, name, position],
+  );
+  return result.insertId;
+}
+
+// The session a set belongs to, with the state of that session and whether
+// the set was added; null when it is not the user's.
+export type AddedSetRow = {
+  id: number;
+  workout_session_id: number;
+  status: WorkoutStatus;
+  source_planned_set_id: number | null;
+};
+
+export async function readWorkoutSetOwner(
+  setId: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<AddedSetRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT wset.id, ws.id AS workout_session_id, ws.status,
+            wset.source_planned_set_id
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE wset.id = ? AND ws.owner_user_id = ?`,
+    [setId, userId],
+  );
+  return (rows[0] as AddedSetRow | undefined) ?? null;
 }

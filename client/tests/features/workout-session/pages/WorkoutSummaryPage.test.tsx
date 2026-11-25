@@ -39,6 +39,7 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: reps === null ? null : "2026-11-26T07:10:00.000Z",
+    is_added: false,
   };
 }
 
@@ -58,6 +59,7 @@ const completed: WorkoutSessionTree = {
       name: "Force",
       position: 1,
       instructions: null,
+      is_added: false,
       exercises: [
         {
           id: 11,
@@ -68,6 +70,7 @@ const completed: WorkoutSessionTree = {
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
           default_rest_seconds: 90,
+          is_added: false,
           sets: [set(1, 10, 40), set(2, 8, 40), set(3, 10, 40)],
         },
         {
@@ -79,6 +82,7 @@ const completed: WorkoutSessionTree = {
           measure_codes: ["reps"],
           is_bodyweight: false,
           default_rest_seconds: 90,
+          is_added: false,
           sets: [set(4, 8, null), set(5, null, null)],
         },
       ],

@@ -85,6 +85,9 @@ export type WorkoutSetRow = {
   planned_rest_seconds: number | null;
   // ISO date-time, null while the set is not done
   validated_at: string | null;
+  // Added during the session: no planned values, and it can be removed
+  // (US-32, RM-043, RM-048)
+  is_added: boolean;
 };
 
 export type WorkoutExerciseTree = {
@@ -98,6 +101,8 @@ export type WorkoutExerciseTree = {
   // Body weight exercise: its load is an added weight ("lest", A7b)
   is_bodyweight: boolean;
   default_rest_seconds: number | null;
+  // Added during the session (US-32)
+  is_added: boolean;
   sets: WorkoutSetRow[];
 };
 
@@ -107,6 +112,8 @@ export type WorkoutBlockTree = {
   name: string | null;
   position: number;
   instructions: string | null;
+  // Added during the session (US-32)
+  is_added: boolean;
   exercises: WorkoutExerciseTree[];
 };
 
@@ -404,4 +411,43 @@ export function formatExerciseResult(
   }
 
   return [head, ...parts].join(" · ");
+}
+
+// --- Adding during the session (US-32) --------------------------------------
+
+export const MAX_ADDED_EXERCISES = 30;
+
+// The exercises chosen in the catalog, added at the end of a block or in a
+// new block. Their values are filled set by set, nothing is planned.
+export const addWorkoutExercisesSchema = z.object({
+  exercise_ids: z
+    .array(z.number().int().positive({ error: "Exercice invalide." }))
+    .min(1, { error: "Choisis au moins un exercice." })
+    .max(MAX_ADDED_EXERCISES, {
+      error: `${MAX_ADDED_EXERCISES} exercices au maximum.`,
+    }),
+});
+
+export type AddWorkoutExercisesInput = z.output<
+  typeof addWorkoutExercisesSchema
+>;
+
+// A new block during the session: a title at most, and the exercises it
+// starts with.
+export const addWorkoutBlockSchema = addWorkoutExercisesSchema.extend({
+  name: z.string().max(160, { error: "160 caractères au maximum." }).nullable(),
+});
+
+export type AddWorkoutBlockInput = z.output<typeof addWorkoutBlockSchema>;
+
+// "2 séries supplémentaires", "1 série supplémentaire" (B6).
+export function formatAddedSets(count: number): string {
+  return count > 1
+    ? `${count} séries supplémentaires`
+    : `${count} série supplémentaire`;
+}
+
+// How many sets of the session were added by hand (B6).
+export function countAddedSets(tree: WorkoutSessionTree): number {
+  return allSets(tree).filter((set) => set.is_added).length;
 }
