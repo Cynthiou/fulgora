@@ -88,7 +88,7 @@ test("captures the screens of the MVP", async ({ page }) => {
   await expect(page.getByText(/résultats? pour/)).toBeVisible();
   await shoot(page, "04-catalogue-recherche");
   await page
-    .getByRole("list", { name: "Exercices" })
+    .getByRole("list", { name: "Exercices du bloc" })
     .getByRole("link")
     .first()
     .click();

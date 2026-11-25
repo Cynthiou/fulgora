@@ -188,7 +188,9 @@ describe("WorkoutExercisePage", () => {
       screen.getByRole("button", { name: "Valider la série 3" }),
     ).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "Modifier" }));
+    await user.click(
+      screen.getByRole("button", { name: /^Modifier la série/ }),
+    );
     expect(screen.getByText("Ce que tu as réellement fait")).toBeTruthy();
     const reps = screen.getByLabelText(
       "Répétitions · prévu 10",
@@ -225,7 +227,9 @@ describe("WorkoutExercisePage", () => {
     const user = renderPage();
     await screen.findByText("Série 2");
 
-    await user.click(screen.getByRole("button", { name: "Modifier" }));
+    await user.click(
+      screen.getByRole("button", { name: /^Modifier la série/ }),
+    );
     await user.clear(screen.getByLabelText("Répétitions · prévu 10"));
     await user.clear(screen.getByLabelText("Charge (kg) · prévu 40"));
     await user.click(

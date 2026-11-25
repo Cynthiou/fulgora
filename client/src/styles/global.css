@@ -20,7 +20,10 @@
 
   --color-primary: #ff6b35; /* action: ONE orange button per screen */
   --color-primary-content: #0b1220;
-  --color-secondary: #2563eb; /* brand: logo, active tab, progress, links */
+  /* Brand blue. #2563EB of the guidelines gives 4.48:1 on the page
+     background (#ECEFF3), just under the 4.5:1 of RM-064, so links and the
+     active tab use this slightly darker blue in the light theme. */
+  --color-secondary: #1d4ed8;
   --color-secondary-content: #ffffff;
   --color-accent: #0e7490; /* overlines and field labels */
   --color-accent-content: #ffffff;

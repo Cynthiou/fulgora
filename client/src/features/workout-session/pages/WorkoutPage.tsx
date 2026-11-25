@@ -148,7 +148,10 @@ function WorkoutPage() {
               <h1 className="text-display-md">{session.session_name}</h1>
               <div className="flex items-center justify-between gap-3">
                 {isInProgress ? (
-                  <p className="text-overline uppercase text-primary">
+                  <p className="text-overline uppercase text-muted">
+                    <span aria-hidden="true" className="text-primary">
+                      ●{" "}
+                    </span>
                     En cours · {session.program_name ?? "séance libre"}
                   </p>
                 ) : (
@@ -164,9 +167,11 @@ function WorkoutPage() {
                   </p>
                 )}
                 {chrono !== null && isInProgress && (
-                  <p className="font-display text-display-sm text-primary">
+                  <p className="rounded-btn border border-base-300 bg-base-100 px-3 py-1 font-display text-display-sm">
                     <span className="sr-only">Durée de la séance </span>
-                    <span aria-hidden="true">● </span>
+                    <span aria-hidden="true" className="text-primary">
+                      ●{" "}
+                    </span>
                     {chrono}
                   </p>
                 )}
@@ -202,11 +207,33 @@ function WorkoutPage() {
               </div>
             )}
 
-            <div className="flex items-center justify-between rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
-              <span className="font-semibold">Séries réalisées</span>
-              <span className="font-display text-display-sm">
-                {countValidatedSets(session)} / {countPlannedSets(session)}
-              </span>
+            <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">Séries réalisées</span>
+                <span className="font-display text-display-sm">
+                  {countValidatedSets(session)} / {countPlannedSets(session)}
+                </span>
+              </div>
+              {/* How far the session has gone, as on the wireframe (B2) */}
+              <div
+                aria-hidden="true"
+                className="h-2 overflow-hidden rounded-chip bg-soft"
+              >
+                <div
+                  className="h-full rounded-chip bg-secondary"
+                  style={{
+                    width: `${
+                      countPlannedSets(session) === 0
+                        ? 0
+                        : Math.round(
+                            (countValidatedSets(session) /
+                              countPlannedSets(session)) *
+                              100,
+                          )
+                    }%`,
+                  }}
+                />
+              </div>
             </div>
 
             {session.blocks.map((block, index) => (
@@ -226,7 +253,10 @@ function WorkoutPage() {
                     {block.instructions ?? "Note vide"}
                   </p>
                 ) : (
-                  <ul className="flex flex-col gap-2">
+                  <ul
+                    aria-label="Exercices du bloc"
+                    className="flex flex-col gap-2"
+                  >
                     {block.exercises.map((exercise) => (
                       <WorkoutExerciseRow
                         key={exercise.id}
@@ -238,6 +268,30 @@ function WorkoutPage() {
                 )}
               </section>
             ))}
+
+            {isInProgress && (
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="add-during-soon"
+                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                >
+                  + Ajouter un exercice ou un bloc
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="add-during-soon"
+                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                >
+                  + Ajouter une série
+                </button>
+                <p id="add-during-soon" className="text-sm text-muted">
+                  Ajouter pendant la séance arrive bientôt.
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -285,7 +339,7 @@ function WorkoutPage() {
               type="button"
               onClick={() => setIsConfirmingEnd(true)}
               disabled={isEnding}
-              className="h-btn flex-1 rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+              className="h-btn flex-[1.6] rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
             >
               {isEnding ? "Un instant…" : "Terminer la séance"}
             </button>

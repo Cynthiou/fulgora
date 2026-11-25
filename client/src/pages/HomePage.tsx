@@ -116,6 +116,7 @@ function HomePage() {
             </div>
             {selected === undefined ? (
               <EmptyState
+                headingLevel="h3"
                 title="Aucune séance prévue"
                 message="Crée ta première séance : choisis tes blocs et tes exercices, puis lance-la quand tu veux."
               >

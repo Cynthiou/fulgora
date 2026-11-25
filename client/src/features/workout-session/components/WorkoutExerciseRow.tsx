@@ -21,6 +21,7 @@ function WorkoutExerciseRow({ sessionId, exercise }: Props) {
   const isCardio =
     getMeasureProfile(exercise.measure_codes, exercise.is_bodyweight) ===
     "cardio";
+  const hasStarted = exercise.sets.some((set) => set.validated_at !== null);
   const planned = {
     measure_codes: exercise.measure_codes,
     is_bodyweight: exercise.is_bodyweight,
@@ -35,12 +36,16 @@ function WorkoutExerciseRow({ sessionId, exercise }: Props) {
       >
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="font-semibold">{exercise.name}</span>
-          <span className="text-sm font-semibold text-secondary">
-            {formatSetProgress(exercise, isCardio)}
-          </span>
-          <span className="text-sm text-muted">
-            {formatSetSummary(planned)}
-          </span>
+          {/* Started: how far it has gone. Untouched: what is planned (B2). */}
+          {hasStarted ? (
+            <span className="text-sm font-semibold text-secondary">
+              {formatSetProgress(exercise, isCardio)}
+            </span>
+          ) : (
+            <span className="text-sm text-muted">
+              {formatSetSummary(planned)}
+            </span>
+          )}
         </span>
         <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
       </Link>

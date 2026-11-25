@@ -55,7 +55,11 @@ test("the history is empty at first, then lists the finished session under its w
   await page.goto("/");
   await page.getByRole("link", { name: /Démarrer la séance/ }).click();
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
-  await page.getByRole("link", { name: /0 \/ 1 série/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
   await page.getByRole("button", { name: "Valider la série 1" }).click();
   await page.getByRole("button", { name: "Passer le repos" }).click();
   await page.getByRole("link", { name: "Retour aux exercices" }).click();

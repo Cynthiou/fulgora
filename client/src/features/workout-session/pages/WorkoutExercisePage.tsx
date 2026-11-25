@@ -241,6 +241,22 @@ function WorkoutExercisePage() {
                   />
                 ))}
               </ul>
+
+              {session.status === "in_progress" && (
+                <>
+                  <button
+                    type="button"
+                    disabled
+                    aria-describedby="add-set-soon"
+                    className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                  >
+                    + Ajouter une série
+                  </button>
+                  <p id="add-set-soon" className="text-sm text-muted">
+                    Ajouter ou retirer une série arrive bientôt.
+                  </p>
+                </>
+              )}
             </>
           )}
       </div>

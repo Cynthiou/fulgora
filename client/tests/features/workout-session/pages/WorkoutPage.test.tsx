@@ -124,8 +124,9 @@ describe("WorkoutPage", () => {
     expect(screen.getByText("12:40")).toBeTruthy();
     expect(screen.getByText("1 / 3")).toBeTruthy();
     expect(screen.getByText("Classique · Force")).toBeTruthy();
+    // A started exercise shows how far it has gone, not its plan (B2)
     expect(screen.getByText("1 / 3 séries")).toBeTruthy();
-    expect(screen.getByText("3 séries · 10 rép. · 40 kg")).toBeTruthy();
+    expect(screen.queryByText("3 séries · 10 rép. · 40 kg")).toBeNull();
     expect(screen.getByText("Penser à respirer.")).toBeTruthy();
     expect(
       screen.getByRole("button", { name: "Terminer la séance" }),

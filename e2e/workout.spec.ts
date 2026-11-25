@@ -66,7 +66,7 @@ test("starts the session of the day, survives a reload and resumes it from the h
     page.getByText(/^Durée de la séance ● \d+:\d{2}$/),
   ).toBeVisible();
   await expect(page.getByText("0 / 2", { exact: true })).toBeVisible();
-  await expect(page.getByText("0 / 2 séries")).toBeVisible();
+  await expect(page.getByText("2 séries · 10 rép.")).toBeVisible();
   await expectNoA11yViolation(page);
 
   // The chrono keeps counting after a reload (computed from the start time)
@@ -106,7 +106,8 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
 
   // B2 -> B3
   await page
-    .getByRole("link", { name: /0 \/ 2 séries/ })
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
     .first()
     .click();
   await expect(
@@ -121,13 +122,15 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
   await page.getByRole("button", { name: "+ 15 s" }).click();
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: "Passer le repos" }).click();
-  await expect(page.getByText("Série 1 validée")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Série 1 validée/ }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Valider la série 2" }),
   ).toBeVisible();
 
   // Set 2 changed through the sheet
-  await page.getByRole("button", { name: "Modifier" }).click();
+  await page.getByRole("button", { name: /^Modifier la série/ }).click();
   await expect(page.getByText("Ce que tu as réellement fait")).toBeVisible();
   await expectNoA11yViolation(page);
   await page
@@ -138,7 +141,9 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
     .getByRole("button", { name: "Valider la série 2" })
     .click();
   await page.getByRole("button", { name: "Passer le repos" }).click();
-  await expect(page.getByText("Série 2 validée")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Série 2 validée/ }),
+  ).toBeVisible();
   await expect(page.getByText("9 rép.")).toBeVisible();
 
   // Next exercise, then back to B2 with the counters updated
@@ -161,7 +166,11 @@ test("abandons the session after a set: unfinished, sets kept, nothing left in p
   await page.reload();
   await page.getByRole("link", { name: /Démarrer la séance/ }).click();
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
-  await page.getByRole("link", { name: /0 \/ 2 séries/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
   await page.getByRole("button", { name: "Valider la série 1" }).click();
   await page.getByRole("button", { name: "Passer le repos" }).click();
   await page.getByRole("link", { name: "Exercices", exact: true }).click();
@@ -170,7 +179,9 @@ test("abandons the session after a set: unfinished, sets kept, nothing left in p
   await expect(page.getByText("Abandonner cette séance ?")).toBeVisible();
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: "Continuer ma séance" }).click();
-  await expect(page.getByText("● En cours")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Terminer la séance" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Abandonner" }).click();
   await page
     .getByRole("dialog")
@@ -202,12 +213,16 @@ test("finishes a session and shows the summary with the right figures", async ({
   await page.reload();
   await page.getByRole("link", { name: /Démarrer la séance/ }).click();
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
-  await page.getByRole("link", { name: /0 \/ 2 séries/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
 
   // Two sets: 10 reps as planned, then 8 reps
   await page.getByRole("button", { name: "Valider la série 1" }).click();
   await page.getByRole("button", { name: "Passer le repos" }).click();
-  await page.getByRole("button", { name: "Modifier" }).click();
+  await page.getByRole("button", { name: /^Modifier la série/ }).click();
   await page
     .getByRole("button", { name: "Diminuer Répétitions · prévu 10" })
     .click();

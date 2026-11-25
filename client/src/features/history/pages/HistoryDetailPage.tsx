@@ -108,12 +108,17 @@ function HistoryDetailPage() {
           !notFound && (
             <>
               <div className="flex flex-col gap-1">
-                <p
-                  className={`text-overline uppercase ${
-                    status === "completed" ? "text-status-done" : "text-muted"
-                  }`}
-                >
-                  <span aria-hidden="true">{STATUSES[status].symbol} </span>
+                <p className="text-overline uppercase text-base-content">
+                  {/* Colour on the symbol only: green and amber are too pale
+                      for running text (brand guidelines, RM-064). */}
+                  <span
+                    aria-hidden="true"
+                    className={
+                      status === "completed" ? "text-status-done" : "text-muted"
+                    }
+                  >
+                    {STATUSES[status].symbol}{" "}
+                  </span>
                   {STATUSES[status].label}
                 </p>
                 {detail.kind === "done" ? (

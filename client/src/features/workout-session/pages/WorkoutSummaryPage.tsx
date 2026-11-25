@@ -69,19 +69,21 @@ function WorkoutSummaryPage() {
               {formatLongDate(startDate).charAt(0).toLowerCase() +
                 formatLongDate(startDate).slice(1)}
             </p>
-            <p
-              className={`text-overline uppercase ${
-                session.status === "completed"
-                  ? "text-status-done"
-                  : "text-status-pending"
-              }`}
-            >
+            <p className="text-overline uppercase text-base-content">
               {session.status === "completed" ? (
                 <>
-                  <span aria-hidden="true">✓ </span>Terminée
+                  <span aria-hidden="true" className="text-status-done">
+                    ✓{" "}
+                  </span>
+                  Terminée
                 </>
               ) : (
-                "Inachevée"
+                <>
+                  <span aria-hidden="true" className="text-status-pending">
+                    ◧{" "}
+                  </span>
+                  Inachevée
+                </>
               )}
             </p>
           </header>
