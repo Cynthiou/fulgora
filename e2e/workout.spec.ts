@@ -150,3 +150,40 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
   await expect(page.getByText("2 / 4", { exact: true })).toBeVisible();
   await expect(page.getByText("2 / 2 séries")).toBeVisible();
 });
+
+test("abandons the session after a set: unfinished, sets kept, nothing left in progress", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+  await planSessionToday(page, "Dos");
+  await page.reload();
+  await page.getByRole("link", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("link", { name: /0 \/ 2 séries/ }).click();
+  await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await page.getByRole("button", { name: "Passer le repos" }).click();
+  await page.getByRole("link", { name: "Exercices", exact: true }).click();
+
+  await page.getByRole("button", { name: "Abandonner" }).click();
+  await expect(page.getByText("Abandonner cette séance ?")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Continuer ma séance" }).click();
+  await expect(page.getByText("● En cours")).toHaveCount(0);
+  await page.getByRole("button", { name: "Abandonner" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Abandonner" })
+    .click();
+
+  await expect(page.getByText("Inachevée")).toBeVisible();
+  await expect(page.getByText("1 / 2", { exact: true })).toBeVisible();
+  await expectNoA11yViolation(page);
+
+  await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+  await expectHomePage(page);
+  await expect(
+    page.getByRole("link", { name: "Reprendre ma séance" }),
+  ).toHaveCount(0);
+});
