@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { formatClock, formatDuration } from "shared";
-import rotateIcon from "../../../assets/icons/ui/actions/rotate.svg";
-import playIcon from "../../../assets/icons/ui/navigation/player-play.svg";
-import pauseIcon from "../../../assets/icons/ui/session/player-pause.svg";
+import pauseIcon from "../../../assets/icons/ui/app/pause.svg";
+import playIcon from "../../../assets/icons/ui/app/play.svg";
+import rotateIcon from "../../../assets/icons/ui/app/rotate.svg";
+import stopIcon from "../../../assets/icons/ui/app/stop.svg";
 import Icon from "../../../components/Icon";
 import { useStopwatch } from "../hooks/useStopwatch";
 import { useTimerAlerts } from "../hooks/useTimerAlerts";
@@ -13,6 +14,8 @@ type Props = {
   isPending: boolean;
   // The set is over: the time held, in seconds
   onDone: (seconds: number) => void;
+  // Tells the card of the set to turn dark while the time runs (B5c)
+  onRunningChange?: (isRunning: boolean) => void;
 };
 
 type Mode = "countdown" | "stopwatch";
@@ -21,7 +24,12 @@ type Mode = "countdown" | "stopwatch";
 // "Minuteur" counts down from what was planned and validates the set by
 // itself at zero; "Chrono" counts up and stops on demand (RM-060).
 // The time always comes from the clock, so the phone may sleep (US-49).
-function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
+function DurationTimer({
+  plannedSeconds,
+  isPending,
+  onDone,
+  onRunningChange,
+}: Props) {
   const [mode, setMode] = useState<Mode>(
     plannedSeconds === null ? "stopwatch" : "countdown",
   );
@@ -36,6 +44,11 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
   // The beeps of the last three seconds, only while counting down (RM-060).
   useTimerAlerts(mode === "countdown" && watch.isStarted ? secondsLeft : 99);
 
+  // The card of the set follows the timer: white before, dark while it runs.
+  useEffect(() => {
+    onRunningChange?.(watch.isStarted);
+  }, [watch.isStarted, onRunningChange]);
+
   // At zero the set validates itself, with the time that was planned.
   useEffect(() => {
     if (isCountdownOver) {
@@ -48,18 +61,25 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
     mode === "countdown"
       ? formatClock(watch.isStarted ? secondsLeft : planned)
       : formatClock(watch.elapsedSeconds);
-
-  // The last ten seconds turn the box black (B5c).
+  // The last ten seconds are announced, with their beeps (B5c).
   const isFinalStretch =
     mode === "countdown" && watch.isStarted && secondsLeft <= 10;
+  const caption =
+    mode === "countdown"
+      ? isFinalStretch
+        ? `Fin dans ${secondsLeft} s · bip à 3, 2, 1`
+        : `Minuteur · prévu ${formatDuration(planned)}`
+      : planned > 0
+        ? `Chrono · objectif ${formatDuration(planned)}`
+        : "Chrono";
 
   if (!watch.isStarted) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex w-full flex-col items-center gap-3">
         {plannedSeconds !== null && (
           <fieldset
             aria-label="Façon de compter"
-            className="grid grid-cols-2 overflow-hidden rounded-btn border border-base-300"
+            className="flex w-full gap-[3px] rounded-btn bg-track p-[3px]"
           >
             {(
               [
@@ -72,10 +92,8 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
                 type="button"
                 aria-pressed={mode === code}
                 onClick={() => setMode(code)}
-                className={`min-h-tap font-semibold ${
-                  mode === code
-                    ? "bg-neutral text-neutral-content"
-                    : "bg-base-100"
+                className={`h-9 flex-1 rounded-ctl text-[13px] font-bold ${
+                  mode === code ? "bg-base-100 shadow-card" : "text-muted"
                 }`}
               >
                 {label}
@@ -84,24 +102,20 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
           </fieldset>
         )}
 
-        <div className="flex flex-col items-center gap-2 rounded-card border border-base-300 p-4">
-          <p className="text-sm text-muted">
-            {mode === "countdown"
-              ? `Minuteur · prévu ${formatDuration(planned)}`
-              : plannedSeconds === null
-                ? "Chrono"
-                : `Chrono · objectif ${formatDuration(planned)}`}
-          </p>
-          <p className="font-display text-display-xl leading-none">{shown}</p>
-        </div>
+        <p className="text-xs font-semibold leading-[1.45] text-muted">
+          {caption}
+        </p>
+        <p className="font-display text-[88px] font-extrabold uppercase italic leading-none">
+          {shown}
+        </p>
 
         <button
           type="button"
           onClick={watch.start}
           disabled={isPending || (mode === "countdown" && planned === 0)}
-          className="flex h-btn w-full items-center justify-center gap-2 rounded-btn bg-neutral font-extrabold uppercase tracking-wide text-neutral-content disabled:opacity-60"
+          className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
         >
-          <Icon src={playIcon} className="size-5" />
+          <Icon src={playIcon} className="size-[18px]" />
           {mode === "countdown" ? "Lancer le minuteur" : "Lancer le chrono"}
         </button>
       </div>
@@ -109,50 +123,34 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
   }
 
   return (
-    <div
-      className={`flex flex-col items-center gap-3 rounded-card p-4 ${
-        isFinalStretch
-          ? "bg-neutral text-neutral-content"
-          : "border border-base-300"
-      }`}
-    >
+    <div className="flex w-full flex-col items-center gap-3">
       <p
         aria-live="polite"
-        className={isFinalStretch ? "text-sm" : "text-sm text-muted"}
+        className="text-xs font-semibold leading-[1.45] text-pick-content/70"
       >
-        {mode === "countdown"
-          ? isFinalStretch
-            ? `Fin dans ${secondsLeft} s · bip à 3, 2, 1`
-            : `Minuteur · prévu ${formatDuration(planned)}`
-          : planned > 0
-            ? `Chrono · objectif ${formatDuration(planned)}`
-            : "Chrono"}
+        {caption}
       </p>
-      <p className="font-display text-display-xl leading-none">{shown}</p>
+      <p className="font-display text-[88px] font-extrabold uppercase italic leading-none">
+        {shown}
+      </p>
 
-      <div className="flex w-full items-center gap-2">
+      <div className="grid w-full grid-cols-[56px_1fr_1fr] gap-2">
         <button
           type="button"
           onClick={watch.start}
           aria-label="Remettre à zéro"
-          className={`flex size-tap shrink-0 items-center justify-center rounded-btn ${
-            isFinalStretch ? "" : "text-secondary"
-          }`}
+          className="grid h-13 place-items-center rounded-btn border border-pick-content/20"
         >
           <Icon src={rotateIcon} className="size-5" />
         </button>
         <button
           type="button"
           onClick={watch.isRunning ? watch.pause : watch.resume}
-          className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-btn border font-semibold ${
-            isFinalStretch
-              ? "border-neutral-content"
-              : "border-base-300 bg-base-100"
-          }`}
+          className="flex h-13 items-center justify-center gap-1.5 rounded-btn border border-pick-content/20 text-sm font-bold"
         >
           <Icon
             src={watch.isRunning ? pauseIcon : playIcon}
-            className="size-5"
+            className="size-4"
           />
           {watch.isRunning ? "Pause" : "Reprendre"}
         </button>
@@ -160,13 +158,10 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
           type="button"
           disabled={isPending}
           onClick={() => onDone(watch.stop())}
-          className={`flex h-12 flex-1 items-center justify-center gap-2 rounded-btn font-semibold disabled:opacity-60 ${
-            isFinalStretch
-              ? "bg-base-100 text-base-content"
-              : "border border-base-300 bg-base-100"
-          }`}
+          className="flex h-13 items-center justify-center gap-1.5 rounded-btn bg-primary text-sm font-extrabold text-primary-content disabled:opacity-60"
         >
-          <span aria-hidden="true">■</span> Arrêter
+          <Icon src={stopIcon} className="size-3.5" />
+          Arrêter
         </button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   describeSet,
   formatActualValues,
@@ -58,6 +59,8 @@ function SetRow({
   const label = getSetLabel(profile, index);
   const isCardio = profile === "cardio";
   const noun = isCardio ? "l'étape" : "la série";
+  // While the app counts the time, the card turns dark (B5c, B5e).
+  const [isCounting, setIsCounting] = useState(false);
 
   if (state === "done") {
     return (
@@ -89,9 +92,19 @@ function SetRow({
     const parts = describeSet(toPlannedValues(set), measureCodes, isBodyweight);
     return (
       <li className="flex flex-col gap-2.5">
-        <div className="flex flex-col items-center gap-3 rounded-hero border-[1.5px] border-primary bg-base-100 p-4 shadow-set">
+        <div
+          className={`flex flex-col items-center gap-3 rounded-hero border-[1.5px] p-4 ${
+            isCounting
+              ? "border-pick bg-pick text-pick-content"
+              : "border-primary bg-base-100 shadow-set"
+          }`}
+        >
           <div className="flex w-full items-center justify-between gap-2">
-            <p className="flex items-center gap-2 font-sans text-overline uppercase not-italic text-action-text">
+            <p
+              className={`flex items-center gap-2 font-sans text-overline uppercase not-italic ${
+                isCounting ? "text-primary" : "text-action-text"
+              }`}
+            >
               {label} / {total}
               {set.is_added && (
                 <span className="rounded-chip border border-base-300 px-2 py-0.5 text-base-content">
@@ -108,7 +121,9 @@ function SetRow({
             >
               <span
                 aria-hidden="true"
-                className="grid size-[34px] place-items-center rounded-btn bg-soft"
+                className={`grid size-[34px] place-items-center rounded-btn ${
+                  isCounting ? "bg-pick-content/10" : "bg-soft"
+                }`}
               >
                 <Icon src={pencilIcon} className="size-4" />
               </span>
@@ -149,6 +164,7 @@ function SetRow({
               plannedSeconds={set.duration_planned_seconds}
               isPending={isPending}
               onDone={onTimed}
+              onRunningChange={setIsCounting}
             />
           ) : isCardio ? (
             // B5d and B5e: the stage is launched, then the reading (US-49)
@@ -157,6 +173,7 @@ function SetRow({
               stageLabel={label}
               isPending={isPending}
               onStop={onTimed}
+              onRunningChange={setIsCounting}
             />
           ) : null}
         </div>
