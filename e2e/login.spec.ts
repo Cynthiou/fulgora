@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
-import { logIn, signUp } from "./helpers";
+import { expectHomePage, logIn, signUp } from "./helpers";
 
 async function expectNoA11yViolation(page: Page) {
   const results = await new AxeBuilder({ page }).analyze();
@@ -17,10 +17,7 @@ test("logs in with the username and stays connected after a reload", async ({
   await page.goto("/connexion");
   await expectNoA11yViolation(page);
   await logIn(page, username);
-
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Ton carnet d'entraînement",
-  );
+  await expectHomePage(page);
 
   // The cookie survives a reload: the server still knows who this is.
   await page.reload();
@@ -30,9 +27,7 @@ test("logs in with the username and stays connected after a reload", async ({
 
   // Already connected: the login page sends straight back home.
   await page.goto("/connexion");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Ton carnet d'entraînement",
-  );
+  await expectHomePage(page);
 });
 
 test("wrong credentials give one single message and keep the identifier", async ({

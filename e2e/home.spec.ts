@@ -1,19 +1,21 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-// Witness test. US-02 will point it to the login page once it exists.
-test("the home page is displayed", async ({ page }) => {
+// The home page is private: a visitor is sent to the login page.
+test("a visitor opening the app sees the login page", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Ton carnet d'entraînement",
+    "Se connecter",
   );
 });
 
-test("the home page has no accessibility violation", async ({ page }) => {
-  await page.goto("/");
+test("an unknown address shows the not found page", async ({ page }) => {
+  await page.goto("/nulle-part");
 
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Page introuvable",
+  );
   const results = await new AxeBuilder({ page }).analyze();
-
   expect(results.violations).toEqual([]);
 });

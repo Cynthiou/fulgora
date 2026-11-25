@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { expectHomePage } from "./helpers";
 
 // Each run creates a new account in the test database (see playwright.config.ts).
 function uniqueStamp() {
@@ -36,9 +37,7 @@ test("a visitor creates an account and lands on the home page", async ({
   await expectNoA11yViolation(page);
 
   await page.getByRole("button", { name: "Commencer" }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Ton carnet d'entraînement",
-  );
+  await expectHomePage(page);
 });
 
 test("an empty form shows its errors without calling the server", async ({

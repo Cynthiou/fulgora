@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { formatLongDate, todayInParis } from "shared";
 
 export const E2E_PASSWORD = "secret-2026";
 
@@ -27,4 +28,11 @@ export async function logIn(page: Page, username: string) {
   await page.getByLabel(/^Pseudo ou adresse e-mail/).fill(username);
   await page.getByLabel(/^Mot de passe/).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "Se connecter" }).click();
+}
+
+// The home page shows today's date as its title.
+export async function expectHomePage(page: Page) {
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    formatLongDate(todayInParis()),
+  );
 }
