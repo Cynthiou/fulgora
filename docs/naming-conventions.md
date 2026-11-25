@@ -55,6 +55,20 @@ Chaque fonctionnalité porte **le même nom du serveur jusqu'à l'écran**, en k
 
 Les types communs au client et au serveur vivent dans `shared/`, un fichier par famille : `shared/catalog.ts`, `shared/workout-session.ts`.
 
+### Les tests
+
+Aucun test à côté du code. Chaque espace de travail a son dossier `tests/`, qui reprend l'arborescence du code, et le fichier de test porte le nom du fichier testé suivi de `.test.ts` ou `.test.tsx`.
+
+| Code                                           | Test                                                  |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| `server/src/modules/user/userActions.ts`       | `server/tests/modules/user/userActions.test.ts`       |
+| `client/src/features/user/pages/LoginPage.tsx` | `client/tests/features/user/pages/LoginPage.test.tsx` |
+| `shared/validation.ts`                         | `shared/tests/validation.test.ts`                     |
+
+- Les préparatifs communs sont dans `server/tests/setup.ts` et `client/tests/setup.ts` (déclarés dans les `vitest.config.ts`).
+- Les aides des tests du serveur (utilisateurs et séances de test, catalogue) sont dans `server/tests/helpers/`.
+- Les tests de bout en bout restent dans `e2e/`, à la racine.
+
 ## 4. Les fonctions
 
 - **Une fonction, une requête.** Si une lecture a besoin de trois requêtes, on écrit trois fonctions, et c'est l'action qui les appelle l'une après l'autre.
