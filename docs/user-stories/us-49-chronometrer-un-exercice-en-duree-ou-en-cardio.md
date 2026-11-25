@@ -71,12 +71,12 @@ Validation par la route de l'US-29.
 
 ## Tâches techniques
 
-- [ ] Frontend : `useStopwatch` (chrono à partir de l'heure de départ, pause cumulée), réutilisation de `useCountdown` et `useTimerAlerts`
-- [ ] Frontend : `DurationTimer.tsx` (B5b, B5c), `CardioStepTimer.tsx` (B5d, B5e), ouverture automatique de `CardioReadingSheet` (B5f)
-- [ ] Tests : unitaires faux minuteurs : pause / reprise, arrêt avant la fin, validation à 0 une seule fois
-- [ ] Tests : E2E gainage 1 min accéléré (faux temps)
+- [x] Frontend : `useStopwatch` (chrono depuis l'heure de départ, pause cumulée) ; le décompte est construit dessus, `useTimerAlerts` est réutilisé
+- [x] Frontend : `DurationTimer.tsx` (B5b, B5c), `CardioStepTimer.tsx` (B5d, B5e), ouverture automatique de `ActualSetSheet` avec la durée mesurée (B5f)
+- [x] Tests : unitaires avec un faux temps : pause / reprise, arrêt avant la fin, validation à 0 une seule fois, chrono qui monte, bip du cardio à l'objectif
+- [x] Tests : E2E gainage 1 min avec l'horloge du navigateur accélérée
 
 ## Definition of Done
 
-- [ ] Vérifié sur un vrai téléphone, écran verrouillé puis rouvert
+- [ ] Vérifié sur un vrai téléphone, écran verrouillé puis rouvert (**à faire par Cynthia**)
 - [ ] Code relu et fusionné via pull request
