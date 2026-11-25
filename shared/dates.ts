@@ -52,3 +52,74 @@ export function formatLongDate(date: string): string {
   }).format(new Date(`${date}T00:00:00Z`));
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+// The calendar day shifted by whole years; 29 February lands on 28 February.
+export function addYears(date: string, years: number): string {
+  const [year, month, day] = date.split("-").map(Number) as [
+    number,
+    number,
+    number,
+  ];
+  const target = new Date(Date.UTC(year + years, month - 1, 1));
+  const lastDay = new Date(Date.UTC(year + years, month, 0)).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
+}
+
+// "2026-11-26" -> "2026-11".
+export function toYearMonth(date: string): string {
+  return date.slice(0, 7);
+}
+
+// "2026-11" shifted by a number of months: +1 -> "2026-12", +2 -> "2027-01".
+export function shiftMonth(yearMonth: string, months: number): string {
+  const [year, month] = yearMonth.split("-").map(Number) as [number, number];
+  const shifted = new Date(Date.UTC(year, month - 1 + months, 1));
+  return shifted.toISOString().slice(0, 7);
+}
+
+// "2026-11" -> "Novembre 2026" (the title of a calendar month).
+export function formatMonthTitle(yearMonth: string): string {
+  const text = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${yearMonth}-01T00:00:00Z`));
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// Monday-first weekday initials for the header of a calendar grid.
+export const WEEKDAY_INITIALS = ["L", "M", "M", "J", "V", "S", "D"];
+
+// The weeks of a month, Monday first, as "YYYY-MM-DD" cells; null fills the
+// days that belong to the previous or the next month.
+export function listMonthGrid(yearMonth: string): (string | null)[][] {
+  const [year, month] = yearMonth.split("-").map(Number) as [number, number];
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  // getUTCDay: 0 = Sunday; we want Monday = 0 ... Sunday = 6
+  const firstWeekday =
+    (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+
+  const cells: (string | null)[] = Array.from(
+    { length: firstWeekday },
+    () => null,
+  );
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    cells.push(`${yearMonth}-${String(day).padStart(2, "0")}`);
+  }
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
+
+  const weeks: (string | null)[][] = [];
+  for (let start = 0; start < cells.length; start += 7) {
+    weeks.push(cells.slice(start, start + 7));
+  }
+  return weeks;
+}
+
+// "2026-11-28" -> "Séance le samedi 28 novembre" (the date picker, A2b).
+export function formatSessionDate(date: string): string {
+  const long = formatLongDate(date);
+  return `Séance le ${long.charAt(0).toLowerCase()}${long.slice(1)}`;
+}

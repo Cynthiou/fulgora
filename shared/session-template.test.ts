@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { addDays, todayInParis } from "./dates.js";
 import {
   AVAILABLE_BLOCK_TYPES,
   BLOCK_TYPE_CODES,
@@ -18,12 +19,14 @@ import {
   formatSetSummary,
   formatSetValues,
   formatTrackedMeasures,
+  freeSessionSchema,
   getBlockLabel,
   getDisallowedSetFields,
   getMeasureProfile,
   getSetFieldLabel,
   getSetFields,
   getSetLabel,
+  isPlannedDateInRange,
   parseMinSec,
   plannedSetSchema,
   SET_LIMITS,
@@ -391,5 +394,44 @@ describe("set fields (US-15)", () => {
     expect(formatMinSec(600)).toBe("10:00");
     expect(formatMinSec(5)).toBe("0:05");
     expect(formatMinSec(3725)).toBe("1:02:05");
+  });
+});
+
+describe("freeSessionSchema (US-23)", () => {
+  const today = todayInParis();
+
+  it("accepts a date within one year back and two years ahead", () => {
+    const base = { ...createEmptyDraft(today), name: "Jambes" };
+    expect(freeSessionSchema.safeParse(base).success).toBe(true);
+    expect(
+      freeSessionSchema.safeParse({
+        ...base,
+        planned_date: addDays(today, -300),
+      }).success,
+    ).toBe(true);
+    expect(
+      freeSessionSchema.safeParse({
+        ...base,
+        planned_date: addDays(today, 700),
+      }).success,
+    ).toBe(true);
+    expect(isPlannedDateInRange(today, today)).toBe(true);
+  });
+
+  it("refuses a date too far back or too far ahead", () => {
+    const base = { ...createEmptyDraft(today), name: "Jambes" };
+    const past = freeSessionSchema.safeParse({
+      ...base,
+      planned_date: addDays(today, -400),
+    });
+    expect(firstMessage(past)).toBe(
+      "La date ne peut pas remonter à plus d'un an.",
+    );
+    const future = freeSessionSchema.safeParse({
+      ...base,
+      planned_date: addDays(today, 800),
+    });
+    expect(firstMessage(future)).toBe("La date ne peut pas dépasser deux ans.");
+    expect(isPlannedDateInRange(addDays(today, 800), today)).toBe(false);
   });
 });

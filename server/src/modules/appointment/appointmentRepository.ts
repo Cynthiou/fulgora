@@ -1,5 +1,9 @@
 import type { AppointmentStatus, WorkoutStatus } from "shared";
-import client, { type Queryable, type Rows } from "../../database/client.js";
+import client, {
+  type Queryable,
+  type Result,
+  type Rows,
+} from "../../database/client.js";
 
 // One function, one query. No business rule here: the action decides.
 
@@ -77,4 +81,21 @@ export async function countVersionContent(
     block_count: Number(row.block_count),
     exercise_count: Number(row.exercise_count),
   }));
+}
+
+// A planned appointment for a session version: a free session has no program
+// nor weekly schedule (RM-015).
+export async function createAppointment(
+  userId: number,
+  sessionVersionId: number,
+  plannedDate: string,
+  plannedTime: string | null,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `INSERT INTO appointment (owner_user_id, session_version_id, planned_date, planned_time, status)
+     VALUES (?, ?, ?, ?, 'planned')`,
+    [userId, sessionVersionId, plannedDate, plannedTime],
+  );
+  return result.insertId;
 }

@@ -1,5 +1,6 @@
 import * as z from "zod";
 import type { MeasureCode } from "./catalog.js";
+import { addYears, todayInParis } from "./dates.js";
 import { REQUIRED_MESSAGE } from "./user.js";
 import { dateSchema, timeSchema } from "./validation.js";
 
@@ -595,3 +596,34 @@ export function parseMinSec(text: string): number | null {
   }
   return hours * 3600 + minutes * 60 + seconds;
 }
+
+// --- Saving a free session (US-23) --------------------------------------------
+
+// How far a free session may be planned: a past date is a session declared
+// after the fact (up to one year back), a future one up to two years ahead.
+export const MAX_PAST_YEARS = 1;
+export const MAX_FUTURE_YEARS = 2;
+
+export function isPlannedDateInRange(date: string, today: string): boolean {
+  return (
+    date >= addYears(today, -MAX_PAST_YEARS) &&
+    date <= addYears(today, MAX_FUTURE_YEARS)
+  );
+}
+
+// What POST /api/appointments receives: the draft, with the date within its
+// range. "Today" is computed in Paris when the request is checked (rule 7).
+export const freeSessionSchema = sessionDraftSchema.extend({
+  planned_date: dateSchema
+    .refine((date) => date >= addYears(todayInParis(), -MAX_PAST_YEARS), {
+      error: "La date ne peut pas remonter à plus d'un an.",
+    })
+    .refine((date) => date <= addYears(todayInParis(), MAX_FUTURE_YEARS), {
+      error: "La date ne peut pas dépasser deux ans.",
+    }),
+});
+
+export type FreeSessionInput = z.output<typeof freeSessionSchema>;
+
+// The answer of a successful save.
+export type FreeSessionCreated = { appointment_id: number };
