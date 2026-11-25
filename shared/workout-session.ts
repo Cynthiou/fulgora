@@ -3,7 +3,9 @@ import type { AppointmentStatus, WorkoutStatus } from "./appointment.js";
 import type { MeasureCode } from "./catalog.js";
 import {
   type BlockType,
+  DEFAULT_REST_SECONDS,
   formatDuration,
+  formatMinSec,
   formatSetValues,
   type PlannedSetValues,
   plannedSetSchema,
@@ -284,4 +286,24 @@ export function formatActualValues(
     { ...toActualValues(set), rest_after_seconds: null },
     codes,
   );
+}
+
+// --- Rest timer (US-30) --------------------------------------------------------
+
+// How long to rest after a set: its own rest, else the exercise's default,
+// else 1 min 30 (RM-023).
+export function getRestDuration(
+  set: Pick<WorkoutSetRow, "planned_rest_seconds">,
+  exercise: Pick<WorkoutExerciseTree, "default_rest_seconds">,
+): number {
+  return (
+    set.planned_rest_seconds ??
+    exercise.default_rest_seconds ??
+    DEFAULT_REST_SECONDS
+  );
+}
+
+// "1:12" on the rest screen: the same writing as the min:s fields.
+export function formatClock(seconds: number): string {
+  return formatMinSec(Math.max(0, seconds));
 }

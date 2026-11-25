@@ -4,8 +4,10 @@ import {
   countPlannedSets,
   countValidatedSets,
   formatActualValues,
+  formatClock,
   formatElapsed,
   formatSetProgress,
+  getRestDuration,
   getSetGap,
   isEmptySet,
   isObjectiveReached,
@@ -172,5 +174,25 @@ describe("validating a set (US-29)", () => {
     expect(formatActualValues(set(1, false), ["reps", "weight"])).toBe(
       "Aucun objectif",
     );
+  });
+});
+
+describe("rest timer helpers (US-30)", () => {
+  it("takes the rest of the set, else the exercise's, else 1 min 30", () => {
+    const exercise = { default_rest_seconds: 120 };
+    expect(getRestDuration({ planned_rest_seconds: 45 }, exercise)).toBe(45);
+    expect(getRestDuration({ planned_rest_seconds: null }, exercise)).toBe(120);
+    expect(
+      getRestDuration(
+        { planned_rest_seconds: null },
+        { default_rest_seconds: null },
+      ),
+    ).toBe(90);
+  });
+
+  it("writes the clock, never below zero", () => {
+    expect(formatClock(72)).toBe("1:12");
+    expect(formatClock(0)).toBe("0:00");
+    expect(formatClock(-3)).toBe("0:00");
   });
 });
