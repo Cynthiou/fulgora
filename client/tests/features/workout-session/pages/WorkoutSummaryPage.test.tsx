@@ -114,7 +114,7 @@ describe("WorkoutSummaryPage", () => {
       await screen.findByRole("heading", { level: 1, name: "Résumé" }),
     ).toBeTruthy();
     expect(screen.getByText("Haut du corps · jeudi 26 novembre")).toBeTruthy();
-    expect(screen.getByText("Terminée")).toBeTruthy();
+    expect(screen.getByText(/Terminée/)).toBeTruthy();
     expect(screen.getByText("48 min")).toBeTruthy();
     expect(screen.getByText("4 / 5")).toBeTruthy();
     // (10 + 8 + 10) x 40 = 1 120 kg; the pull-ups carry no weight
@@ -131,7 +131,7 @@ describe("WorkoutSummaryPage", () => {
   it("says « Inachevée » after an abandon and sends a running session back", async () => {
     readMock.mockResolvedValue({ ...completed, status: "unfinished" });
     renderPage();
-    expect(await screen.findByText("Inachevée")).toBeTruthy();
+    expect(await screen.findByText(/Inachevée/)).toBeTruthy();
 
     readMock.mockResolvedValue({
       ...completed,

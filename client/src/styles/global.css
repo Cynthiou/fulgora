@@ -134,7 +134,7 @@
   /* A status word written on its own tint: the colours of the charter fall
      under the 4.5:1 of RM-064 in 11 px bold, so the word uses a darker shade
      (the tint and the dots keep the colours of the mockups). */
-  --fulgora-done-text: #15803d;
+  --fulgora-done-text: #166534;
   --fulgora-pending-text: #92400e;
   --fulgora-missed-text: #b91c1c;
   --fulgora-cancelled-text: #475569;

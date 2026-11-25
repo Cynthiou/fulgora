@@ -62,9 +62,7 @@ test("starts the session of the day, survives a reload and resumes it from the h
     page.getByRole("heading", { level: 1, name: "Haut du corps" }),
   ).toBeVisible();
   await expect(page.getByText("En cours · séance libre")).toBeVisible();
-  await expect(
-    page.getByText(/^Durée de la séance \d+:\d{2}$/),
-  ).toBeVisible();
+  await expect(page.getByText(/^Durée de la séance \d+:\d{2}$/)).toBeVisible();
   await expect(page.getByText("0 / 2", { exact: true })).toBeVisible();
   await expect(page.getByText("2 séries · 10 rép.")).toBeVisible();
   await expectNoA11yViolation(page);
@@ -118,7 +116,7 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
   // Set 1 as planned: one tap, then the rest (B4)
   await page.getByRole("button", { name: "Valider la série 1" }).click();
   await expect(page.getByText("Repos · 1 min 30 s par défaut")).toBeVisible();
-  await expect(page.getByText(/^Ensuite : série 2/)).toBeVisible();
+  await expect(page.getByText(/^série 2/)).toBeVisible();
   await page.getByRole("button", { name: "+ 15 s" }).click();
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: "Passer le repos" }).click();

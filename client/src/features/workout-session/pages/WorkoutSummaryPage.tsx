@@ -11,14 +11,18 @@ import {
   formatSummaryDuration,
   formatTonnage,
 } from "shared";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import pencilIcon from "../../../assets/icons/ui/app/pencil.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
+import PageHeader from "../../../components/PageHeader";
 import AutoClosedNotice from "../components/AutoClosedNotice";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
 
 const PRIMARY_LINK =
-  "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
+  "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action";
 
 // Screen B6: the summary of a finished session (completed or unfinished).
 // Everything is computed from the results (RM-051): duration, sets done,
@@ -40,139 +44,180 @@ function WorkoutSummaryPage() {
   const startDate = session?.started_at.slice(0, 10) ?? "";
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col gap-6 p-4 pb-28">
-      {isLoading && <LoadingState label="Chargement du résumé…" />}
-
-      {!isLoading && notFound && (
-        <EmptyState
-          title="Séance introuvable"
-          message="Elle n'existe pas, ou elle ne t'appartient pas."
-        >
-          <Link to="/" className={PRIMARY_LINK}>
-            Retour à l'accueil
-          </Link>
-        </EmptyState>
-      )}
-
-      {!isLoading && !notFound && error !== null && (
-        <ErrorState
-          title="Impossible de charger le résumé"
-          message="Vérifie ta connexion internet, puis réessaie."
-          onRetry={reload}
+    <div className="mx-auto flex min-h-screen max-w-md flex-col">
+      {session !== null && !isLoading && (
+        <PageHeader
+          title="Résumé"
+          subtitle={`${session.session_name} · ${
+            formatLongDate(startDate).charAt(0).toLowerCase() +
+            formatLongDate(startDate).slice(1)
+          }`}
         />
       )}
+      <div className="flex flex-1 flex-col gap-3 px-[18px] pt-1 pb-28">
+        {isLoading && <LoadingState label="Chargement du résumé…" />}
 
-      {!isLoading && session !== null && error === null && !notFound && (
-        <>
-          <header className="flex flex-col gap-1">
-            <h1 className="text-display-md">Résumé</h1>
-            <p className="text-muted">
-              {session.session_name} ·{" "}
-              {formatLongDate(startDate).charAt(0).toLowerCase() +
-                formatLongDate(startDate).slice(1)}
-            </p>
-            <p className="text-overline uppercase text-base-content">
-              {session.status === "completed" ? (
-                <>
-                  <span aria-hidden="true" className="text-status-done">
-                    ✓{" "}
-                  </span>
-                  Terminée
-                </>
-              ) : (
-                <>
-                  <span aria-hidden="true" className="text-status-pending">
-                    ◧{" "}
-                  </span>
-                  Inachevée
-                </>
-              )}
-            </p>
-          </header>
+        {!isLoading && notFound && (
+          <EmptyState
+            title="Séance introuvable"
+            message="Elle n'existe pas, ou elle ne t'appartient pas."
+          >
+            <Link to="/" className={PRIMARY_LINK}>
+              Retour à l'accueil
+            </Link>
+          </EmptyState>
+        )}
 
-          {session.auto_closed && <AutoClosedNotice />}
+        {!isLoading && !notFound && error !== null && (
+          <ErrorState
+            title="Impossible de charger le résumé"
+            message="Vérifie ta connexion internet, puis réessaie."
+            onRetry={reload}
+          />
+        )}
 
-          <dl className="grid grid-cols-3 gap-2 rounded-card border border-base-300 bg-base-100 p-4 text-center shadow-card">
-            <div className="flex flex-col">
-              <dd className="font-display text-display-sm">
-                {formatSummaryDuration(
-                  computeDurationSeconds(session.started_at, session.ended_at),
-                )}
-              </dd>
-              <dt className="text-sm text-muted">durée</dt>
+        {!isLoading && session !== null && error === null && !notFound && (
+          <>
+            {/* "✓ Terminée" then the congratulation of the mockup (B6). */}
+            <div className="flex flex-col items-start gap-2">
+              {/* The session says "Terminée", where an appointment says
+                  "Effectuée": the chip is written here (B6). */}
+              <span
+                className={`rounded-chip px-2 py-[3px] text-[11px] font-bold ${
+                  session.status === "completed"
+                    ? "bg-status-done/10 text-status-done-text"
+                    : "bg-status-pending/10 text-status-pending-text"
+                }`}
+              >
+                {session.status === "completed" ? "✓ Terminée" : "Inachevée"}
+              </span>
+              <p className="font-display text-display-lg font-extrabold uppercase italic">
+                {session.status === "completed"
+                  ? "Bien joué"
+                  : "Séance arrêtée"}
+              </p>
             </div>
-            <div className="flex flex-col">
-              <dd className="font-display text-display-sm">
-                {countValidatedSets(session)} / {countPlannedSets(session)}
-              </dd>
-              <dt className="text-sm text-muted">séries</dt>
-            </div>
-            <div className="flex flex-col">
-              <dd className="font-display text-display-sm">
-                {formatTonnage(computeTonnage(sets ?? []))}
-              </dd>
-              <dt className="text-sm text-muted">volume</dt>
-            </div>
-          </dl>
 
-          {/* Sets added during the session are counted apart (US-32). */}
-          {countAddedSets(session) > 0 && (
-            <p className="text-sm text-muted">
-              Dont {formatAddedSets(countAddedSets(session))}.
-            </p>
-          )}
+            {session.auto_closed && <AutoClosedNotice />}
 
-          <ul aria-label="Exercices" className="flex flex-col gap-2">
-            {exercises.map((exercise) => {
-              const allDone = exercise.sets.every(
-                (set) => set.validated_at !== null,
-              );
-              return (
-                <li
-                  key={exercise.id}
-                  className="flex items-start gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
+            <dl className="grid grid-cols-3 gap-2">
+              {[
+                {
+                  key: "duree",
+                  value: formatSummaryDuration(
+                    computeDurationSeconds(
+                      session.started_at,
+                      session.ended_at,
+                    ),
+                  ),
+                  label: "durée",
+                },
+                {
+                  key: "series",
+                  value: `${countValidatedSets(session)} / ${countPlannedSets(
+                    session,
+                  )}`,
+                  label: "séries",
+                },
+                {
+                  key: "volume",
+                  value: formatTonnage(computeTonnage(sets ?? [])),
+                  label: "volume",
+                },
+              ].map((figure) => (
+                <div
+                  key={figure.key}
+                  className="flex flex-col gap-1 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
                 >
-                  <span
-                    aria-hidden="true"
-                    className={`font-bold ${allDone ? "text-status-done" : "text-muted"}`}
+                  <dd className="font-display text-display-sm">
+                    {figure.value}
+                  </dd>
+                  <dt className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                    {figure.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
+
+            {/* Sets added during the session are counted apart (US-32). */}
+            {countAddedSets(session) > 0 && (
+              <p className="text-xs text-muted">
+                Dont {formatAddedSets(countAddedSets(session))}.
+              </p>
+            )}
+
+            <ul
+              aria-label="Exercices"
+              className="flex flex-col rounded-card border border-base-300 bg-base-100 px-4 py-1.5 shadow-card"
+            >
+              {exercises.map((exercise, index) => {
+                const allDone = exercise.sets.every(
+                  (set) => set.validated_at !== null,
+                );
+                return (
+                  <li
+                    key={exercise.id}
+                    className={`flex items-start gap-2.5 py-2.5 ${
+                      index === 0 ? "" : "border-t border-base-300"
+                    }`}
                   >
-                    {allDone ? "✓" : "–"}
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="font-semibold">
-                      {exercise.name}
-                      <span className="sr-only">
-                        {allDone ? ", faite" : ", incomplète"}
+                    <span
+                      aria-hidden="true"
+                      className={`grid size-[22px] shrink-0 place-items-center rounded-full ${
+                        allDone
+                          ? "bg-status-done text-white"
+                          : "bg-status-pending/10 text-status-pending-text"
+                      }`}
+                    >
+                      {allDone ? (
+                        <Icon src={checkIcon} className="size-3" />
+                      ) : (
+                        "–"
+                      )}
+                    </span>
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-sm font-bold">
+                        {exercise.name}
+                        <span className="sr-only">
+                          {allDone ? ", faite" : ", incomplète"}
+                        </span>
+                      </span>
+                      <span
+                        className={`text-xs font-medium leading-[1.45] ${
+                          allDone ? "text-muted" : "text-status-pending-text"
+                        }`}
+                      >
+                        {formatExerciseResult(exercise)}
                       </span>
                     </span>
-                    <span className="text-sm text-muted">
-                      {formatExerciseResult(exercise)}
-                    </span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
 
       {!isLoading && session !== null && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
-          <div className="mx-auto flex max-w-md flex-col gap-2">
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
+          <div className="mx-auto grid max-w-md grid-cols-[1fr_1.3fr] gap-2.5">
             {/* Correcting the results arrives with US-37. */}
             <button
               type="button"
               disabled
               aria-describedby="fix-results-soon"
-              className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+              className="flex h-btn items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
             >
-              Corriger les résultats
+              <Icon src={pencilIcon} className="size-4" />
+              <span className="sr-only">Corriger les résultats</span>
+              <span aria-hidden="true">Corriger</span>
             </button>
             <p id="fix-results-soon" className="sr-only">
               Corriger les résultats arrive bientôt.
             </p>
             <Link to="/planning" className={PRIMARY_LINK}>
-              Retour au planning
+              <span className="sr-only">Retour au planning</span>
+              <span aria-hidden="true">Planning</span>
             </Link>
           </div>
         </div>
