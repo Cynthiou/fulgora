@@ -86,24 +86,24 @@ Comme l'US-07, recherche et filtres conservés.
 
 ## Tâches techniques
 
-- [ ] Backend : `readExercises` et `countExercises` : ajouter des morceaux de SQL **constants**, seulement si le filtre est fourni : `AND e.name LIKE ? ESCAPE '\\'` ; `AND EXISTS (SELECT 1 FROM exercise_category ec WHERE ec.exercise_id = e.id AND ec.category_id IN (?))` ; idem matériel avec `exercise_equipment` ; `AND e.difficulty IN (?)`
-- [ ] Backend : utiliser `query` (et non `execute`) pour ces deux fonctions, à cause des tableaux dans `IN (?)`
-- [ ] Backend : échapper `\`, `%` et `_` dans la recherche avant de l'entourer de `%`
-- [ ] Backend : `exerciseRepository.readCategories`, `readEquipments` ; routes `GET /api/categories`, `GET /api/equipments`
-- [ ] Shared : `exerciseQuerySchema` : `search` 0 à 60, `category_ids` / `equipment_ids` tableaux d'entiers positifs (10 max), `difficulties` dans l'énumération
-- [ ] Shared : `escapeLike(text)` (fonction pure)
-- [ ] Frontend : `features/exercise/components/ExerciseSearch.tsx`, `FilterToggle.tsx`, `FilterGrid.tsx` (tuiles icône + libellé), `ActiveFilterChips.tsx`
-- [ ] Frontend : `hooks/useDebouncedValue.ts` (300 ms)
-- [ ] Frontend : filtres lus et écrits avec `useSearchParams`
-- [ ] Frontend : `HighlightedText.tsx` (terme en gras, sans `dangerouslySetInnerHTML`)
-- [ ] Frontend : compteur dans une zone `aria-live="polite"`
-- [ ] Tests : unitaires : `escapeLike`, `HighlightedText`
-- [ ] Tests : back : « squat » ; « % » ne renvoie pas tout ; deux groupes (OU) ; groupe + matériel (ET) ; difficulté inconnue → 400
-- [ ] Tests : E2E : filtrer, ouvrir une fiche, revenir → filtres et position conservés ; axe avec un filtre déplié
+- [x] Backend : `readExercises` et `countExercises` : ajouter des morceaux de SQL **constants**, seulement si le filtre est fourni : `AND e.name LIKE ? ESCAPE '\\'` ; `AND EXISTS (SELECT 1 FROM exercise_category ec WHERE ec.exercise_id = e.id AND ec.category_id IN (?))` ; idem matériel avec `exercise_equipment` ; `AND e.difficulty IN (?)`
+- [x] Backend : utiliser `query` (et non `execute`) pour ces deux fonctions, à cause des tableaux dans `IN (?)`
+- [x] Backend : échapper `\`, `%` et `_` dans la recherche avant de l'entourer de `%`
+- [x] Backend : `exerciseRepository.readCategories`, `readEquipments` ; routes `GET /api/categories`, `GET /api/equipments`
+- [x] Shared : `exerciseQuerySchema` : `search` 0 à 60, `category_ids` / `equipment_ids` tableaux d'entiers positifs (10 max), `difficulties` dans l'énumération
+- [x] Shared : `escapeLike(text)` (fonction pure)
+- [x] Frontend : `features/exercise/components/ExerciseSearch.tsx`, `FilterToggle.tsx`, `FilterGrid.tsx` (tuiles icône + libellé), `ActiveFilterChips.tsx`
+- [x] Frontend : `hooks/useDebouncedValue.ts` (300 ms)
+- [x] Frontend : filtres lus et écrits avec `useSearchParams`
+- [x] Frontend : `HighlightedText.tsx` (terme en gras, sans `dangerouslySetInnerHTML`)
+- [x] Frontend : compteur dans une zone `aria-live="polite"`
+- [x] Tests : unitaires : `escapeLike`, `HighlightedText`
+- [x] Tests : back : « squat » ; « % » ne renvoie pas tout ; deux groupes (OU) ; groupe + matériel (ET) ; difficulté inconnue → 400
+- [x] Tests : E2E : filtrer, ouvrir une fiche, revenir → filtres et position conservés ; axe avec un filtre déplié
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] États résultats, aucun résultat, chargement et erreur testés
-- [ ] Grilles utilisables au clavier (Tab, Entrée, Espace)
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] États résultats, aucun résultat, chargement et erreur testés
+- [x] Grilles utilisables au clavier (Tab, Entrée, Espace)
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
