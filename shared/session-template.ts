@@ -32,16 +32,69 @@ export const AVAILABLE_BLOCK_TYPES = [
   "note",
 ] as const satisfies readonly BlockType[];
 
-export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
-  classic: "Classique",
-  circuit: "Circuit",
-  amrap: "AMRAP",
-  for_time: "For Time",
-  warm_up: "Échauffement",
-  stretching: "Étirements",
-  challenge: "Défi",
-  note: "Note",
+export type BlockTypeInfo = {
+  code: BlockType;
+  label: string;
+  description: string;
+  // False for the timed blocks until US-43: shown as "Bientôt".
+  isAvailable: boolean;
 };
+
+// The 8 types, in the order of the "Type de bloc" panel (A3).
+export const BLOCK_TYPES: BlockTypeInfo[] = [
+  {
+    code: "classic",
+    label: "Classique",
+    description: "Exercices et séries, avec objectifs et repos",
+    isAvailable: true,
+  },
+  {
+    code: "circuit",
+    label: "Circuit",
+    description: "Exercices enchaînés, nombre de tours",
+    isAvailable: false,
+  },
+  {
+    code: "amrap",
+    label: "AMRAP",
+    description: "Maximum de tours dans une durée fixe",
+    isAvailable: false,
+  },
+  {
+    code: "for_time",
+    label: "For Time",
+    description: "Travail fixe, le plus vite possible",
+    isAvailable: false,
+  },
+  {
+    code: "warm_up",
+    label: "Échauffement",
+    description: "Mise en route",
+    isAvailable: true,
+  },
+  {
+    code: "stretching",
+    label: "Étirements",
+    description: "Retour au calme",
+    isAvailable: true,
+  },
+  {
+    code: "challenge",
+    label: "Défi",
+    description: "Objectif ponctuel",
+    isAvailable: true,
+  },
+  {
+    code: "note",
+    label: "Note",
+    description: "Texte libre",
+    isAvailable: true,
+  },
+];
+
+export const BLOCK_TYPE_LABELS = Object.fromEntries(
+  BLOCK_TYPES.map((info) => [info.code, info.label]),
+) as Record<BlockType, string>;
 
 // --- Limits (US-13, US-14, US-15) ------------------------------------------
 

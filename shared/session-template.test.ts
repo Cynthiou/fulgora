@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  AVAILABLE_BLOCK_TYPES,
+  BLOCK_TYPE_CODES,
+  BLOCK_TYPE_LABELS,
+  BLOCK_TYPES,
   countDraftExercises,
   createEmptyDraft,
   createEmptySet,
@@ -206,5 +210,15 @@ describe("helpers", () => {
     expect(formatBlockCount(0)).toBe("0 bloc");
     expect(formatBlockCount(1)).toBe("1 bloc");
     expect(formatBlockCount(3)).toBe("3 blocs");
+  });
+});
+
+describe("BLOCK_TYPES", () => {
+  it("lists the 8 types, 5 of them available in the MVP", () => {
+    expect(BLOCK_TYPES.map((info) => info.code)).toEqual([...BLOCK_TYPE_CODES]);
+    expect(
+      BLOCK_TYPES.filter((info) => info.isAvailable).map((info) => info.code),
+    ).toEqual([...AVAILABLE_BLOCK_TYPES]);
+    expect(BLOCK_TYPE_LABELS.for_time).toBe("For Time");
   });
 });
