@@ -116,7 +116,11 @@ describe("POST /api/workout-sessions", () => {
       validated_at: null,
     });
     expect(Number(sets[0]?.weight_planned_kg)).toBe(40);
-    expect(sets[1]).toMatchObject({ position: 2, reps_planned: 8, planned_rest_seconds: 120 });
+    expect(sets[1]).toMatchObject({
+      position: 2,
+      reps_planned: 8,
+      planned_rest_seconds: 120,
+    });
 
     // Changing the plan afterwards does not touch the copy (RM-041)
     await client.execute(
@@ -186,7 +190,10 @@ describe("POST /api/workout-sessions", () => {
     expect(second.body.error.message).toContain("Haut du corps");
 
     // Someone else cannot read it
-    const theirs = await get(`/api/workout-sessions/${workoutId}`, someoneElse.cookie);
+    const theirs = await get(
+      `/api/workout-sessions/${workoutId}`,
+      someoneElse.cookie,
+    );
     expect(theirs.status).toBe(404);
 
     await finish(workoutId);
@@ -261,10 +268,13 @@ describe("POST /api/workout-sessions", () => {
   });
 
   it("answers 401 without a cookie, and null when nothing is in progress", async () => {
-    expect((await request(app).get("/api/workout-sessions/current")).status).toBe(
-      401,
+    expect(
+      (await request(app).get("/api/workout-sessions/current")).status,
+    ).toBe(401);
+    const nothing = await get(
+      "/api/workout-sessions/current",
+      someoneElse.cookie,
     );
-    const nothing = await get("/api/workout-sessions/current", someoneElse.cookie);
     expect(nothing.status).toBe(200);
     expect(nothing.body).toBeNull();
   });
@@ -279,7 +289,10 @@ describe("GET /api/appointments/:id", () => {
       blocks: [2],
     });
 
-    const response = await get(`/api/appointments/${appointmentId}`, lea.cookie);
+    const response = await get(
+      `/api/appointments/${appointmentId}`,
+      lea.cookie,
+    );
 
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({
@@ -300,7 +313,8 @@ describe("GET /api/appointments/:id", () => {
     expect(response.body.blocks[0].exercises[0].name).toMatch(/^Exercice /);
 
     expect(
-      (await get(`/api/appointments/${appointmentId}`, someoneElse.cookie)).status,
+      (await get(`/api/appointments/${appointmentId}`, someoneElse.cookie))
+        .status,
     ).toBe(404);
     expect((await get("/api/appointments/abc", lea.cookie)).status).toBe(400);
   });
