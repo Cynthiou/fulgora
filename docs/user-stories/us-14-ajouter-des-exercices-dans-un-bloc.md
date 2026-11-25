@@ -77,18 +77,18 @@ Validation dans la route de l'US-23 :
 
 ## Tâches techniques
 
-- [ ] Backend : `exerciseRepository.readAvailableExerciseIds(userId, ids)` (avec `query`) : `SELECT id FROM exercise WHERE id IN (?) AND is_archived = FALSE AND (owner_user_id IS NULL OR owner_user_id = ?)`
-- [ ] Frontend : `ExerciseListPage` reçoit `selectionMode` (`"block"` ou `"catalog"`) ; `useExerciseSelection` (liste ordonnée d'identifiants, `toggle`, `clear`)
-- [ ] Frontend : `components/SelectableExerciseCard.tsx` (`aria-pressed`, libellé « sélectionné, 1 sur 3 »)
-- [ ] Frontend : `components/SessionDestinationSheet.tsx` (MVP : nouvelle séance libre seulement)
-- [ ] Frontend : sélection transmise à l'éditeur par l'état de navigation ; reducer `addExercises(blockIndex, exercises)` crée 1 série pré-remplie selon le profil (US-15)
-- [ ] Frontend : `components/BlockExerciseRow.tsx` avec `formatSetSummary` (shared)
-- [ ] Tests : unitaires : `useExerciseSelection` (ordre, recalage des numéros)
+- [x] Backend : `exerciseRepository.readAvailableExerciseIds(userId, ids)` (avec `query`) : `SELECT id FROM exercise WHERE id IN (?) AND is_archived = FALSE AND (owner_user_id IS NULL OR owner_user_id = ?)`
+- [x] Frontend : `ExerciseListPage` reçoit `selectionMode` (`"block"` ou `"catalog"`) ; `useExerciseSelection` (liste ordonnée d'identifiants, `toggle`, `clear`)
+- [x] Frontend : `components/SelectableExerciseCard.tsx` (`aria-pressed`, libellé « sélectionné, 1 sur 3 »)
+- [x] Frontend : `components/SessionDestinationSheet.tsx` (MVP : nouvelle séance libre seulement)
+- [x] Frontend : sélection transmise à l'éditeur par l'état de navigation ; reducer `addExercises(blockIndex, exercises)` crée 1 série pré-remplie selon le profil (US-15)
+- [x] Frontend : `components/BlockExerciseRow.tsx` avec `formatSetSummary` (shared)
+- [x] Tests : unitaires : `useExerciseSelection` (ordre, recalage des numéros)
 - [ ] Tests : back (dans US-23) : exercice personnel d'un autre → 422, archivé → 422
-- [ ] Tests : E2E : bloc → sélection de 3 exercices → retour, ordre respecté ; catalogue → Sélectionner → Ajouter à une séance → éditeur
+- [x] Tests : E2E : bloc → sélection de 3 exercices → retour, ordre respecté ; catalogue → Sélectionner → Ajouter à une séance → éditeur
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Sélection utilisable au clavier et au lecteur d'écran
+- [x] Sélection utilisable au clavier et au lecteur d'écran
 - [ ] Code relu et fusionné via pull request
