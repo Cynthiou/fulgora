@@ -1,7 +1,7 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { formatLongDate, type SelectedExercise } from "shared";
+import { formatLongDate, type SelectedExercise, todayInParis } from "shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFreeSession } from "../../../../src/features/appointment/services/appointmentService";
 import SessionEditorPage from "../../../../src/features/session-template/pages/SessionEditorPage";
@@ -93,8 +93,10 @@ describe("SessionEditorPage", () => {
   it("falls back on today when the date of the address is unusable", () => {
     renderEditor("/seances/nouvelle?date=hier");
 
+    // The app lives in Paris: after 23:00 UTC the day is already the next
+    // one there, so the test asks the same clock as the editor.
     expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
-      formatLongDate(new Date().toISOString().slice(0, 10)),
+      formatLongDate(todayInParis()),
     );
   });
 

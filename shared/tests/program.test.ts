@@ -5,7 +5,11 @@ import {
   canActivateProgram,
   computeProgramProgress,
   computeProgramStatus,
+  countProgramAppointments,
   countProgramWeeks,
+  describeAddedSessions,
+  describeDayAfterAdding,
+  describeRemovedDay,
   formatPeriod,
   formatPeriodShort,
   formatProgramProgress,
@@ -28,7 +32,9 @@ function session(
   exerciseCount: number,
 ): ProgramSessionSummary {
   return {
+    schedule_id: weekday,
     weekday,
+    planned_time: "18:30",
     session_template_id: weekday,
     session_version_id: weekday,
     name: buildProgramSessionName(weekday),
@@ -276,5 +282,46 @@ describe("seeing a program (US-48)", () => {
     expect(getAvailableProgramActions({ status: "abandoned" }).canReuse).toBe(
       true,
     );
+  });
+});
+
+// US-19: several sessions can share a day, and every counter follows.
+describe("several sessions on the same day (US-19)", () => {
+  // Six weeks, Monday, Thursday and Saturday: the example of the mockup.
+  const START = "2026-11-30";
+  const END = "2027-01-10";
+  const week = [
+    { weekday: 1, name: "Haut du corps", planned_time: "18:30" },
+    { weekday: 4, name: "Jambes", planned_time: "07:00" },
+    { weekday: 6, name: "Cardio", planned_time: null },
+    { weekday: 6, name: "Mobilité", planned_time: null },
+  ];
+
+  it("counts one appointment per session and per week (RM-075)", () => {
+    expect(countProgramAppointments(START, END, week)).toBe(24);
+    expect(countProgramAppointments(START, END, [])).toBe(0);
+  });
+
+  it("says what one more session adds (PRO-03a)", () => {
+    expect(describeAddedSessions(START, END, week, 1)).toBe(
+      "Ajoute 6 rendez-vous de plus (1 par semaine) : le total passe de 24 à 30.",
+    );
+  });
+
+  it("says what unchecking a day removes (PRO-03b)", () => {
+    const removed = describeRemovedDay(START, END, week, 6);
+    expect(removed?.title).toBe("Samedi décoché : 2 séances seront retirées");
+    expect(removed?.detail).toBe(
+      "« Cardio » et « Mobilité », avec leurs blocs et exercices. Le programme passe de 24 à 12 rendez-vous.",
+    );
+    // A day without any session removes nothing
+    expect(describeRemovedDay(START, END, week, 2)).toBeNull();
+  });
+
+  it("says what the day will hold once the session is added", () => {
+    expect(describeDayAfterAdding(week, 1)).toBe(
+      "Le lundi aura 2 séances : « Haut du corps » à 18:30 et celle-ci.",
+    );
+    expect(describeDayAfterAdding(week, 2)).toBeNull();
   });
 });

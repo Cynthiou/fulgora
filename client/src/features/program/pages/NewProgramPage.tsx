@@ -3,18 +3,25 @@ import { useNavigate, useSearchParams } from "react-router";
 import {
   addDays,
   dateSchema,
+  describeRemovedDay,
   formatLongDate,
   formatWeekCount,
   formatWeekdays,
+  type ProgramDetailFull,
   programInfoSchema,
   todayInParis,
   WEEKDAYS,
 } from "shared";
+import alertIcon from "../../../assets/icons/ui/app/alert.svg";
+import Icon from "../../../components/Icon";
 import PageHeader from "../../../components/PageHeader";
 import TextField from "../../../components/TextField";
 import { ApiError } from "../../../services/apiError";
 import StepBar from "../components/StepBar";
-import { createProgramDraft } from "../services/programService";
+import {
+  createProgramDraft,
+  updateProgramDraft,
+} from "../services/programService";
 
 // The date the Planning handed over, today otherwise.
 function readStartDate(raw: string | null): string {
@@ -23,23 +30,46 @@ function readStartDate(raw: string | null): string {
     : todayInParis();
 }
 
+type Props = {
+  // Given when the page edits the information of a draft (PRO-03b)
+  draft?: ProgramDetailFull;
+};
+
 // Screen PRO-02, step 1 of 3: the name, the period and the days of the
 // typical week. "Suivant" saves a draft and opens the sessions (US-18).
-function NewProgramPage() {
+// With a draft given, the same form edits it (PRO-03b, US-19).
+function NewProgramPage({ draft }: Props) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState(() =>
-    readStartDate(searchParams.get("date")),
+  const isEditing = draft !== undefined;
+  const [name, setName] = useState(draft?.name ?? "");
+  const [description, setDescription] = useState(draft?.description ?? "");
+  const [startDate, setStartDate] = useState(
+    () => draft?.start_date ?? readStartDate(searchParams.get("date")),
   );
-  const [endDate, setEndDate] = useState(() =>
-    addDays(readStartDate(searchParams.get("date")), 41),
+  const [endDate, setEndDate] = useState(
+    () =>
+      draft?.end_date ?? addDays(readStartDate(searchParams.get("date")), 41),
   );
-  const [plannedTime, setPlannedTime] = useState("18:30");
-  const [weekdays, setWeekdays] = useState<number[]>([]);
+  const [plannedTime, setPlannedTime] = useState(
+    draft?.planned_time ?? "18:30",
+  );
+  const [weekdays, setWeekdays] = useState<number[]>(() => [
+    ...new Set(draft?.sessions.map((session) => session.weekday) ?? []),
+  ]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+
+  // What unchecking a day would take away (PRO-03b). The day is only
+  // really removed when the form is saved.
+  const removedDays = (draft?.sessions ?? [])
+    .map((session) => session.weekday)
+    .filter((weekday, index, all) => all.indexOf(weekday) === index)
+    .filter((weekday) => !weekdays.includes(weekday))
+    .map((weekday) =>
+      describeRemovedDay(startDate, endDate, draft?.sessions ?? [], weekday),
+    )
+    .filter((line): line is { title: string; detail: string } => line !== null);
 
   function toggleDay(value: number) {
     setWeekdays((current) =>
@@ -74,7 +104,9 @@ function NewProgramPage() {
     setErrors({});
     setIsSaving(true);
     try {
-      const program = await createProgramDraft(result.data);
+      const program = isEditing
+        ? await updateProgramDraft(draft.id, result.data)
+        : await createProgramDraft(result.data);
       navigate(`/programmes/${program.id}/seances`, { replace: true });
     } catch (caught) {
       setErrors({
@@ -90,14 +122,18 @@ function NewProgramPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <PageHeader onBack={() => navigate(-1)} title="Nouveau programme" />
+      <PageHeader
+        onBack={() => navigate(-1)}
+        title={isEditing ? "Modifier le programme" : "Nouveau programme"}
+        subtitle={isEditing ? "Informations et jours" : undefined}
+      />
 
       <form
         noValidate
         onSubmit={submit}
         className="flex flex-col gap-3.5 px-[18px] pt-1 pb-4"
       >
-        <StepBar current={1} label="Informations et jours" />
+        {!isEditing && <StepBar current={1} label="Informations et jours" />}
         <fieldset disabled={isSaving} className="flex flex-col gap-3.5">
           <TextField
             id="program_name"
@@ -181,6 +217,25 @@ function NewProgramPage() {
             )}
           </fieldset>
 
+          {removedDays.map((removed) => (
+            <div
+              key={removed.title}
+              role="status"
+              className="flex gap-2.5 rounded-card bg-status-pending/[0.12] p-3.5"
+            >
+              <Icon
+                src={alertIcon}
+                className="mt-px size-[18px] shrink-0 text-status-pending-text"
+              />
+              <p className="flex flex-col gap-1 text-[13px] leading-[1.45]">
+                <b className="font-bold text-status-pending-text">
+                  {removed.title}
+                </b>
+                <span className="text-muted">{removed.detail}</span>
+              </p>
+            </div>
+          ))}
+
           <p className="rounded-card border border-base-300 bg-base-100 p-3 text-xs leading-[1.45] text-muted shadow-card">
             {formatLongDate(startDate)} → {formatLongDate(endDate)} ·{" "}
             {formatWeekCount(startDate, endDate)}
@@ -190,7 +245,11 @@ function NewProgramPage() {
             type="submit"
             className="mt-1 flex h-btn w-full items-center justify-center rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
           >
-            {isSaving ? "Enregistrement…" : "Suivant"}
+            {isSaving
+              ? "Enregistrement…"
+              : isEditing
+                ? "Enregistrer"
+                : "Suivant"}
           </button>
         </fieldset>
       </form>

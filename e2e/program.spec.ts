@@ -128,6 +128,75 @@ test("a program that is not yours says it does not exist", async ({ page }) => {
   );
 });
 
+// US-19: a day can hold several sessions; removing one can be undone.
+test("adds a second session on the same day, removes it and undoes", async ({
+  page,
+}) => {
+  const today = todayInParis();
+  const start = addDays(today, 1);
+  const end = addDays(today, 14);
+  const weekday = getWeekday(start);
+
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+
+  await page.goto("/programmes/nouveau");
+  await page.getByLabel(/^Nom du programme/).fill("Deux fois le même jour");
+  await page.getByLabel(/^Début/).fill(start);
+  await page.getByLabel(/^Fin/).fill(end);
+  await page
+    .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
+    .click();
+  await page.getByRole("button", { name: "Suivant" }).click();
+  await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
+
+  // PRO-03a: the panel says what the day will hold and what it adds
+  const dayName = weekdayName(weekday).toLocaleLowerCase("fr-FR");
+  await page
+    .getByRole("button", { name: `Autre séance le ${dayName}` })
+    .click();
+  await expect(page.getByText(/aura 2 séances/)).toBeVisible();
+  await expect(page.getByText(/le total passe de 2 à 4/)).toBeVisible();
+  await shoot(page, "pro-03a-autre-seance");
+  await expectNoA11yViolation(page);
+  await page.getByLabel(/^Nom de la séance/).fill("Gainage");
+  await page.getByLabel(/^Heure/).fill("20:00");
+  await page.getByRole("button", { name: "Ajouter la séance" }).click();
+
+  await expect(page.getByText("Gainage")).toBeVisible();
+  await expect(page.getByText("0 / 2 séances prêtes")).toBeVisible();
+
+  // PRO-03b: unchecking a day says what it would remove
+  await page.getByRole("link", { name: "Modifier les informations" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Modifier le programme",
+  );
+  await page
+    .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
+    .click();
+  await expect(
+    page.getByText(/décoché : 2 séances seront retirées/),
+  ).toBeVisible();
+  await shoot(page, "pro-03b-retirer-un-jour");
+  await expectNoA11yViolation(page);
+  // Nothing is saved: the day comes back and the sessions are still there
+  await page
+    .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
+    .click();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
+  await expect(page.getByText("Gainage")).toBeVisible();
+
+  // PRO-03c then PRO-03d: the removal, then "Annuler"
+  await page.getByRole("button", { name: "Retirer la séance Gainage" }).click();
+  await expect(page.getByText("Séance « Gainage » retirée.")).toBeVisible();
+  await shoot(page, "pro-03d-seance-retiree");
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(page.getByText("Gainage")).toBeVisible();
+  await expect(page.getByText("0 / 2 séances prêtes")).toBeVisible();
+});
+
 // The button of a day is named by its full name (the three letters are
 // hidden from the screen reader).
 function weekdayName(weekday: number): string {

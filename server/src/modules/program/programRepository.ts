@@ -125,7 +125,7 @@ export async function readProgramSchedules(
          AND sv.version_number = (SELECT MAX(sv2.version_number)
                                     FROM session_version sv2
                                    WHERE sv2.session_template_id = st.id)
-       ORDER BY ws.weekday`,
+       ORDER BY ws.weekday, ws.planned_time IS NULL, ws.planned_time, ws.id`,
     [programId],
   );
   return rows as ScheduleRow[];
@@ -148,6 +148,46 @@ export async function createSchedule(
 
 // A day dropped from the typical week keeps its history (RM-032): the line
 // is deactivated, never deleted.
+// One row of the typical week, whatever its program, for the actions
+// that work on a single session (US-19).
+export async function readSchedule(
+  scheduleId: number,
+  programId: number,
+  db: Queryable = client,
+): Promise<ScheduleRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT ws.id, ws.weekday, ws.planned_time, ws.session_template_id,
+            sv.id AS session_version_id, st.name,
+            0 AS exercise_count, NULL AS exercise_names
+       FROM weekly_schedule ws
+       JOIN session_template st ON st.id = ws.session_template_id
+       JOIN session_version sv ON sv.session_template_id = st.id
+      WHERE ws.id = ? AND ws.program_id = ?
+        AND sv.version_number = (SELECT MAX(sv2.version_number)
+                                   FROM session_version sv2
+                                  WHERE sv2.session_template_id = st.id)`,
+    [scheduleId, programId],
+  );
+  return (rows[0] as ScheduleRow | undefined) ?? null;
+}
+
+// Removing a session of the typical week is reversible for a few seconds
+// (PRO-03d): the row is only marked, never deleted.
+export async function setScheduleRemoved(
+  scheduleId: number,
+  programId: number,
+  isRemoved: boolean,
+  db: Queryable = client,
+): Promise<boolean> {
+  const [result] = await db.execute<Result>(
+    `UPDATE weekly_schedule
+        SET deactivated_at = ${isRemoved ? "NOW(3)" : "NULL"}
+      WHERE id = ? AND program_id = ?`,
+    [scheduleId, programId],
+  );
+  return result.affectedRows === 1;
+}
+
 export async function deactivateSchedule(
   id: number,
   db: Queryable = client,

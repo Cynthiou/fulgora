@@ -1,19 +1,23 @@
 import express from "express";
 import {
   idParamSchema,
-  programDayParamsSchema,
   programInfoSchema,
+  programSessionParamsSchema,
+  programSessionSchema,
   sessionEditSchema,
 } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
 import {
   activate,
+  addSession,
   browse,
   createDraft,
   read,
   readDaySession,
   removeDraft,
+  removeSession,
+  restoreSession,
   updateDraft,
   writeDaySession,
 } from "./programActions.js";
@@ -63,21 +67,45 @@ programRouter.delete(
   removeDraft,
 );
 
-// GET /api/programs/:id/sessions/:weekday: the session of one day of the
-// typical week, as a draft for the editor (US-18, step 2).
-programRouter.get(
-  "/:id/sessions/:weekday",
+// POST /api/programs/:id/sessions: one more session on a day (US-19).
+programRouter.post(
+  "/:id/sessions",
   authenticate,
-  validate({ params: programDayParamsSchema }),
+  validate({ params: idParamSchema, body: programSessionSchema }),
+  addSession,
+);
+
+// GET /api/programs/:id/sessions/:scheduleId: one session of the typical
+// week, as a draft for the editor (US-18, step 2).
+programRouter.get(
+  "/:id/sessions/:scheduleId",
+  authenticate,
+  validate({ params: programSessionParamsSchema }),
   readDaySession,
 );
 
-// PUT /api/programs/:id/sessions/:weekday: what the editor built.
+// PUT /api/programs/:id/sessions/:scheduleId: what the editor built.
 programRouter.put(
-  "/:id/sessions/:weekday",
+  "/:id/sessions/:scheduleId",
   authenticate,
-  validate({ params: programDayParamsSchema, body: sessionEditSchema }),
+  validate({ params: programSessionParamsSchema, body: sessionEditSchema }),
   writeDaySession,
+);
+
+// DELETE /api/programs/:id/sessions/:scheduleId: the session leaves the
+// week; POST .../restore puts it back (PRO-03c, PRO-03d).
+programRouter.delete(
+  "/:id/sessions/:scheduleId",
+  authenticate,
+  validate({ params: programSessionParamsSchema }),
+  removeSession,
+);
+
+programRouter.post(
+  "/:id/sessions/:scheduleId/restore",
+  authenticate,
+  validate({ params: programSessionParamsSchema }),
+  restoreSession,
 );
 
 export default programRouter;

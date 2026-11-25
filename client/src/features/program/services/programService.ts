@@ -3,6 +3,7 @@ import type {
   ProgramDetail,
   ProgramDetailFull,
   ProgramInfoInput,
+  ProgramSessionInput,
   SessionDraft,
 } from "shared";
 import { apiFetch } from "../../../services/api";
@@ -77,25 +78,56 @@ export type ProgramDaySession = {
   session: SessionDraft;
 };
 
-// GET /api/programs/:id/sessions/:weekday: the session of one day.
+// GET /api/programs/:id/sessions/:scheduleId: one session of the week.
 export function readProgramDaySession(
   id: number,
-  weekday: number,
+  scheduleId: number,
   signal?: AbortSignal,
 ): Promise<ProgramDaySession> {
-  return apiFetch<ProgramDaySession>(`/programs/${id}/sessions/${weekday}`, {
+  return apiFetch<ProgramDaySession>(`/programs/${id}/sessions/${scheduleId}`, {
     signal,
   });
 }
 
-// PUT /api/programs/:id/sessions/:weekday: what the editor built.
+// PUT /api/programs/:id/sessions/:scheduleId: what the editor built.
 export function writeProgramDaySession(
   id: number,
-  weekday: number,
+  scheduleId: number,
   session: SessionDraft,
 ): Promise<{ version_id: number }> {
-  return apiFetch(`/programs/${id}/sessions/${weekday}`, {
+  return apiFetch(`/programs/${id}/sessions/${scheduleId}`, {
     method: "PUT",
     body: JSON.stringify({ scope: "this", session }),
   });
+}
+
+// POST /api/programs/:id/sessions: one more session on a day (US-19).
+export function addProgramSession(
+  id: number,
+  input: ProgramSessionInput,
+): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(`/programs/${id}/sessions`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+// DELETE /api/programs/:id/sessions/:scheduleId, and the way back.
+export function removeProgramSession(
+  id: number,
+  scheduleId: number,
+): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(`/programs/${id}/sessions/${scheduleId}`, {
+    method: "DELETE",
+  });
+}
+
+export function restoreProgramSession(
+  id: number,
+  scheduleId: number,
+): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(
+    `/programs/${id}/sessions/${scheduleId}/restore`,
+    { method: "POST" },
+  );
 }

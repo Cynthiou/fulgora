@@ -181,7 +181,11 @@ export type ProgramInfoInput = z.output<typeof programInfoSchema>;
 
 // A program draft, with the state of each of its sessions.
 export type ProgramSessionSummary = {
+  // The row of the typical week this session comes from
+  schedule_id: number;
   weekday: number;
+  // "07:00", or null when the session has no hour
+  planned_time: string | null;
   session_template_id: number;
   session_version_id: number;
   name: string;
@@ -238,6 +242,116 @@ export type ProgramCreated = {
 export const programDayParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
   weekday: z.coerce.number().int().min(1).max(7),
+});
+
+// --- Several sessions on the same day (US-19) ------------------------------
+
+// How many appointments a program would hold: one per session of the
+// typical week, for every matching day of the period (RM-075).
+export function countProgramAppointments(
+  startDate: string,
+  endDate: string,
+  sessions: { weekday: number }[],
+): number {
+  const perWeekday = new Map<number, number>();
+  for (const session of sessions) {
+    perWeekday.set(session.weekday, (perWeekday.get(session.weekday) ?? 0) + 1);
+  }
+  return listProgramDates(startDate, endDate, [...perWeekday.keys()]).reduce(
+    (total, date) => total + (perWeekday.get(getWeekday(date)) ?? 0),
+    0,
+  );
+}
+
+// "Ajoute 6 rendez-vous de plus (1 par semaine) : le total passe de 24 à
+// 30." (PRO-03a). Returns null when nothing would change.
+export function describeAddedSessions(
+  startDate: string,
+  endDate: string,
+  sessions: { weekday: number }[],
+  weekday: number,
+): string | null {
+  const before = countProgramAppointments(startDate, endDate, sessions);
+  const after = countProgramAppointments(startDate, endDate, [
+    ...sessions,
+    { weekday },
+  ]);
+  const added = after - before;
+  if (added <= 0) {
+    return null;
+  }
+  return `Ajoute ${added} rendez-vous de plus (1 par semaine) : le total passe de ${before} à ${after}.`;
+}
+
+// "« Cardio » et « Mobilité », avec leurs blocs et exercices. Le programme
+// passe de 24 à 12 rendez-vous." (PRO-03b)
+export function describeRemovedDay(
+  startDate: string,
+  endDate: string,
+  sessions: { weekday: number; name: string }[],
+  weekday: number,
+): { title: string; detail: string } | null {
+  const removed = sessions.filter((session) => session.weekday === weekday);
+  if (removed.length === 0) {
+    return null;
+  }
+  const kept = sessions.filter((session) => session.weekday !== weekday);
+  const before = countProgramAppointments(startDate, endDate, sessions);
+  const after = countProgramAppointments(startDate, endDate, kept);
+  const names = removed.map((session) => `« ${session.name} »`);
+  const list =
+    names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
+  return {
+    title: `${getWeekdayLabel(weekday)} décoché : ${removed.length} séance${
+      removed.length > 1 ? "s" : ""
+    } ${removed.length > 1 ? "seront retirées" : "sera retirée"}`,
+    detail: `${list}, avec leurs blocs et exercices. Le programme passe de ${before} à ${after} rendez-vous.`,
+  };
+}
+
+// "Le lundi aura 2 séances : « Haut du corps » à 18:30 et celle-ci."
+export function describeDayAfterAdding(
+  sessions: { weekday: number; name: string; planned_time: string | null }[],
+  weekday: number,
+): string | null {
+  const sameDay = sessions.filter((session) => session.weekday === weekday);
+  if (sameDay.length === 0) {
+    return null;
+  }
+  const names = sameDay.map(
+    (session) =>
+      `« ${session.name} »${
+        session.planned_time === null ? "" : ` à ${session.planned_time}`
+      }`,
+  );
+  const list =
+    names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
+  return `Le ${getWeekdayLabel(weekday).toLocaleLowerCase(
+    "fr-FR",
+  )} aura ${sameDay.length + 1} séances : ${list} et celle-ci.`;
+}
+
+// The name of a session of a program, asked when it is added (PRO-03a).
+export const programSessionSchema = z.object({
+  weekday: z.number().int().min(1).max(7),
+  name: z
+    .string()
+    .trim()
+    .min(1, REQUIRED_MESSAGE)
+    .max(160, "160 caractères au maximum."),
+  planned_time: timeSchema.nullable(),
+});
+
+export type ProgramSessionInput = z.output<typeof programSessionSchema>;
+
+// The address of one session of a program: /api/programs/:id/sessions/:sid
+export const programSessionParamsSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  scheduleId: z.coerce.number().int().positive(),
 });
 
 // --- Seeing a program (US-48) ----------------------------------------------

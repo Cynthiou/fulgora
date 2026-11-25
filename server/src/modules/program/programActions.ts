@@ -7,6 +7,7 @@ import {
   type ProgramCreated,
   type ProgramDetailFull,
   type ProgramInfoInput,
+  type ProgramSessionInput,
   type ProgramSessionSummary,
   type SessionEditInput,
   statusAfterCreation,
@@ -41,6 +42,7 @@ import {
   readProgramSchedules,
   readPrograms,
   type ScheduleRow,
+  setScheduleRemoved,
   updateProgramInfo,
   updateProgramStatus,
 } from "./programRepository.js";
@@ -50,7 +52,9 @@ import {
 
 function toSession(row: ScheduleRow): ProgramSessionSummary {
   return {
+    schedule_id: row.id,
     weekday: row.weekday,
+    planned_time: toHourMinute(row.planned_time),
     session_template_id: row.session_template_id,
     session_version_id: row.session_version_id,
     name: row.name,
@@ -242,34 +246,37 @@ export const activate: RequestHandler = async (req, res) => {
       );
     }
 
-    // One appointment per day of the period falling on a chosen weekday.
-    const byWeekday = new Map(schedules.map((row) => [row.weekday, row]));
+    // One appointment per session of the week and per matching day: a
+    // day holding two sessions gives two appointments (US-19).
     const dates = listProgramDates(
       program.start_date,
       program.end_date,
       schedules.map((row) => row.weekday),
     );
+    let appointmentCount = 0;
     for (const date of dates) {
-      const schedule = byWeekday.get(getWeekday(date));
-      if (schedule === undefined) {
-        continue;
+      for (const schedule of schedules) {
+        if (schedule.weekday !== getWeekday(date)) {
+          continue;
+        }
+        await createProgramAppointment(
+          userId,
+          id,
+          schedule.id,
+          schedule.session_version_id,
+          date,
+          toHourMinute(schedule.planned_time),
+          connection,
+        );
+        appointmentCount += 1;
       }
-      await createProgramAppointment(
-        userId,
-        id,
-        schedule.id,
-        schedule.session_version_id,
-        date,
-        toHourMinute(schedule.planned_time),
-        connection,
-      );
     }
 
     const status = statusAfterCreation(program.start_date, todayInParis());
     await updateProgramStatus(id, status, connection);
 
     const answer: ProgramCreated = {
-      appointment_count: dates.length,
+      appointment_count: appointmentCount,
       first_date: dates[0] ?? null,
       last_date: dates[dates.length - 1] ?? null,
       status,
@@ -309,9 +316,9 @@ export const removeDraft: RequestHandler = async (req, res) => {
 // --- The session of one day of the program (US-18, step 2) ------------------
 
 // Finds the day in the typical week, or answers 404.
-async function readSchedule(
+async function readOwnedSchedule(
   programId: number,
-  weekday: number,
+  scheduleId: number,
   userId: number,
 ): Promise<{
   program: Awaited<ReturnType<typeof readProgram>>;
@@ -322,12 +329,12 @@ async function readSchedule(
     throw notFound();
   }
   const schedules = await readProgramSchedules(programId);
-  const schedule = schedules.find((row) => row.weekday === weekday);
+  const schedule = schedules.find((row) => row.id === scheduleId);
   if (schedule === undefined) {
     throw new HttpError(
       404,
-      "PROGRAM_DAY_NOT_FOUND",
-      "Ce jour ne fait pas partie du programme.",
+      "PROGRAM_SESSION_NOT_FOUND",
+      "Cette séance ne fait pas partie du programme.",
     );
   }
   return { program, schedule };
@@ -337,16 +344,16 @@ async function readSchedule(
 // draft for the editor.
 export const readDaySession: RequestHandler = async (req, res) => {
   const userId = readUserId(req);
-  const { id, weekday } = req.params as unknown as {
+  const { id, scheduleId } = req.params as unknown as {
     id: number;
-    weekday: number;
+    scheduleId: number;
   };
-  const { program, schedule } = await readSchedule(id, weekday, userId);
+  const { program, schedule } = await readOwnedSchedule(id, scheduleId, userId);
 
   res.json({
     program_id: id,
     program_name: program?.name ?? "",
-    weekday,
+    weekday: schedule.weekday,
     session: await buildSessionDraft(
       schedule.session_version_id,
       schedule.name,
@@ -360,12 +367,12 @@ export const readDaySession: RequestHandler = async (req, res) => {
 // becomes the next version of that day's session (RM-017).
 export const writeDaySession: RequestHandler = async (req, res) => {
   const userId = readUserId(req);
-  const { id, weekday } = req.params as unknown as {
+  const { id, scheduleId } = req.params as unknown as {
     id: number;
-    weekday: number;
+    scheduleId: number;
   };
   const { session } = req.body as SessionEditInput;
-  const { schedule } = await readSchedule(id, weekday, userId);
+  const { schedule } = await readOwnedSchedule(id, scheduleId, userId);
 
   const versionId = await withTransaction(async (connection) => {
     await assertSessionContentValid(session.blocks, userId, connection);
@@ -389,3 +396,96 @@ export const writeDaySession: RequestHandler = async (req, res) => {
 
   res.json({ version_id: versionId });
 };
+
+// POST /api/programs/:id/sessions: one more session on a day of the week
+// (PRO-03a). Only on a draft: once created, the days change with US-20.
+export const addSession: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const input = req.body as ProgramSessionInput;
+
+  await withTransaction(async (connection) => {
+    const program = await readProgramForUpdate(id, userId, connection);
+    if (program === null) {
+      throw notFound();
+    }
+    if (program.status !== "draft") {
+      throw new HttpError(
+        409,
+        "PROGRAM_NOT_EDITABLE",
+        "Ce programme est déjà créé : ses séances se changent depuis le programme.",
+      );
+    }
+    const templateId = await createSessionTemplate(
+      userId,
+      input.name,
+      connection,
+    );
+    const versionId = await createSessionVersion(templateId, 1, connection);
+    await createSchedule(
+      id,
+      templateId,
+      input.weekday,
+      input.planned_time,
+      connection,
+    );
+    return versionId;
+  });
+
+  res.status(201).json(await buildDetail(id, userId));
+};
+
+// DELETE /api/programs/:id/sessions/:scheduleId: the session leaves the
+// typical week, and can come back for a few seconds (PRO-03c, PRO-03d).
+export const removeSession: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id, scheduleId } = req.params as unknown as {
+    id: number;
+    scheduleId: number;
+  };
+  await assertDraft(id, userId);
+  const removed = await setScheduleRemoved(scheduleId, id, true);
+  if (!removed) {
+    throw new HttpError(
+      404,
+      "PROGRAM_SESSION_NOT_FOUND",
+      "Cette séance ne fait pas partie du programme.",
+    );
+  }
+  res.json(await buildDetail(id, userId));
+};
+
+// POST /api/programs/:id/sessions/:scheduleId/restore: "Annuler" of the
+// toast puts the session back, with its blocks and its exercises.
+export const restoreSession: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id, scheduleId } = req.params as unknown as {
+    id: number;
+    scheduleId: number;
+  };
+  await assertDraft(id, userId);
+  const restored = await setScheduleRemoved(scheduleId, id, false);
+  if (!restored) {
+    throw new HttpError(
+      404,
+      "PROGRAM_SESSION_NOT_FOUND",
+      "Cette séance ne fait pas partie du programme.",
+    );
+  }
+  res.json(await buildDetail(id, userId));
+};
+
+// The sessions of the week only change while the program is a draft.
+async function assertDraft(id: number, userId: number): Promise<void> {
+  const program = await readProgram(id, userId);
+  if (program === null) {
+    throw notFound();
+  }
+  if (program.status !== "draft") {
+    throw new HttpError(
+      409,
+      "PROGRAM_NOT_EDITABLE",
+      "Ce programme est déjà créé : ses séances se changent depuis le programme.",
+    );
+  }
+}

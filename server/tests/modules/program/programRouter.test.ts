@@ -264,9 +264,12 @@ describe("les séances d'un jour du programme", () => {
   it("gives the session of a day as a draft, and saves a new version", async () => {
     const draft = await post("/api/programs", validInfo(), lea.cookie);
     const programId = draft.body.id;
+    const thursdayId = draft.body.sessions.find(
+      (item: { weekday: number }) => item.weekday === 4,
+    ).schedule_id;
 
     const read = await request(app)
-      .get(`/api/programs/${programId}/sessions/4`)
+      .get(`/api/programs/${programId}/sessions/${thursdayId}`)
       .set("Cookie", lea.cookie);
 
     expect(read.status).toBe(200);
@@ -311,7 +314,7 @@ describe("les séances d'un jour du programme", () => {
     };
 
     const written = await request(app)
-      .put(`/api/programs/${programId}/sessions/4`)
+      .put(`/api/programs/${programId}/sessions/${thursdayId}`)
       .set("Origin", ORIGIN)
       .set("Cookie", lea.cookie)
       .send({ scope: "this", session });
@@ -330,11 +333,11 @@ describe("les séances d'un jour du programme", () => {
     });
   });
 
-  it("answers 404 for a day outside the week", async () => {
+  it("answers 404 for a session outside the program", async () => {
     const draft = await post("/api/programs", validInfo(), lea.cookie);
 
     const response = await request(app)
-      .get(`/api/programs/${draft.body.id}/sessions/7`)
+      .get(`/api/programs/${draft.body.id}/sessions/999999`)
       .set("Cookie", lea.cookie);
 
     expect(response.status).toBe(404);
@@ -423,5 +426,106 @@ describe("GET /api/programs/:id et la tâche des statuts", () => {
       [over.body.id],
     );
     expect(Number(notifications[0]?.total)).toBe(1);
+  });
+});
+
+// US-19: a day may hold several sessions, each with its own hour.
+describe("plusieurs séances le même jour", () => {
+  it("adds a session on a day, removes it and puts it back", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    const programId = draft.body.id;
+
+    const added = await post(
+      `/api/programs/${programId}/sessions`,
+      { weekday: 1, name: "Gainage", planned_time: "20:00" },
+      lea.cookie,
+    );
+
+    expect(added.status).toBe(201);
+    const monday = added.body.sessions.filter(
+      (item: { weekday: number }) => item.weekday === 1,
+    );
+    expect(monday).toHaveLength(2);
+    expect(monday[1]).toMatchObject({
+      name: "Gainage",
+      planned_time: "20:00",
+    });
+
+    const scheduleId = monday[1].schedule_id;
+    const removed = await request(app)
+      .delete(`/api/programs/${programId}/sessions/${scheduleId}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie);
+
+    expect(removed.status).toBe(200);
+    expect(
+      removed.body.sessions.filter(
+        (item: { weekday: number }) => item.weekday === 1,
+      ),
+    ).toHaveLength(1);
+
+    const back = await post(
+      `/api/programs/${programId}/sessions/${scheduleId}/restore`,
+      undefined,
+      lea.cookie,
+    );
+
+    expect(back.status).toBe(200);
+    expect(
+      back.body.sessions.filter(
+        (item: { weekday: number }) => item.weekday === 1,
+      ),
+    ).toHaveLength(2);
+  });
+
+  it("plans one appointment per session of the day (RM-075)", async () => {
+    const draft = await post(
+      "/api/programs",
+      validInfo({ weekdays: [1] }),
+      lea.cookie,
+    );
+    const programId = draft.body.id;
+    await post(
+      `/api/programs/${programId}/sessions`,
+      { weekday: 1, name: "Gainage", planned_time: null },
+      lea.cookie,
+    );
+
+    const detail = await request(app)
+      .get(`/api/programs/${programId}`)
+      .set("Cookie", lea.cookie);
+    for (const session of detail.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+
+    const created = await post(
+      `/api/programs/${programId}/activate`,
+      undefined,
+      lea.cookie,
+    );
+
+    // Two Mondays in the period, two sessions each: four appointments.
+    expect(created.status).toBe(200);
+    expect(created.body.appointment_count).toBe(4);
+  });
+
+  it("refuses to touch the sessions of a program already created", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    for (const session of draft.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+    await post(
+      `/api/programs/${draft.body.id}/activate`,
+      undefined,
+      lea.cookie,
+    );
+
+    const response = await post(
+      `/api/programs/${draft.body.id}/sessions`,
+      { weekday: 2, name: "Trop tard", planned_time: null },
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(409);
   });
 });

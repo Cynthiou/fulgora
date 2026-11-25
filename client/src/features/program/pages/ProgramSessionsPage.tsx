@@ -2,28 +2,37 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import {
   canActivateProgram,
+  countProgramAppointments,
   countProgramWeeks,
+  describeAddedSessions,
   formatPeriod,
   formatPeriodShort,
   formatReadySessions,
   getWeekdayLabel,
-  listProgramDates,
   type ProgramCreated,
-  type ProgramDetail,
+  type ProgramDetailFull,
+  type ProgramSessionSummary,
 } from "shared";
 import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import PageHeader from "../../../components/PageHeader";
+import UndoToast from "../../../components/UndoToast";
 import { isAbortError } from "../../../services/api";
 import { ApiError } from "../../../services/apiError";
+import AddSessionOnDaySheet from "../components/AddSessionOnDaySheet";
 import StepBar from "../components/StepBar";
 import {
   activateProgram,
+  addProgramSession,
   deleteProgramDraft,
   readProgram,
+  removeProgramSession,
+  restoreProgramSession,
 } from "../services/programService";
 
 const PRIMARY_BUTTON =
@@ -38,13 +47,65 @@ function ProgramSessionsPage() {
   const params = useParams();
   const navigate = useNavigate();
   const id = Number(params.programId);
-  const [program, setProgram] = useState<ProgramDetail | null>(null);
+  const [program, setProgram] = useState<ProgramDetailFull | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [created, setCreated] = useState<ProgramCreated | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
+  // The day whose "+ Autre séance" panel is open (PRO-03a)
+  const [addingOn, setAddingOn] = useState<number | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  // The session just removed, which "Annuler" puts back (PRO-03d)
+  const [removed, setRemoved] = useState<ProgramSessionSummary | null>(null);
+
+  async function addSession(name: string, plannedTime: string | null) {
+    if (addingOn === null) {
+      return;
+    }
+    setIsSending(true);
+    setAddError(null);
+    try {
+      setProgram(
+        await addProgramSession(id, {
+          weekday: addingOn,
+          name,
+          planned_time: plannedTime,
+        }),
+      );
+      setAddingOn(null);
+    } catch {
+      setAddError("Impossible d'ajouter cette séance.");
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  async function removeSession(session: ProgramSessionSummary) {
+    setIsSending(true);
+    try {
+      setProgram(await removeProgramSession(id, session.schedule_id));
+      setRemoved(session);
+    } catch {
+      setError("Impossible de retirer cette séance.");
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  async function undoRemove() {
+    if (removed === null) {
+      return;
+    }
+    const session = removed;
+    setRemoved(null);
+    try {
+      setProgram(await restoreProgramSession(id, session.schedule_id));
+    } catch {
+      setError("Impossible de remettre cette séance.");
+    }
+  }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is listed on purpose, it re-runs the load
   useEffect(() => {
@@ -129,6 +190,8 @@ function ProgramSessionsPage() {
 
   const sessions = program?.sessions ?? [];
   const canCreate = canActivateProgram(sessions);
+  // The days of the week, in order, each one holding its sessions.
+  const weekdays = [...new Set(sessions.map((session) => session.weekday))];
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -155,6 +218,13 @@ function ProgramSessionsPage() {
                   {formatPeriodShort(program.start_date, program.end_date)}
                 </span>
               </div>
+              <Link
+                to={`/programmes/${id}/informations`}
+                // On the dark card the link stays light, to be readable (RM-064).
+                className="self-start text-xs font-semibold text-pick-content underline"
+              >
+                Modifier les informations
+              </Link>
               <dl className="grid grid-cols-3 gap-1.5">
                 {[
                   {
@@ -167,16 +237,16 @@ function ProgramSessionsPage() {
                   },
                   {
                     key: "jours",
-                    value: sessions.length,
+                    value: new Set(sessions.map((item) => item.weekday)).size,
                     label: "jours / sem.",
                   },
                   {
                     key: "seances",
-                    value: listProgramDates(
+                    value: countProgramAppointments(
                       program.start_date,
                       program.end_date,
-                      sessions.map((session) => session.weekday),
-                    ).length,
+                      sessions,
+                    ),
                     label: "séances",
                   },
                 ].map((figure) => (
@@ -204,43 +274,78 @@ function ProgramSessionsPage() {
               </p>
             </div>
 
-            <ul className="flex flex-col gap-2">
-              {sessions.map((session) => (
-                <li key={session.weekday}>
-                  <Link
-                    to={`/programmes/${id}/seances/${session.weekday}`}
-                    className={`flex flex-col gap-1.5 rounded-card border border-base-300 px-3.5 py-3 ${
-                      session.exercise_count === 0
-                        ? "bg-soft"
-                        : "bg-base-100 shadow-card"
-                    }`}
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="text-overline uppercase text-accent">
-                        {getWeekdayLabel(session.weekday)}
-                      </span>
-                      <span className="shrink-0 text-xs font-semibold leading-[1.45] text-muted">
-                        {program.planned_time ?? "sans heure"}
-                      </span>
-                    </span>
-                    <span className="flex items-center justify-between gap-2">
-                      <b className="truncate text-sm font-bold">
-                        {session.name}
-                      </b>
-                      <Icon
-                        src={chevronRightIcon}
-                        className="size-[18px] shrink-0 text-faint"
-                      />
-                    </span>
-                    <span className="line-clamp-2 text-xs font-medium leading-[1.45] text-muted">
-                      {session.exercise_count === 0
-                        ? "À configurer"
-                        : session.exercise_names}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {weekdays.map((weekday) => (
+              <section
+                key={weekday}
+                aria-label={getWeekdayLabel(weekday)}
+                className="flex flex-col gap-2"
+              >
+                <ul className="flex flex-col gap-2">
+                  {sessions
+                    .filter((session) => session.weekday === weekday)
+                    .map((session) => (
+                      <li
+                        key={session.schedule_id}
+                        className="flex items-stretch gap-2"
+                      >
+                        <Link
+                          to={`/programmes/${id}/seances/${session.schedule_id}`}
+                          className={`flex min-w-0 flex-1 flex-col gap-1.5 rounded-card border border-base-300 px-3.5 py-3 ${
+                            session.exercise_count === 0
+                              ? "bg-soft"
+                              : "bg-base-100 shadow-card"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="text-overline uppercase text-accent">
+                              {getWeekdayLabel(session.weekday)}
+                            </span>
+                            <span className="shrink-0 text-xs font-semibold leading-[1.45] text-muted">
+                              {session.planned_time ?? "sans heure"}
+                            </span>
+                          </span>
+                          <span className="flex items-center justify-between gap-2">
+                            <b className="truncate text-sm font-bold">
+                              {session.name}
+                            </b>
+                            <Icon
+                              src={chevronRightIcon}
+                              className="size-[18px] shrink-0 text-faint"
+                            />
+                          </span>
+                          <span className="line-clamp-2 text-xs font-medium leading-[1.45] text-muted">
+                            {session.exercise_count === 0
+                              ? "À configurer"
+                              : session.exercise_names}
+                          </span>
+                        </Link>
+                        {/* The last session of the week stays: a program
+                            needs at least one (RM-027). */}
+                        {sessions.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeSession(session)}
+                            disabled={isSending}
+                            aria-label={`Retirer la séance ${session.name}`}
+                            className="grid w-12 shrink-0 place-items-center rounded-card border border-base-300 bg-base-100 text-status-missed shadow-card disabled:opacity-60"
+                          >
+                            <Icon src={trashIcon} className="size-[18px]" />
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => setAddingOn(weekday)}
+                  className="flex h-12 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary"
+                >
+                  <Icon src={plusIcon} className="size-[18px]" />
+                  Autre séance le{" "}
+                  {getWeekdayLabel(weekday).toLocaleLowerCase("fr-FR")}
+                </button>
+              </section>
+            ))}
 
             {error !== null && (
               <p role="alert" className="font-semibold">
@@ -276,6 +381,34 @@ function ProgramSessionsPage() {
             )}
           </div>
         </div>
+      )}
+
+      {addingOn !== null && program !== null && (
+        <AddSessionOnDaySheet
+          weekday={addingOn}
+          sessions={sessions}
+          addedLine={describeAddedSessions(
+            program.start_date,
+            program.end_date,
+            sessions,
+            addingOn,
+          )}
+          isSending={isSending}
+          error={addError}
+          onConfirm={addSession}
+          onClose={() => {
+            setAddingOn(null);
+            setAddError(null);
+          }}
+        />
+      )}
+
+      {removed !== null && (
+        <UndoToast
+          message={`Séance « ${removed.name} » retirée.`}
+          onUndo={undoRemove}
+          onDismiss={() => setRemoved(null)}
+        />
       )}
 
       {isLeaving && (

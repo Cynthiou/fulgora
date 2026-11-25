@@ -10,16 +10,17 @@ import {
   writeProgramDaySession,
 } from "../services/programService";
 
-// Route /programmes/:programId/seances/:weekday: the session of one day of
+// Route /programmes/:programId/seances/:scheduleId: one session of
 // the typical week, built with the editor of the free sessions (US-18).
 // The date is replaced by the day: it comes from the program (RM-075).
 function ProgramDaySessionPage() {
   const params = useParams();
   const navigate = useNavigate();
   const programId = Number(params.programId);
-  const weekday = Number(params.weekday);
+  const scheduleId = Number(params.scheduleId);
   const [draft, setDraft] = useState<SessionDraft | null>(null);
   const [programName, setProgramName] = useState("");
+  const [weekday, setWeekday] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -27,10 +28,11 @@ function ProgramDaySessionPage() {
   useEffect(() => {
     const controller = new AbortController();
     setError(null);
-    readProgramDaySession(programId, weekday, controller.signal)
+    readProgramDaySession(programId, scheduleId, controller.signal)
       .then((answer) => {
         setDraft(answer.session);
         setProgramName(answer.program_name);
+        setWeekday(answer.weekday);
       })
       .catch((caught: unknown) => {
         if (!isAbortError(caught)) {
@@ -38,7 +40,7 @@ function ProgramDaySessionPage() {
         }
       });
     return () => controller.abort();
-  }, [programId, weekday, attempt]);
+  }, [programId, scheduleId, attempt]);
 
   if (error !== null) {
     return (
@@ -63,12 +65,12 @@ function ProgramDaySessionPage() {
   return (
     <SessionEditorPage
       edit={{
-        path: `/programmes/${programId}/seances/${weekday}`,
+        path: `/programmes/${programId}/seances/${scheduleId}`,
         subtitle: programName,
         savedDraft: draft,
         dayLabel: getWeekdayLabel(weekday),
         save: async (next) => {
-          await writeProgramDaySession(programId, weekday, next);
+          await writeProgramDaySession(programId, scheduleId, next);
         },
         onSaved: () =>
           navigate(`/programmes/${programId}/seances`, { replace: true }),
