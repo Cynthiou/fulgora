@@ -1,6 +1,7 @@
 # Règles métier Fulgora
 
 Ce document contient deux parties :
+
 - **les règles fonctionnelles** (RM-xxx) : ce que l'application doit faire, du point de vue de l'utilisateur ;
 - **les décisions techniques** (DT-xx) : comment on le fait, côté sécurité, base de données et architecture.
 
@@ -10,26 +11,26 @@ Les US du backlog (`docs/backlog.md`) renvoient à ces numéros. Le modèle de d
 
 Les règles ont été écrites avec les noms du MCD (en français). Dans le code et la base, les tables portent des noms anglais.
 
-| Nom dans le MCD | Table | Rôle |
-|---|---|---|
-| UTILISATEUR | `user` | Compte et préférences |
-| EXERCICE | `exercise` | Exercice du catalogue commun ou personnel |
-| CATEGORIE, MUSCLE, EQUIPEMENT, MESURE | `category`, `muscle`, `equipment`, `measure` | Listes de référence |
-| EXERCICE_MESURE | `exercise_measure` | Mesures à saisir pour un exercice |
-| SEANCE_MODELE | `session_template` | Séance préparée |
-| VERSION_SEANCE | `session_version` | Version figée d'une séance préparée |
-| BLOC_MODELE | `template_block` | Bloc prévu |
-| EXERCICE_BLOC_MODELE | `template_block_exercise` | Exercice prévu dans un bloc |
-| SERIE_PREVUE | `planned_set` | Série prévue |
-| PROGRAMME | `program` | Programme sur une période |
-| PLANIFICATION_HEBDOMADAIRE | `weekly_schedule` | Règle « tel jour, telle séance » |
-| HISTORIQUE_MODIFICATION_PROGRAMME | `program_change` | Historique des changements d'un programme |
-| RENDEZ_VOUS | `appointment` | Séance planifiée à une date |
-| SEANCE_REALISEE | `workout_session` | Séance réellement faite |
-| BLOC_REALISE | `workout_block` | Bloc réalisé |
-| EXERCICE_BLOC_REALISE | `workout_exercise` | Exercice réalisé |
-| SERIE_REALISEE | `workout_set` | Série réalisée |
-| NOTIFICATION | `notification` | Alerte interne |
+| Nom dans le MCD                       | Table                                        | Rôle                                      |
+| ------------------------------------- | -------------------------------------------- | ----------------------------------------- |
+| UTILISATEUR                           | `user`                                       | Compte et préférences                     |
+| EXERCICE                              | `exercise`                                   | Exercice du catalogue commun ou personnel |
+| CATEGORIE, MUSCLE, EQUIPEMENT, MESURE | `category`, `muscle`, `equipment`, `measure` | Listes de référence                       |
+| EXERCICE_MESURE                       | `exercise_measure`                           | Mesures à saisir pour un exercice         |
+| SEANCE_MODELE                         | `session_template`                           | Séance préparée                           |
+| VERSION_SEANCE                        | `session_version`                            | Version figée d'une séance préparée       |
+| BLOC_MODELE                           | `template_block`                             | Bloc prévu                                |
+| EXERCICE_BLOC_MODELE                  | `template_block_exercise`                    | Exercice prévu dans un bloc               |
+| SERIE_PREVUE                          | `planned_set`                                | Série prévue                              |
+| PROGRAMME                             | `program`                                    | Programme sur une période                 |
+| PLANIFICATION_HEBDOMADAIRE            | `weekly_schedule`                            | Règle « tel jour, telle séance »          |
+| HISTORIQUE_MODIFICATION_PROGRAMME     | `program_change`                             | Historique des changements d'un programme |
+| RENDEZ_VOUS                           | `appointment`                                | Séance planifiée à une date               |
+| SEANCE_REALISEE                       | `workout_session`                            | Séance réellement faite                   |
+| BLOC_REALISE                          | `workout_block`                              | Bloc réalisé                              |
+| EXERCICE_BLOC_REALISE                 | `workout_exercise`                           | Exercice réalisé                          |
+| SERIE_REALISEE                        | `workout_set`                                | Série réalisée                            |
+| NOTIFICATION                          | `notification`                               | Alerte interne                            |
 
 ---
 
@@ -100,7 +101,7 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 - **RM-049** · La date de validation d'une série conserve la première validation ; la date de mise à jour indique la dernière correction. Pour une saisie après coup, la date de validation correspond au moment de la saisie, pas à l'exécution.
 - **RM-050** · La date historique de référence est la date réelle de début déclarée dans la séance réalisée ; la date de planification reste indépendante.
 - **RM-051** · Les performances et les records sont calculés à partir des résultats réels, sans table de records.
-- **RM-065** · Une séance `in_progress` sans aucune action enregistrée pendant **4 heures** est clôturée automatiquement en `unfinished` ; les résultats partiels sont conservés, le rendez-vous reste `attended`. À la prochaine ouverture, l'utilisateur voit : « Cette séance a été clôturée après 4 heures sans activité. Tes résultats ont été conservés. », avec les boutons « Voir le résumé » et « Corriger les résultats ». La séance ne peut pas être reprise comme séance en cours, mais elle peut être corrigée selon RM-047. *(Décision du 23/11/2026, ex-question O-01.)*
+- **RM-065** · Une séance `in_progress` sans aucune action enregistrée pendant **4 heures** est clôturée automatiquement en `unfinished` ; les résultats partiels sont conservés, le rendez-vous reste `attended`. À la prochaine ouverture, l'utilisateur voit : « Cette séance a été clôturée après 4 heures sans activité. Tes résultats ont été conservés. », avec les boutons « Voir le résumé » et « Corriger les résultats ». La séance ne peut pas être reprise comme séance en cours, mais elle peut être corrigée selon RM-047. _(Décision du 23/11/2026, ex-question O-01.)_
 
 ## Confirmation, historique et notifications
 
@@ -123,7 +124,7 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 
 ## Navigation
 
-- **RM-066** · La navigation principale compte quatre onglets : **Accueil** (séance du jour, reprise d'entraînement, indicateurs), **Calendrier** (séances libres, programmes, rendez-vous), **Suivi** (historique, progression) et **Catalogue** (exercices, recherche, filtres, sélection pour une séance). Le profil s'ouvre depuis l'avatar de l'en-tête. Les écrans de création de séances et de programmes s'ouvrent depuis les parcours concernés. *(Décision du 23/11/2026.)*
+- **RM-066** · La navigation principale compte quatre onglets : **Accueil** (séance du jour, reprise d'entraînement, indicateurs), **Calendrier** (séances libres, programmes, rendez-vous), **Suivi** (historique, progression) et **Catalogue** (exercices, recherche, filtres, sélection pour une séance). Le profil s'ouvre depuis l'avatar de l'en-tête. Les écrans de création de séances et de programmes s'ouvrent depuis les parcours concernés. _(Décision du 23/11/2026.)_
 
 ## Questions encore ouvertes
 
@@ -135,7 +136,7 @@ Elles ne sont **pas** validées. Elles seront tranchées avant les US concernée
 - **O-05** · Verrouillage MySQL : stratégie exacte pour garantir une seule séance en cours et la cohérence des annulations. (US-28, US-21)
 - **O-06** · Version de séance utilisée par plusieurs rendez-vous passés mais non exécutés. (US-38)
 
-*O-01 (inactivité) est tranchée : voir RM-065.*
+_O-01 (inactivité) est tranchée : voir RM-065._
 
 ---
 
