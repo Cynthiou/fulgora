@@ -4,8 +4,10 @@ import {
   exerciseQuerySchema,
   formatExerciseCount,
   formatExerciseMeta,
+  formatMuscleRoleLabel,
   formatResultCount,
   getExerciseImage,
+  getExerciseMuscleMap,
 } from "./catalog.js";
 
 describe("exerciseQuerySchema", () => {
@@ -142,5 +144,37 @@ describe("formatExerciseCount", () => {
     expect(formatExerciseCount(151)).toBe("151 exercices");
     expect(formatExerciseCount(1)).toBe("1 exercice");
     expect(formatExerciseCount(0)).toBe("0 exercices");
+  });
+});
+
+describe("formatMuscleRoleLabel", () => {
+  it("agrees in number for each role", () => {
+    expect(formatMuscleRoleLabel("primary", 1)).toBe("Principal");
+    expect(formatMuscleRoleLabel("primary", 2)).toBe("Principaux");
+    expect(formatMuscleRoleLabel("secondary", 1)).toBe("Secondaire");
+    expect(formatMuscleRoleLabel("secondary", 3)).toBe("Secondaires");
+  });
+});
+
+describe("getExerciseMuscleMap", () => {
+  it("follows the profile, falls back on the other map, or gives null", () => {
+    const both = {
+      muscle_map_female_url: "/f.svg",
+      muscle_map_male_url: "/m.svg",
+    };
+    expect(getExerciseMuscleMap(both, "male")).toBe("/m.svg");
+    expect(getExerciseMuscleMap(both, null)).toBe("/f.svg");
+    expect(
+      getExerciseMuscleMap(
+        { muscle_map_female_url: null, muscle_map_male_url: "/m.svg" },
+        "female",
+      ),
+    ).toBe("/m.svg");
+    expect(
+      getExerciseMuscleMap(
+        { muscle_map_female_url: null, muscle_map_male_url: null },
+        "female",
+      ),
+    ).toBeNull();
   });
 });

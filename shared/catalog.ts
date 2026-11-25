@@ -187,3 +187,58 @@ export function getExerciseImage(
     sex === "male" ? exercise.image_female_url : exercise.image_male_url;
   return preferred ?? other ?? null;
 }
+
+// --- Exercise detail (US-09) ----------------------------------------------
+
+export type ExerciseMuscle = { name: string; role: MuscleRole };
+export type ExerciseMeasure = { code: MeasureCode; label: string };
+
+// The whole detail page of an exercise.
+export type ExerciseDetail = {
+  id: number;
+  slug: string;
+  name: string;
+  difficulty: Difficulty;
+  is_personal: boolean;
+  image_female_url: string | null;
+  image_male_url: string | null;
+  muscle_map_female_url: string | null;
+  muscle_map_male_url: string | null;
+  categories: string[];
+  equipments: string[];
+  // Primary muscles first (RM-009)
+  muscles: ExerciseMuscle[];
+  // Only the measures planned for this exercise (RM-010)
+  measures: ExerciseMeasure[];
+  instructions: string[];
+  mistakes: string[];
+  alternatives: string[];
+};
+
+// "Principal" / "Principaux", "Secondaire" / "Secondaires" (RM-009).
+export function formatMuscleRoleLabel(role: MuscleRole, count: number): string {
+  if (role === "primary") {
+    return count > 1 ? "Principaux" : "Principal";
+  }
+  return count > 1 ? "Secondaires" : "Secondaire";
+}
+
+// The muscle map to show: same rule as the illustration (RM-004, RM-014).
+// Null when none is drawn yet (D-14): the muscles are then written only.
+export function getExerciseMuscleMap(
+  exercise: Pick<
+    ExerciseDetail,
+    "muscle_map_female_url" | "muscle_map_male_url"
+  >,
+  sex: Sex | null,
+): string | null {
+  const preferred =
+    sex === "male"
+      ? exercise.muscle_map_male_url
+      : exercise.muscle_map_female_url;
+  const other =
+    sex === "male"
+      ? exercise.muscle_map_female_url
+      : exercise.muscle_map_male_url;
+  return preferred ?? other ?? null;
+}
