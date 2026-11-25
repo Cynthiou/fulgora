@@ -1168,7 +1168,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place une box derrière toi, à une hauteur adaptée.",
@@ -1397,7 +1398,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, jambes levées et genoux fléchis à 90 degrés.",
@@ -2145,7 +2147,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Tiens-toi debout, les pieds à largeur d'épaules.",
@@ -2306,7 +2309,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Attrape la barre en pronation, paumes vers l'avant, à largeur d'épaules.",
@@ -2597,7 +2601,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Pars debout, les pieds à largeur d'épaules.",
@@ -2637,7 +2642,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, genoux pliés et pieds à plat au sol.",
@@ -2681,7 +2687,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, les jambes relevées et les genoux légèrement fléchis.",
@@ -2725,7 +2732,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, les jambes tendues.",
@@ -2769,7 +2777,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, genoux pliés et pieds à plat au sol.",
@@ -2813,7 +2822,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Assieds-toi au sol, genoux pliés et pieds légèrement décollés.",
@@ -2860,7 +2870,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, genoux pliés et pieds posés au sol.",
@@ -2908,7 +2919,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place-toi en gainage latéral, l'avant-bras au sol et le corps bien aligné.",
@@ -2956,7 +2968,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le ventre, bras tendus devant toi et jambes tendues.",
@@ -3705,7 +3718,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, mains derrière la tête et jambes décollées.",
@@ -3752,7 +3766,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place-toi face au sol, mains écartées à largeur d'épaules.",
@@ -3843,7 +3858,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Attrape les barres parallèles, paumes tournées vers l'intérieur.",
@@ -3936,7 +3952,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi face contre le banc à lombaires, chevilles bien calées sous les rouleaux.",
@@ -4078,7 +4095,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place une barre à hauteur de taille et allonge-toi dessous.",
@@ -4626,7 +4644,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Cale bien tes chevilles sous un support ou demande à un partenaire de les maintenir.",
@@ -4711,7 +4730,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place les pieds à largeur d'épaules et garde le buste bien droit.",
@@ -4759,7 +4779,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Attrape la barre de traction avec les mains à largeur d'épaules.",
@@ -4848,7 +4869,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place-toi en position de planche haute, mains juste sous les épaules.",
@@ -4892,7 +4914,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Mets-toi à genoux au sol, la roue abdominale tenue à deux mains.",
@@ -5322,7 +5345,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Pose les mains sur le bord d'un banc, doigts vers l'avant et bras tendus.",
@@ -5910,7 +5934,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos sur un banc et agrippe le bord avec les mains.",
@@ -6161,7 +6186,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Mets-toi à quatre pattes, mains sous les épaules et genoux sous les hanches.",
@@ -6249,7 +6275,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place-toi en position hollow : bas du dos plaqué au sol, bras tendus derrière la tête et jambes tendues décollées.",
@@ -6396,7 +6423,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Place-toi en position de pompes, mains jointes sous la poitrine, index et pouces formant un losange.",
@@ -6585,7 +6613,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Tiens-toi d'une main à un support stable et appuie-toi sur une seule jambe.",
@@ -7257,7 +7286,8 @@
       ],
       "measure_profile": "bodyweight",
       "measure_ids": [
-        1
+        1,
+        2
       ],
       "instructions": [
         "Allonge-toi sur le dos, jambes serrées et tendues, bras le long du corps, paumes vers le sol.",
