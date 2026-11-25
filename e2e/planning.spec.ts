@@ -93,7 +93,7 @@ test("shows a session done in advance on its real day, with a reminder", async (
   await planSession(page, "Haut du corps", inTwoDays);
 
   // Done today, while planned in two days (RM-069, RM-070)
-  await page.goto("/planning?vue=jour&jour=" + inTwoDays);
+  await page.goto(`/planning?vue=jour&jour=${inTwoDays}`);
   await page.getByRole("link", { name: /Haut du corps/ }).click();
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
   await expect(page.getByText(/Séries réalisées/)).toBeVisible();

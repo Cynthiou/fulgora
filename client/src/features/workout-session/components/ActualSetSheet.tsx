@@ -22,6 +22,8 @@ type Props = {
   index: number;
   measureCodes: MeasureCode[];
   isBodyweight: boolean;
+  // The time measured by the stopwatch, which fills the duration (B5f)
+  measuredSeconds?: number | null;
   onConfirm: (values: ActualSetValues) => void;
   onCancel: () => void;
 };
@@ -76,6 +78,7 @@ function ActualSetSheet({
   index,
   measureCodes,
   isBodyweight,
+  measuredSeconds = null,
   onConfirm,
   onCancel,
 }: Props) {
@@ -84,20 +87,25 @@ function ActualSetSheet({
   const isCardio = profile === "cardio";
   const fields = getSetFields(measureCodes, isBodyweight);
   const planned = plannedAsActual(set);
-  const [values, setValues] = useState<ActualSetValues>(() =>
-    set.validated_at === null
-      ? planned
-      : {
-          reps: set.reps_actual,
-          weight_kg: set.weight_actual_kg,
-          duration_seconds: set.duration_actual_seconds,
-          distance_meters: set.distance_actual_meters,
-          speed_kmh: set.speed_actual_kmh,
-          resistance: set.resistance_actual,
-          incline_percent: set.incline_actual_percent,
-          calories: set.calories_actual,
-        },
-  );
+  const [values, setValues] = useState<ActualSetValues>(() => {
+    const start =
+      set.validated_at === null
+        ? planned
+        : {
+            reps: set.reps_actual,
+            weight_kg: set.weight_actual_kg,
+            duration_seconds: set.duration_actual_seconds,
+            distance_meters: set.distance_actual_meters,
+            speed_kmh: set.speed_actual_kmh,
+            resistance: set.resistance_actual,
+            incline_percent: set.incline_actual_percent,
+            calories: set.calories_actual,
+          };
+    // The stopwatch of the stage fills the duration (B5f, US-49).
+    return measuredSeconds === null
+      ? start
+      : { ...start, duration_seconds: measuredSeconds };
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const label = getSetLabel(profile, index);

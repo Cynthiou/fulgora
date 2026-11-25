@@ -30,6 +30,36 @@ async function shoot(page: Page, name: string) {
   }
 }
 
+type CatalogItem = { id: number; name: string; measure_codes: string[] };
+
+// A session planned today holding one exercise measured in time (US-49).
+async function planDurationSession(page: Page, exerciseId: number) {
+  const response = await page.request.post("/api/appointments", {
+    headers: { Origin: E2E_ORIGIN },
+    data: {
+      name: "Gainage",
+      planned_date: todayInParis(),
+      planned_time: null,
+      blocks: [
+        {
+          block_type: "classic",
+          name: null,
+          instructions: null,
+          exercises: [
+            {
+              exercise_id: exerciseId,
+              default_rest_seconds: 45,
+              sets: [{ ...createEmptySet(), duration_seconds: 60 }],
+            },
+          ],
+        },
+      ],
+    },
+  });
+  expect(response.status()).toBe(201);
+  return (await response.json()).appointment_id as number;
+}
+
 // A session planned today, through the API, with one exercise and two sets.
 async function planSessionToday(page: Page, name: string) {
   const exercises = await page.request.get("/api/exercises?search=Squat");
@@ -249,4 +279,28 @@ test("captures the screens of the MVP", async ({ page }) => {
     .click();
   await expect(page.getByRole("table")).toBeVisible();
   await shoot(page, "sui-06-detail-seance-passee");
+
+  // B5b et B5c : le minuteur d'un exercice en durée (US-49)
+  const catalog = await page.request.get("/api/exercises?search=gainage");
+  const plank = ((await catalog.json()).items as CatalogItem[]).find(
+    (item) =>
+      item.measure_codes.length === 1 && item.measure_codes[0] === "duration",
+  );
+  if (plank !== undefined) {
+    const appointmentId = await planDurationSession(page, plank.id);
+    await page.clock.install();
+    await page.goto(`/seances/${appointmentId}`);
+    await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+    await page
+      .getByRole("list", { name: "Exercices du bloc" })
+      .getByRole("link")
+      .first()
+      .click();
+    await expect(page.getByText("Minuteur · prévu 1 min")).toBeVisible();
+    await shoot(page, "b5b-minuteur-avant");
+    await page.getByRole("button", { name: /Lancer le minuteur/ }).click();
+    await page.clock.fastForward(53_000);
+    await expect(page.getByText(/^Fin dans /)).toBeVisible();
+    await shoot(page, "b5c-minuteur-en-cours");
+  }
 });

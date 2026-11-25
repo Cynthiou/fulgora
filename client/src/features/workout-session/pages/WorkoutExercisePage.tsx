@@ -83,6 +83,8 @@ function WorkoutExercisePage() {
   const exerciseId = Number(params.exerciseId);
   // While a set is being added or removed, the buttons wait.
   const [isChanging, setIsChanging] = useState(false);
+  // The seconds measured by the stopwatch, waiting for the reading (B5f)
+  const [measured, setMeasured] = useState<number | null>(null);
   const { session, isLoading, notFound, error, reload, replaceSet } =
     useWorkoutSession(sessionId);
   const validation = useValidateSet({ onReplace: replaceSet });
@@ -129,10 +131,35 @@ function WorkoutExercisePage() {
     startRest(set, index);
   }
 
+  // The time measured by the app (US-49). For an exercise in time the set
+  // is validated with it; for a cardio stage the machine reading opens, its
+  // duration already filled (B5f).
+  function finishTimed(set: WorkoutSetRow, index: number, seconds: number) {
+    if (exercise === undefined || exercise === null) {
+      return;
+    }
+    const profile = getMeasureProfile(
+      exercise.measure_codes,
+      exercise.is_bodyweight,
+    );
+    if (profile === "cardio") {
+      setMeasured(seconds);
+      setEditing({ set, index });
+      return;
+    }
+    validation.validate(set, {
+      ...plannedAsActual(set),
+      duration_seconds: seconds,
+    });
+    setPickedIndex(null);
+    startRest(set, index);
+  }
+
   function confirmEdited(values: ActualSetValues) {
     if (editing !== null) {
       validation.validate(editing.set, values);
       setEditing(null);
+      setMeasured(null);
       setPickedIndex(null);
       startRest(editing.set, editing.index);
     }
@@ -278,6 +305,7 @@ function WorkoutExercisePage() {
                         ? () => removeSet(set.id)
                         : null
                     }
+                    onTimed={(seconds) => finishTimed(set, index, seconds)}
                   />
                 ))}
               </ul>
@@ -326,8 +354,12 @@ function WorkoutExercisePage() {
           index={editing.index}
           measureCodes={exercise.measure_codes}
           isBodyweight={exercise.is_bodyweight}
+          measuredSeconds={measured}
           onConfirm={confirmEdited}
-          onCancel={() => setEditing(null)}
+          onCancel={() => {
+            setEditing(null);
+            setMeasured(null);
+          }}
         />
       )}
     </div>

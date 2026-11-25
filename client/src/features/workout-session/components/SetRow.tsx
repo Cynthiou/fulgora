@@ -12,6 +12,8 @@ import pencilIcon from "../../../assets/icons/ui/actions/pencil.svg";
 import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
 import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
 import Icon from "../../../components/Icon";
+import CardioStepTimer from "./CardioStepTimer";
+import DurationTimer from "./DurationTimer";
 
 type Props = {
   set: WorkoutSetRow;
@@ -27,6 +29,9 @@ type Props = {
   onPick: () => void;
   // Only a set added during the session can be removed (RM-048)
   onRemove: (() => void) | null;
+  // The time measured by the app (US-49): the set is validated with it for
+  // an exercise in time, and it opens the machine reading for a cardio one.
+  onTimed: (seconds: number) => void;
 };
 
 // Screen B3a: one set of the exercise.
@@ -45,6 +50,7 @@ function SetRow({
   onEdit,
   onPick,
   onRemove,
+  onTimed,
 }: Props) {
   const label = getSetLabel(profile, index);
   const isCardio = profile === "cardio";
@@ -98,7 +104,8 @@ function SetRow({
           </button>
         </div>
 
-        {parts.length === 0 ? (
+        {/* An exercise in time shows its objective inside the timer. */}
+        {profile === "duration" ? null : parts.length === 0 ? (
           <p className="text-muted">
             Aucun objectif prévu : indique ce que tu as fait.
           </p>
@@ -123,14 +130,31 @@ function SetRow({
           </ul>
         )}
 
-        <button
-          type="button"
-          onClick={isCardio || parts.length === 0 ? onEdit : onValidate}
-          disabled={isPending}
-          className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
-        >
-          Valider {noun} {index + 1}
-        </button>
+        {profile === "duration" ? (
+          // B5b and B5c: the app counts the time of the set (US-49)
+          <DurationTimer
+            plannedSeconds={set.duration_planned_seconds}
+            isPending={isPending}
+            onDone={onTimed}
+          />
+        ) : isCardio ? (
+          // B5d and B5e: the stage is launched, then the reading (US-49)
+          <CardioStepTimer
+            plannedSeconds={set.duration_planned_seconds}
+            stageLabel={label}
+            isPending={isPending}
+            onStop={onTimed}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={parts.length === 0 ? onEdit : onValidate}
+            disabled={isPending}
+            className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+          >
+            Valider {noun} {index + 1}
+          </button>
+        )}
       </li>
     );
   }
