@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import {
+  type AppointmentDetail,
   type AppointmentListItem,
   type DateRange,
   type FreeSessionCreated,
@@ -27,7 +28,10 @@ import {
   type AppointmentRow,
   countVersionContent,
   createAppointment,
+  readAppointment,
   readAppointmentsBetween,
+  readVersionBlocks,
+  readVersionExercises,
   type VersionContentRow,
 } from "./appointmentRepository.js";
 
@@ -189,4 +193,49 @@ export const createFree: RequestHandler = async (req, res) => {
 
   const created: FreeSessionCreated = { appointment_id: appointmentId };
   res.status(201).json(created);
+};
+
+// GET /api/appointments/:id: one planned session with its blocks and the
+// names of its exercises (B1). Another user's appointment answers 404.
+export const read: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const row = await readAppointment(id, userId);
+  if (row === null) {
+    throw new HttpError(
+      404,
+      "APPOINTMENT_NOT_FOUND",
+      "Cette séance n'existe pas.",
+    );
+  }
+  const blocks = await readVersionBlocks(row.session_version_id);
+  const exercises = await readVersionExercises(row.session_version_id);
+
+  const detail: AppointmentDetail = {
+    id: row.id,
+    planned_date: row.planned_date,
+    planned_time: toHourMinute(row.planned_time),
+    status: row.status,
+    session_name: row.session_name,
+    program_name: row.program_name,
+    workout_session:
+      row.workout_session_id === null || row.workout_status === null
+        ? null
+        : { id: row.workout_session_id, status: row.workout_status },
+    blocks: blocks.map((block) => ({
+      id: block.id,
+      block_type: block.block_type,
+      name: block.name,
+      position: block.position,
+      exercises: exercises
+        .filter((exercise) => exercise.template_block_id === block.id)
+        .map((exercise) => ({
+          id: exercise.id,
+          exercise_id: exercise.exercise_id,
+          name: exercise.name,
+        })),
+    })),
+  };
+  res.json(detail);
 };

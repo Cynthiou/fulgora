@@ -1,5 +1,9 @@
 import type { PlannedSetValues, SessionDraftInput } from "shared";
-import client, { type Queryable, type Result } from "../../database/client.js";
+import client, {
+  type Queryable,
+  type Result,
+  type Rows,
+} from "../../database/client.js";
 
 // One function, one query. All of them take the connection of the running
 // transaction (db), so that a session is saved whole or not at all (US-23).
@@ -95,4 +99,19 @@ export async function createPlannedSet(
     ],
   );
   return result.insertId;
+}
+
+// How many exercises a version holds: zero means it cannot start (RM-018).
+export async function countVersionExercises(
+  sessionVersionId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COUNT(*) AS total
+       FROM template_block_exercise tbe
+       JOIN template_block tb ON tb.id = tbe.template_block_id
+      WHERE tb.session_version_id = ?`,
+    [sessionVersionId],
+  );
+  return Number(rows[0]?.total ?? 0);
 }

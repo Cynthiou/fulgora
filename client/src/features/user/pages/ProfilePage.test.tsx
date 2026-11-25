@@ -33,6 +33,7 @@ const lucas: PublicUser = {
 // 17:34 UTC in November is 18:34 in Paris (PRF-09).
 const IN_PROGRESS: CurrentWorkoutSession = {
   id: 9,
+  appointment_id: 1,
   session_name: "Haut du corps",
   started_at: "2026-11-25T17:34:00.000Z",
   validated_sets: 3,

@@ -1,8 +1,8 @@
 import express from "express";
-import { dateRangeSchema, freeSessionSchema } from "shared";
+import { dateRangeSchema, freeSessionSchema, idParamSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { browse, createFree } from "./appointmentActions.js";
+import { browse, createFree, read } from "./appointmentActions.js";
 
 const appointmentRouter = express.Router();
 
@@ -20,6 +20,14 @@ appointmentRouter.post(
   authenticate,
   validate({ body: freeSessionSchema }),
   createFree,
+);
+
+// GET /api/appointments/:id: one planned session, for the detail screen (B1).
+appointmentRouter.get(
+  "/:id",
+  authenticate,
+  validate({ params: idParamSchema }),
+  read,
 );
 
 export default appointmentRouter;
