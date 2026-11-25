@@ -69,11 +69,20 @@ test("search and filters live in the address and survive a detour", async ({
     page.getByRole("button", { name: "Retirer le filtre Jambes" }),
   ).toBeVisible();
 
-  // Detour through a card (the detail page arrives with US-09), then back
+  // Detour through the detail of the first card, then back
   const firstCard = exerciseCards(page).first();
   const firstName = await firstCard.locator("span.truncate").textContent();
   await firstCard.click();
-  await page.goBack();
+  await expect(
+    page.getByRole("heading", { level: 2, name: firstName ?? "" }),
+  ).toBeVisible();
+  await expect(page.getByText("Muscles sollicités")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Ajouter à une séance" }),
+  ).toBeVisible();
+  const detail = await new AxeBuilder({ page }).analyze();
+  expect(detail.violations).toEqual([]);
+  await page.getByRole("button", { name: "Retour au catalogue" }).click();
 
   expect(page.url()).toContain("search=squat");
   expect(page.url()).toContain("category_ids=");
