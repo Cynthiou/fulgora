@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   type ActualSetValues,
   getMeasureProfile,
@@ -13,6 +13,9 @@ import {
   validateSetValue,
   type WorkoutSetRow,
 } from "shared";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import BottomSheet from "../../../components/BottomSheet";
+import Icon from "../../../components/Icon";
 import MinSecField from "../../../components/MinSecField";
 import NumberField from "../../../components/NumberField";
 
@@ -82,7 +85,6 @@ function ActualSetSheet({
   onConfirm,
   onCancel,
 }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const profile = getMeasureProfile(measureCodes, isBodyweight);
   const isCardio = profile === "cardio";
   const fields = getSetFields(measureCodes, isBodyweight);
@@ -110,24 +112,6 @@ function ActualSetSheet({
   const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const label = getSetLabel(profile, index);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog === null || dialog.open) {
-      return;
-    }
-    const opener = document.activeElement;
-    if (typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
-      dialog.setAttribute("open", "");
-    }
-    return () => {
-      if (opener instanceof HTMLElement && opener.isConnected) {
-        opener.focus();
-      }
-    };
-  }, []);
-
   function setError(field: string, message: string | null) {
     setErrors((current) => {
       if (message === null) {
@@ -149,29 +133,33 @@ function ActualSetSheet({
   const hasError = Object.keys(errors).length > 0;
 
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="actual-set-title"
+    <BottomSheet
+      label="Ce que tu as réellement fait"
       onClose={onCancel}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-hero border border-base-300 bg-base-100 p-4 text-base-content shadow-card backdrop:bg-neutral/60"
+      closeLabel={null}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col">
-          <h2 id="actual-set-title" className="text-display-sm">
+        <div className="flex flex-col gap-0.5">
+          <h2
+            id="actual-set-title"
+            className="font-sans text-overline uppercase not-italic text-accent"
+          >
             Ce que tu as réellement fait
           </h2>
-          <p className="font-semibold text-muted">{label}</p>
+          <p className="font-display text-[26px] font-extrabold uppercase italic leading-none">
+            {label}
+          </p>
         </div>
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-tap px-2 font-semibold text-secondary"
+          className="min-h-tap shrink-0 px-1 text-sm font-semibold text-secondary"
         >
           Annuler
         </button>
       </div>
 
-      <div className="mt-4 flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {fields.map((field) => {
           const title = fieldLabel(field, isCardio, profile);
           const hint = `${title} · prévu ${formatPlanned(field, planned[field])}`;
@@ -181,6 +169,7 @@ function ActualSetSheet({
                 key={field}
                 id={`actual-${field}`}
                 label={hint}
+                labelTone="muted"
                 value={values.duration_seconds}
                 max={SET_LIMITS.duration_seconds.max}
                 onChange={(value) => {
@@ -201,6 +190,7 @@ function ActualSetSheet({
               key={field}
               id={`actual-${field}`}
               label={hint}
+              labelTone="muted"
               value={values[field]}
               step={STEPPER[field].step}
               decimal={STEPPER[field].decimal}
@@ -220,7 +210,7 @@ function ActualSetSheet({
       </div>
 
       {emptyMessage !== null && (
-        <p role="alert" className="mt-3 flex gap-1 text-sm font-semibold">
+        <p role="alert" className="flex gap-1 text-sm font-semibold">
           <span aria-hidden="true" className="text-status-missed">
             ⚠
           </span>
@@ -232,11 +222,12 @@ function ActualSetSheet({
         type="button"
         onClick={confirm}
         disabled={hasError}
-        className="mt-5 flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+        className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
       >
+        <Icon src={checkIcon} className="size-[18px]" />
         Valider {isCardio ? "l'étape" : "la série"} {index + 1}
       </button>
-    </dialog>
+    </BottomSheet>
   );
 }
 
