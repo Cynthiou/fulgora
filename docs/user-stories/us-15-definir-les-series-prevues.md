@@ -87,19 +87,19 @@ Validation dans la route de l'US-23 :
 
 ## Tâches techniques
 
-- [ ] BDD : `planned_set` : `reps`, `weight_kg`, `duration_seconds`, `distance_meters`, `speed_kmh`, `resistance`, `incline_percent`, `calories`, `rest_after_seconds` ; `template_block_exercise.default_rest_seconds`
-- [ ] Backend : `exerciseRepository.readExerciseMeasureCodes(ids)` (avec `query`) : `SELECT em.exercise_id, m.code FROM exercise_measure em JOIN measure m ON m.id = em.measure_id WHERE em.exercise_id IN (?)`
-- [ ] Shared : `getSetFields(measureCodes)` : liste des champs à afficher, utilisée par le client et par le serveur
-- [ ] Shared : `getMeasureProfile(measureCodes)` : `weighted`, `bodyweight`, `duration`, `cardio`
-- [ ] Shared : `formatSetSummary(sets, profile)` (« 3 séries · 8 rép. · 10 kg lest », « 3 étapes »)
-- [ ] Shared : `formatDuration(seconds)` (« 1 min 30 », « 45 s ») et `parseMinSec("1:30")`
-- [ ] Shared : bornes de `PlannedSetValues` dans `sessionDraftSchema` (charge : multiple de 0,25)
-- [ ] Frontend : `components/SetConfigurator.tsx` choisit `RepsWeightFields`, `BodyweightFields` (lest), `DurationFields`, `CardioStepFields` selon le profil
-- [ ] Frontend : `components/NumberField.tsx` (`inputMode="decimal"` ou `numeric`, message d'erreur lié par `aria-describedby`)
-- [ ] Frontend : `components/RestInput.tsx` (minutes + secondes)
-- [ ] Tests : unitaires : `getSetFields` et `getMeasureProfile` pour chaque profil ; `formatSetSummary` ; `parseMinSec`
+- [x] BDD : `planned_set` : `reps`, `weight_kg`, `duration_seconds`, `distance_meters`, `speed_kmh`, `resistance`, `incline_percent`, `calories`, `rest_after_seconds` ; `template_block_exercise.default_rest_seconds`
+- [x] Backend : `exerciseRepository.readExerciseMeasureCodes(ids)` (avec `query`) : `SELECT em.exercise_id, m.code FROM exercise_measure em JOIN measure m ON m.id = em.measure_id WHERE em.exercise_id IN (?)`
+- [x] Shared : `getSetFields(measureCodes)` : liste des champs à afficher, utilisée par le client et par le serveur
+- [x] Shared : `getMeasureProfile(measureCodes)` : `weighted`, `bodyweight`, `duration`, `cardio`
+- [x] Shared : `formatSetSummary(sets, profile)` (« 3 séries · 8 rép. · 10 kg lest », « 3 étapes »)
+- [x] Shared : `formatDuration(seconds)` (« 1 min 30 », « 45 s ») et `parseMinSec("1:30")`
+- [x] Shared : bornes de `PlannedSetValues` dans `sessionDraftSchema` (charge : multiple de 0,25)
+- [x] Frontend : `components/SetConfigurator.tsx` choisit `RepsWeightFields`, `BodyweightFields` (lest), `DurationFields`, `CardioStepFields` selon le profil
+- [x] Frontend : `components/NumberField.tsx` (`inputMode="decimal"` ou `numeric`, message d'erreur lié par `aria-describedby`)
+- [x] Frontend : `components/RestInput.tsx` (minutes + secondes)
+- [x] Tests : unitaires : `getSetFields` et `getMeasureProfile` pour chaque profil ; `formatSetSummary` ; `parseMinSec`
 - [ ] Tests : back (dans US-23) : durée sur un exercice à répétitions → 422 ; valeur négative → 400 ; charge 40,3 → 400
-- [ ] Tests : E2E : configurer un exercice de chaque profil ; axe sur A7a à A7d
+- [x] Tests : E2E : configurer un exercice de chaque profil ; axe sur A7a à A7d
 
 ## Definition of Done
 
