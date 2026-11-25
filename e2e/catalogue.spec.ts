@@ -1,6 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { signUp } from "./helpers";
+
+// The cards of the exercise list (not the links of the tab bar).
+function exerciseCards(page: Page) {
+  return page.getByRole("list", { name: "Exercices" }).getByRole("link");
+}
 
 // The test database holds the shared catalog (seeded by the server tests).
 test("the catalog loads 20 by 20 down to the last exercise", async ({
@@ -15,11 +20,7 @@ test("the catalog loads 20 by 20 down to the last exercise", async ({
   const total = Number((await counter.textContent())?.split(" ")[0]);
   expect(total).toBeGreaterThan(20);
 
-  const cards = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("link") })
-    .last()
-    .getByRole("link");
+  const cards = exerciseCards(page);
   await expect(cards).toHaveCount(20);
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
@@ -69,12 +70,7 @@ test("search and filters live in the address and survive a detour", async ({
   ).toBeVisible();
 
   // Detour through a card (the detail page arrives with US-09), then back
-  const firstCard = page
-    .getByRole("list")
-    .filter({ has: page.getByRole("link") })
-    .last()
-    .getByRole("link")
-    .first();
+  const firstCard = exerciseCards(page).first();
   const firstName = await firstCard.locator("span.truncate").textContent();
   await firstCard.click();
   await page.goBack();
@@ -83,7 +79,9 @@ test("search and filters live in the address and survive a detour", async ({
   expect(page.url()).toContain("category_ids=");
   await expect(page.getByRole("searchbox")).toHaveValue("squat");
   await expect(page.getByText(/pour « squat » · Jambes/)).toBeVisible();
-  await expect(page.getByText(firstName ?? "")).toBeVisible();
+  await expect(exerciseCards(page).first().locator("span.truncate")).toHaveText(
+    firstName ?? "",
+  );
 
   // No result
   await page.getByRole("searchbox").fill("squaat");

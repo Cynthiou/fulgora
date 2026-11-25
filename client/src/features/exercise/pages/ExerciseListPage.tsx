@@ -385,7 +385,7 @@ function ExerciseListPage() {
             </EmptyState>
           )}
 
-          <ul className="flex flex-col gap-2">
+          <ul aria-label="Exercices" className="flex flex-col gap-2">
             {items.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}
