@@ -25,6 +25,10 @@ export type AppointmentRow = {
 
 // The appointments of a user planned between two dates (both included), with
 // the session name, the program and the realized session when it exists.
+// A session done inside the period comes along even when it was planned
+// outside: the Planning shows it on the day it was really done (RM-070).
+// The realized day is compared in UTC with one day of margin on each side,
+// then the client decides the exact day in the user's time zone.
 // Sorted by date, then time, the ones without a time last (RM-066).
 export async function readAppointmentsBetween(
   userId: number,
@@ -43,9 +47,12 @@ export async function readAppointmentsBetween(
        JOIN session_template st ON st.id = sv.session_template_id
        LEFT JOIN program p ON p.id = a.program_id
        LEFT JOIN workout_session ws ON ws.appointment_id = a.id
-      WHERE a.owner_user_id = ? AND a.planned_date BETWEEN ? AND ?
+      WHERE a.owner_user_id = ?
+        AND (a.planned_date BETWEEN ? AND ?
+             OR DATE(ws.started_at) BETWEEN DATE_SUB(?, INTERVAL 1 DAY)
+                                        AND DATE_ADD(?, INTERVAL 1 DAY))
       ORDER BY a.planned_date, a.planned_time IS NULL, a.planned_time, a.id`,
-    [userId, from, to],
+    [userId, from, to, from, to],
   );
   return rows as AppointmentRow[];
 }

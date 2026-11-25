@@ -1,7 +1,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
-import client from "../../../src/database/client.js";
+import client, { type Result } from "../../../src/database/client.js";
 import {
   createTestAppointment,
   createTestUser,
@@ -60,6 +60,32 @@ function browse(query: string, cookie: string) {
 }
 
 describe("GET /api/appointments", () => {
+  // RM-070: the Planning shows a session on the day it was really done,
+  // even when that day is outside the period it was planned for.
+  it("brings along a session done inside the period but planned outside", async () => {
+    const { appointmentId } = await createTestAppointment(lea, {
+      name: "Faite en avance",
+      date: "2027-03-19",
+      time: "07:00:00",
+      blocks: [1],
+    });
+    const [workout] = await client.execute<Result>(
+      `INSERT INTO workout_session (appointment_id, owner_user_id, status, started_at, ended_at, last_activity_at)
+       VALUES (?, ?, 'completed', '2027-03-17 17:30:00.000',
+               '2027-03-17 18:20:00.000', '2027-03-17 18:20:00.000')`,
+      [appointmentId, lea.id],
+    );
+    expect(workout.insertId).toBeGreaterThan(0);
+
+    const response = await browse("from=2027-03-14&to=2027-03-18", lea.cookie);
+
+    expect(response.status).toBe(200);
+    const names = response.body.map(
+      (item: { session_name: string }) => item.session_name,
+    );
+    expect(names).toContain("Faite en avance");
+  });
+
   it("lists the user's sessions of the day, by time, without a time last", async () => {
     const response = await browse("from=2026-11-26&to=2026-11-26", lea.cookie);
 
