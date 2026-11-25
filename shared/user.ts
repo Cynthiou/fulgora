@@ -78,3 +78,14 @@ export const loginSchema = z.object({
 });
 
 export type LoginPayload = z.input<typeof loginSchema>;
+
+// The two letters of the avatar: "lucas_m" -> "LM", "lea.martin" -> "LM",
+// "lea" -> "LE". Parts are split on ".", "_" and "-".
+export function getInitials(username: string): string {
+  const parts = username.split(/[._-]+/).filter((part) => part !== "");
+  const letters =
+    parts.length >= 2
+      ? `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`
+      : (parts[0] ?? username).slice(0, 2);
+  return letters.toUpperCase();
+}

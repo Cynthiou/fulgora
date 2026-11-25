@@ -4,3 +4,4 @@ export * from "./dates.js";
 export * from "./status.js";
 export * from "./user.js";
 export * from "./validation.js";
+export type * from "./workout-session.js";

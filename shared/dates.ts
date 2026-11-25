@@ -21,3 +21,16 @@ export function todayIn(timeZone: string, now: Date = new Date()): string {
 export function todayInParis(now: Date = new Date()): string {
   return todayIn(DEFAULT_TIMEZONE, now);
 }
+
+// "18:34" for a moment in time, seen from a time zone.
+export function formatTimeOfDay(
+  moment: Date | string,
+  timeZone: string = DEFAULT_TIMEZONE,
+): string {
+  const date = typeof moment === "string" ? new Date(moment) : moment;
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { todayIn, todayInParis } from "./dates.js";
+import { formatTimeOfDay, todayIn, todayInParis } from "./dates.js";
 
 describe("todayIn", () => {
   it("gives the calendar day of the time zone, not of UTC", () => {
@@ -25,5 +25,22 @@ describe("todayIn", () => {
 describe("todayInParis", () => {
   it("uses Europe/Paris", () => {
     expect(todayInParis(new Date("2026-07-31T22:30:00Z"))).toBe("2026-08-01");
+  });
+});
+
+describe("formatTimeOfDay", () => {
+  it("shows hours and minutes in the Paris time zone by default", () => {
+    // 17:34 UTC in November is 18:34 in Paris.
+    expect(formatTimeOfDay("2026-11-25T17:34:00.000Z")).toBe("18:34");
+  });
+
+  it("accepts a Date and another time zone", () => {
+    const moment = new Date("2026-11-25T17:34:00.000Z");
+
+    expect(formatTimeOfDay(moment, "UTC")).toBe("17:34");
+  });
+
+  it("pads the hour on two digits", () => {
+    expect(formatTimeOfDay("2026-11-25T06:05:00.000Z", "UTC")).toBe("06:05");
   });
 });

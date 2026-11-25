@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   EMAIL_MESSAGE,
+  getInitials,
   PASSWORD_MESSAGE,
   REQUIRED_MESSAGE,
   signupSchema,
@@ -23,6 +24,19 @@ function messageFor(input: unknown, field: string): string | undefined {
   }
   return result.error.issues.find((issue) => issue.path[0] === field)?.message;
 }
+
+describe("getInitials", () => {
+  it("takes the first letter of the first two parts", () => {
+    expect(getInitials("lucas_m")).toBe("LM");
+    expect(getInitials("lea.martin")).toBe("LM");
+    expect(getInitials("jean-paul.d")).toBe("JP");
+  });
+
+  it("takes the first two letters of a single word", () => {
+    expect(getInitials("lea")).toBe("LE");
+    expect(getInitials("x")).toBe("X");
+  });
+});
 
 describe("signupSchema", () => {
   it("accepts a complete form and drops unknown fields", () => {
