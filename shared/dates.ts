@@ -91,6 +91,18 @@ export function formatMonthTitle(yearMonth: string): string {
 // Monday-first weekday initials for the header of a calendar grid.
 export const WEEKDAY_INITIALS = ["L", "M", "M", "J", "V", "S", "D"];
 
+// The same days written in full: the initials repeat (M, M), the names do
+// not, so they name the columns and key the cells of the grid.
+export const WEEKDAY_NAMES = [
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+  "dimanche",
+];
+
 // The weeks of a month, Monday first, as "YYYY-MM-DD" cells; null fills the
 // days that belong to the previous or the next month.
 export function listMonthGrid(yearMonth: string): (string | null)[][] {
@@ -116,6 +128,21 @@ export function listMonthGrid(yearMonth: string): (string | null)[][] {
     weeks.push(cells.slice(start, start + 7));
   }
   return weeks;
+}
+
+// One cell of the month grid: a day, or an empty box before the first day
+// and after the last one. Every cell carries its own key, so the grid never
+// keys a cell by its position in the list.
+export type MonthSlot = { key: string; day: string | null };
+
+export function listMonthWeeks(yearMonth: string): MonthSlot[][] {
+  return listMonthGrid(yearMonth).map((week, weekIndex) =>
+    week.map((day, dayIndex) => ({
+      key:
+        day ?? `${yearMonth}-semaine-${weekIndex}-${WEEKDAY_NAMES[dayIndex]}`,
+      day,
+    })),
+  );
 }
 
 // "2026-11-19" -> "19 novembre" (inside a sentence, "prévue le 19 novembre").

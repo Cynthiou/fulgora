@@ -153,7 +153,11 @@ describe("buildMonthCell", () => {
       appointment(4, "2026-11-26"),
     ];
     expect(buildMonthCell(items, "2026-11-26")).toEqual({
-      statuses: ["planned", "planned", "planned"],
+      indicators: [
+        { appointment_id: 1, status: "planned" },
+        { appointment_id: 2, status: "planned" },
+        { appointment_id: 3, status: "planned" },
+      ],
       extra: 1,
       hasMoved: false,
     });
@@ -168,7 +172,7 @@ describe("buildMonthCell", () => {
       }),
     ];
     expect(buildMonthCell(items, "2026-11-24")).toEqual({
-      statuses: ["to_confirm"],
+      indicators: [{ appointment_id: 1, status: "to_confirm" }],
       extra: 0,
       hasMoved: true,
     });
@@ -176,7 +180,7 @@ describe("buildMonthCell", () => {
 
   it("leaves the reminder out of the cell", () => {
     expect(buildMonthCell([doneOn17(1, "2026-11-19")], "2026-11-19")).toEqual({
-      statuses: [],
+      indicators: [],
       extra: 0,
       hasMoved: false,
     });

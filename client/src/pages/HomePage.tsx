@@ -4,6 +4,7 @@ import {
   addDays,
   formatLongDate,
   formatTodayCount,
+  getAppointmentDisplayDate,
   sortDayAppointments,
   todayInParis,
 } from "shared";
@@ -45,8 +46,11 @@ function HomePage() {
   const isLoading = appointments.isLoading || current.isLoading;
   const hasFailed = appointments.error !== null || current.error !== null;
 
+  // A session done another day belongs to that day, not to today (RM-070).
   const todayItems = sortDayAppointments(
-    appointments.items.filter((item) => item.planned_date === today),
+    appointments.items.filter(
+      (item) => getAppointmentDisplayDate(item) === today,
+    ),
   );
   const hasAnySession = appointments.items.length > 0;
 

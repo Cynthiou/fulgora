@@ -171,7 +171,7 @@ describe("HomePage", () => {
       id: 9,
       appointment_id: 1,
       session_name: "Jambes",
-      started_at: "2026-11-26T06:04:00.000Z",
+      started_at: `${today}T06:04:00.000Z`,
       validated_sets: 6,
       planned_sets: 11,
     };

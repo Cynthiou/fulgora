@@ -144,7 +144,20 @@ test("captures the screens of the MVP", async ({ page }) => {
   await shoot(page, "03-accueil-avec-seance");
   await page.getByRole("link", { name: "Planning", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Planning");
-  await shoot(page, "planning");
+  await shoot(page, "cal-01-planning-mois");
+  await page.getByRole("button", { name: "Ajouter une séance" }).click();
+  await expect(page.getByRole("link", { name: /^Séance libre/ })).toBeVisible();
+  await shoot(page, "cal-01b-bouton-ouvert");
+  await page
+    .getByRole("button", { name: "Fermer le menu d'ajout" })
+    .first()
+    .click();
+  await page.getByRole("tab", { name: "Semaine" }).click();
+  await expect(page.getByText("LUN", { exact: true })).toBeVisible();
+  await shoot(page, "cal-02-planning-semaine");
+  await page.getByRole("tab", { name: "Jour" }).click();
+  await expect(page.getByText("Aujourd'hui", { exact: true })).toBeVisible();
+  await shoot(page, "cal-03-planning-jour");
 
   // Suivi vide, Profil
   await page.getByRole("link", { name: "Suivi", exact: true }).click();

@@ -86,9 +86,12 @@ export function formatDayCount(entries: DayEntry[]): string {
   return plural(sessions.length, "séance");
 }
 
+// One square of a day cell: which session it stands for, and its status.
+export type DayIndicator = { appointment_id: number; status: StatusCode };
+
 export type MonthCell = {
   // Three indicators at most, in the order of the day
-  statuses: StatusCode[];
+  indicators: DayIndicator[];
   // How many more the cell could not show ("+1")
   extra: number;
   // At least one session was moved by hand (RM-032)
@@ -107,9 +110,10 @@ export function buildMonthCell(
     (entry) => !entry.isReminder,
   );
   return {
-    statuses: sessions
-      .slice(0, MAX_DAY_INDICATORS)
-      .map((entry) => getAppointmentStatus(entry.item)),
+    indicators: sessions.slice(0, MAX_DAY_INDICATORS).map((entry) => ({
+      appointment_id: entry.item.id,
+      status: getAppointmentStatus(entry.item),
+    })),
     extra: Math.max(0, sessions.length - MAX_DAY_INDICATORS),
     hasMoved: sessions.some((entry) => entry.item.moved_manually),
   };

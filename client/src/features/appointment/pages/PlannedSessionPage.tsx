@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
-  type CurrentWorkoutSession,
   formatLongDate,
   formatSessionContent,
   getAppointmentStatus,
@@ -13,12 +12,8 @@ import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import StatusBadge from "../../../components/StatusBadge";
-import { ApiError } from "../../../services/apiError";
 import AlreadyInProgressDialog from "../../workout-session/components/AlreadyInProgressDialog";
-import {
-  readCurrentWorkoutSession,
-  startWorkoutSession,
-} from "../../workout-session/services/workoutSessionService";
+import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
 import SessionActionsSheet from "../components/SessionActionsSheet";
 import { useAppointment } from "../hooks/useAppointment";
 
@@ -34,18 +29,11 @@ function PlannedSessionPage() {
   const location = useLocation();
   const { appointment, isLoading, notFound, error, reload } =
     useAppointment(id);
-  const [isStarting, setIsStarting] = useState(false);
-  const [startError, setStartError] = useState<string | null>(null);
-  const [inProgress, setInProgress] = useState<CurrentWorkoutSession | null>(
-    null,
-  );
+  const workoutStart = useStartWorkout();
   // The "⋯" menu of the header (CAL-04m)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // "Séance modifiée.", handed over by the editor
   const flash = (location.state as { flash?: string } | null)?.flash ?? null;
-  // Read at the very instant of a second tap: one start, never two.
-  const inFlight = useRef(false);
-
   function goBack() {
     if (location.key === "default") {
       navigate("/");
@@ -54,41 +42,8 @@ function PlannedSessionPage() {
     }
   }
 
-  async function start() {
-    if (inFlight.current) {
-      return;
-    }
-    inFlight.current = true;
-    setIsStarting(true);
-    setStartError(null);
-    try {
-      const started = await startWorkoutSession(id);
-      navigate(`/entrainement/${started.id}`, { replace: true });
-    } catch (caught) {
-      // The true state first: the session may have started anyway, or
-      // another one may be running (RM-040).
-      const current = await readCurrentWorkoutSession().catch(() => null);
-      if (current !== null && current.appointment_id === id) {
-        navigate(`/entrainement/${current.id}`, { replace: true });
-        return;
-      }
-      if (
-        caught instanceof ApiError &&
-        caught.code === "WORKOUT_ALREADY_IN_PROGRESS" &&
-        current !== null
-      ) {
-        setInProgress(current);
-      } else {
-        setStartError(
-          caught instanceof ApiError && caught.status === 422
-            ? caught.message
-            : "Impossible de démarrer la séance.",
-        );
-      }
-    } finally {
-      inFlight.current = false;
-      setIsStarting(false);
-    }
+  function start() {
+    workoutStart.start(id);
   }
 
   const exerciseCount =
@@ -238,8 +193,8 @@ function PlannedSessionPage() {
               )}
             </section>
 
-            {startError !== null && (
-              <ErrorState title={startError} onRetry={start} />
+            {workoutStart.error !== null && (
+              <ErrorState title={workoutStart.error} onRetry={start} />
             )}
           </>
         )}
@@ -280,10 +235,10 @@ function PlannedSessionPage() {
               <button
                 type="button"
                 onClick={start}
-                disabled={isStarting}
+                disabled={workoutStart.isStarting}
                 className={PRIMARY_BUTTON}
               >
-                {isStarting ? (
+                {workoutStart.isStarting ? (
                   "Démarrage…"
                 ) : (
                   <>
@@ -308,10 +263,10 @@ function PlannedSessionPage() {
         />
       )}
 
-      {inProgress !== null && (
+      {workoutStart.inProgress !== null && (
         <AlreadyInProgressDialog
-          current={inProgress}
-          onClose={() => setInProgress(null)}
+          current={workoutStart.inProgress}
+          onClose={workoutStart.closeInProgress}
         />
       )}
     </div>
