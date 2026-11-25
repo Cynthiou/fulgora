@@ -15,7 +15,11 @@ test("the catalog loads 20 by 20 down to the last exercise", async ({
   const total = Number((await counter.textContent())?.split(" ")[0]);
   expect(total).toBeGreaterThan(20);
 
-  const cards = page.getByRole("list").first().getByRole("link");
+  const cards = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("link") })
+    .last()
+    .getByRole("link");
   await expect(cards).toHaveCount(20);
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
@@ -35,4 +39,58 @@ test("the catalog loads 20 by 20 down to the last exercise", async ({
   await expect(page.getByRole("button", { name: "Charger plus" })).toHaveCount(
     0,
   );
+});
+
+test("search and filters live in the address and survive a detour", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.goto("/catalogue");
+  await expect(page.getByText(/^\d+ exercices$/)).toBeVisible();
+
+  // Search: the counter and the bold term
+  await page.getByRole("searchbox").fill("squat");
+  await expect(page.getByText(/résultats? pour « squat »/)).toBeVisible();
+  expect(page.url()).toContain("search=squat");
+  await expect(
+    page.locator("strong", { hasText: /squat/i }).first(),
+  ).toBeVisible();
+
+  // Filter: open the group grid and pick "Jambes"
+  await page.getByRole("button", { name: /^Groupe/ }).click();
+  await expect(page.getByRole("group", { name: "Groupe" })).toBeVisible();
+  const grid = await new AxeBuilder({ page }).analyze();
+  expect(grid.violations).toEqual([]);
+  await page.getByRole("button", { name: /Jambes/ }).click();
+  await expect(page.getByText(/pour « squat » · Jambes/)).toBeVisible();
+  expect(page.url()).toContain("category_ids=");
+  await expect(
+    page.getByRole("button", { name: "Retirer le filtre Jambes" }),
+  ).toBeVisible();
+
+  // Detour through a card (the detail page arrives with US-09), then back
+  const firstCard = page
+    .getByRole("list")
+    .filter({ has: page.getByRole("link") })
+    .last()
+    .getByRole("link")
+    .first();
+  const firstName = await firstCard.locator("span.truncate").textContent();
+  await firstCard.click();
+  await page.goBack();
+
+  expect(page.url()).toContain("search=squat");
+  expect(page.url()).toContain("category_ids=");
+  await expect(page.getByRole("searchbox")).toHaveValue("squat");
+  await expect(page.getByText(/pour « squat » · Jambes/)).toBeVisible();
+  await expect(page.getByText(firstName ?? "")).toBeVisible();
+
+  // No result
+  await page.getByRole("searchbox").fill("squaat");
+  await expect(
+    page.getByText("Aucun exercice trouvé pour « squaat »"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Réinitialiser les filtres" }).click();
+  await page.getByRole("button", { name: "Effacer la recherche" }).click();
+  await expect(page.getByText(/^\d+ exercices$/)).toBeVisible();
 });
