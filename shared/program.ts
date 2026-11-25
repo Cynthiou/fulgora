@@ -214,3 +214,9 @@ export type ProgramCreated = {
   last_date: string | null;
   status: ProgramStatus;
 };
+
+// The address of a program day: /api/programs/:id/sessions/:weekday
+export const programDayParamsSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  weekday: z.coerce.number().int().min(1).max(7),
+});

@@ -2,11 +2,11 @@ import type { RequestHandler } from "express";
 import {
   type AppointmentStatus,
   createEmptySet,
-  type DraftBlock,
   type DraftExercise,
   type EditableSession,
   type MeasureCode,
   type PlannedSetValues,
+  type SessionDraft,
   type SessionEdited,
   type SessionEditInput,
   toHourMinute,
@@ -107,6 +107,44 @@ function toDraftExercise(
   };
 }
 
+// One session version turned back into a draft for the editor: blocks,
+// exercises and sets, with the keys the list of changes matches on.
+// Shared by the appointment (US-17) and the program day (US-18).
+export async function buildSessionDraft(
+  versionId: number,
+  name: string,
+  plannedDate: string,
+  plannedTime: string | null,
+): Promise<SessionDraft> {
+  const [blocks, exercises, sets] = await Promise.all([
+    readVersionBlocks(versionId),
+    readVersionExercises(versionId),
+    readVersionSets(versionId),
+  ]);
+
+  return {
+    name,
+    planned_date: plannedDate,
+    planned_time: plannedTime,
+    blocks: blocks.map((block) => ({
+      key: `bloc-${block.id}`,
+      block_type: block.block_type,
+      name: block.name,
+      instructions: block.instructions,
+      exercises: exercises
+        .filter((exercise) => exercise.template_block_id === block.id)
+        .map((exercise) =>
+          toDraftExercise(
+            exercise,
+            sets.filter(
+              (set) => set.template_block_exercise_id === exercise.id,
+            ),
+          ),
+        ),
+    })),
+  };
+}
+
 // GET /api/appointments/:id/session: the current version turned back into a
 // draft, so the editor opens on exactly what is planned.
 export const readSession: RequestHandler = async (req, res) => {
@@ -125,40 +163,18 @@ export const readSession: RequestHandler = async (req, res) => {
     throw notEditable();
   }
 
-  const versionId = appointment.session_version_id;
-  const [blocks, exercises, sets] = await Promise.all([
-    readVersionBlocks(versionId),
-    readVersionExercises(versionId),
-    readVersionSets(versionId),
-  ]);
-
-  const draftBlocks: DraftBlock[] = blocks.map((block) => ({
-    key: `bloc-${block.id}`,
-    block_type: block.block_type,
-    name: block.name,
-    instructions: block.instructions,
-    exercises: exercises
-      .filter((exercise) => exercise.template_block_id === block.id)
-      .map((exercise) =>
-        toDraftExercise(
-          exercise,
-          sets.filter((set) => set.template_block_exercise_id === exercise.id),
-        ),
-      ),
-  }));
-
   const editable: EditableSession = {
     appointment_id: appointment.id,
-    session_version_id: versionId,
+    session_version_id: appointment.session_version_id,
     program_name: appointment.program_name,
     // The scope screen (CAL-06) arrives with the programs (US-18).
     can_apply_to_following: false,
-    session: {
-      name: appointment.session_name,
-      planned_date: appointment.planned_date,
-      planned_time: toHourMinute(appointment.planned_time),
-      blocks: draftBlocks,
-    },
+    session: await buildSessionDraft(
+      appointment.session_version_id,
+      appointment.session_name,
+      appointment.planned_date,
+      toHourMinute(appointment.planned_time),
+    ),
   };
   res.json(editable);
 };

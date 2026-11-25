@@ -8,6 +8,7 @@ import {
   type ProgramDetail,
   type ProgramInfoInput,
   type ProgramSessionSummary,
+  type SessionEditInput,
   statusAfterCreation,
   todayInParis,
   toHourMinute,
@@ -15,9 +16,16 @@ import {
 import { withTransaction } from "../../database/withTransaction.js";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
+import { buildSessionDraft } from "../appointment/sessionEditActions.js";
+import {
+  assertSessionContentValid,
+  writeSessionTree,
+} from "../session-template/sessionContent.js";
 import {
   createSessionTemplate,
   createSessionVersion,
+  readNextVersionNumber,
+  updateSessionTemplateName,
 } from "../session-template/sessionTemplateRepository.js";
 import {
   createProgram,
@@ -290,4 +298,88 @@ export const removeDraft: RequestHandler = async (req, res) => {
     await deleteDraftProgram(id, userId, connection);
   });
   res.status(204).end();
+};
+
+// --- The session of one day of the program (US-18, step 2) ------------------
+
+// Finds the day in the typical week, or answers 404.
+async function readSchedule(
+  programId: number,
+  weekday: number,
+  userId: number,
+): Promise<{
+  program: Awaited<ReturnType<typeof readProgram>>;
+  schedule: ScheduleRow;
+}> {
+  const program = await readProgram(programId, userId);
+  if (program === null) {
+    throw notFound();
+  }
+  const schedules = await readProgramSchedules(programId);
+  const schedule = schedules.find((row) => row.weekday === weekday);
+  if (schedule === undefined) {
+    throw new HttpError(
+      404,
+      "PROGRAM_DAY_NOT_FOUND",
+      "Ce jour ne fait pas partie du programme.",
+    );
+  }
+  return { program, schedule };
+}
+
+// GET /api/programs/:id/sessions/:weekday: the session of that day, as a
+// draft for the editor.
+export const readDaySession: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id, weekday } = req.params as unknown as {
+    id: number;
+    weekday: number;
+  };
+  const { program, schedule } = await readSchedule(id, weekday, userId);
+
+  res.json({
+    program_id: id,
+    program_name: program?.name ?? "",
+    weekday,
+    session: await buildSessionDraft(
+      schedule.session_version_id,
+      schedule.name,
+      program?.start_date ?? "",
+      toHourMinute(schedule.planned_time),
+    ),
+  });
+};
+
+// PUT /api/programs/:id/sessions/:weekday: what was built in the editor
+// becomes the next version of that day's session (RM-017).
+export const writeDaySession: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id, weekday } = req.params as unknown as {
+    id: number;
+    weekday: number;
+  };
+  const { session } = req.body as SessionEditInput;
+  const { schedule } = await readSchedule(id, weekday, userId);
+
+  const versionId = await withTransaction(async (connection) => {
+    await assertSessionContentValid(session.blocks, userId, connection);
+    const versionNumber = await readNextVersionNumber(
+      schedule.session_template_id,
+      connection,
+    );
+    const created = await createSessionVersion(
+      schedule.session_template_id,
+      versionNumber,
+      connection,
+    );
+    await writeSessionTree(created, session.blocks, connection);
+    await updateSessionTemplateName(
+      schedule.session_template_id,
+      session.name,
+      connection,
+    );
+    return created;
+  });
+
+  res.json({ version_id: versionId });
 };

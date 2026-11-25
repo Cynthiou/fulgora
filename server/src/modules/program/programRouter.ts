@@ -1,5 +1,10 @@
 import express from "express";
-import { idParamSchema, programInfoSchema } from "shared";
+import {
+  idParamSchema,
+  programDayParamsSchema,
+  programInfoSchema,
+  sessionEditSchema,
+} from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
 import {
@@ -7,8 +12,10 @@ import {
   browse,
   createDraft,
   read,
+  readDaySession,
   removeDraft,
   updateDraft,
+  writeDaySession,
 } from "./programActions.js";
 
 const programRouter = express.Router();
@@ -54,6 +61,23 @@ programRouter.delete(
   authenticate,
   validate({ params: idParamSchema }),
   removeDraft,
+);
+
+// GET /api/programs/:id/sessions/:weekday: the session of one day of the
+// typical week, as a draft for the editor (US-18, step 2).
+programRouter.get(
+  "/:id/sessions/:weekday",
+  authenticate,
+  validate({ params: programDayParamsSchema }),
+  readDaySession,
+);
+
+// PUT /api/programs/:id/sessions/:weekday: what the editor built.
+programRouter.put(
+  "/:id/sessions/:weekday",
+  authenticate,
+  validate({ params: programDayParamsSchema, body: sessionEditSchema }),
+  writeDaySession,
 );
 
 export default programRouter;

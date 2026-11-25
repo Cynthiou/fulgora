@@ -250,3 +250,84 @@ describe("GET et DELETE /api/programs", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("les séances d'un jour du programme", () => {
+  it("gives the session of a day as a draft, and saves a new version", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    const programId = draft.body.id;
+
+    const read = await request(app)
+      .get(`/api/programs/${programId}/sessions/4`)
+      .set("Cookie", lea.cookie);
+
+    expect(read.status).toBe(200);
+    expect(read.body.session).toMatchObject({
+      name: "Séance du jeudi",
+      blocks: [],
+    });
+
+    const session = {
+      ...read.body.session,
+      name: "Haut du corps",
+      blocks: [
+        {
+          key: "b1",
+          block_type: "classic",
+          name: null,
+          instructions: null,
+          exercises: [
+            {
+              key: "e1",
+              exercise_id: exerciseId,
+              name: "Squat",
+              measure_codes: [],
+              default_rest_seconds: 90,
+              sets: [
+                {
+                  reps: null,
+                  weight_kg: null,
+                  duration_seconds: null,
+                  distance_meters: null,
+                  speed_kmh: null,
+                  resistance: null,
+                  incline_percent: null,
+                  calories: null,
+                  rest_after_seconds: null,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const written = await request(app)
+      .put(`/api/programs/${programId}/sessions/4`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie)
+      .send({ scope: "this", session });
+
+    expect(written.status).toBe(200);
+
+    const after = await request(app)
+      .get(`/api/programs/${programId}`)
+      .set("Cookie", lea.cookie);
+    const thursday = after.body.sessions.find(
+      (item: { weekday: number }) => item.weekday === 4,
+    );
+    expect(thursday).toMatchObject({
+      name: "Haut du corps",
+      exercise_count: 1,
+    });
+  });
+
+  it("answers 404 for a day outside the week", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+
+    const response = await request(app)
+      .get(`/api/programs/${draft.body.id}/sessions/7`)
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(404);
+  });
+});
