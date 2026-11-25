@@ -2,7 +2,7 @@ import express from "express";
 import { idParamSchema, startWorkoutSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { read, readCurrent, start } from "./workoutSessionActions.js";
+import { abandon, read, readCurrent, start } from "./workoutSessionActions.js";
 
 const workoutSessionRouter = express.Router();
 
@@ -23,6 +23,14 @@ workoutSessionRouter.get(
   authenticate,
   validate({ params: idParamSchema }),
   read,
+);
+
+// POST /api/workout-sessions/:id/abandon: stop before the end (US-33)
+workoutSessionRouter.post(
+  "/:id/abandon",
+  authenticate,
+  validate({ params: idParamSchema }),
+  abandon,
 );
 
 export default workoutSessionRouter;

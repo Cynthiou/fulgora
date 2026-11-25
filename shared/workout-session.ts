@@ -110,6 +110,8 @@ export type WorkoutSessionTree = {
   status: WorkoutStatus;
   started_at: string;
   ended_at: string | null;
+  // True when the server closed it after 4 hours without activity (RM-065)
+  auto_closed: boolean;
   blocks: WorkoutBlockTree[];
 };
 

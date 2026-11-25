@@ -44,6 +44,7 @@ const tree: WorkoutSessionTree = {
   status: "in_progress",
   started_at: "2026-11-26T07:00:00.000Z",
   ended_at: null,
+  auto_closed: false,
   blocks: [
     {
       id: 1,

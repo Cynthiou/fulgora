@@ -128,6 +128,8 @@ export type WorkoutSessionRow = {
   status: WorkoutStatus;
   started_at: Date;
   ended_at: Date | null;
+  // 0 or 1 in MySQL
+  auto_closed: number;
   session_name: string;
   program_name: string | null;
 };
@@ -140,7 +142,7 @@ export async function readWorkoutSession(
 ): Promise<WorkoutSessionRow | null> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT ws.id, ws.appointment_id, ws.status, ws.started_at, ws.ended_at,
-            st.name AS session_name, p.name AS program_name
+            ws.auto_closed, st.name AS session_name, p.name AS program_name
        FROM workout_session ws
        JOIN appointment a ON a.id = ws.appointment_id
        JOIN session_version sv ON sv.id = a.session_version_id
@@ -329,4 +331,34 @@ export async function readWorkoutSet(
     [setId],
   );
   return (rows[0] as WorkoutSetDbRow | undefined) ?? null;
+}
+
+// "Abandonner": over for good, partial results kept (RM-045). The condition
+// on the status makes the update harmless when the session is already over;
+// the action reads the number of changed rows.
+export async function abandonWorkoutSession(
+  id: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE workout_session
+        SET status = 'unfinished', ended_at = NOW(3)
+      WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`,
+    [id, userId],
+  );
+  return result.affectedRows;
+}
+
+// Sessions left without any action for 4 hours are closed as unfinished,
+// ended at their last action and marked auto_closed (RM-065, DT-18).
+export async function closeInactiveWorkoutSessions(
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE workout_session
+        SET status = 'unfinished', ended_at = last_activity_at, auto_closed = TRUE
+      WHERE status = 'in_progress' AND last_activity_at < NOW(3) - INTERVAL 4 HOUR`,
+  );
+  return result.affectedRows;
 }
