@@ -13,6 +13,7 @@ import PageLayout from "./components/PageLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import PlanningPage from "./features/appointment/pages/PlanningPage";
+import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -47,10 +48,14 @@ const router = createBrowserRouter([
               { path: "/catalogue", element: <ExerciseListPage /> },
             ],
           },
-          // Opened from the avatar, without the tabs
+          // Full pages without the tabs: the profile (from the avatar) and
+          // the exercise detail (its own header and bottom button)
           {
             element: <PageLayout />,
-            children: [{ path: "/profil", element: <ProfilePage /> }],
+            children: [
+              { path: "/profil", element: <ProfilePage /> },
+              { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
+            ],
           },
         ],
       },

@@ -26,6 +26,8 @@ function ExerciseCard({ exercise, sex, searchTerm = "" }: Props) {
     <li>
       <Link
         to={`/catalogue/${exercise.id}`}
+        // The name travels along, so the detail header shows it while loading.
+        state={{ name: exercise.name }}
         className="flex min-h-24 items-center gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
       >
         {image === null ? (

@@ -1,4 +1,5 @@
 import type {
+  ExerciseDetail,
   ExerciseListResponse,
   ExerciseQuery,
   ReferenceItem,
@@ -45,4 +46,13 @@ export function readCategories(signal?: AbortSignal): Promise<ReferenceItem[]> {
 // GET /api/equipments: the equipment list, for the filter grid.
 export function readEquipments(signal?: AbortSignal): Promise<ReferenceItem[]> {
   return apiFetch<ReferenceItem[]>("/equipments", { signal });
+}
+
+// GET /api/exercises/:id: the whole detail of one exercise (404 when it does
+// not exist for this user).
+export function readExercise(
+  id: number,
+  signal?: AbortSignal,
+): Promise<ExerciseDetail> {
+  return apiFetch<ExerciseDetail>(`/exercises/${id}`, { signal });
 }
