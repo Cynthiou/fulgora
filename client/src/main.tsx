@@ -9,12 +9,17 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";
+import SignupPage from "./features/user/pages/SignupPage";
 import HomePage from "./pages/HomePage";
 
 const router = createBrowserRouter([
   {
     element: <App />,
-    children: [{ path: "/", element: <HomePage /> }],
+    children: [
+      { path: "/", element: <HomePage /> },
+      // Public pages
+      { path: "/inscription", element: <SignupPage /> },
+    ],
   },
 ]);
 
