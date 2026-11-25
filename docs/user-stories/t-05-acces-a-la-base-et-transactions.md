@@ -36,12 +36,12 @@ Créer une séance écrit dans 6 tables. Si la 4ᵉ écriture échoue, les 3 pre
 
 ## Tâches techniques
 
-- [ ] Backend : `database/client.ts` : exporter le type `Queryable`
-- [ ] Backend : créer `database/withTransaction.ts` (`getConnection`, `beginTransaction`, `commit`, `rollback`, `release` dans `finally`)
-- [ ] BDD : documenter dans `docs/` la création de l'utilisateur MySQL à droits limités (commande à lancer par Cynthia)
-- [ ] Tests : transaction réussie ; erreur au milieu → aucune ligne ; connexion rendue (le pool ne s'épuise pas après 20 échecs)
+- [x] Backend : `database/client.ts` : exporter le type `Queryable`
+- [x] Backend : créer `database/withTransaction.ts` (`getConnection`, `beginTransaction`, `commit`, `rollback`, `release` dans `finally`)
+- [x] BDD : documenter dans `docs/` la création de l'utilisateur MySQL à droits limités (commande à lancer par Cynthia)
+- [x] Tests : transaction réussie ; erreur au milieu → aucune ligne ; connexion rendue (le pool ne s'épuise pas après 20 échecs)
 
 ## Definition of Done
 
-- [ ] Tests verts
-- [ ] La notion de transaction est expliquée en commentaire en tête du fichier
+- [x] Tests verts
+- [x] La notion de transaction est expliquée en commentaire en tête du fichier
