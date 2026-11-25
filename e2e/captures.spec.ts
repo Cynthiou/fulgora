@@ -197,6 +197,13 @@ test("captures the screens of the MVP", async ({ page }) => {
   await page.getByRole("button", { name: "Quitter" }).click();
   await expect(page.getByText("Planifiée")).toBeVisible();
 
+  // CAL-07 : la confirmation d'annulation, puis retour (US-26)
+  await page.getByRole("button", { name: "Actions de la séance" }).click();
+  await page.getByRole("button", { name: /Annuler le rendez-vous/ }).click();
+  await expect(page.getByText(/^Annuler « /)).toBeVisible();
+  await shoot(page, "cal-07-annuler-une-seance");
+  await page.getByRole("button", { name: "Garder la séance" }).click();
+
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
   await expect(page.getByText("En cours · séance libre")).toBeVisible();
   await shoot(page, "b2-seance-en-cours");

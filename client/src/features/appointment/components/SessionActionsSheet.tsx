@@ -8,6 +8,9 @@ type Props = {
   // False once the session has been started, done or cancelled: its
   // preparation does not change anymore (RM-058).
   canEdit: boolean;
+  // False once it was started, done or already cancelled (RM-035)
+  canCancel: boolean;
+  onCancel: () => void;
   onClose: () => void;
 };
 
@@ -17,7 +20,13 @@ const ROW =
 // Screen CAL-04m: the "⋯" of a planned session. "Modifier la séance" opens
 // the editor (US-17); "Déplacer" (US-25) and "Annuler le rendez-vous"
 // (US-26) are shown as the wireframe does, not working yet.
-function SessionActionsSheet({ appointmentId, canEdit, onClose }: Props) {
+function SessionActionsSheet({
+  appointmentId,
+  canEdit,
+  canCancel,
+  onCancel,
+  onClose,
+}: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const navigate = useNavigate();
 
@@ -83,13 +92,21 @@ function SessionActionsSheet({ appointmentId, canEdit, onClose }: Props) {
         <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
       </button>
 
-      {/* Cancelling an appointment is US-26. */}
-      <button type="button" disabled className={`${ROW} opacity-60`}>
+      <button
+        type="button"
+        disabled={!canCancel}
+        onClick={onCancel}
+        className={`${ROW} disabled:opacity-60`}
+      >
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="font-display text-display-sm">
             Annuler le rendez-vous
           </span>
-          <span className="text-sm text-muted">Bientôt</span>
+          <span className="text-sm text-muted">
+            {canCancel
+              ? "La séance reste visible, annulée"
+              : "Cette séance a été commencée ou est déjà annulée"}
+          </span>
         </span>
       </button>
 

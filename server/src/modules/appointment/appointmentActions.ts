@@ -20,6 +20,7 @@ import {
 } from "../session-template/sessionTemplateRepository.js";
 import {
   type AppointmentRow,
+  cancelAppointment,
   countVersionContent,
   countWorkoutSetsBySession,
   createAppointment,
@@ -158,6 +159,8 @@ export const read: RequestHandler = async (req, res) => {
     planned_date: row.planned_date,
     planned_time: toHourMinute(row.planned_time),
     status: row.status,
+    cancelled_at:
+      row.cancelled_at === null ? null : row.cancelled_at.toISOString(),
     session_name: row.session_name,
     program_name: row.program_name,
     workout_session:
@@ -179,4 +182,33 @@ export const read: RequestHandler = async (req, res) => {
     })),
   };
   res.json(detail);
+};
+
+// PATCH /api/appointments/:id/cancel: the appointment is given up before it
+// starts (US-26, RM-035). It stays visible, as cancelled.
+export const cancel: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const done = await cancelAppointment(id, userId);
+  if (!done) {
+    // Nothing changed: either it is not his, or it cannot be cancelled.
+    const row = await readAppointment(id, userId);
+    if (row === null) {
+      throw new HttpError(
+        404,
+        "APPOINTMENT_NOT_FOUND",
+        "Cette séance n'existe pas.",
+      );
+    }
+    throw new HttpError(
+      409,
+      "APPOINTMENT_NOT_CANCELLABLE",
+      row.workout_session_id === null
+        ? "Cette séance est déjà annulée ou terminée."
+        : "Cette séance a été commencée : termine-la ou abandonne-la.",
+    );
+  }
+
+  res.json({ status: "cancelled" });
 };

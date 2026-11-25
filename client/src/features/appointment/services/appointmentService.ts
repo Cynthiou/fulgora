@@ -58,3 +58,11 @@ export function updateSession(
     body: JSON.stringify({ scope, session }),
   });
 }
+
+// PATCH /api/appointments/:id/cancel: give up a session before it starts
+// (US-26). It stays visible, as cancelled.
+export function cancelAppointment(id: number): Promise<{ status: string }> {
+  return apiFetch<{ status: string }>(`/appointments/${id}/cancel`, {
+    method: "PATCH",
+  });
+}

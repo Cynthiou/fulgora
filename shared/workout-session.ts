@@ -41,6 +41,8 @@ export type AppointmentDetail = {
   planned_date: string;
   planned_time: string | null;
   status: AppointmentStatus;
+  // When the appointment was cancelled, in ISO (RM-035); null otherwise
+  cancelled_at: string | null;
   session_name: string;
   program_name: string | null;
   // The realized session, when the appointment was started

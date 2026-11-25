@@ -1,7 +1,10 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
-import client, { type Result } from "../../../src/database/client.js";
+import client, {
+  type Result,
+  type Rows,
+} from "../../../src/database/client.js";
 import {
   createTestAppointment,
   createTestUser,
@@ -160,5 +163,78 @@ describe("GET /api/appointments", () => {
     );
 
     expect(response.status).toBe(401);
+  });
+});
+
+// US-26: giving up a session before it starts (RM-035).
+describe("PATCH /api/appointments/:id/cancel", () => {
+  function cancel(id: number, cookie: string) {
+    return request(app)
+      .patch(`/api/appointments/${id}/cancel`)
+      .set("Origin", "http://localhost:3000")
+      .set("Cookie", cookie);
+  }
+
+  it("cancels a planned session and stamps the moment", async () => {
+    const { appointmentId } = await createTestAppointment(lea, {
+      name: "À annuler",
+      date: "2027-04-10",
+      time: "07:00:00",
+    });
+
+    const response = await cancel(appointmentId, lea.cookie);
+
+    expect(response.status).toBe(200);
+    const [rows] = await client.execute<Rows[]>(
+      "SELECT status, cancelled_at FROM appointment WHERE id = ?",
+      [appointmentId],
+    );
+    expect(rows[0]?.status).toBe("cancelled");
+    expect(rows[0]?.cancelled_at).not.toBeNull();
+  });
+
+  it("refuses a session already started", async () => {
+    const { appointmentId } = await createTestAppointment(lea, {
+      name: "Commencée",
+      date: "2027-04-11",
+    });
+    await client.execute(
+      `INSERT INTO workout_session (appointment_id, owner_user_id, status, started_at, last_activity_at)
+       VALUES (?, ?, 'in_progress', NOW(3), NOW(3))`,
+      [appointmentId, lea.id],
+    );
+
+    const response = await cancel(appointmentId, lea.cookie);
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("APPOINTMENT_NOT_CANCELLABLE");
+  });
+
+  it("refuses to cancel twice", async () => {
+    const { appointmentId } = await createTestAppointment(lea, {
+      name: "Deux fois",
+      date: "2027-04-12",
+    });
+    await cancel(appointmentId, lea.cookie);
+
+    const again = await cancel(appointmentId, lea.cookie);
+
+    expect(again.status).toBe(409);
+  });
+
+  it("answers 404 for the session of somebody else", async () => {
+    const { appointmentId } = await createTestAppointment(lea, {
+      name: "Pas la sienne",
+      date: "2027-04-13",
+    });
+
+    const response = await cancel(appointmentId, someoneElse.cookie);
+
+    expect(response.status).toBe(404);
+    const [rows] = await client.execute<Rows[]>(
+      "SELECT status FROM appointment WHERE id = ?",
+      [appointmentId],
+    );
+    expect(rows[0]?.status).toBe("planned");
   });
 });

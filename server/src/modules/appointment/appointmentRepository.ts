@@ -148,6 +148,7 @@ export type AppointmentDetailRow = {
   planned_date: string;
   planned_time: string | null;
   status: AppointmentStatus;
+  cancelled_at: Date | null;
   session_version_id: number;
   session_name: string;
   program_name: string | null;
@@ -162,7 +163,8 @@ export async function readAppointment(
   db: Queryable = client,
 ): Promise<AppointmentDetailRow | null> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT a.id, a.planned_date, a.planned_time, a.status, a.session_version_id,
+    `SELECT a.id, a.planned_date, a.planned_time, a.status, a.cancelled_at,
+            a.session_version_id,
             st.name AS session_name, p.name AS program_name,
             ws.id AS workout_session_id, ws.status AS workout_status
        FROM appointment a
@@ -324,4 +326,25 @@ export async function updateAppointmentsVersion(
     "UPDATE appointment SET session_version_id = ? WHERE id IN (?)",
     [sessionVersionId, ids],
   );
+}
+
+// Cancels a planned appointment, and says whether it did (RM-035). The
+// conditions live in the query itself: a started, done or already cancelled
+// appointment changes nothing, and the action then reads the row to know
+// whether it must answer 404 or 409.
+export async function cancelAppointment(
+  id: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<boolean> {
+  const [result] = await db.execute<Result>(
+    `UPDATE appointment a
+        SET a.status = 'cancelled', a.cancelled_at = NOW(3)
+      WHERE a.id = ? AND a.owner_user_id = ?
+        AND a.status IN ('planned', 'to_confirm', 'missed')
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [id, userId],
+  );
+  return result.affectedRows === 1;
 }

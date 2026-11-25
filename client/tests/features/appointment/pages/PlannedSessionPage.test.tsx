@@ -4,7 +4,10 @@ import { createMemoryRouter, RouterProvider, useParams } from "react-router";
 import type { AppointmentDetail } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PlannedSessionPage from "../../../../src/features/appointment/pages/PlannedSessionPage";
-import { readAppointment } from "../../../../src/features/appointment/services/appointmentService";
+import {
+  cancelAppointment,
+  readAppointment,
+} from "../../../../src/features/appointment/services/appointmentService";
 import {
   readCurrentWorkoutSession,
   startWorkoutSession,
@@ -15,6 +18,7 @@ vi.mock(
   "../../../../src/features/appointment/services/appointmentService",
   () => ({
     readAppointment: vi.fn(),
+    cancelAppointment: vi.fn(),
   }),
 );
 vi.mock(
@@ -25,6 +29,7 @@ vi.mock(
   }),
 );
 const readAppointmentMock = vi.mocked(readAppointment);
+const cancelAppointmentMock = vi.mocked(cancelAppointment);
 const startMock = vi.mocked(startWorkoutSession);
 const readCurrentMock = vi.mocked(readCurrentWorkoutSession);
 
@@ -33,6 +38,7 @@ const planned: AppointmentDetail = {
   planned_date: "2026-11-26",
   planned_time: "18:30",
   status: "planned",
+  cancelled_at: null,
   session_name: "Haut du corps",
   program_name: null,
   workout_session: null,
@@ -246,5 +252,86 @@ describe("PlannedSessionPage", () => {
     await waitFor(() => {
       expect(screen.getByText("Séance introuvable")).toBeTruthy();
     });
+  });
+});
+
+describe("PlannedSessionPage · annuler (US-26)", () => {
+  beforeEach(() => {
+    readAppointmentMock.mockReset();
+    cancelAppointmentMock.mockReset();
+    readCurrentMock.mockReset();
+    readCurrentMock.mockResolvedValue(null);
+  });
+
+  it("asks before cancelling, then shows the session as cancelled", async () => {
+    readAppointmentMock.mockResolvedValue(planned);
+    cancelAppointmentMock.mockResolvedValue({ status: "cancelled" });
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /Annuler le rendez-vous/ }),
+    );
+
+    expect(screen.getByText("Annuler « Haut du corps » ?")).toBeTruthy();
+
+    // The session comes back cancelled from the server
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      status: "cancelled",
+      cancelled_at: "2026-11-25T20:12:00.000Z",
+    });
+    await user.click(screen.getByRole("button", { name: "Annuler la séance" }));
+
+    expect(cancelAppointmentMock).toHaveBeenCalledWith(12);
+    expect(
+      await screen.findByText("Annulée le 25 novembre à 21:12"),
+    ).toBeTruthy();
+    expect(screen.getByText("Ce rendez-vous est annulé.")).toBeTruthy();
+    expect(screen.queryByText(/Démarrer la séance/)).toBeNull();
+  });
+
+  it("keeps the session when the user changes his mind", async () => {
+    readAppointmentMock.mockResolvedValue(planned);
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /Annuler le rendez-vous/ }),
+    );
+    await user.click(screen.getByRole("button", { name: "Garder la séance" }));
+
+    expect(cancelAppointmentMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: /Démarrer la séance/ }),
+    ).toBeTruthy();
+  });
+
+  it("never offers to cancel a session already started", async () => {
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      status: "attended",
+      workout_session: { id: 8, status: "in_progress" },
+    });
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+
+    expect(
+      (
+        screen.getByRole("button", {
+          name: /Annuler le rendez-vous/,
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
+  formatDayTime,
   formatLongDate,
   formatSessionContent,
   getAppointmentStatus,
@@ -12,10 +13,13 @@ import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import StatusBadge from "../../../components/StatusBadge";
+import { ApiError } from "../../../services/apiError";
 import AlreadyInProgressDialog from "../../workout-session/components/AlreadyInProgressDialog";
 import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
+import CancelAppointmentDialog from "../components/CancelAppointmentDialog";
 import SessionActionsSheet from "../components/SessionActionsSheet";
 import { useAppointment } from "../hooks/useAppointment";
+import { cancelAppointment } from "../services/appointmentService";
 
 const PRIMARY_BUTTON =
   "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60";
@@ -32,6 +36,10 @@ function PlannedSessionPage() {
   const workoutStart = useStartWorkout();
   // The "⋯" menu of the header (CAL-04m)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // The confirmation before giving up the session (CAL-07)
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isSendingCancel, setIsSendingCancel] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   // "Séance modifiée.", handed over by the editor
   const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   function goBack() {
@@ -46,12 +54,38 @@ function PlannedSessionPage() {
     workoutStart.start(id);
   }
 
+  // "Annuler la séance" of CAL-07: the appointment stays, as cancelled.
+  async function confirmCancel() {
+    setIsSendingCancel(true);
+    setCancelError(null);
+    try {
+      await cancelAppointment(id);
+      setIsCancelling(false);
+      reload();
+    } catch (caught) {
+      setCancelError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible d'annuler la séance. Réessaie.",
+      );
+    } finally {
+      setIsSendingCancel(false);
+    }
+  }
+
   const exerciseCount =
     appointment?.blocks.reduce(
       (total, block) => total + block.exercises.length,
       0,
     ) ?? 0;
   const workout = appointment?.workout_session ?? null;
+  const isCancelled = appointment?.status === "cancelled";
+  // A session not started yet can still be given up (RM-035).
+  const canCancel =
+    appointment !== null &&
+    workout === null &&
+    appointment.status !== "cancelled" &&
+    appointment.status !== "attended";
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -145,15 +179,44 @@ function PlannedSessionPage() {
                   </span>
                 )}
               </div>
-              <h2 className="text-display-md">{appointment.session_name}</h2>
-              <p className="text-muted">
-                {formatLongDate(appointment.planned_date)}
-                {appointment.planned_time === null
-                  ? ""
-                  : ` · ${appointment.planned_time}`}{" "}
-                ·{" "}
-                {formatSessionContent(appointment.blocks.length, exerciseCount)}
-              </p>
+              <h2
+                className={`text-display-md ${
+                  isCancelled ? "text-muted line-through" : ""
+                }`}
+              >
+                {appointment.session_name}
+              </h2>
+              {isCancelled ? (
+                // CAL-07c: what was planned, then when it was given up
+                <>
+                  <p className="text-muted">
+                    Prévue{" "}
+                    {formatLongDate(appointment.planned_date).toLocaleLowerCase(
+                      "fr-FR",
+                    )}
+                    {appointment.planned_time === null
+                      ? ""
+                      : ` · ${appointment.planned_time}`}
+                  </p>
+                  {appointment.cancelled_at !== null && (
+                    <p className="text-muted">
+                      Annulée le {formatDayTime(appointment.cancelled_at)}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted">
+                  {formatLongDate(appointment.planned_date)}
+                  {appointment.planned_time === null
+                    ? ""
+                    : ` · ${appointment.planned_time}`}{" "}
+                  ·{" "}
+                  {formatSessionContent(
+                    appointment.blocks.length,
+                    exerciseCount,
+                  )}
+                </p>
+              )}
             </div>
 
             <section
@@ -218,7 +281,7 @@ function PlannedSessionPage() {
               >
                 Voir le résumé
               </Link>
-            ) : appointment.status === "cancelled" ? (
+            ) : isCancelled ? (
               <p className="text-center font-semibold text-muted">
                 Ce rendez-vous est annulé.
               </p>
@@ -242,7 +305,7 @@ function PlannedSessionPage() {
                   "Démarrage…"
                 ) : (
                   <>
-                    <span aria-hidden="true">▶ </span>Démarrer la séance
+                    <span aria-hidden="true">{"▶ "}</span>Démarrer la séance
                   </>
                 )}
               </button>
@@ -254,12 +317,26 @@ function PlannedSessionPage() {
       {isMenuOpen && appointment !== null && (
         <SessionActionsSheet
           appointmentId={appointment.id}
-          canEdit={
-            appointment.workout_session === null &&
-            appointment.status !== "cancelled" &&
-            appointment.status !== "attended"
-          }
+          canEdit={canCancel}
+          canCancel={canCancel}
+          onCancel={() => {
+            setIsMenuOpen(false);
+            setCancelError(null);
+            setIsCancelling(true);
+          }}
           onClose={() => setIsMenuOpen(false)}
+        />
+      )}
+
+      {isCancelling && appointment !== null && (
+        <CancelAppointmentDialog
+          sessionName={appointment.session_name}
+          plannedDate={appointment.planned_date}
+          plannedTime={appointment.planned_time}
+          isSending={isSendingCancel}
+          error={cancelError}
+          onConfirm={confirmCancel}
+          onClose={() => setIsCancelling(false)}
         />
       )}
 

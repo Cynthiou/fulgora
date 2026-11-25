@@ -118,7 +118,7 @@ function TodaySessionCard({ appointment, currentSession }: Props) {
         </Link>
       ) : (
         <Link to={`/seances/${appointment.id}`} className={PRIMARY_LINK}>
-          <span aria-hidden="true">▶ </span>Démarrer la séance
+          <span aria-hidden="true">{"▶ "}</span>Démarrer la séance
         </Link>
       )}
     </article>

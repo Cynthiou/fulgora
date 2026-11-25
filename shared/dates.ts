@@ -145,6 +145,21 @@ export function listMonthWeeks(yearMonth: string): MonthSlot[][] {
   );
 }
 
+// A moment in time -> "25 novembre à 21:12", seen from a time zone
+// ("Annulée le 25 novembre à 21:12", CAL-07c).
+export function formatDayTime(
+  moment: string,
+  timeZone: string = DEFAULT_TIMEZONE,
+): string {
+  const date = new Date(moment);
+  const day = new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    day: "numeric",
+    month: "long",
+  }).format(date);
+  return `${day} à ${formatTimeOfDay(date, timeZone)}`;
+}
+
 // "2026-11-19" -> "19 novembre" (inside a sentence, "prévue le 19 novembre").
 export function formatDayMonth(date: string): string {
   return new Intl.DateTimeFormat("fr-FR", {

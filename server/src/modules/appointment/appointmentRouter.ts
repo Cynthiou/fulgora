@@ -7,7 +7,7 @@ import {
 } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { browse, createFree, read } from "./appointmentActions.js";
+import { browse, cancel, createFree, read } from "./appointmentActions.js";
 import { editSession, readSession } from "./sessionEditActions.js";
 
 const appointmentRouter = express.Router();
@@ -51,6 +51,14 @@ appointmentRouter.put(
   authenticate,
   validate({ params: idParamSchema, body: sessionEditSchema }),
   editSession,
+);
+
+// PATCH /api/appointments/:id/cancel: give up a session before it starts.
+appointmentRouter.patch(
+  "/:id/cancel",
+  authenticate,
+  validate({ params: idParamSchema }),
+  cancel,
 );
 
 export default appointmentRouter;
