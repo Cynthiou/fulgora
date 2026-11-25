@@ -78,16 +78,16 @@ Message, saisie conservée.
 
 ## Tâches techniques
 
-- [ ] Shared : `programDraftSchema` (nom 0 à 160, dates, jours 1 à 7, séances avec `weekday`, `planned_time`, `name`, `session: SessionDraft`) ; `listWeekdayDates(start, end, weekday)` ; `countProgramAppointments`
-- [ ] Backend : `programRepository.createProgram` (statut `draft`), `updateProgramInfo`, `updateProgramStatus`
-- [ ] Backend : `weeklyScheduleRepository.createWeeklySchedule(programId, templateId, weekday, time)`, `deleteDraftSchedules(programId)`
-- [ ] Backend : séances du brouillon créées avec les fonctions de l'US-23 (template, version 1, arbre) ; un brouillon mis à jour remplace entièrement ses séances (aucun rendez-vous n'existe, donc rien à préserver)
-- [ ] Backend : `appointmentRepository.createAppointments(rows)` : insertion multiple (`INSERT … VALUES ?` avec `query`)
-- [ ] Backend : `programActions.saveDraft` (`POST /api/programs`, `PUT /api/programs/:id`) et `programActions.create` (`POST /api/programs/:id/create`) dans `withTransaction` : verrou sur le programme, statut `draft`, chaque séance avec ≥ 1 exercice, génération des rendez-vous, statut `programmed` ou `in_progress`, trace `program_change`
-- [ ] Frontend : `CreateProgramInfoPage.tsx` (PRO-02), `ProgramSessionsPage.tsx` (PRO-03), réutilisation de `SessionEditorPage` en mode « jour de la semaine », `ProgramCreatedPage.tsx` (PRO-06), dialogue PRO-03e (garde de sortie)
-- [ ] Frontend : `useProgramDraft` (état local du programme et de ses séances)
-- [ ] Tests : unitaires `listWeekdayDates` (début un mercredi, fin un dimanche, année bissextile) ; back : brouillon sans rendez-vous, création → nombre exact de rendez-vous, séance vide → 422, échec au milieu → aucun rendez-vous, programme d'un autre → 404
-- [ ] Tests : E2E parcours complet PRO-02 → PRO-06 ; axe
+- [x] Shared : `programInfoSchema` (nom, dates, jours 1 à 7, heure), `listProgramDates(start, end, weekdays)`, `countProgramWeeks`, `canActivateProgram`, `statusAfterCreation`
+- [x] Backend : `createProgram` (statut `draft`), `updateProgramInfo`, `updateProgramStatus`
+- [x] Backend : `createSchedule(programId, templateId, weekday, time)`, `deactivateSchedule`, `deleteProgramSchedules`
+- [x] Backend : séances du brouillon créées avec les fonctions de l'US-23 ; un jour ajouté crée sa séance, un jour retiré sort de la semaine type (sa séance est gardée)
+- [x] Backend : `createProgramAppointment(...)`, un rendez-vous à la fois dans la transaction ; l'insertion multiple viendra si le nombre pose un problème
+- [x] Backend : `createDraft`, `updateDraft` et `activate` (`POST /api/programs/:id/activate`) dans `withTransaction`, avec verrou sur le programme ; la trace `program_change` attend l'US-20
+- [x] Frontend : `NewProgramPage.tsx` (PRO-02), `ProgramSessionsPage.tsx` (PRO-03 et PRO-06), `ProgramDaySessionPage.tsx` qui réutilise l'éditeur en mode « jour », dialogue PRO-03e
+- [ ] Frontend : `useProgramDraft` : **pas nécessaire**, le brouillon vit côté serveur dès l'étape 1
+- [x] Tests : unitaires `listProgramDates`, `countProgramWeeks`, `computeProgramStatus`, `programInfoSchema` ; back : brouillon sans rendez-vous, nombre exact de rendez-vous, séance vide → 422, deuxième création → 409, programme d'un autre → 404
+- [x] Tests : E2E parcours complet PRO-02 → PRO-06, avec axe à chaque écran
 
 ## Definition of Done
 
