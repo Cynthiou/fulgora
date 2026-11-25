@@ -16,6 +16,7 @@ import PlannedSessionPage from "./features/appointment/pages/PlannedSessionPage"
 import PlanningPage from "./features/appointment/pages/PlanningPage";
 import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
+import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -62,6 +63,11 @@ const router = createBrowserRouter([
               { path: "/profil", element: <ProfilePage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
+              // A past session, planned against done (SUI-06)
+              {
+                path: "/suivi/historique/:appointmentId",
+                element: <HistoryDetailPage />,
+              },
               // A planned session (B1) and the session in progress (B2)
               {
                 path: "/seances/:appointmentId",
