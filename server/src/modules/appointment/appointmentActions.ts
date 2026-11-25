@@ -101,13 +101,12 @@ function toListItem(
   };
 }
 
-// GET /api/appointments?from=&to=: the user's appointments in the period.
-// The query was validated by dateRangeSchema (62 days at most).
-export const browse: RequestHandler = async (req, res) => {
-  const userId = readUserId(req);
-  const { from, to } = req.query as unknown as DateRange;
-
-  const rows = await readAppointmentsBetween(userId, from, to);
+// The list items of a set of rows: the content of their version and the
+// sets of their realized session are read in two queries, whatever the
+// number of rows (US-24, US-48).
+export async function buildAppointmentItems(
+  rows: AppointmentRow[],
+): Promise<AppointmentListItem[]> {
   const versionIds = [...new Set(rows.map((row) => row.session_version_id))];
   const contents = await countVersionContent(versionIds);
   const contentByVersion = new Map(
@@ -122,7 +121,7 @@ export const browse: RequestHandler = async (req, res) => {
     setCounts.map((count) => [count.workout_session_id, count]),
   );
 
-  const items = rows.map((row) =>
+  return rows.map((row) =>
     toListItem(
       row,
       contentByVersion.get(row.session_version_id),
@@ -131,7 +130,16 @@ export const browse: RequestHandler = async (req, res) => {
         : setsByWorkout.get(row.workout_session_id),
     ),
   );
-  res.json(items);
+}
+
+// GET /api/appointments?from=&to=: the user's appointments in the period.
+// The query was validated by dateRangeSchema (62 days at most).
+export const browse: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { from, to } = req.query as unknown as DateRange;
+
+  const rows = await readAppointmentsBetween(userId, from, to);
+  res.json(await buildAppointmentItems(rows));
 };
 
 // POST /api/appointments: a free session saved in one go, in a transaction

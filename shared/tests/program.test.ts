@@ -1,15 +1,22 @@
 import { describe, expect, it } from "vitest";
+import type { AppointmentListItem } from "../appointment.js";
 import {
   buildProgramSessionName,
   canActivateProgram,
+  computeProgramProgress,
   computeProgramStatus,
   countProgramWeeks,
   formatPeriod,
   formatPeriodShort,
+  formatProgramProgress,
+  formatProgramReview,
   formatReadySessions,
   formatWeekCount,
   formatWeekdays,
+  getAvailableProgramActions,
+  getProgramWeekIndex,
   getWeekday,
+  groupProgramWeeks,
   listProgramDates,
   type ProgramSessionSummary,
   programInfoSchema,
@@ -158,5 +165,116 @@ describe("programInfoSchema", () => {
     expect(
       programInfoSchema.safeParse({ ...valid, end_date: "2028-01-01" }).success,
     ).toBe(false);
+  });
+});
+
+describe("seeing a program (US-48)", () => {
+  // An appointment of the program, with or without its realized session.
+  function appointment(
+    id: number,
+    date: string,
+    workout: "completed" | "unfinished" | "in_progress" | null = null,
+  ): AppointmentListItem {
+    return {
+      id,
+      planned_date: date,
+      planned_time: "18:30",
+      status: "planned",
+      moved_manually: false,
+      initial_date: null,
+      session_version_id: id,
+      session_name: `Séance ${id}`,
+      program: { id: 1, name: "Force" },
+      block_count: 1,
+      exercise_count: 3,
+      workout_session:
+        workout === null
+          ? null
+          : {
+              id,
+              status: workout,
+              started_at: `${date}T17:00:00.000Z`,
+              validated_sets: 3,
+              planned_sets: 3,
+            },
+    };
+  }
+
+  const program = { start_date: "2026-11-02", end_date: "2026-12-13" };
+  const items = [
+    appointment(1, "2026-11-02", "completed"),
+    appointment(2, "2026-11-05", "completed"),
+    appointment(3, "2026-11-09", "unfinished"),
+    appointment(4, "2026-11-12"),
+    appointment(5, "2026-11-23"),
+    appointment(6, "2026-12-10"),
+  ];
+
+  it("counts what is past and what is done (PRO-07)", () => {
+    const progress = computeProgramProgress(items, "2026-11-23");
+    expect(progress).toEqual({ total: 6, past: 4, done: 3, percent: 50 });
+    expect(formatProgramProgress(progress)).toBe(
+      "4 / 6 séances passées · 3 faites",
+    );
+    expect(formatProgramReview(progress)).toBe(
+      "6 séances prévues · 50 % réalisées",
+    );
+  });
+
+  it("gives 0 % and no session for an empty program", () => {
+    expect(computeProgramProgress([], "2026-11-23")).toEqual({
+      total: 0,
+      past: 0,
+      done: 0,
+      percent: 0,
+    });
+  });
+
+  it("cuts the program into weeks with their state (PRO-07)", () => {
+    const weeks = groupProgramWeeks(program, items, "2026-11-23");
+    expect(weeks).toHaveLength(6);
+    expect(weeks[0]?.from).toBe("2026-11-02");
+    expect(weeks[0]?.to).toBe("2026-11-08");
+    expect(weeks[0]?.state).toBe("done");
+    // The third week holds nothing and is over
+    expect(weeks[1]?.state).toBe("partial");
+    expect(weeks[2]?.state).toBe("missed");
+    expect(weeks[3]?.items.map((item) => item.id)).toEqual([5]);
+    expect(weeks[3]?.state).toBe("current");
+    expect(weeks[5]?.state).toBe("coming");
+  });
+
+  it("says which week a day belongs to", () => {
+    expect(getProgramWeekIndex(program, "2026-11-02")).toBe(1);
+    expect(getProgramWeekIndex(program, "2026-11-23")).toBe(4);
+    expect(getProgramWeekIndex(program, "2026-12-20")).toBeNull();
+  });
+
+  it("offers only the actions the state allows (PRO-07b)", () => {
+    expect(getAvailableProgramActions({ status: "draft" })).toEqual({
+      canEdit: true,
+      canAbandon: false,
+      canDelete: true,
+      canReuse: false,
+    });
+    expect(getAvailableProgramActions({ status: "in_progress" })).toEqual({
+      canEdit: true,
+      canAbandon: true,
+      canDelete: false,
+      canReuse: false,
+    });
+    // A session in progress holds the program (RM-045)
+    expect(
+      getAvailableProgramActions({ status: "in_progress" }, true).canAbandon,
+    ).toBe(false);
+    expect(getAvailableProgramActions({ status: "finished" })).toEqual({
+      canEdit: false,
+      canAbandon: false,
+      canDelete: false,
+      canReuse: true,
+    });
+    expect(getAvailableProgramActions({ status: "abandoned" }).canReuse).toBe(
+      true,
+    );
   });
 });

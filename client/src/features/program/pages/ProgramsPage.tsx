@@ -28,6 +28,17 @@ const STATUS_CHIP: Record<string, string> = {
   abandoned: "bg-status-cancelled/10 text-status-cancelled-text",
 };
 
+// The chips over the list: every state, plus "Tous" (PRO-01).
+const FILTERS = [
+  { code: "all", label: "Tous" },
+  { code: "in_progress", label: "En cours" },
+  { code: "programmed", label: "À venir" },
+  { code: "finished", label: "Terminés" },
+  { code: "abandoned", label: "Abandonnés" },
+] as const;
+
+type FilterCode = (typeof FILTERS)[number]["code"];
+
 // "4 programmes · 2 en cours · 1 brouillon" (PRO-01b).
 function describeList(items: ProgramListItem[], today: string): string {
   const running = items.filter(
@@ -54,6 +65,7 @@ function ProgramsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [filter, setFilter] = useState<FilterCode>("all");
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is listed on purpose, it re-runs the load
   useEffect(() => {
@@ -74,6 +86,13 @@ function ProgramsPage() {
       });
     return () => controller.abort();
   }, [attempt]);
+
+  // A draft always stays in the list: it is the first thing to finish
+  // (RM-071).
+  const shown =
+    filter === "all"
+      ? items
+      : items.filter((item) => computeProgramStatus(item, today) === filter);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -113,8 +132,42 @@ function ProgramsPage() {
         )}
 
         {!isLoading && error === null && items.length > 0 && (
+          <div
+            role="tablist"
+            aria-label="Filtrer les programmes"
+            className="-mx-[18px] flex gap-1.5 overflow-x-auto px-[18px] pb-0.5"
+          >
+            {FILTERS.map((item) => (
+              <button
+                key={item.code}
+                type="button"
+                role="tab"
+                aria-selected={filter === item.code}
+                onClick={() => setFilter(item.code)}
+                className={`flex h-8 shrink-0 items-center rounded-full px-3 text-xs font-bold ${
+                  filter === item.code
+                    ? "bg-pick text-pick-content"
+                    : "border border-base-300 bg-base-100 shadow-card"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!isLoading &&
+          error === null &&
+          shown.length === 0 &&
+          items.length > 0 && (
+            <p className="pt-2 text-sm text-muted">
+              Aucun programme dans cet état.
+            </p>
+          )}
+
+        {!isLoading && error === null && shown.length > 0 && (
           <ul className="flex flex-col gap-2.5">
-            {items.map((item) => {
+            {shown.map((item) => {
               const status = computeProgramStatus(item, today);
               const isDraft = status === "draft";
               const ready =

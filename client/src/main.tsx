@@ -21,6 +21,7 @@ import TrackingPage from "./features/history/pages/TrackingPage";
 import NotificationsPage from "./features/notification/pages/NotificationsPage";
 import NewProgramPage from "./features/program/pages/NewProgramPage";
 import ProgramDaySessionPage from "./features/program/pages/ProgramDaySessionPage";
+import ProgramDetailPage from "./features/program/pages/ProgramDetailPage";
 import ProgramSessionsPage from "./features/program/pages/ProgramSessionsPage";
 import ProgramsPage from "./features/program/pages/ProgramsPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
@@ -71,6 +72,7 @@ const router = createBrowserRouter([
               // The programs of the user (US-48) and their creation (US-18)
               { path: "/programmes", element: <ProgramsPage /> },
               { path: "/programmes/nouveau", element: <NewProgramPage /> },
+              { path: "/programmes/:id", element: <ProgramDetailPage /> },
               {
                 path: "/programmes/:programId/seances",
                 element: <ProgramSessionsPage />,

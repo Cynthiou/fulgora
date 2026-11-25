@@ -4,6 +4,7 @@ import client, {
   type Result,
   type Rows,
 } from "../../database/client.js";
+import type { AppointmentRow } from "../appointment/appointmentRepository.js";
 
 // One function, one query (US-18). A program holds its period, the days of
 // its typical week (weekly_schedule) and one session per day.
@@ -181,6 +182,9 @@ export type ProgramListRow = ProgramRow & {
   session_count: number;
   ready_count: number;
   appointment_count: number;
+  // How many of its appointments are past, and how many were really done
+  past_count: number;
+  done_count: number;
 };
 
 export async function readPrograms(
@@ -202,13 +206,118 @@ export async function readPrograms(
                              WHERE sv.session_template_id = ws2.session_template_id))
               AS ready_count,
             (SELECT COUNT(*) FROM appointment a WHERE a.program_id = p.id)
-              AS appointment_count
+              AS appointment_count,
+            (SELECT COUNT(*)
+               FROM appointment a2
+               LEFT JOIN workout_session ws3 ON ws3.appointment_id = a2.id
+              WHERE a2.program_id = p.id
+                AND (ws3.status IN ('completed','abandoned')
+                     OR a2.planned_date < CURDATE()))
+              AS past_count,
+            (SELECT COUNT(*)
+               FROM appointment a3
+               JOIN workout_session ws4 ON ws4.appointment_id = a3.id
+              WHERE a3.program_id = p.id
+                AND ws4.status IN ('completed','abandoned'))
+              AS done_count
        FROM program p
       WHERE p.owner_user_id = ?
       ORDER BY p.status = 'draft' DESC, p.start_date DESC, p.id DESC`,
     [userId],
   );
   return rows as ProgramListRow[];
+}
+
+// The appointments of a program, oldest first, with the session that was
+// really done when there is one (US-48). Same shape as the Planning list.
+export async function readProgramAppointments(
+  programId: number,
+  db: Queryable = client,
+): Promise<AppointmentRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT a.id, a.planned_date, a.planned_time, a.status, a.moved_manually,
+            a.initial_date, a.session_version_id,
+            st.name AS session_name,
+            p.id AS program_id, p.name AS program_name,
+            ws.id AS workout_session_id, ws.status AS workout_status,
+            ws.started_at
+       FROM appointment a
+       JOIN session_version sv ON sv.id = a.session_version_id
+       JOIN session_template st ON st.id = sv.session_template_id
+       JOIN program p ON p.id = a.program_id
+       LEFT JOIN workout_session ws ON ws.appointment_id = a.id
+      WHERE a.program_id = ?
+      ORDER BY a.planned_date, a.planned_time IS NULL, a.planned_time, a.id`,
+    [programId],
+  );
+  return rows as AppointmentRow[];
+}
+
+// The programs of a time zone whose start date has come (RM-074).
+export async function listProgramsToStart(
+  timezone: string,
+  today: string,
+  db: Queryable = client,
+): Promise<number[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT p.id
+       FROM program p
+       JOIN \`user\` u ON u.id = p.owner_user_id
+      WHERE u.timezone = ? AND p.status = 'programmed' AND p.start_date <= ?`,
+    [timezone, today],
+  );
+  return rows.map((row) => Number(row.id));
+}
+
+// Those whose last day is over (RM-074).
+export async function listProgramsToFinish(
+  timezone: string,
+  today: string,
+  db: Queryable = client,
+): Promise<number[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT p.id
+       FROM program p
+       JOIN \`user\` u ON u.id = p.owner_user_id
+      WHERE u.timezone = ? AND p.status = 'in_progress' AND p.end_date < ?`,
+    [timezone, today],
+  );
+  return rows.map((row) => Number(row.id));
+}
+
+// One UPDATE for the whole batch; uses query, not execute, for IN (?).
+export async function markProgramsStatus(
+  ids: number[],
+  status: ProgramStatus,
+  db: Queryable = client,
+): Promise<number> {
+  if (ids.length === 0) {
+    return 0;
+  }
+  const [result] = await db.query<Result>(
+    "UPDATE program SET status = ? WHERE id IN (?)",
+    [status, ids],
+  );
+  return result.affectedRows;
+}
+
+// The trace of what the watch changed, program by program (US-20).
+export async function logProgramStatusChanges(
+  ids: number[],
+  oldStatus: ProgramStatus,
+  newStatus: ProgramStatus,
+  db: Queryable = client,
+): Promise<void> {
+  if (ids.length === 0) {
+    return;
+  }
+  await db.query(
+    `INSERT INTO program_change (program_id, change_type, old_value, new_value)
+     SELECT p.id, 'status', JSON_OBJECT('status', ?), JSON_OBJECT('status', ?)
+       FROM program p
+      WHERE p.id IN (?)`,
+    [oldStatus, newStatus, ids],
+  );
 }
 
 // A draft that was never planned can be deleted whole (RM-071).

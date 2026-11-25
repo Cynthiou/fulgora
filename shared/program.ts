@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { type AppointmentListItem, isWorkoutOver } from "./appointment.js";
 import { addDays, formatLongDate, todayInParis } from "./dates.js";
 import { REQUIRED_MESSAGE } from "./user.js";
 import { dateSchema, timeSchema } from "./validation.js";
@@ -238,3 +239,138 @@ export const programDayParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
   weekday: z.coerce.number().int().min(1).max(7),
 });
+
+// --- Seeing a program (US-48) ----------------------------------------------
+
+// A program and its appointments, as the detail screen reads them.
+export type ProgramDetailFull = ProgramDetail & {
+  appointments: AppointmentListItem[];
+};
+
+export type ProgramProgress = {
+  // How many appointments the program holds
+  total: number;
+  // Those whose day is over (or which were done)
+  past: number;
+  // Those really done
+  done: number;
+  // 0 to 100, on the whole program
+  percent: number;
+};
+
+// "6 / 12 séances passées · 3 faites" (PRO-07). A session done in advance
+// counts as past, whatever its planned day (RM-070).
+export function computeProgramProgress(
+  appointments: AppointmentListItem[],
+  today: string = todayInParis(),
+): ProgramProgress {
+  const total = appointments.length;
+  const done = appointments.filter((item) => isWorkoutOver(item)).length;
+  const past = appointments.filter(
+    (item) => isWorkoutOver(item) || item.planned_date < today,
+  ).length;
+  return {
+    total,
+    past,
+    done,
+    percent: total === 0 ? 0 : Math.round((done / total) * 100),
+  };
+}
+
+export function formatProgramProgress(progress: ProgramProgress): string {
+  return `${progress.past} / ${progress.total} séances passées · ${progress.done} faite${
+    progress.done > 1 ? "s" : ""
+  }`;
+}
+
+export type ProgramWeek = {
+  // 1 for the first week of the program
+  index: number;
+  // The first and the last day of the week, inside the period
+  from: string;
+  to: string;
+  items: AppointmentListItem[];
+  // "done": every session of the week is done; "missed": none is, and the
+  // week is over; "current": today falls in it; "coming": still ahead.
+  state: "done" | "missed" | "partial" | "current" | "coming";
+};
+
+// The weeks of a program, from its start date, with their sessions (PRO-07).
+export function groupProgramWeeks(
+  program: { start_date: string; end_date: string },
+  appointments: AppointmentListItem[],
+  today: string = todayInParis(),
+): ProgramWeek[] {
+  const weeks: ProgramWeek[] = [];
+  const count = countProgramWeeks(program.start_date, program.end_date);
+  for (let index = 0; index < count; index += 1) {
+    const from = addDays(program.start_date, index * 7);
+    const to = addDays(from, 6);
+    const items = appointments.filter(
+      (item) => item.planned_date >= from && item.planned_date <= to,
+    );
+    const done = items.filter((item) => isWorkoutOver(item)).length;
+    const isOver = to < today;
+    const isCurrent = from <= today && today <= to;
+    const state: ProgramWeek["state"] =
+      items.length > 0 && done === items.length
+        ? "done"
+        : isCurrent
+          ? "current"
+          : isOver
+            ? done === 0
+              ? "missed"
+              : "partial"
+            : "coming";
+    weeks.push({ index: index + 1, from, to, items, state });
+  }
+  return weeks;
+}
+
+// Which week of the program a day belongs to (1 for the first one), or null
+// when the day is outside the period.
+export function getProgramWeekIndex(
+  program: { start_date: string; end_date: string },
+  day: string,
+): number | null {
+  if (day < program.start_date || day > program.end_date) {
+    return null;
+  }
+  const start = Date.parse(`${program.start_date}T00:00:00Z`);
+  const date = Date.parse(`${day}T00:00:00Z`);
+  return Math.floor((date - start) / 86_400_000 / 7) + 1;
+}
+
+export type ProgramActions = {
+  // Change the period, the days or a session (US-19, US-21)
+  canEdit: boolean;
+  // Give up the rest of the program (US-20)
+  canAbandon: boolean;
+  // Throw away a draft (US-18)
+  canDelete: boolean;
+  // Build a new program from this one (US-22)
+  canReuse: boolean;
+};
+
+// What the "⋯" menu offers, state by state (PRO-07b). A program with a
+// session in progress cannot be given up before it ends (RM-045).
+export function getAvailableProgramActions(
+  program: { status: ProgramStatus },
+  hasInProgressSession = false,
+): ProgramActions {
+  const { status } = program;
+  return {
+    canEdit:
+      status === "draft" || status === "programmed" || status === "in_progress",
+    canAbandon:
+      (status === "programmed" || status === "in_progress") &&
+      !hasInProgressSession,
+    canDelete: status === "draft",
+    canReuse: status === "finished" || status === "abandoned",
+  };
+}
+
+// "16 séances prévues · 88 % réalisées" (PRO-13).
+export function formatProgramReview(progress: ProgramProgress): string {
+  return `${progress.total} séances prévues · ${progress.percent} % réalisées`;
+}

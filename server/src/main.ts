@@ -1,6 +1,7 @@
 import "dotenv/config";
 import app from "./app.js";
 import { startAppointmentStatusWatch } from "./modules/appointment/statusWatch.js";
+import { startProgramStatusWatch } from "./modules/program/programStatusWatch.js";
 import { startInactivityWatch } from "./modules/workout-session/inactivityWatch.js";
 import { readJwtSecret } from "./utils/token.js";
 
@@ -23,3 +24,4 @@ app.listen(port, () => {
 // the tests (which import app.ts, never main.ts) run no background task.
 startInactivityWatch();
 startAppointmentStatusWatch();
+startProgramStatusWatch();

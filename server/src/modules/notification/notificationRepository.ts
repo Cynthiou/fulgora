@@ -123,6 +123,28 @@ export async function createAppointmentNotifications(
   return result.affectedRows;
 }
 
+// One notification per program that has just ended (RM-074). The status
+// only changes once, so the watch never inserts the same one twice.
+export async function createProgramFinishedNotifications(
+  programIds: number[],
+  db: Queryable = client,
+): Promise<number> {
+  if (programIds.length === 0) {
+    return 0;
+  }
+  const [result] = await db.query<Result>(
+    `INSERT INTO notification (user_id, \`type\`, title, message, program_id)
+     SELECT p.owner_user_id, 'program_finished', 'Programme terminé',
+            CONCAT(p.name, ' · ', DATE_FORMAT(p.start_date, '%d/%m/%Y'),
+                   ' → ', DATE_FORMAT(p.end_date, '%d/%m/%Y')),
+            p.id
+       FROM program p
+      WHERE p.id IN (?)`,
+    [programIds],
+  );
+  return result.affectedRows;
+}
+
 // The appointments which just took a status, to notify about them.
 export async function listAppointmentsWithStatus(
   timezone: string,

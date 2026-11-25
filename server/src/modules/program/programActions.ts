@@ -5,7 +5,7 @@ import {
   getWeekday,
   listProgramDates,
   type ProgramCreated,
-  type ProgramDetail,
+  type ProgramDetailFull,
   type ProgramInfoInput,
   type ProgramSessionSummary,
   type SessionEditInput,
@@ -16,6 +16,7 @@ import {
 import { withTransaction } from "../../database/withTransaction.js";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
+import { buildAppointmentItems } from "../appointment/appointmentActions.js";
 import { buildSessionDraft } from "../appointment/sessionEditActions.js";
 import {
   assertSessionContentValid,
@@ -35,6 +36,7 @@ import {
   deleteDraftProgram,
   deleteProgramSchedules,
   readProgram,
+  readProgramAppointments,
   readProgramForUpdate,
   readProgramSchedules,
   readPrograms,
@@ -60,12 +62,13 @@ function toSession(row: ScheduleRow): ProgramSessionSummary {
 async function buildDetail(
   id: number,
   userId: number,
-): Promise<ProgramDetail | null> {
+): Promise<ProgramDetailFull | null> {
   const program = await readProgram(id, userId);
   if (program === null) {
     return null;
   }
   const schedules = await readProgramSchedules(id);
+  const appointments = await readProgramAppointments(id);
   return {
     id: program.id,
     name: program.name,
@@ -75,6 +78,7 @@ async function buildDetail(
     status: program.status,
     planned_time: toHourMinute(schedules[0]?.planned_time ?? null),
     sessions: schedules.map(toSession),
+    appointments: await buildAppointmentItems(appointments),
   };
 }
 
@@ -155,6 +159,8 @@ export const browse: RequestHandler = async (req, res) => {
       session_count: Number(row.session_count),
       ready_count: Number(row.ready_count),
       appointment_count: Number(row.appointment_count),
+      past_count: Number(row.past_count),
+      done_count: Number(row.done_count),
     })),
   );
 };

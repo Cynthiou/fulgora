@@ -3,6 +3,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
 import client, { type Rows } from "../../../src/database/client.js";
+import { updateProgramStatuses } from "../../../src/modules/program/programStatusWatch.js";
 import {
   createTestUser,
   deleteTestUsers,
@@ -73,6 +74,14 @@ afterAll(async () => {
   );
   await client.query(
     "DELETE ws FROM weekly_schedule ws JOIN program p ON p.id = ws.program_id JOIN `user` u ON u.id = p.owner_user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
+  await client.query(
+    "DELETE n FROM notification n JOIN `user` u ON u.id = n.user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
+  await client.query(
+    "DELETE pc FROM program_change pc JOIN program p ON p.id = pc.program_id JOIN `user` u ON u.id = p.owner_user_id WHERE u.username LIKE ?",
     [`${PREFIX}%`],
   );
   await client.query(
@@ -329,5 +338,90 @@ describe("les séances d'un jour du programme", () => {
       .set("Cookie", lea.cookie);
 
     expect(response.status).toBe(404);
+  });
+});
+
+// US-48: the detail of a program carries its appointments, and the watch
+// moves the statuses by itself (RM-074).
+describe("GET /api/programs/:id et la tâche des statuts", () => {
+  it("gives the appointments of the program with the detail", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    for (const session of draft.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+    await post(
+      `/api/programs/${draft.body.id}/activate`,
+      undefined,
+      lea.cookie,
+    );
+
+    const response = await request(app)
+      .get(`/api/programs/${draft.body.id}`)
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.appointments.length).toBe(4);
+    expect(response.body.appointments[0]).toMatchObject({
+      planned_date: START,
+      planned_time: "18:30",
+      status: "planned",
+      exercise_count: 1,
+    });
+    expect(response.body.appointments[0].program.id).toBe(draft.body.id);
+  });
+
+  it("counts what is past and what is done in the list", async () => {
+    const response = await request(app)
+      .get("/api/programs")
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    const created = response.body.find(
+      (item: { status: string }) => item.status !== "draft",
+    );
+    expect(created).toHaveProperty("past_count");
+    expect(created).toHaveProperty("done_count");
+    expect(created.done_count).toBe(0);
+  });
+
+  it("starts a program on its first day and ends it the day after the last", async () => {
+    // A program of yesterday only: the watch ends it right away.
+    const over = await post(
+      "/api/programs",
+      validInfo({
+        name: "Fini",
+        start_date: addDays(todayInParis(), -8),
+        end_date: addDays(todayInParis(), -1),
+      }),
+      lea.cookie,
+    );
+    for (const session of over.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+    await post(`/api/programs/${over.body.id}/activate`, undefined, lea.cookie);
+    await client.execute(
+      "UPDATE program SET status = 'programmed' WHERE id = ?",
+      [over.body.id],
+    );
+
+    // One pass is enough here: the program starts, then ends in the same
+    // walk, because its last day is already behind us.
+    const first = await updateProgramStatuses();
+    expect(first.started).toBeGreaterThan(0);
+    expect(first.finished).toBeGreaterThan(0);
+
+    const [rows] = await client.execute<Rows[]>(
+      "SELECT status FROM program WHERE id = ?",
+      [over.body.id],
+    );
+    expect(rows[0]?.status).toBe("finished");
+
+    // One notification, and only one: the status never changes twice.
+    await updateProgramStatuses();
+    const [notifications] = await client.execute<Rows[]>(
+      "SELECT COUNT(*) AS total FROM notification WHERE program_id = ? AND `type` = 'program_finished'",
+      [over.body.id],
+    );
+    expect(Number(notifications[0]?.total)).toBe(1);
   });
 });

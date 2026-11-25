@@ -1,6 +1,7 @@
 import type {
   ProgramCreated,
   ProgramDetail,
+  ProgramDetailFull,
   ProgramInfoInput,
   SessionDraft,
 } from "shared";
@@ -17,6 +18,9 @@ export type ProgramListItem = {
   session_count: number;
   ready_count: number;
   appointment_count: number;
+  // How far it has gone: appointments past, and really done (PRO-01)
+  past_count: number;
+  done_count: number;
 };
 
 // GET /api/programs: every program of the user.
@@ -34,12 +38,13 @@ export function createProgramDraft(
   });
 }
 
-// GET /api/programs/:id: the program, its days and its sessions.
+// GET /api/programs/:id: the program, its days, its sessions and the
+// appointments it put in the Planning (US-48).
 export function readProgram(
   id: number,
   signal?: AbortSignal,
-): Promise<ProgramDetail> {
-  return apiFetch<ProgramDetail>(`/programs/${id}`, { signal });
+): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(`/programs/${id}`, { signal });
 }
 
 // PUT /api/programs/:id: the period and the days of a draft.
