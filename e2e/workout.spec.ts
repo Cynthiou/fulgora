@@ -140,6 +140,8 @@ test("validates the sets of an exercise, one as planned and one changed, then mo
     .getByRole("dialog")
     .getByRole("button", { name: "Valider la série 2" })
     .click();
+
+  // Two exercises in this session: the rest still comes (US-30)
   await page.getByRole("button", { name: "Passer le repos" }).click();
   await expect(
     page.getByRole("button", { name: /Série 2 validée/ }),
@@ -233,9 +235,9 @@ test("finishes a session and shows the summary with the right figures", async ({
     .getByRole("dialog")
     .getByRole("button", { name: "Valider la série 2" })
     .click();
-  await page.getByRole("button", { name: "Passer le repos" }).click();
-  await page.getByRole("link", { name: "Retour aux exercices" }).click();
 
+  // Last set of the session: the exercises come back without a rest (US-30)
+  await expect(page.getByText(/Séries réalisées/)).toBeVisible();
   await page.getByRole("button", { name: "Terminer la séance" }).click();
   await expect(page.getByText("Terminer la séance ?")).toBeVisible();
   await expect(

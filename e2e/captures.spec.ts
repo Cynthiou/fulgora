@@ -262,10 +262,10 @@ test("captures the screens of the MVP", async ({ page }) => {
   await shoot(page, "b4-repos");
   await page.getByRole("button", { name: "Passer le repos" }).click();
 
-  // B6 résumé, puis l'historique et son détail
+  // B6 résumé, puis l'historique et son détail. La dernière série de la
+  // séance ne déclenche pas de repos (US-30) : on revient aux exercices.
   await page.getByRole("button", { name: "Valider la série 2" }).click();
-  await page.getByRole("button", { name: "Passer le repos" }).click();
-  await page.getByRole("link", { name: "Exercices", exact: true }).click();
+  await expect(page.getByText(/Séries réalisées/)).toBeVisible();
   await page.getByRole("button", { name: "Terminer la séance" }).click();
   await page.getByRole("button", { name: "Terminer", exact: true }).click();
   await expect(page.getByText("Terminée")).toBeVisible();

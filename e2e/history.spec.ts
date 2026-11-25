@@ -61,8 +61,8 @@ test("the history is empty at first, then lists the finished session under its w
     .first()
     .click();
   await page.getByRole("button", { name: "Valider la série 1" }).click();
-  await page.getByRole("button", { name: "Passer le repos" }).click();
-  await page.getByRole("link", { name: "Retour aux exercices" }).click();
+  // The only set of the session: no rest, the exercises come back (US-30)
+  await expect(page.getByText(/Séries réalisées/)).toBeVisible();
   await page.getByRole("button", { name: "Terminer la séance" }).click();
   await page.getByRole("button", { name: "Terminer", exact: true }).click();
   await expect(page.getByText("Terminée")).toBeVisible();

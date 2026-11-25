@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
   type ActualSetValues,
   formatDuration,
@@ -79,6 +79,7 @@ function describeNext(
 // Every validated set starts the rest timer (US-30).
 function WorkoutExercisePage() {
   const params = useParams();
+  const navigate = useNavigate();
   const sessionId = Number(params.id);
   const exerciseId = Number(params.exerciseId);
   // While a set is being added or removed, the buttons wait.
@@ -113,9 +114,24 @@ function WorkoutExercisePage() {
         ? null
         : firstUndone;
 
-  // The rest starts as soon as the set is validated (RM-023 for its length).
+  // Nothing left to do in the whole session once this set is validated.
+  function isLastSetOfSession(set: WorkoutSetRow): boolean {
+    return exercises.every((item) =>
+      item.sets.every(
+        (other) => other.id === set.id || other.validated_at !== null,
+      ),
+    );
+  }
+
+  // The rest starts as soon as the set is validated (RM-023 for its length),
+  // except after the very last set of the session: there is nothing left to
+  // rest for, so the exercises come back right away (correction US-30).
   function startRest(set: WorkoutSetRow, index: number) {
     if (exercise === undefined || exercise === null) {
+      return;
+    }
+    if (isLastSetOfSession(set)) {
+      navigate(`/entrainement/${sessionId}`);
       return;
     }
     setRest({

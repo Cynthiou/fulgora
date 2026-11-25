@@ -343,3 +343,58 @@ describe("WorkoutExercisePage · ajouter et retirer une série (US-32)", () => {
     expect(removeSetMock).toHaveBeenCalledWith(5);
   });
 });
+
+describe("WorkoutExercisePage · pas de repos après la dernière série (US-30)", () => {
+  beforeEach(() => {
+    readMock.mockReset();
+    validateMock.mockReset();
+    addSetMock.mockReset();
+    removeSetMock.mockReset();
+  });
+
+  it("goes back to the exercises instead of resting", async () => {
+    // One exercise, one set left to do: it is the last of the session.
+    const lastOne: WorkoutSessionTree = {
+      ...tree,
+      blocks: [
+        {
+          ...tree.blocks[0],
+          exercises: [
+            {
+              ...tree.blocks[0].exercises[0],
+              sets: [set(1, true), set(2, false)],
+            },
+          ],
+        },
+      ],
+    };
+    readMock.mockResolvedValue(lastOne);
+    validateMock.mockResolvedValue({ ...set(2, true) });
+    const user = renderPage();
+    await screen.findByText("Développé couché");
+
+    await user.click(
+      screen.getByRole("button", { name: /Valider la série 2/ }),
+    );
+
+    expect(await screen.findByText("Page 9 / liste")).toBeTruthy();
+    expect(
+      screen.queryByRole("heading", { level: 1, name: "Repos" }),
+    ).toBeNull();
+  });
+
+  it("still rests when a set remains elsewhere in the session", async () => {
+    readMock.mockResolvedValue(tree);
+    validateMock.mockResolvedValue({ ...set(2, true) });
+    const user = renderPage();
+    await screen.findByText("Développé couché");
+
+    await user.click(
+      screen.getByRole("button", { name: /Valider la série 2/ }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Repos" }),
+    ).toBeTruthy();
+  });
+});

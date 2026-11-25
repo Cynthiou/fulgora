@@ -30,9 +30,7 @@ describe("DurationTimer (B5b, B5c)", () => {
     expect(screen.getByText("1:00")).toBeTruthy();
 
     act(() => {
-      screen
-        .getByRole("button", { name: /Lancer le minuteur/ })
-        .click();
+      screen.getByRole("button", { name: /Lancer le minuteur/ }).click();
     });
     tick(53);
     expect(screen.getByText("0:07")).toBeTruthy();
