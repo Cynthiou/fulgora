@@ -58,11 +58,11 @@ Bouton désactivé.
 
 ## Tâches techniques
 
-- [ ] BDD : provenance par les colonnes `source_*` à `NULL` (D-18)
-- [ ] Backend : `createWorkoutSet`, `createWorkoutExercise`, `createWorkoutBlock` (positions = max + 1), `deleteAddedWorkoutSet` (seulement si `source_planned_set_id IS NULL`)
-- [ ] Backend : `POST /api/workout-sessions/:id/blocks`, `POST /api/workout-blocks/:id/exercises`, `POST /api/workout-exercises/:id/sets`, `DELETE /api/workout-sets/:id`
-- [ ] Frontend : boutons dans B2 et B3, réutilisation du mode sélection du catalogue
-- [ ] Tests : back : ajout, suppression d'un ajouté, refus sur un prévu, séance terminée → 409
+- [x] BDD : provenance par les colonnes `source_*` à `NULL` (D-18), déjà au schéma
+- [x] Backend : `createWorkoutSet`, `createWorkoutExercise`, `createWorkoutBlock` (position = max + 1 avec `FOR UPDATE`), `deleteAddedWorkoutSet`
+- [x] Backend : les quatre routes, chacune dans une transaction
+- [x] Frontend : « + Ajouter une série » et la corbeille en B3a, « + Ajouter un exercice ou un bloc » en B2 avec le catalogue en mode sélection et le choix de la destination
+- [x] Tests : back : ajout d'une série, d'un exercice et d'un bloc, suppression d'un ajouté, refus sur un prévu (422), séance terminée → 409 ; client et E2E
 
 ## Definition of Done
 
