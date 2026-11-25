@@ -69,18 +69,18 @@ Aucune route propre : l'enregistrement est livré par l'US-23.
 
 ## Tâches techniques
 
-- [ ] Shared : `shared/session-template.ts` : types `SessionDraft`, `DraftBlock`, `DraftExercise`, `PlannedSetValues` ; `sessionDraftSchema` (Zod) avec toutes les bornes (voir US-15)
-- [ ] Frontend : `features/session-template/hooks/sessionDraftReducer.ts` : fonction pure, actions `setName`, `setDate`, `setTime`, `addBlock`, `removeBlock`, `restoreBlock`, `moveBlock`, `addExercises`, `removeExercise`, `updateExerciseRest`, `addSet`, `duplicateLastSet`, `updateSet`, `removeSet`
-- [ ] Frontend : `features/session-template/hooks/useSessionDraft.ts` (`useReducer` + `isDirty`)
-- [ ] Frontend : **Notion à expliquer avant de coder** : `useReducer` (un état complexe modifié par une seule fonction pure, testable sans écran)
-- [ ] Frontend : `features/session-template/pages/SessionEditorPage.tsx` (A2), `components/SessionReview.tsx` (A8)
-- [ ] Frontend : garde de sortie : `beforeunload` + confirmation sur le retour ‹ (React Router `useBlocker`)
-- [ ] Routing : `/seances/nouvelle?date=AAAA-MM-JJ` (plein écran, sans onglets)
-- [ ] Tests : reducer : chaque action, ordre conservé, `isDirty`
-- [ ] Tests : front : nom obligatoire, avertissement « pas d'exercice », confirmation de sortie
+- [x] Shared : `shared/session-template.ts` : types `SessionDraft`, `DraftBlock`, `DraftExercise`, `PlannedSetValues` ; `sessionDraftSchema` (Zod) avec toutes les bornes (voir US-15)
+- [x] Frontend : `features/session-template/hooks/sessionDraftReducer.ts` : fonction pure, actions `setName`, `setDate`, `setTime`, `addBlock`, `removeBlock`, `restoreBlock`, `moveBlock`, `addExercises`, `removeExercise`, `updateExerciseRest`, `addSet`, `duplicateLastSet`, `updateSet`, `removeSet`
+- [x] Frontend : `features/session-template/hooks/useSessionDraft.ts` (`useReducer` + `isDirty`)
+- [x] Frontend : **Notion à expliquer avant de coder** : `useReducer` (un état complexe modifié par une seule fonction pure, testable sans écran)
+- [x] Frontend : `features/session-template/pages/SessionEditorPage.tsx` (A2), `components/SessionReview.tsx` (A8)
+- [x] Frontend : garde de sortie : `beforeunload` + confirmation sur le retour ‹ (React Router `useBlocker`)
+- [x] Routing : `/seances/nouvelle?date=AAAA-MM-JJ` (plein écran, sans onglets)
+- [x] Tests : reducer : chaque action, ordre conservé, `isDirty`
+- [x] Tests : front : nom obligatoire, avertissement « pas d'exercice », confirmation de sortie
 
 ## Definition of Done
 
-- [ ] Reducer couvert par des tests unitaires
-- [ ] Confirmation de sortie testée (retour ‹ et fermeture)
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Reducer couvert par des tests unitaires
+- [x] Confirmation de sortie testée (retour ‹ et fermeture)
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
