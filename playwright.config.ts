@@ -20,7 +20,9 @@ export default defineConfig({
   projects: [
     {
       name: "mobile",
-      use: { browserName: "chromium", viewport: { width: 375, height: 812 } },
+      // The size of the high fidelity mockups, so a capture and a mockup can
+      // be put side by side (390 x 844, an iPhone 14).
+      use: { browserName: "chromium", viewport: { width: 390, height: 844 } },
     },
     {
       name: "desktop",

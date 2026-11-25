@@ -8,6 +8,9 @@ type Props = {
   message?: string;
   // The small picture of the mockups, in its tinted box
   icon?: string;
+  // CAL-03e and NOT-02v centre the block and draw a slightly bigger box;
+  // 03-1 and 04-3 keep it against the left edge.
+  centered?: boolean;
   // Usually the one action that fills the emptiness, for example "Créer une séance".
   children?: ReactNode;
 };
@@ -20,18 +23,29 @@ function EmptyState({
   title,
   message,
   icon,
+  centered = false,
   children,
   headingLevel: Heading = "h2",
 }: Props) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
-      <div className="flex flex-col items-start gap-2.5 py-1.5">
+    <div
+      className={`flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card ${
+        centered ? "items-center" : "items-start"
+      }`}
+    >
+      <div
+        className={`flex flex-col gap-2.5 ${
+          centered ? "items-center py-2.5 text-center" : "items-start py-1.5"
+        }`}
+      >
         {icon !== undefined && (
           <span
             aria-hidden="true"
-            className="grid size-[52px] place-items-center rounded-hero bg-secondary/10 text-secondary"
+            className={`grid place-items-center rounded-hero bg-secondary/10 text-secondary ${
+              centered ? "size-14" : "size-[52px]"
+            }`}
           >
-            <Icon src={icon} className="size-6" />
+            <Icon src={icon} className={centered ? "size-7" : "size-6"} />
           </span>
         )}
         <Heading className="text-[26px] leading-none">{title}</Heading>

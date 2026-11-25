@@ -1,46 +1,36 @@
 import { STATUSES, type StatusCode } from "shared";
 
-// The small square of the calendar: the shape says the status, the colour
-// only helps (RM-064). It is never alone, the legend names every square.
-const DOT_CLASSES: Record<StatusCode, string> = {
-  planned: "border-2 border-secondary",
-  completed: "border-2 border-status-done bg-status-done",
-  unfinished:
-    "border-2 border-status-pending bg-gradient-to-r from-status-pending from-50% to-transparent to-50%",
-  to_confirm: "border-2 border-dashed border-status-pending",
-  missed: "border-0",
-  cancelled: "border-0",
-  moved: "border-0",
-};
-
-// The two statuses drawn as a character instead of a square.
-const DOT_SYMBOLS: Partial<Record<StatusCode, string>> = {
-  missed: "×",
-  cancelled: "/",
-  moved: "↷",
+// The colour of each status in the calendar and in the chips (CAL-01).
+const DOT_COLOURS: Record<StatusCode, string> = {
+  planned: "bg-secondary",
+  completed: "bg-status-done",
+  unfinished: "bg-status-pending",
+  to_confirm: "bg-status-pending",
+  missed: "bg-status-missed",
+  cancelled: "bg-status-cancelled",
+  moved: "bg-muted",
 };
 
 type Props = {
   status: StatusCode;
-  // Named for the screen reader when the square stands alone in a cell
+  // 5 px in a day of the month, 7 px in the legend
+  size?: "sm" | "md";
+  // Named for the screen reader when the dot stands alone in a cell
   isLabelled?: boolean;
 };
 
-function StatusDot({ status, isLabelled = false }: Props) {
-  const symbol = DOT_SYMBOLS[status];
-
+// Screen CAL-01: a small round dot says what a day holds. It never stands
+// alone: the legend names every colour, and each session says its status in
+// words right under the calendar (RM-064).
+function StatusDot({ status, size = "sm", isLabelled = false }: Props) {
   return (
-    <span className="inline-flex size-3 items-center justify-center">
+    <span className="inline-flex items-center justify-center">
       <span
         aria-hidden="true"
-        className={
-          symbol === undefined
-            ? `size-3 rounded-[2px] ${DOT_CLASSES[status]}`
-            : "text-xs font-bold leading-none"
-        }
-      >
-        {symbol}
-      </span>
+        className={`block rounded-full ${
+          size === "sm" ? "size-[5px]" : "size-[7px]"
+        } ${DOT_COLOURS[status]}`}
+      />
       {isLabelled && <span className="sr-only">{STATUSES[status].label}</span>}
     </span>
   );

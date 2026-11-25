@@ -3,8 +3,9 @@ import {
   addDays,
   buildDayEntries,
   formatLongDate,
+  WEEKDAY_SHORT,
 } from "shared";
-import AppointmentRow from "./AppointmentRow";
+import WeekRow from "./WeekRow";
 
 type Props = {
   // The Monday of the week
@@ -14,56 +15,54 @@ type Props = {
   onPickDay: (day: string) => void;
 };
 
-const DAY_NAMES = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
-
 // Screen CAL-02: the seven days one under the other, each with its sessions.
-// A day without any session keeps its line, empty.
+// A day without any session keeps its line, drawn as a dashed rule. Today is
+// written in blue.
 function WeekList({ weekStart, today, items, onPickDay }: Props) {
   const days = Array.from({ length: 7 }, (_, index) =>
     addDays(weekStart, index),
   );
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-2.5">
       {days.map((day, index) => {
         const entries = buildDayEntries(items, day);
         const isToday = day === today;
         return (
-          <li key={day} className="flex gap-3">
+          <li key={day} className="flex gap-2.5">
             {/* Named by what it shows, with the full date hidden before:
                 an aria-label alone would drop the visible text (axe). */}
             <button
               type="button"
               onClick={() => onPickDay(day)}
-              className="flex w-10 shrink-0 flex-col items-center"
+              className={`flex w-[38px] shrink-0 flex-col items-center pt-1.5 ${
+                isToday ? "text-secondary" : ""
+              }`}
             >
               <span className="sr-only">
                 Voir le {formatLongDate(day).toLocaleLowerCase("fr-FR")}
               </span>
               <span
                 aria-hidden="true"
-                className="text-overline uppercase text-muted"
-              >
-                {DAY_NAMES[index]}
-              </span>
-              <span
-                className={`flex size-8 items-center justify-center rounded-ctl font-display text-display-sm ${
-                  isToday ? "bg-neutral text-neutral-content" : ""
+                className={`text-[9.5px] font-bold uppercase tracking-[0.14em] ${
+                  isToday ? "" : "text-muted"
                 }`}
               >
+                {WEEKDAY_SHORT[index]}
+              </span>
+              <span aria-hidden="true" className="text-[17px] font-extrabold">
                 {Number(day.slice(8, 10))}
               </span>
             </button>
 
             {entries.length === 0 ? (
-              <span className="mt-4 h-px flex-1 bg-base-300" />
+              <span className="mt-[27px] h-px flex-1 border-b border-dashed border-rule" />
             ) : (
-              <ul className="flex-1 overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+              <ul className="flex flex-1 flex-col gap-[5px]">
                 {entries.map((entry) => (
-                  <AppointmentRow
+                  <WeekRow
                     key={`${entry.item.id}-${entry.isReminder}`}
                     entry={entry}
-                    showTime={false}
                   />
                 ))}
               </ul>

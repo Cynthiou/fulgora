@@ -103,6 +103,20 @@ export const WEEKDAY_NAMES = [
   "dimanche",
 ];
 
+// The same days in three letters, as the week view writes them (CAL-02).
+export const WEEKDAY_SHORT = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+
+// Monday = 0 ... Sunday = 6, for a "YYYY-MM-DD" day.
+export function weekdayIndex(day: string): number {
+  return (new Date(`${day}T00:00:00Z`).getUTCDay() + 6) % 7;
+}
+
+// "2026-11-28" -> "SAM 28": the day of a session shown on another date
+// (CAL-03e, where the hour moves under the name).
+export function formatShortDay(day: string): string {
+  return `${WEEKDAY_SHORT[weekdayIndex(day)]} ${Number(day.slice(8, 10))}`;
+}
+
 // The weeks of a month, Monday first, as "YYYY-MM-DD" cells; null fills the
 // days that belong to the previous or the next month.
 export function listMonthGrid(yearMonth: string): (string | null)[][] {
@@ -167,6 +181,28 @@ export function formatDayMonth(date: string): string {
     day: "numeric",
     month: "long",
   }).format(new Date(`${date}T00:00:00Z`));
+}
+
+// "2026-11-23" (a Monday) -> "23 → 29 nov.", the title of the week view
+// (CAL-02). The month is shortened, as the mockup writes it.
+export function formatWeekRange(monday: string): string {
+  const sunday = addDays(monday, 6);
+  const month = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    month: "short",
+  }).format(new Date(`${sunday}T00:00:00Z`));
+  return `${Number(monday.slice(8, 10))} → ${Number(sunday.slice(8, 10))} ${month}`;
+}
+
+// The ISO week number of a day: "Semaine 48" under the title of the week
+// view (CAL-02). The week holding the Thursday carries the number.
+export function isoWeekNumber(day: string): number {
+  const thursday = new Date(`${addDays(day, 3 - weekdayIndex(day))}T00:00:00Z`);
+  const firstOfYear = new Date(
+    Date.UTC(thursday.getUTCFullYear(), 0, 1),
+  ).getTime();
+  const days = Math.round((thursday.getTime() - firstOfYear) / 86400000);
+  return Math.floor(days / 7) + 1;
 }
 
 // "2026-11-28" -> "Séance le samedi 28 novembre" (the date picker, A2b).

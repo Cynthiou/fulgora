@@ -7,11 +7,11 @@ function PlanningLegend() {
   return (
     <ul
       aria-label="Légende des statuts"
-      className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted"
+      className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-medium text-muted"
     >
       {STATUS_CODES.map((status) => (
-        <li key={status} className="flex items-center gap-1">
-          <StatusDot status={status} />
+        <li key={status} className="flex items-center gap-[5px]">
+          <StatusDot status={status} size="md" />
           {STATUSES[status].label}
         </li>
       ))}

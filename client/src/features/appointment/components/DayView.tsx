@@ -3,11 +3,15 @@ import {
   type AppointmentListItem,
   buildDayEntries,
   type DayEntry,
-  formatLongDate,
   getAppointmentStatus,
   isWorkoutOver,
 } from "shared";
+import calendarIcon from "../../../assets/icons/ui/app/calendar.svg";
+import playIcon from "../../../assets/icons/ui/app/play.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import AppointmentRow from "./AppointmentRow";
 
 type Props = {
@@ -23,8 +27,9 @@ type Props = {
   onStart: (appointmentId: number) => void;
 };
 
+// The one orange button of the screen (CAL-03, CAL-03e).
 const PRIMARY_BUTTON =
-  "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60";
+  "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60";
 
 // Screens CAL-03, CAL-03e and CAL-03h: one day and its sessions. The next
 // session to do is flagged "À suivre" and is the only one with a start
@@ -57,41 +62,38 @@ function DayView({
 
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-base-300 p-6 text-center">
-          <p className="font-display text-display-sm">
-            {isToday ? "Rien de prévu aujourd'hui" : "Rien de prévu ce jour-là"}
-          </p>
-          <p className="text-muted">
-            Ajoute une séance libre ou démarre un programme.
-          </p>
+      <div className="flex flex-col gap-2.5">
+        <EmptyState
+          centered
+          icon={calendarIcon}
+          title={
+            isToday ? "Rien de prévu aujourd'hui" : "Rien de prévu ce jour-là"
+          }
+          message="Ajoute une séance libre ou démarre un programme."
+        >
           <Link
             to={`/seances/nouvelle?date=${day}`}
             className={`${PRIMARY_BUTTON} no-underline`}
           >
-            + Créer une séance
+            <Icon src={plusIcon} className="size-[18px]" />
+            Créer une séance
           </Link>
-        </div>
+        </EmptyState>
 
         {nextEntry !== null && (
           <section
             aria-labelledby="next-session"
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-1.5"
           >
             <h2
               id="next-session"
-              className="font-sans text-overline not-italic uppercase text-accent"
+              className="font-sans text-overline uppercase not-italic text-muted"
             >
               Prochaine séance
             </h2>
-            <ul className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
-              <AppointmentRow entry={nextEntry} showTime={false} />
+            <ul>
+              <AppointmentRow entry={nextEntry} withDate />
             </ul>
-            <p className="text-sm text-muted">
-              {formatLongDate(nextEntry.item.planned_date).toLocaleLowerCase(
-                "fr-FR",
-              )}
-            </p>
           </section>
         )}
       </div>
@@ -99,48 +101,56 @@ function DayView({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <ul className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
-        {entries.map((entry) => (
-          <AppointmentRow
-            key={`${entry.item.id}-${entry.isReminder}`}
-            entry={entry}
-            isNext={entry === next && !isPast}
-          />
-        ))}
+    <div className="flex flex-col gap-2.5">
+      <ul className="flex flex-col gap-2.5">
+        {entries.map((entry) =>
+          entry === next && !isPast ? (
+            // The session to come is announced, then ringed in blue (CAL-03).
+            <li
+              key={`${entry.item.id}-${entry.isReminder}`}
+              className="flex flex-col gap-1.5"
+            >
+              <span className="font-sans text-overline uppercase not-italic text-action-text">
+                À suivre
+              </span>
+              <ul>
+                <AppointmentRow entry={entry} isNext />
+              </ul>
+            </li>
+          ) : (
+            <AppointmentRow
+              key={`${entry.item.id}-${entry.isReminder}`}
+              entry={entry}
+            />
+          ),
+        )}
       </ul>
 
       {startError !== null && <ErrorState title={startError} />}
 
-      {next !== undefined && !isPast && (
-        <>
-          {isAnotherInProgress ? (
-            <p className="text-center font-semibold text-muted">
-              Une séance est en cours
-            </p>
-          ) : (
-            <button
-              type="button"
-              disabled={isStarting}
-              onClick={() => onStart(next.item.id)}
-              className={PRIMARY_BUTTON}
-            >
-              {isStarting ? (
-                "Démarrage…"
-              ) : (
-                <>
-                  <span aria-hidden="true">{"▶ "}</span>
-                  Démarrer {next.item.session_name}
-                </>
-              )}
-            </button>
-          )}
-          <p className="text-center text-sm text-muted">
-            La prochaine séance prévue. Les autres se démarrent depuis leur
-            détail.
+      {next !== undefined &&
+        !isPast &&
+        (isAnotherInProgress ? (
+          <p className="text-center text-sm font-semibold text-muted">
+            Une séance est en cours
           </p>
-        </>
-      )}
+        ) : (
+          <button
+            type="button"
+            disabled={isStarting}
+            onClick={() => onStart(next.item.id)}
+            className={PRIMARY_BUTTON}
+          >
+            {isStarting ? (
+              "Démarrage…"
+            ) : (
+              <>
+                <Icon src={playIcon} className="size-[18px]" />
+                Démarrer {next.item.session_name}
+              </>
+            )}
+          </button>
+        ))}
 
       {isPast && toConfirm.length > 0 && (
         <p className="text-center text-sm text-muted">

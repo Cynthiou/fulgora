@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import {
   addDays,
   buildDayEntries,
@@ -7,14 +7,16 @@ import {
   formatDayCount,
   formatLongDate,
   formatMonthTitle,
+  formatWeekRange,
   getAppointmentDisplayDate,
+  isoWeekNumber,
   isWorkoutOver,
   shiftMonth,
   todayInParis,
   toYearMonth,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
@@ -120,44 +122,37 @@ function PlanningPage() {
           .map((item) => ({ item, isReminder: false }))[0] ?? null);
 
   const title =
-    view === "mois"
-      ? formatMonthTitle(month)
-      : view === "semaine"
-        ? `${Number(startOfWeek(day).slice(8, 10))} → ${formatLongDate(
-            addDays(startOfWeek(day), 6),
-          )
-            .split(" ")
-            .slice(1)
-            .join(" ")}`
-        : day === today
-          ? "Aujourd'hui"
-          : formatLongDate(day);
+    view === "semaine"
+      ? formatWeekRange(startOfWeek(day))
+      : day === today
+        ? "Aujourd'hui"
+        : formatLongDate(day);
 
-  // "Jeudi 26 novembre · 4 séances · 1 effectuée" under "Aujourd'hui";
-  // only the count when the title already carries the date (CAL-03h).
+  // "Semaine 48" under the week, "Jeudi 26 novembre · 4 séances · 1
+  // effectuée" under the day (CAL-02, CAL-03h).
   const subtitle =
-    view === "jour"
-      ? [day === today ? formatLongDate(day) : null, formatDayCount(entries)]
+    view === "semaine"
+      ? `Semaine ${isoWeekNumber(day)}`
+      : [day === today ? formatLongDate(day) : null, formatDayCount(entries)]
           .filter((part): part is string => part !== null)
-          .join(" · ")
-      : null;
+          .join(" · ");
+
+  const arrowLabels =
+    view === "mois"
+      ? ["Mois précédent", "Mois suivant"]
+      : view === "semaine"
+        ? ["Semaine précédente", "Semaine suivante"]
+        : ["Jour précédent", "Jour suivant"];
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
-      <div className="flex items-baseline justify-between gap-3">
-        <h1 className="text-display-md">Planning</h1>
-        <Link
-          to="/programmes"
-          className="min-h-tap font-semibold text-secondary underline"
-        >
-          Mes programmes
-        </Link>
-      </div>
+    <div className="mx-auto flex max-w-md flex-col gap-2.5 px-[18px] pb-3.5 pt-1">
+      {/* The title and the link to the programs are in the header (CAL-01). */}
+      <h1 className="sr-only">Planning</h1>
 
       <div
         role="tablist"
         aria-label="Vue du planning"
-        className="grid grid-cols-3 overflow-hidden rounded-btn border border-base-300"
+        className="flex gap-[3px] rounded-btn bg-track p-[3px]"
       >
         {VIEWS.map((item) => (
           <button
@@ -166,10 +161,8 @@ function PlanningPage() {
             role="tab"
             aria-selected={view === item.code}
             onClick={() => go(item.code, day)}
-            className={`min-h-tap px-2 font-semibold ${
-              view === item.code
-                ? "bg-neutral text-neutral-content"
-                : "bg-base-100"
+            className={`h-9 flex-1 rounded-ctl text-[13px] font-bold ${
+              view === item.code ? "bg-base-100 shadow-card" : "text-muted"
             }`}
           >
             {item.label}
@@ -177,48 +170,44 @@ function PlanningPage() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => step(-1)}
-          aria-label={
-            view === "mois"
-              ? "Mois précédent"
-              : view === "semaine"
-                ? "Semaine précédente"
-                : "Jour précédent"
-          }
-          className="flex size-tap items-center justify-center rounded-btn border border-base-300 text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-5" />
-        </button>
-        <div className="flex min-w-0 flex-col items-center">
-          <p className="truncate font-display text-display-sm">{title}</p>
-          {subtitle !== null && (
-            <p className="truncate text-sm text-muted">{subtitle}</p>
-          )}
+      {/* The week and the day carry their title between two square arrows;
+          the month puts it inside its card, right over the grid. */}
+      {view !== "mois" && (
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => step(-1)}
+            aria-label={arrowLabels[0]}
+            className="-mx-0.5 flex size-tap items-center justify-center"
+          >
+            <span className="grid size-10 place-items-center rounded-btn border border-base-300 bg-base-100 shadow-card">
+              <Icon src={chevronLeftIcon} className="size-[18px]" />
+            </span>
+          </button>
+          <div className="flex min-w-0 flex-col items-center gap-[3px]">
+            <p className="truncate font-display text-display-sm">{title}</p>
+            <p className="truncate text-xs font-medium leading-[1.45] text-muted">
+              {subtitle}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => step(1)}
+            aria-label={arrowLabels[1]}
+            className="-mx-0.5 flex size-tap items-center justify-center"
+          >
+            <span className="grid size-10 place-items-center rounded-btn border border-base-300 bg-base-100 shadow-card">
+              <Icon src={chevronRightIcon} className="size-[18px]" />
+            </span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => step(1)}
-          aria-label={
-            view === "mois"
-              ? "Mois suivant"
-              : view === "semaine"
-                ? "Semaine suivante"
-                : "Jour suivant"
-          }
-          className="flex size-tap items-center justify-center rounded-btn border border-base-300 text-secondary"
-        >
-          <Icon src={chevronRightIcon} className="size-5" />
-        </button>
-      </div>
+      )}
 
       {day !== today && (
         <button
           type="button"
           onClick={() => go(view, today)}
-          className="min-h-tap self-center font-semibold text-secondary underline"
+          className="min-h-tap self-center text-[13px] font-semibold text-secondary underline"
         >
           <span aria-hidden="true">↩ </span>Revenir à aujourd'hui
         </button>
@@ -238,25 +227,53 @@ function PlanningPage() {
         <>
           {view === "mois" && (
             <>
-              <MonthGrid
-                yearMonth={month}
-                selectedDay={day}
-                today={today}
-                items={items}
-                onSelect={(picked) => go("mois", picked)}
-              />
+              <div className="flex flex-col gap-2 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => step(-1)}
+                    aria-label={arrowLabels[0]}
+                    className="-my-3 flex size-tap items-center justify-center text-muted"
+                  >
+                    <Icon src={chevronLeftIcon} className="size-[18px]" />
+                  </button>
+                  <p className="text-[15px] font-extrabold">
+                    {formatMonthTitle(month)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => step(1)}
+                    aria-label={arrowLabels[1]}
+                    className="-my-3 flex size-tap items-center justify-center text-muted"
+                  >
+                    <Icon src={chevronRightIcon} className="size-[18px]" />
+                  </button>
+                </div>
+                <MonthGrid
+                  yearMonth={month}
+                  selectedDay={day}
+                  today={today}
+                  items={items}
+                  onSelect={(picked) => go("mois", picked)}
+                />
+              </div>
               <PlanningLegend />
               <section
                 aria-labelledby="day-title"
                 className="flex flex-col gap-2"
               >
-                <h2 id="day-title" className="text-display-sm">
+                <h2
+                  id="day-title"
+                  className="font-sans text-overline uppercase not-italic text-muted"
+                >
                   {formatLongDate(day)} · {formatDayCount(entries)}
                 </h2>
                 {entries.length === 0 ? (
-                  <p className="text-muted">Aucune séance ce jour-là.</p>
+                  <p className="text-sm text-muted">
+                    Aucune séance ce jour-là.
+                  </p>
                 ) : (
-                  <ul className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+                  <ul className="flex flex-col gap-2">
                     {entries.map((entry) => (
                       <AppointmentRow
                         key={`${entry.item.id}-${entry.isReminder}`}

@@ -2,74 +2,58 @@ import { Link } from "react-router";
 import {
   type DayEntry,
   describeEntry,
+  formatShortDay,
+  getAppointmentDisplayDate,
   getAppointmentStatus,
   getEntryTime,
-  STATUSES,
 } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
-import Icon from "../../../components/Icon";
-import StatusDot from "./StatusDot";
+import StatusChip from "../../../components/StatusChip";
 
 type Props = {
   entry: DayEntry;
-  // The next session of the day, the only one with a "À suivre" flag (CAL-03)
+  // The next session of the day: the mockups ring it in blue (CAL-01)
   isNext?: boolean;
-  // The time in front of the name, as in the day view (CAL-03)
-  showTime?: boolean;
+  // CAL-03e: a session of another day shows that day ("SAM 28") in place of
+  // its hour, and the hour moves under the name.
+  withDate?: boolean;
 };
 
-// One line of the Planning: the time, the status, the name, what the session
-// is. A reminder (a session done another day) is greyed and has no time, but
-// it opens the same session (RM-070).
-function AppointmentRow({ entry, isNext = false, showTime = true }: Props) {
+// Screens CAL-01, CAL-02 and CAL-03: one session of a day. The time on the
+// left, the name and what it is in the middle, its status on the right. A
+// reminder (a session done another day) is greyed and has no time, but it
+// opens the same session (RM-070).
+function AppointmentRow({ entry, isNext = false, withDate = false }: Props) {
   const { item, isReminder } = entry;
   const status = getAppointmentStatus(item);
   const time = getEntryTime(entry);
+  const lead = withDate
+    ? formatShortDay(getAppointmentDisplayDate(item))
+    : time;
+  const subtitle = [withDate ? time : null, describeEntry(entry)]
+    .filter((part): part is string => part !== null)
+    .join(" · ");
 
   return (
-    <li className="border-b border-base-300 last:border-b-0">
+    <li>
       <Link
         to={`/seances/${item.id}`}
-        className={`flex items-center gap-3 p-3 ${isReminder ? "bg-soft" : ""}`}
+        className={`flex items-center gap-3 rounded-card border bg-base-100 px-3 py-2.5 ${
+          isNext
+            ? "border-[1.5px] border-secondary shadow-next"
+            : "border-base-300 shadow-card"
+        } ${isReminder ? "opacity-60" : ""}`}
       >
-        {showTime && (
-          <span
-            className={`w-12 shrink-0 font-semibold ${
-              isReminder ? "text-faint" : ""
-            }`}
-          >
-            {time ?? <span aria-hidden="true">—</span>}
-            {time === null && <span className="sr-only">Sans heure</span>}
-          </span>
-        )}
-        <StatusDot status={status} />
-        <span className="flex min-w-0 flex-1 flex-col">
-          <span
-            className={`truncate font-display text-display-sm ${
-              isReminder ? "text-muted" : ""
-            }`}
-          >
-            {item.session_name}
-          </span>
-          <span className="truncate text-sm text-muted">
-            <span className="sr-only">{STATUSES[status].label} · </span>
-            {describeEntry(entry)}
-          </span>
-          {isNext && (
-            <span className="mt-1 w-fit rounded-chip bg-neutral px-2 py-0.5 text-overline uppercase text-neutral-content">
-              À suivre
-            </span>
-          )}
+        <span className="w-[42px] shrink-0 text-[13px] font-extrabold">
+          {lead ?? <span aria-hidden="true">—</span>}
+          {lead === null && <span className="sr-only">Sans heure</span>}
         </span>
-        {!showTime && (
-          <span
-            className={`shrink-0 font-semibold ${isReminder ? "text-faint" : ""}`}
-          >
-            {time ?? <span aria-hidden="true">—</span>}
-            {time === null && <span className="sr-only">Sans heure</span>}
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <b className="truncate text-sm font-bold">{item.session_name}</b>
+          <span className="truncate text-[11.5px] font-medium leading-[1.45] text-muted">
+            {subtitle}
           </span>
-        )}
-        <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
+        </span>
+        <StatusChip status={status} />
       </Link>
     </li>
   );

@@ -119,6 +119,16 @@
   --fulgora-soft: #f3f5f8;
   --fulgora-muted: #5b6576;
   --fulgora-faint: #8a93a3;
+  /* The grey track of a segmented control (CAL-01) */
+  --fulgora-track: #e1e5eb;
+  /* The chosen day of the calendar grid (CAL-01) */
+  --fulgora-pick: #0b1220;
+  /* The dashed rule of an empty day in the week view (CAL-02) */
+  --fulgora-rule: #c9cfd8;
+  /* The word "À suivre" of the mockups is written in the orange of the
+     action. On the light page it only reaches 2.45:1, under the 4.5:1 of
+     RM-064, so small orange text uses this darker orange. */
+  --fulgora-action-text: #ab3f0a;
   --fulgora-shadow-card:
     0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 18px rgba(15, 23, 42, 0.05);
   /* The card of the day and the other hero cards of the mockups */
@@ -129,6 +139,10 @@
   --fulgora-soft: #1e293b;
   --fulgora-muted: #94a3b8;
   --fulgora-faint: #64748b;
+  --fulgora-track: #1e293b;
+  --fulgora-pick: #2a3a5c;
+  --fulgora-rule: #3a4763;
+  --fulgora-action-text: #ff6b35;
   --fulgora-shadow-card:
     inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
   --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -139,6 +153,10 @@
     --fulgora-soft: #1e293b;
     --fulgora-muted: #94a3b8;
     --fulgora-faint: #64748b;
+    --fulgora-track: #1e293b;
+    --fulgora-pick: #2a3a5c;
+    --fulgora-rule: #3a4763;
+    --fulgora-action-text: #ff6b35;
     --fulgora-shadow-card:
       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
     --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -150,6 +168,11 @@
   --color-soft: var(--fulgora-soft);
   --color-muted: var(--fulgora-muted);
   --color-faint: var(--fulgora-faint);
+  --color-track: var(--fulgora-track);
+  --color-pick: var(--fulgora-pick);
+  --color-pick-content: #ffffff;
+  --color-rule: var(--fulgora-rule);
+  --color-action-text: var(--fulgora-action-text);
   --color-status-done: #16a34a;
   --color-status-pending: #d97706;
   --color-status-missed: #dc2626;
@@ -181,9 +204,15 @@
   --radius-btn: 8px;
   --radius-card: 10px;
   --radius-hero: 12px;
+  /* The round button of the Planning is a soft square (CAL-01) */
+  --radius-fab: 16px;
 
   --shadow-action: 0 10px 24px rgba(255, 107, 53, 0.32);
   --shadow-nav-active: 0 10px 22px rgba(37, 99, 235, 0.35);
+  /* The session to come, ringed in blue (CAL-01, CAL-03) */
+  --shadow-next: 0 8px 20px rgba(37, 99, 235, 0.12);
+  /* The round button of the Planning (CAL-01) */
+  --shadow-fab: 0 12px 26px rgba(37, 99, 235, 0.4);
 
   --spacing-tap: 44px;
   --spacing-btn: 56px;

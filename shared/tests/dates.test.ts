@@ -5,7 +5,10 @@ import {
   formatLongDate,
   formatMonthTitle,
   formatSessionDate,
+  formatShortDay,
   formatTimeOfDay,
+  formatWeekRange,
+  isoWeekNumber,
   listMonthGrid,
   shiftMonth,
   todayIn,
@@ -100,6 +103,19 @@ describe("calendar helpers (US-23)", () => {
     expect(weeks[5]?.[0]).toBe("2026-11-30");
     expect(weeks[5]?.[6]).toBeNull();
     expect(listMonthGrid("2026-06")[0]?.[0]).toBe("2026-06-01");
+  });
+
+  it("writes a day in three letters and its number (CAL-03e)", () => {
+    expect(formatShortDay("2026-11-28")).toBe("SAM 28");
+    expect(formatShortDay("2026-11-30")).toBe("LUN 30");
+  });
+
+  it("writes the week range and its number (CAL-02)", () => {
+    expect(formatWeekRange("2026-11-23")).toBe("23 → 29 nov.");
+    expect(isoWeekNumber("2026-11-23")).toBe(48);
+    expect(isoWeekNumber("2026-11-29")).toBe(48);
+    // The 1st of January 2027 is a Friday: it belongs to the week 53 of 2026.
+    expect(isoWeekNumber("2027-01-01")).toBe(53);
   });
 
   it("writes the month title and the chosen date in French", () => {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { formatLongDate } from "shared";
-import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
-import xIcon from "../../../assets/icons/ui/actions/x.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import xIcon from "../../../assets/icons/ui/app/x.svg";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -43,7 +43,7 @@ function CreateChoiceSheet({ date }: Props) {
         />
       )}
 
-      <div className="fixed inset-x-0 bottom-nav z-20 mx-auto flex max-w-md flex-col items-end gap-3 p-4">
+      <div className="fixed inset-x-0 bottom-nav z-20 mx-auto flex max-w-md flex-col items-end gap-3 p-4 pr-5">
         {isOpen && (
           <div className="flex w-full flex-col gap-2">
             <Link
@@ -87,9 +87,9 @@ function CreateChoiceSheet({ date }: Props) {
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
           aria-label={isOpen ? "Fermer le menu d'ajout" : "Ajouter une séance"}
-          className="flex size-14 items-center justify-center rounded-full bg-neutral text-neutral-content shadow-action"
+          className="grid size-[58px] place-items-center rounded-fab bg-secondary text-secondary-content shadow-fab"
         >
-          <Icon src={isOpen ? xIcon : plusIcon} className="size-6" />
+          <Icon src={isOpen ? xIcon : plusIcon} className="size-[26px]" />
         </button>
       </div>
     </>

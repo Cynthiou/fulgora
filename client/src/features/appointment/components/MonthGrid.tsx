@@ -21,9 +21,9 @@ type Props = {
 };
 
 // Screen CAL-01: the month, Monday first, written as a table, because a
-// calendar is a table of days. Three indicators per day at most, "+n"
-// beyond. The arrows move from day to day, and only the selected day is
-// reachable with the tab key.
+// calendar is a table of days. Each day is 32 px tall and carries one dot
+// per status it holds; the chosen day turns dark. The arrows move from day
+// to day, and only the selected day is reachable with the tab key.
 function MonthGrid({ yearMonth, selectedDay, today, items, onSelect }: Props) {
   const tableRef = useRef<HTMLTableElement>(null);
   // Focus follows the selection only after a key press, never on arrival.
@@ -59,7 +59,7 @@ function MonthGrid({ yearMonth, selectedDay, today, items, onSelect }: Props) {
     <table
       ref={tableRef}
       onKeyDown={handleKeyDown}
-      className="w-full table-fixed border-separate border-spacing-y-1"
+      className="w-full table-fixed border-separate border-spacing-[2px]"
     >
       <caption className="sr-only">
         Calendrier de {formatMonthTitle(yearMonth)}
@@ -70,7 +70,7 @@ function MonthGrid({ yearMonth, selectedDay, today, items, onSelect }: Props) {
             <th
               key={name}
               scope="col"
-              className="py-1 text-center text-xs font-semibold text-muted"
+              className="py-0.5 text-center text-[10px] font-bold text-faint"
             >
               <span aria-hidden="true">{WEEKDAY_INITIALS[index]}</span>
               <span className="sr-only">{name}</span>
@@ -84,7 +84,7 @@ function MonthGrid({ yearMonth, selectedDay, today, items, onSelect }: Props) {
             {week.map((slot) =>
               slot.day === null ? (
                 // Empty box before the first day and after the last one
-                <td key={slot.key} className="h-12" />
+                <td key={slot.key} className="h-8" />
               ) : (
                 <td key={slot.key} className="p-0">
                   <DayCell
@@ -124,27 +124,31 @@ function DayCell({ day, isSelected, isToday, items, onSelect }: CellProps) {
       aria-pressed={isSelected}
       aria-current={isToday ? "date" : undefined}
       onClick={() => onSelect(day)}
-      className={`flex h-12 w-full flex-col items-center justify-center gap-0.5 rounded-ctl text-base-content ${
-        isSelected ? "border-2 border-neutral font-extrabold" : ""
-      } ${isToday && !isSelected ? "font-extrabold" : ""}`}
+      className={`flex h-8 w-full flex-col items-center justify-center gap-0.5 rounded-btn text-[13px] ${
+        isSelected
+          ? "bg-pick font-extrabold text-pick-content"
+          : isToday
+            ? "font-extrabold ring-1 ring-inset ring-base-300"
+            : "font-semibold"
+      }`}
     >
-      <span className={isSelected ? "font-display" : ""}>
-        {Number(day.slice(8, 10))}
-      </span>
-      <span className="flex h-3 items-center gap-0.5">
-        {cell.indicators.map((indicator) => (
-          <StatusDot key={indicator.appointment_id} status={indicator.status} />
-        ))}
-        {cell.extra > 0 && (
-          <span aria-hidden="true" className="text-[10px] font-semibold">
-            +{cell.extra}
-          </span>
-        )}
-        {cell.hasMoved && (
-          <span aria-hidden="true" className="text-[10px]">
-            ↷
-          </span>
-        )}
+      <span>{Number(day.slice(8, 10))}</span>
+      <span className="flex h-[5px] items-center gap-[3px]">
+        {isSelected
+          ? cell.indicators.length > 0 && (
+              <span
+                aria-hidden="true"
+                className="block size-[5px] rounded-full bg-pick-content"
+              />
+            )
+          : cell.indicators
+              .slice(0, 3)
+              .map((indicator) => (
+                <StatusDot
+                  key={indicator.appointment_id}
+                  status={indicator.status}
+                />
+              ))}
       </span>
       <span className="sr-only">
         {formatLongDate(day)}
