@@ -6,11 +6,11 @@ import {
   type NotificationGroup,
   type NotificationItem,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import bellIcon from "../../../assets/icons/ui/app/bell.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
-import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
+import PageHeader from "../../../components/PageHeader";
 import { isAbortError } from "../../../services/api";
 import NotificationRow from "../components/NotificationRow";
 import {
@@ -85,31 +85,34 @@ function NotificationsPage() {
   }
 
   const hasUnread = items.some((item) => item.read_at === null);
+  // "3 non lues" under the title, as the mockup writes it (NOT-02).
+  const unreadCount = items.filter((item) => item.read_at === null).length;
+  const unreadLabel =
+    unreadCount === 0
+      ? undefined
+      : `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={() => navigate(from)}
-          aria-label="Retour"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <h1 className="flex-1 text-display-sm">Notifications</h1>
-        {hasUnread && (
-          <button
-            type="button"
-            onClick={readAll}
-            className="min-h-tap px-2 font-semibold text-secondary underline"
-          >
-            Tout marquer lu
-          </button>
-        )}
-      </header>
+      <PageHeader
+        onBack={() => navigate(from)}
+        title="Notifications"
+        subtitle={unreadLabel}
+        action={
+          hasUnread ? (
+            <button
+              type="button"
+              onClick={readAll}
+              className="min-h-tap shrink-0 px-1.5 text-[13px] font-semibold text-secondary"
+            >
+              <span className="sr-only">Tout marquer lu</span>
+              <span aria-hidden="true">Tout lire</span>
+            </button>
+          ) : undefined
+        }
+      />
 
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-2 px-[18px] pt-1 pb-3.5">
         {isLoading && <LoadingState label="Chargement des notifications…" />}
 
         {!isLoading && error !== null && (
@@ -122,6 +125,8 @@ function NotificationsPage() {
 
         {!isLoading && error === null && items.length === 0 && (
           <EmptyState
+            plain
+            icon={bellIcon}
             title="Aucune notification"
             message="Tu seras prévenu ici des séances à confirmer ou manquées, des programmes terminés et de tes records."
           />
@@ -144,11 +149,11 @@ function NotificationsPage() {
               >
                 <h2
                   id={`group-${group}`}
-                  className="font-sans text-overline not-italic uppercase text-accent"
+                  className="font-sans text-overline uppercase not-italic text-muted"
                 >
                   {NOTIFICATION_GROUP_LABELS[group]}
                 </h2>
-                <ul className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+                <ul className="flex flex-col gap-2">
                   {rows.map((item) => (
                     <NotificationRow key={item.id} item={item} onOpen={open} />
                   ))}
@@ -158,7 +163,7 @@ function NotificationsPage() {
           })}
 
         {/* The alert settings arrive with US-05. */}
-        <p className="text-center text-sm text-muted">
+        <p className="pt-2 text-center text-xs text-muted">
           Réglages des alertes : bientôt.
         </p>
       </div>
