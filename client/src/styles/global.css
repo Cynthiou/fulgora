@@ -259,6 +259,9 @@
   --shadow-next: 0 8px 20px rgba(37, 99, 235, 0.12);
   /* The round button of the Planning (CAL-01) */
   --shadow-fab: 0 12px 26px rgba(37, 99, 235, 0.4);
+  /* A panel sliding from the bottom, and a dialog over the page */
+  --shadow-sheet: 0 -10px 30px rgba(11, 18, 32, 0.2);
+  --shadow-dialog: 0 20px 50px rgba(11, 18, 32, 0.3);
   /* The card of the set being done (B3a) */
   --shadow-set: 0 10px 26px rgba(255, 107, 53, 0.14);
 

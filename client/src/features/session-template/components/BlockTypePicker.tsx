@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
 import { BLOCK_TYPES, type BlockType } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import BottomSheet from "../../../components/BottomSheet";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -8,61 +8,45 @@ type Props = {
   onClose: () => void;
 };
 
-// Screen A3: the 8 block types in one column. The timed ones (Circuit, AMRAP,
-// For Time) are greyed with "Bientôt" and cannot be chosen before US-43.
-// A native <dialog>: focus kept inside, Escape closes.
+// Screen A3: the 8 block types in one column, each with its two letters in
+// a square. The timed ones (Circuit, AMRAP, For Time) are greyed with
+// "Bientôt" and cannot be chosen before US-43.
 function BlockTypePicker({ onPick, onClose }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog === null || dialog.open) {
-      return;
-    }
-    // The button that opened the panel gets the focus back when it closes.
-    const opener = document.activeElement;
-    if (typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
-      dialog.setAttribute("open", "");
-    }
-    return () => {
-      if (opener instanceof HTMLElement && opener.isConnected) {
-        opener.focus();
-      }
-    };
-  }, []);
-
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="block-type-title"
-      onClose={onClose}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-hero border border-base-300 bg-base-100 p-4 text-base-content shadow-card backdrop:bg-neutral/60"
-    >
-      <div className="flex items-center justify-between">
-        <h2 id="block-type-title" className="text-display-sm">
-          Type de bloc
-        </h2>
+    <BottomSheet label="Type de bloc" onClose={onClose} closeLabel={null}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-[26px] leading-none">Type de bloc</h2>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-tap px-2 font-semibold text-secondary"
+          className="min-h-tap px-1 text-sm font-semibold text-secondary"
         >
           Fermer
         </button>
       </div>
-      <ul className="mt-3 flex flex-col gap-2">
-        {BLOCK_TYPES.map((info) => (
+      <ul className="overflow-hidden rounded-card border border-base-300">
+        {BLOCK_TYPES.map((info, index) => (
           <li key={info.code}>
             <button
               type="button"
               disabled={!info.isAvailable}
               onClick={() => onPick(info.code)}
-              className="flex min-h-tap w-full items-center gap-3 rounded-card border border-base-300 p-3 text-left disabled:opacity-60"
+              className={`flex min-h-[54px] w-full items-center gap-3 px-3.5 py-2 text-left disabled:opacity-60 ${
+                index === 0 ? "" : "border-t border-base-300"
+              } ${info.isAvailable ? "bg-secondary/[0.06]" : ""}`}
             >
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="font-semibold">
+              <span
+                aria-hidden="true"
+                className={`grid size-[34px] shrink-0 place-items-center rounded-btn text-xs font-extrabold ${
+                  info.isAvailable
+                    ? "bg-secondary text-secondary-content"
+                    : "bg-soft text-muted"
+                }`}
+              >
+                {info.label.slice(0, 2).toUpperCase()}
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-px">
+                <b className="truncate text-sm font-bold">
                   {info.label}
                   {!info.isAvailable && (
                     <>
@@ -73,17 +57,22 @@ function BlockTypePicker({ onPick, onClose }: Props) {
                       <span className="sr-only">, indisponible</span>
                     </>
                   )}
+                </b>
+                <span className="text-xs leading-[1.45] text-muted">
+                  {info.description}
                 </span>
-                <span className="text-sm text-muted">{info.description}</span>
               </span>
               {info.isAvailable && (
-                <Icon src={chevronRightIcon} className="size-5 text-muted" />
+                <Icon
+                  src={chevronRightIcon}
+                  className="size-[18px] shrink-0 text-faint"
+                />
               )}
             </button>
           </li>
         ))}
       </ul>
-    </dialog>
+    </BottomSheet>
   );
 }
 
