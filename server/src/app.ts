@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import helmet from "helmet";
+import { checkOrigin } from "./middlewares/checkOrigin.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import router from "./router.js";
 import { HttpError } from "./utils/httpError.js";
@@ -15,7 +16,8 @@ app.use(helmet());
 app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 
-app.use("/api", router);
+// Every write (POST, PUT, PATCH, DELETE) must come from an allowed origin.
+app.use("/api", checkOrigin, router);
 
 // Unknown route: same error shape as everything else, not the Express HTML page.
 app.use((_req, _res, next) => {
