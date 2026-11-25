@@ -1,12 +1,9 @@
 import { Outlet } from "react-router";
 
-// The shell shared by every page. The current page is displayed in <Outlet />.
+// The root of every page. The layouts (AppLayout with the tabs, PageLayout
+// without) each bring their own <main>, so nothing is drawn here.
 function App() {
-  return (
-    <main className="min-h-screen bg-base-100 text-base-content">
-      <Outlet />
-    </main>
-  );
+  return <Outlet />;
 }
 
 export default App;

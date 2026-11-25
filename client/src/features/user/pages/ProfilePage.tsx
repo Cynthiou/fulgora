@@ -1,4 +1,7 @@
+import { Link, useLocation } from "react-router";
 import { getInitials } from "shared";
+import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import Icon from "../../../components/Icon";
 import { useAuth } from "../../../hooks/useAuth";
 import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
 import { useLogout } from "../hooks/useLogout";
@@ -7,6 +10,10 @@ import { useLogout } from "../hooks/useLogout";
 // Preferences and account settings arrive with US-04 to US-06.
 function ProfilePage() {
   const { user } = useAuth();
+  const location = useLocation();
+  // The tab the avatar was clicked from (US-44); the home page otherwise.
+  const state = location.state as { from?: string } | null;
+  const backTo = state?.from ?? "/";
   const {
     isLoggingOut,
     error,
@@ -24,7 +31,16 @@ function ProfilePage() {
 
   return (
     <section className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <h1 className="text-display-md">Mon profil</h1>
+      <div className="flex items-center gap-2">
+        <Link
+          to={backTo}
+          aria-label="Retour"
+          className="-ml-3 flex size-tap items-center justify-center rounded-btn text-secondary"
+        >
+          <Icon src={chevronLeftIcon} className="size-7" />
+        </Link>
+        <h1 className="text-display-md">Mon profil</h1>
+      </div>
 
       <div className="flex items-center gap-4 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
         <span

@@ -8,25 +8,56 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import App from "./App";
+import AppLayout from "./components/AppLayout";
+import PageLayout from "./components/PageLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import PlanningPage from "./features/appointment/pages/PlanningPage";
+import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
+import TrackingPage from "./features/history/pages/TrackingPage";
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
 import HomePage from "./pages/HomePage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
-      { path: "/", element: <HomePage /> },
-      // Public pages
-      { path: "/inscription", element: <SignupPage /> },
-      { path: "/connexion", element: <LoginPage /> },
+      // Public pages, without the tabs
+      {
+        element: <PageLayout />,
+        children: [
+          { path: "/inscription", element: <SignupPage /> },
+          { path: "/connexion", element: <LoginPage /> },
+        ],
+      },
       // Private pages: never shown without a connected user
       {
         element: <ProtectedRoute />,
-        children: [{ path: "/profil", element: <ProfilePage /> }],
+        children: [
+          // The four tabs
+          {
+            element: <AppLayout />,
+            children: [
+              { path: "/", element: <HomePage /> },
+              { path: "/planning", element: <PlanningPage /> },
+              { path: "/suivi", element: <TrackingPage /> },
+              { path: "/catalogue", element: <ExerciseListPage /> },
+            ],
+          },
+          // Opened from the avatar, without the tabs
+          {
+            element: <PageLayout />,
+            children: [{ path: "/profil", element: <ProfilePage /> }],
+          },
+        ],
+      },
+      // Unknown address
+      {
+        element: <PageLayout />,
+        children: [{ path: "*", element: <NotFoundPage /> }],
       },
     ],
   },

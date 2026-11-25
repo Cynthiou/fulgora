@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import type { PublicUser } from "shared";
+import type { CurrentWorkoutSession, PublicUser } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AuthContext,
@@ -28,6 +28,15 @@ const lucas: PublicUser = {
   username: "lucas_m",
   email: "lucas.martin@exemple.fr",
   sex: null,
+};
+
+// 17:34 UTC in November is 18:34 in Paris (PRF-09).
+const IN_PROGRESS: CurrentWorkoutSession = {
+  id: 9,
+  session_name: "Haut du corps",
+  started_at: "2026-11-25T17:34:00.000Z",
+  validated_sets: 3,
+  planned_sets: 18,
 };
 
 function renderProfile() {
@@ -82,11 +91,7 @@ describe("ProfilePage", () => {
   });
 
   it("asks for a confirmation when a session is in progress", async () => {
-    readCurrentMock.mockResolvedValue({
-      id: 9,
-      session_name: "Haut du corps",
-      started_at: "2026-11-25T17:34:00.000Z",
-    });
+    readCurrentMock.mockResolvedValue(IN_PROGRESS);
     const { user } = renderProfile();
 
     await user.click(screen.getByRole("button", { name: "Se déconnecter" }));
@@ -99,11 +104,7 @@ describe("ProfilePage", () => {
   });
 
   it("keeps everything as is on « Rester connecté »", async () => {
-    readCurrentMock.mockResolvedValue({
-      id: 9,
-      session_name: "Haut du corps",
-      started_at: "2026-11-25T17:34:00.000Z",
-    });
+    readCurrentMock.mockResolvedValue(IN_PROGRESS);
     const { user, forgetUser } = renderProfile();
     await user.click(screen.getByRole("button", { name: "Se déconnecter" }));
     await screen.findByText("Une séance est en cours");
@@ -117,11 +118,7 @@ describe("ProfilePage", () => {
   });
 
   it("logs out after the confirmation", async () => {
-    readCurrentMock.mockResolvedValue({
-      id: 9,
-      session_name: "Haut du corps",
-      started_at: "2026-11-25T17:34:00.000Z",
-    });
+    readCurrentMock.mockResolvedValue(IN_PROGRESS);
     const { user } = renderProfile();
     await user.click(screen.getByRole("button", { name: "Se déconnecter" }));
     await screen.findByText("Une séance est en cours");
