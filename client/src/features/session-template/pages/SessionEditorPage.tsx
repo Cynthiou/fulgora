@@ -29,10 +29,7 @@ import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
 import UndoToast from "../../../components/UndoToast";
 import { ApiError } from "../../../services/apiError";
-import {
-  createFreeSession,
-  updateSession,
-} from "../../appointment/services/appointmentService";
+import { createFreeSession } from "../../appointment/services/appointmentService";
 import BlockEditor from "../components/BlockEditor";
 import BlockTypePicker from "../components/BlockTypePicker";
 import DatePickerSheet from "../components/DatePickerSheet";
@@ -64,13 +61,22 @@ function readInitialDate(raw: string | null): string {
 // Exercises handed over by the catalog ("Ajouter à une séance").
 type NavigationState = { exercises?: SelectedExercise[] } | null;
 
-// What the editor needs to change a session already planned (US-17).
+// What the editor needs to change a session already saved: the one of an
+// appointment (US-17) or the one of a day of a program (US-18).
 export type EditContext = {
-  appointmentId: number;
-  programName: string | null;
+  // The address of this editor, which keys the draft kept during a detour
+  path: string;
+  // Shown under the title: the program, or the name of the session
+  subtitle: string | null;
   // The saved version: the editor opens on it, and the list of changes
   // (CAL-06b) compares against it
   savedDraft: SessionDraft;
+  // "Jeudi" for a day of a program: it replaces the date, which belongs to
+  // the appointment and changes through "Déplacer" (US-25)
+  dayLabel?: string | null;
+  // Writes the new version, then says where to go
+  save: (draft: SessionDraft) => Promise<void>;
+  onSaved: () => void;
 };
 
 type InitialState = {
@@ -91,7 +97,7 @@ function readInitialState(
   // when it belongs to this very appointment.
   if (edit !== undefined) {
     const stored = loadDraft();
-    if (stored === null || stored.appointmentId !== edit.appointmentId) {
+    if (stored === null || stored.editorPath !== edit.path) {
       return { draft: edit.savedDraft, openBlockKey: null, isDirty: false };
     }
     const pending = readPendingExercises();
@@ -121,7 +127,7 @@ function readInitialState(
   }
 
   const stored = loadDraft();
-  if (stored !== null && (stored.appointmentId ?? null) === null) {
+  if (stored !== null && (stored.editorPath ?? null) === null) {
     const pending = readPendingExercises();
     const draft =
       pending === null
@@ -257,11 +263,7 @@ function SessionEditorPage({ edit }: Props) {
   // A changed draft is kept in the tab, for the detour through the catalog.
   useEffect(() => {
     if (isDirty) {
-      saveDraft({
-        draft,
-        openBlockKey,
-        appointmentId: edit?.appointmentId ?? null,
-      });
+      saveDraft({ draft, openBlockKey, editorPath: edit?.path ?? null });
     }
   }, [draft, openBlockKey, isDirty, edit]);
 
@@ -378,14 +380,11 @@ function SessionEditorPage({ edit }: Props) {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await updateSession(edit.appointmentId, "this", draft);
+      await edit.save(draft);
       hasSaved.current = true;
       markSaved();
       clearDraft();
-      navigate(`/seances/${edit.appointmentId}`, {
-        replace: true,
-        state: { flash: "Séance modifiée." },
-      });
+      edit.onSaved();
     } catch (error) {
       setSaveError(toSaveError(error, draft));
     } finally {
@@ -463,7 +462,7 @@ function SessionEditorPage({ edit }: Props) {
     saveDraft({
       draft,
       openBlockKey: blockKey,
-      appointmentId: edit?.appointmentId ?? null,
+      editorPath: edit?.path ?? null,
     });
     navigate(`${SELECTION_PATH}?block=${encodeURIComponent(blockKey)}`);
   }
@@ -500,7 +499,7 @@ function SessionEditorPage({ edit }: Props) {
       <>
         <SessionChangesPanel
           sessionName={draft.name}
-          programName={edit.programName}
+          programName={edit.subtitle}
           plannedDate={draft.planned_date}
           changes={changes}
           isSaving={isSaving}
@@ -608,7 +607,7 @@ function SessionEditorPage({ edit }: Props) {
           <p className="truncate text-sm text-muted">
             {edit === undefined
               ? "Séance libre"
-              : (edit.programName ?? draft.name)}
+              : (edit.subtitle ?? draft.name)}
           </p>
         </div>
       </header>
@@ -653,23 +652,31 @@ function SessionEditorPage({ edit }: Props) {
             </>
           ) : (
             // The date and the time belong to the appointment: they change
-            // through "Déplacer" (US-25), never here.
+            // through "Déplacer" (US-25), never here. A day of a program
+            // shows its weekday instead (PRO-03).
             <div className="flex flex-col gap-1">
               <p className="flex h-field items-center rounded-btn border border-base-300 bg-soft px-4">
                 <span className="flex flex-col">
                   <span className="text-overline uppercase text-accent">
-                    Date
+                    {edit.dayLabel === undefined || edit.dayLabel === null
+                      ? "Date"
+                      : "Jour"}
                   </span>
                   <span className="font-semibold">
-                    {formatLongDate(draft.planned_date)}
-                    {draft.planned_time === null
-                      ? ""
-                      : ` · ${draft.planned_time}`}
+                    {edit.dayLabel === undefined || edit.dayLabel === null
+                      ? `${formatLongDate(draft.planned_date)}${
+                          draft.planned_time === null
+                            ? ""
+                            : ` · ${draft.planned_time}`
+                        }`
+                      : edit.dayLabel}
                   </span>
                 </span>
               </p>
               <p className="text-sm text-muted">
-                Pour changer la date ou l'heure : « Déplacer ».
+                {edit.dayLabel === undefined || edit.dayLabel === null
+                  ? "Pour changer la date ou l'heure : « Déplacer »."
+                  : "Ce jour vient du programme."}
               </p>
             </div>
           )}

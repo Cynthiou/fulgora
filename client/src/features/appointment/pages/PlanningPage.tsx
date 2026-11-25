@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import {
   addDays,
   buildDayEntries,
@@ -146,14 +146,12 @@ function PlanningPage() {
     <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
       <div className="flex items-baseline justify-between gap-3">
         <h1 className="text-display-md">Planning</h1>
-        {/* The list of programs arrives with US-48. */}
-        <button
-          type="button"
-          disabled
-          className="min-h-tap font-semibold text-muted underline opacity-60"
+        <Link
+          to="/programmes"
+          className="min-h-tap font-semibold text-secondary underline"
         >
           Mes programmes
-        </button>
+        </Link>
       </div>
 
       <div

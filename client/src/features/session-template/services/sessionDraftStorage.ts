@@ -13,8 +13,9 @@ export type StoredDraft = {
   draft: SessionDraft;
   // The block open on screen (A4/A6), to come back to it
   openBlockKey: string | null;
-  // The appointment being modified (US-17), null for a new session
-  appointmentId?: number | null;
+  // The address of the editor the draft belongs to: the new session, the
+  // one of an appointment (US-17) or the one of a program day (US-18).
+  editorPath?: string | null;
 };
 
 export function loadDraft(): StoredDraft | null {

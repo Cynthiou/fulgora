@@ -19,6 +19,10 @@ import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
 import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
 import NotificationsPage from "./features/notification/pages/NotificationsPage";
+import NewProgramPage from "./features/program/pages/NewProgramPage";
+import ProgramDaySessionPage from "./features/program/pages/ProgramDaySessionPage";
+import ProgramSessionsPage from "./features/program/pages/ProgramSessionsPage";
+import ProgramsPage from "./features/program/pages/ProgramsPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -64,6 +68,17 @@ const router = createBrowserRouter([
             children: [
               { path: "/profil", element: <ProfilePage /> },
               { path: "/notifications", element: <NotificationsPage /> },
+              // The programs of the user (US-48) and their creation (US-18)
+              { path: "/programmes", element: <ProgramsPage /> },
+              { path: "/programmes/nouveau", element: <NewProgramPage /> },
+              {
+                path: "/programmes/:programId/seances",
+                element: <ProgramSessionsPage />,
+              },
+              {
+                path: "/programmes/:programId/seances/:weekday",
+                element: <ProgramDaySessionPage />,
+              },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
               // A past session, planned against done (SUI-06)

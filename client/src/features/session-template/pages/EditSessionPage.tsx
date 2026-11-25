@@ -1,7 +1,8 @@
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import LoadingState from "../../../components/LoadingState";
+import { updateSession } from "../../appointment/services/appointmentService";
 import { useEditableSession } from "../hooks/useEditableSession";
 import SessionEditorPage from "./SessionEditorPage";
 
@@ -13,6 +14,7 @@ const SECONDARY_LINK =
 // already started, done or cancelled never comes this far.
 function EditSessionPage() {
   const params = useParams();
+  const navigate = useNavigate();
   const id = Number(params.appointmentId);
   const { session, isLoading, notFound, notEditable, error, reload } =
     useEditableSession(id);
@@ -70,9 +72,17 @@ function EditSessionPage() {
   return (
     <SessionEditorPage
       edit={{
-        appointmentId: session.appointment_id,
-        programName: session.program_name,
+        path: `/seances/${id}/modifier`,
+        subtitle: session.program_name,
         savedDraft: session.session,
+        save: async (draft) => {
+          await updateSession(session.appointment_id, "this", draft);
+        },
+        onSaved: () =>
+          navigate(`/seances/${session.appointment_id}`, {
+            replace: true,
+            state: { flash: "Séance modifiée." },
+          }),
       }}
     />
   );

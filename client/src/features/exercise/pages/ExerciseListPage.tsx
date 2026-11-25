@@ -134,12 +134,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
   const block =
     blockIndex === -1 ? null : storedDraft?.draft.blocks[blockIndex];
   const existingCount = block?.exercises.length ?? 0;
-  // Where the kept draft comes from: a new session, or one being changed.
-  const editedAppointmentId = storedDraft?.appointmentId ?? null;
-  const editorPath =
-    editedAppointmentId === null
-      ? "/seances/nouvelle"
-      : `/seances/${editedAppointmentId}/modifier`;
+  // Where the kept draft comes from: the new session, the one of an
+  // appointment (US-17) or the one of a program day (US-18).
+  const editorPath = storedDraft?.editorPath ?? "/seances/nouvelle";
 
   // The session in progress, when the catalog was opened from it (US-32)
   const workoutSessionId =

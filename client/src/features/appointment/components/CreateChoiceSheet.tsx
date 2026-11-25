@@ -11,8 +11,8 @@ type Props = {
 };
 
 // Screen CAL-01b: the round button of the Planning. Closed it is a "+",
-// open it becomes a "×" with the two ways to add something. "Programme" is
-// shown as the wireframe does, and waits for US-18.
+// open it becomes a "×" with the two ways to add something: a free session
+// (US-23) or a program (US-18).
 function CreateChoiceSheet({ date }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -64,11 +64,9 @@ function CreateChoiceSheet({ date }: Props) {
               </span>
             </Link>
 
-            {/* Programs arrive with US-18. */}
-            <button
-              type="button"
-              disabled
-              className="flex items-center gap-3 rounded-card border border-base-300 bg-base-100 p-3 text-left opacity-60 shadow-card"
+            <Link
+              to={`/programmes/nouveau?date=${date}`}
+              className="flex items-center gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
             >
               <span
                 aria-hidden="true"
@@ -78,9 +76,9 @@ function CreateChoiceSheet({ date }: Props) {
               </span>
               <span className="flex flex-col">
                 <span className="font-display text-display-sm">Programme</span>
-                <span className="text-sm text-muted">Bientôt</span>
+                <span className="text-sm text-muted">Débute le {longDate}</span>
               </span>
-            </button>
+            </Link>
           </div>
         )}
 
