@@ -9,6 +9,7 @@ import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import LoadingState from "../../../components/LoadingState";
 import StatusBadge from "../../../components/StatusBadge";
+import CreateSessionSheet from "../components/CreateSessionSheet";
 import { useAppointments } from "../hooks/useAppointments";
 
 const PRIMARY_LINK =
@@ -25,7 +26,10 @@ function PlanningPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <h1 className="text-display-md">Planning</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-display-md">Planning</h1>
+        <CreateSessionSheet date={today} />
+      </div>
 
       {isLoading && <LoadingState label="Chargement du planning…" />}
 

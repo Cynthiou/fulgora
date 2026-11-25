@@ -13,6 +13,7 @@ import {
   type DraftExercise,
   dateSchema,
   formatBlockCount,
+  formatLongDate,
   MAX_BLOCKS,
   type SelectedExercise,
   type SessionDraft,
@@ -20,14 +21,19 @@ import {
   todayInParis,
 } from "shared";
 import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
+import chevronDownIcon from "../../../assets/icons/ui/chevrons/chevron-down.svg";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
 import UndoToast from "../../../components/UndoToast";
+import { ApiError } from "../../../services/apiError";
+import { createFreeSession } from "../../appointment/services/appointmentService";
 import BlockEditor from "../components/BlockEditor";
 import BlockTypePicker from "../components/BlockTypePicker";
+import DatePickerSheet from "../components/DatePickerSheet";
 import SessionReview from "../components/SessionReview";
+import SessionSavedPanel from "../components/SessionSavedPanel";
 import SetConfigurator from "../components/SetConfigurator";
 import { nextKey, sessionDraftReducer } from "../hooks/sessionDraftReducer";
 import { useSessionDraft } from "../hooks/useSessionDraft";
@@ -114,6 +120,46 @@ type Removed =
       index: number;
     };
 
+// What the confirmation screen (A9) shows once the session is saved.
+type SavedSession = {
+  name: string;
+  plannedDate: string;
+  plannedTime: string | null;
+  blockCount: number;
+  exerciseCount: number;
+};
+
+// The exercise named by a server error path such as "blocks.2.exercises.0".
+function findExerciseByPath(
+  draft: SessionDraft,
+  path: string | undefined,
+): DraftExercise | null {
+  const match = /^blocks\.(\d+)\.exercises\.(\d+)/.exec(path ?? "");
+  if (match === null) {
+    return null;
+  }
+  return draft.blocks[Number(match[1])]?.exercises[Number(match[2])] ?? null;
+}
+
+// The message shown when the server refuses the session.
+function toSaveError(error: unknown, draft: SessionDraft): string {
+  if (error instanceof ApiError) {
+    const exercise = findExerciseByPath(draft, error.field);
+    if (error.code === "EXERCISE_NOT_AVAILABLE") {
+      return exercise === null
+        ? "Un exercice n'est plus disponible. Retire-le pour enregistrer."
+        : `« ${exercise.name} » n'est plus disponible. Retire-le pour enregistrer.`;
+    }
+    if (error.code === "MEASURE_NOT_ALLOWED" && exercise !== null) {
+      return `« ${exercise.name} » : ${error.message}`;
+    }
+    if (error.status === 400) {
+      return "Certaines valeurs de la séance sont invalides. Vérifie les blocs et les séries.";
+    }
+  }
+  return "Impossible d'enregistrer la séance. Ton brouillon est conservé.";
+}
+
 // Screen A2: a new free session. The draft lives in useSessionDraft; leaving
 // with unsaved changes asks for a confirmation (back arrow and tab closing).
 // A block opens full screen (A4/A6) over the session; the type panel (A3) is
@@ -129,12 +175,17 @@ function SessionEditorPage() {
       searchParams.get("date"),
     );
   }
-  const { draft, isDirty, dispatch } = useSessionDraft(
+  const { draft, isDirty, dispatch, markSaved } = useSessionDraft(
     initial.current.draft,
     initial.current.isDirty,
   );
   const [nameError, setNameError] = useState<string | null>(null);
-  const [saveNotice, setSaveNotice] = useState<string | null>(null);
+  const [isPickingDate, setIsPickingDate] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedSession | null>(null);
+  // Read in the same instant a second tap arrives: one session, never two.
+  const inFlight = useRef(false);
   const [openBlockKey, setOpenBlockKey] = useState<string | null>(
     initial.current.openBlockKey,
   );
@@ -207,9 +258,13 @@ function SessionEditorPage() {
     }
   }
 
-  function handleSave(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaveNotice(null);
+  // Saves everything in one call: session, version 1, blocks, exercises,
+  // sets and the appointment. On failure the draft stays as it is.
+  async function save() {
+    if (inFlight.current) {
+      return;
+    }
+    setSaveError(null);
     const result = sessionDraftSchema.safeParse(draft);
     const nameIssue = result.success
       ? undefined
@@ -220,8 +275,31 @@ function SessionEditorPage() {
       return;
     }
     setNameError(null);
-    // Saving (session, version 1, blocks, appointment) is delivered by US-23.
-    setSaveNotice("L'enregistrement arrive avec l'étape suivante.");
+
+    inFlight.current = true;
+    setIsSaving(true);
+    try {
+      await createFreeSession(draft);
+      markSaved();
+      clearDraft();
+      setSaved({
+        name: draft.name,
+        plannedDate: draft.planned_date,
+        plannedTime: draft.planned_time,
+        blockCount: draft.blocks.length,
+        exerciseCount: countDraftExercises(draft),
+      });
+    } catch (error) {
+      setSaveError(toSaveError(error, draft));
+    } finally {
+      inFlight.current = false;
+      setIsSaving(false);
+    }
+  }
+
+  function handleSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    save();
   }
 
   function pickBlockType(blockType: BlockType) {
@@ -303,6 +381,10 @@ function SessionEditorPage() {
       onDismiss={() => setRemoved(null)}
     />
   );
+
+  if (saved !== null) {
+    return <SessionSavedPanel {...saved} />;
+  }
 
   if (
     openBlock !== undefined &&
@@ -393,120 +475,154 @@ function SessionEditorPage() {
       <form
         noValidate
         onSubmit={handleSave}
-        className="flex flex-1 flex-col gap-6 p-4 pb-28"
+        className="flex flex-1 flex-col p-4 pb-28"
       >
-        <TextField
-          id="planned_date"
-          label="Date"
-          required
-          type="date"
-          value={draft.planned_date}
-          onChange={(event) =>
-            dispatch({ type: "setDate", date: event.target.value })
-          }
-        />
-        <TextField
-          id="planned_time"
-          label="Heure (facultatif)"
-          type="time"
-          value={draft.planned_time ?? ""}
-          onChange={(event) =>
-            dispatch({
-              type: "setTime",
-              time: event.target.value === "" ? null : event.target.value,
-            })
-          }
-        />
-        <TextField
-          id="session_name"
-          label="Nom de la séance"
-          required
-          ref={nameRef}
-          value={draft.name}
-          onChange={(event) => {
-            setNameError(null);
-            dispatch({ type: "setName", name: event.target.value });
-          }}
-          placeholder="Ex. Haut du corps"
-          autoComplete="off"
-          maxLength={160}
-          error={nameError ?? undefined}
-        />
-
-        <section aria-labelledby="blocks-title" className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between">
-            <h2
-              id="blocks-title"
-              className="font-sans text-overline not-italic uppercase text-accent"
-            >
-              Blocs
-            </h2>
-            <p className="text-sm font-semibold text-muted">
-              {formatBlockCount(blockCount)}
-            </p>
-          </div>
-
-          {blockCount === 0 ? (
-            <p className="rounded-card border border-base-300 bg-base-100 p-4 text-muted shadow-card">
-              Ajoute un premier bloc pour y mettre des exercices.
-            </p>
-          ) : (
-            <SessionReview
-              blocks={draft.blocks}
-              onOpen={setOpenBlockKey}
-              onRemove={removeBlock}
-            />
-          )}
-
+        {/* While saving, nothing can change anymore: one fieldset freezes all. */}
+        <fieldset disabled={isSaving} className="flex flex-col gap-6">
           <button
             type="button"
-            onClick={() => setPicker("add")}
-            disabled={blockCount >= MAX_BLOCKS}
-            aria-describedby={
-              blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
-            }
-            className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+            onClick={() => setIsPickingDate(true)}
+            aria-haspopup="dialog"
+            className="flex h-field items-center justify-between rounded-btn border border-base-300 bg-base-100 px-4 text-left"
           >
-            <Icon src={plusIcon} className="size-5" />
-            Ajouter un bloc
+            <span className="flex flex-col">
+              <span className="text-overline uppercase text-accent">
+                Date *
+              </span>
+              <span className="font-semibold">
+                {formatLongDate(draft.planned_date)}
+              </span>
+            </span>
+            <Icon src={chevronDownIcon} className="size-5 text-muted" />
           </button>
-          {blockCount >= MAX_BLOCKS && (
-            <p id="blocks-limit" className="text-sm text-muted">
-              {MAX_BLOCKS} blocs au maximum
+          <TextField
+            id="planned_time"
+            label="Heure (facultatif)"
+            type="time"
+            value={draft.planned_time ?? ""}
+            onChange={(event) =>
+              dispatch({
+                type: "setTime",
+                time: event.target.value === "" ? null : event.target.value,
+              })
+            }
+          />
+          <TextField
+            id="session_name"
+            label="Nom de la séance"
+            required
+            ref={nameRef}
+            value={draft.name}
+            onChange={(event) => {
+              setNameError(null);
+              dispatch({ type: "setName", name: event.target.value });
+            }}
+            placeholder="Ex. Haut du corps"
+            autoComplete="off"
+            maxLength={160}
+            error={nameError ?? undefined}
+          />
+
+          <section
+            aria-labelledby="blocks-title"
+            className="flex flex-col gap-3"
+          >
+            <div className="flex items-baseline justify-between">
+              <h2
+                id="blocks-title"
+                className="font-sans text-overline not-italic uppercase text-accent"
+              >
+                Blocs
+              </h2>
+              <p className="text-sm font-semibold text-muted">
+                {formatBlockCount(blockCount)}
+              </p>
+            </div>
+
+            {blockCount === 0 ? (
+              <p className="rounded-card border border-base-300 bg-base-100 p-4 text-muted shadow-card">
+                Ajoute un premier bloc pour y mettre des exercices.
+              </p>
+            ) : (
+              <SessionReview
+                blocks={draft.blocks}
+                onOpen={setOpenBlockKey}
+                onRemove={removeBlock}
+              />
+            )}
+
+            <button
+              type="button"
+              onClick={() => setPicker("add")}
+              disabled={blockCount >= MAX_BLOCKS}
+              aria-describedby={
+                blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
+              }
+              className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+            >
+              <Icon src={plusIcon} className="size-5" />
+              Ajouter un bloc
+            </button>
+            {blockCount >= MAX_BLOCKS && (
+              <p id="blocks-limit" className="text-sm text-muted">
+                {MAX_BLOCKS} blocs au maximum
+              </p>
+            )}
+          </section>
+
+          {exerciseCount === 0 && (
+            <p
+              role="status"
+              className="flex gap-2 rounded-card border border-status-pending bg-base-100 p-3 text-sm font-semibold"
+            >
+              <span aria-hidden="true" className="text-status-pending">
+                ⚠
+              </span>
+              Cette séance n'a pas encore d'exercice : tu ne pourras pas la
+              démarrer.
             </p>
           )}
-        </section>
 
-        {exerciseCount === 0 && (
-          <p
-            role="status"
-            className="flex gap-2 rounded-card border border-status-pending bg-base-100 p-3 text-sm font-semibold"
-          >
-            <span aria-hidden="true" className="text-status-pending">
-              ⚠
-            </span>
-            Cette séance n'a pas encore d'exercice : tu ne pourras pas la
-            démarrer.
-          </p>
-        )}
-
-        {saveNotice !== null && (
-          <p role="status" className="text-center font-semibold text-muted">
-            {saveNotice}
-          </p>
-        )}
-
-        <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
-          <div className="mx-auto max-w-md">
-            <button
-              type="submit"
-              className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
+          {saveError !== null && (
+            <div
+              role="alert"
+              className="flex flex-col gap-3 rounded-card border border-status-missed bg-base-100 p-4"
             >
-              Enregistrer la séance
-            </button>
+              <p className="font-semibold">{saveError}</p>
+              <button
+                type="button"
+                onClick={save}
+                className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+              >
+                Réessayer
+              </button>
+            </div>
+          )}
+
+          <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+            <div className="mx-auto max-w-md">
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+              >
+                {isSaving ? "Enregistrement…" : "Enregistrer la séance"}
+              </button>
+            </div>
           </div>
-        </div>
+        </fieldset>
       </form>
+
+      {isPickingDate && (
+        <DatePickerSheet
+          value={draft.planned_date}
+          onConfirm={(date) => {
+            dispatch({ type: "setDate", date });
+            setIsPickingDate(false);
+          }}
+          onClose={() => setIsPickingDate(false)}
+        />
+      )}
 
       {picker === "add" && (
         <BlockTypePicker

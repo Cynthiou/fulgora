@@ -230,3 +230,22 @@ describe("HomePage", () => {
     expect(readAppointmentsMock).toHaveBeenCalledTimes(2);
   });
 });
+
+describe("HomePage · « + » (US-23)", () => {
+  it("opens the choice of a free session planned today", async () => {
+    readAppointmentsMock.mockResolvedValue([]);
+    readCurrentMock.mockResolvedValue(null);
+    renderHome();
+    const user = userEvent.setup();
+    await screen.findByText("Aucune séance prévue");
+
+    await user.click(
+      screen.getByRole("button", { name: "Ajouter une séance" }),
+    );
+
+    expect(screen.getByText("Nouvelle séance")).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: /^Séance libre/ }).getAttribute("href"),
+    ).toBe(`/seances/nouvelle?date=${today}`);
+  });
+});

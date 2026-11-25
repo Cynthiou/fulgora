@@ -1,14 +1,21 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import type { SelectedExercise } from "shared";
+import { formatLongDate, type SelectedExercise } from "shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ApiError } from "../../../services/apiError";
+import { createFreeSession } from "../../appointment/services/appointmentService";
 import {
   loadDraft,
   saveDraft,
   savePendingExercises,
 } from "../services/sessionDraftStorage";
 import SessionEditorPage from "./SessionEditorPage";
+
+vi.mock("../../appointment/services/appointmentService", () => ({
+  createFreeSession: vi.fn(),
+}));
+const createFreeSessionMock = vi.mocked(createFreeSession);
 
 type Entry = string | { pathname: string; state: unknown };
 
@@ -67,7 +74,9 @@ describe("SessionEditorPage", () => {
       "Nouvelle séance",
     );
     expect(screen.getByText("Séance libre")).toBeTruthy();
-    expect(inputValue(/^Date/)).toBe("2026-11-26");
+    expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
+      "Jeudi 26 novembre",
+    );
     expect(inputValue(/^Heure/)).toBe("");
     expect(screen.getByText("0 bloc")).toBeTruthy();
     expect(
@@ -81,10 +90,12 @@ describe("SessionEditorPage", () => {
   it("falls back on today when the date of the address is unusable", () => {
     renderEditor("/seances/nouvelle?date=hier");
 
-    expect(inputValue(/^Date/)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
+      formatLongDate(new Date().toISOString().slice(0, 10)),
+    );
   });
 
-  it("requires a name to save", async () => {
+  it("requires a name to save, then nothing is sent", async () => {
     const user = renderEditor();
 
     await user.click(
@@ -95,21 +106,40 @@ describe("SessionEditorPage", () => {
     expect(document.activeElement).toBe(
       screen.getByLabelText(/^Nom de la séance/),
     );
+    expect(createFreeSessionMock).not.toHaveBeenCalled();
 
     await user.type(
       screen.getByLabelText(/^Nom de la séance/),
       "Haut du corps",
     );
     expect(screen.queryByText("Ce champ est obligatoire.")).toBeNull();
-
-    await user.click(
-      screen.getByRole("button", { name: "Enregistrer la séance" }),
-    );
-    expect(
-      screen.getByText("L'enregistrement arrive avec l'étape suivante."),
-    ).toBeTruthy();
   });
 
+  it("changes the date through the picker (A2b)", async () => {
+    const user = renderEditor();
+
+    await user.click(screen.getByRole("button", { name: /^Date/ }));
+
+    expect(screen.getByText("Date de la séance")).toBeTruthy();
+    expect(screen.getByText("Novembre 2026")).toBeTruthy();
+    expect(screen.getByText("Séance le jeudi 26 novembre")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Mois suivant" }));
+    expect(screen.getByText("Décembre 2026")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Mois précédent" }));
+    await user.click(
+      screen.getByRole("button", { name: /^Samedi 28 novembre/ }),
+    );
+    expect(screen.getByText("Séance le samedi 28 novembre")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Valider la date" }));
+
+    expect(screen.queryByText("Date de la séance")).toBeNull();
+    expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
+      "Samedi 28 novembre",
+    );
+    expect(loadDraft()?.draft.planned_date).toBe("2026-11-28");
+  });
   it("shows the 8 types, 3 of them unavailable, and closes the panel", async () => {
     const user = renderEditor();
 
@@ -660,5 +690,155 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
     expect(
       screen.getByRole("group", { name: "Repos par défaut" }),
     ).toBeTruthy();
+  });
+});
+
+describe("SessionEditorPage · saving (US-23)", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    createFreeSessionMock.mockReset();
+  });
+
+  async function fillAndSave(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(
+      screen.getByLabelText(/^Nom de la séance/),
+      "Haut du corps",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Enregistrer la séance" }),
+    );
+  }
+
+  it("sends the draft once, freezes the form meanwhile, then shows A9", async () => {
+    let finish: (value: { appointment_id: number }) => void = () => {};
+    createFreeSessionMock.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const user = renderEditor();
+
+    await fillAndSave(user);
+    // A second tap while saving changes nothing
+    await user.click(screen.getByRole("button", { name: "Enregistrement…" }));
+
+    expect(createFreeSessionMock).toHaveBeenCalledTimes(1);
+    expect(createFreeSessionMock.mock.calls[0]?.[0]).toMatchObject({
+      name: "Haut du corps",
+      planned_date: "2026-11-26",
+      blocks: [],
+    });
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Enregistrement…",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+    // The whole form is frozen by its fieldset
+    expect(
+      screen.getByLabelText(/^Nom de la séance/).closest("fieldset")?.disabled,
+    ).toBe(true);
+
+    act(() => finish({ appointment_id: 42 }));
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Séance enregistrée",
+      }),
+    ).toBeTruthy();
+    expect(screen.getByText("Haut du corps")).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain(
+      "Séance enregistrée le jeudi 26 novembre.",
+    );
+    expect(screen.getByRole("link", { name: "Voir le planning" })).toBeTruthy();
+    expect(loadDraft()).toBeNull();
+  });
+
+  it("keeps the draft and offers a retry when the server fails", async () => {
+    createFreeSessionMock
+      .mockRejectedValueOnce(
+        new ApiError(0, "NETWORK_ERROR", "Connexion impossible. Réessaie."),
+      )
+      .mockResolvedValueOnce({ appointment_id: 7 });
+    const user = renderEditor();
+
+    await fillAndSave(user);
+
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Impossible d'enregistrer la séance. Ton brouillon est conservé.",
+    );
+    expect(inputValue(/^Nom de la séance/)).toBe("Haut du corps");
+    expect(loadDraft()?.draft.name).toBe("Haut du corps");
+
+    await user.click(screen.getByRole("button", { name: "Réessayer" }));
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Séance enregistrée",
+      }),
+    ).toBeTruthy();
+    expect(createFreeSessionMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("names the exercise the server refuses", async () => {
+    saveDraft({
+      draft: {
+        name: "Dos",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "classic",
+            name: null,
+            instructions: null,
+            exercises: [
+              {
+                key: "e1",
+                exercise_id: 99,
+                name: "Mon tirage élastique",
+                measure_codes: ["reps"],
+                default_rest_seconds: 90,
+                sets: [
+                  {
+                    reps: 10,
+                    weight_kg: null,
+                    duration_seconds: null,
+                    distance_meters: null,
+                    speed_kmh: null,
+                    resistance: null,
+                    incline_percent: null,
+                    calories: null,
+                    rest_after_seconds: null,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      openBlockKey: null,
+    });
+    createFreeSessionMock.mockRejectedValue(
+      new ApiError(
+        422,
+        "EXERCISE_NOT_AVAILABLE",
+        "Cet exercice n'est plus disponible. Retire-le pour enregistrer.",
+        "blocks.0.exercises.0",
+      ),
+    );
+    const user = renderEditor("/seances/nouvelle");
+
+    await user.click(
+      screen.getByRole("button", { name: "Enregistrer la séance" }),
+    );
+
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "« Mon tirage élastique » n'est plus disponible. Retire-le pour enregistrer.",
+    );
+    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
   });
 });

@@ -9,6 +9,7 @@ import {
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
 import QuickActions from "../components/QuickActions";
+import CreateSessionSheet from "../features/appointment/components/CreateSessionSheet";
 import TodaySelector from "../features/appointment/components/TodaySelector";
 import TodaySessionCard from "../features/appointment/components/TodaySessionCard";
 import { useAppointments } from "../features/appointment/hooks/useAppointments";
@@ -68,7 +69,10 @@ function HomePage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <h1 className="text-display-md">{formatLongDate(today)}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-display-md">{formatLongDate(today)}</h1>
+        <CreateSessionSheet date={today} />
+      </div>
 
       {isLoading && <HomeSkeleton />}
 
