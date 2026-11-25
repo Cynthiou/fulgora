@@ -81,20 +81,20 @@ Message, brouillon conservé.
 
 ## Tâches techniques
 
-- [ ] Backend : `readVersionTree(versionId)` (blocs, exercices, séries) et conversion en `SessionDraft`
-- [ ] Backend : `GET /api/appointments/:id/session` : la version actuelle en brouillon + `can_apply_to_following` + liste des rendez-vous concernés par chaque portée
-- [ ] Backend : `readNextVersionNumber(templateId)` ; `createSessionVersion(templateId, n)` et création de l'arbre (fonctions de l'US-23)
-- [ ] Backend : `readFollowingAppointments(programId, templateId, fromDate)` : `status = 'planned'` (et `to_confirm`, `missed`), **sans** `workout_session`, `planned_date >= ?`, avec `FOR UPDATE`
-- [ ] Backend : `updateAppointmentsVersion(ids, versionId)` (avec `query` pour `IN (?)`)
-- [ ] Backend : `PUT /api/appointments/:id/session` (`{ scope: "this" | "following", session }`) dans `withTransaction` ; trace dans `program_change` pour une séance de programme
-- [ ] Shared : `diffSessionDrafts(before, after)` : liste lisible des changements (CAL-06b), testée
-- [ ] Frontend : `EditSessionScopePage.tsx` (CAL-06 / PRO-09), réutilisation de `SessionEditorPage` en mode édition, `SessionChangesPage.tsx` (CAL-06b)
-- [ ] Frontend : `SessionDestinationSheet` : section « OU UNE SÉANCE À VENIR »
-- [ ] Tests : back : nouvelle version créée, ancienne intacte ; « cette séance » → 1 rendez-vous ; « suivantes » → seulement les futurs non commencés ; séance déplacée mise à jour mais date conservée ; séance démarrée → 409 ; `workout_set.*_planned` des séances passées inchangées
-- [ ] Tests : unitaires : `diffSessionDrafts`
-- [ ] Tests : E2E : modifier « Jambes » et les suivantes, vérifier deux dates
+- [x] Backend : `readVersionTree(versionId)` (blocs, exercices, séries) et conversion en `SessionDraft`
+- [x] Backend : `GET /api/appointments/:id/session` : la version actuelle en brouillon + `can_apply_to_following` (toujours faux tant qu'il n'y a pas de programme)
+- [x] Backend : `readNextVersionNumber(templateId)` ; `createSessionVersion(templateId, n)` et création de l'arbre (fonctions de l'US-23)
+- [ ] Backend : `readFollowingAppointments(programId, templateId, fromDate)` : **repoussé à l'US-18**, aucun programme n'existe encore
+- [x] Backend : `updateAppointmentsVersion(ids, versionId)` (avec `query` pour `IN (?)`)
+- [x] Backend : `PUT /api/appointments/:id/session` (`{ scope, session }`) dans `withTransaction` ; la trace `program_change` attend l'US-18
+- [x] Shared : `diffSessionDrafts(before, after)` : liste lisible des changements (CAL-06b), testée
+- [x] Frontend : `SessionEditorPage` en mode édition et `SessionChangesPanel` (CAL-06b) ; l'écran de portée (CAL-06 / PRO-09) attend l'US-18
+- [ ] Frontend : `SessionDestinationSheet` : section « OU UNE SÉANCE À VENIR » : **repoussé** (US-14)
+- [x] Tests : back : nouvelle version créée, ancienne intacte, « cette séance » → 1 rendez-vous, séance démarrée → 409, portée « suivantes » → 400 ; les cas de programme attendent l'US-18
+- [x] Tests : unitaires : `diffSessionDrafts`
+- [x] Tests : E2E : modifier « Jambes » depuis le menu ⋯, voir les changements, valider ; séance démarrée non modifiable
 
 ## Definition of Done
 
-- [ ] Critères d'acceptation vérifiés manuellement
+- [x] Critères d'acceptation vérifiés (séance libre ; les critères de programme attendent l'US-18)
 - [ ] Code relu et fusionné via pull request
