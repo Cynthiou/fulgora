@@ -5,9 +5,11 @@ import app from "../../app.js";
 import client from "../../database/client.js";
 import { authLimiterStore } from "../../middlewares/rateLimiters.js";
 
-// Every account created here starts with "test_" and is removed afterwards.
+// Every account created here starts with "test_signup_" and is removed
+// afterwards. Each test file uses its own prefix: files run in parallel and
+// must never clean each other's accounts.
 const ORIGIN = "http://localhost:3000";
-const PREFIX = "test_";
+const PREFIX = "test_signup_";
 
 function uniqueSignup() {
   const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
