@@ -22,6 +22,8 @@ export type ExerciseRow = {
   equipment_names: string | null;
   // "reps,weight", built by GROUP_CONCAT; null without any measure
   measure_codes: string | null;
+  // 0 or 1: the exercise uses the body weight ("Poids du corps")
+  is_bodyweight: number;
 };
 
 // The WHERE of the catalog: who can see what (RM-007), then the filters.
@@ -88,7 +90,10 @@ export async function readExercises(
             (SELECT GROUP_CONCAT(m.code ORDER BY m.id SEPARATOR ',')
                FROM exercise_measure em
                JOIN measure m ON m.id = em.measure_id
-              WHERE em.exercise_id = e.id) AS measure_codes
+              WHERE em.exercise_id = e.id) AS measure_codes,
+            EXISTS (SELECT 1 FROM exercise_equipment ee2
+                      JOIN equipment eq2 ON eq2.id = ee2.equipment_id
+                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight
        FROM exercise e
       WHERE ${where.sql}
       ORDER BY e.name, e.id

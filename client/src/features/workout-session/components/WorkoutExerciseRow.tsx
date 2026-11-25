@@ -18,9 +18,12 @@ type Props = {
 // ("1 / 3 séries") and the plan ("3 séries · 10 rép. · 40 kg"). Touching it
 // opens the exercise, set by set (B3).
 function WorkoutExerciseRow({ sessionId, exercise }: Props) {
-  const isCardio = getMeasureProfile(exercise.measure_codes) === "cardio";
+  const isCardio =
+    getMeasureProfile(exercise.measure_codes, exercise.is_bodyweight) ===
+    "cardio";
   const planned = {
     measure_codes: exercise.measure_codes,
+    is_bodyweight: exercise.is_bodyweight,
     sets: exercise.sets.map(toPlannedValues),
   };
 

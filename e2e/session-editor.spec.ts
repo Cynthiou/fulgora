@@ -320,3 +320,34 @@ test("plans a free session from the home page and finds it there (A1 to A9)", as
   await expect(page.getByText("Haut du corps")).toBeVisible();
   await expect(page.getByText("Aucune séance prévue")).toHaveCount(0);
 });
+
+test("a body weight exercise follows the lest layout (A7b)", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.goto("/seances/nouvelle");
+  await page.getByLabel(/^Nom de la séance/).fill("Dos");
+  await page.getByRole("button", { name: "Ajouter un bloc" }).click();
+  await page.getByRole("button", { name: /^Classique/ }).click();
+  await page.getByRole("button", { name: "Ajouter des exercices" }).click();
+  // Tractions is done with the body weight, yet it measures reps and weight
+  await pickFromCatalog(page, "Tractions");
+  await page
+    .getByRole("button", { name: "Ajouter au bloc, 1 sélectionné" })
+    .click();
+
+  await page.getByRole("button", { name: /^Tractions/ }).click();
+
+  await expect(page.getByText("Répétitions · Lest")).toBeVisible();
+  const toggle = page.getByRole("switch", { name: "Ajouter un lest" });
+  await expect(toggle).toHaveAttribute("aria-checked", "false");
+  await expect(page.getByRole("textbox", { name: /^Charge/ })).toHaveCount(0);
+
+  await toggle.click();
+  await page.getByRole("textbox", { name: "Lest (kg)" }).fill("10");
+  await page.getByRole("button", { name: "Valider l'exercice" }).click();
+
+  await expect(page.getByRole("button", { name: /^Tractions/ })).toContainText(
+    "1 série · 10 rép. · 10 kg lest",
+  );
+});

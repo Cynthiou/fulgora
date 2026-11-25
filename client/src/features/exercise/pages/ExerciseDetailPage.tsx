@@ -68,6 +68,7 @@ function ExerciseDetailPage() {
               .filter((part) => part !== "")
               .join(" · ") || null,
           measure_codes: exercise.measures.map((measure) => measure.code),
+          is_bodyweight: exercise.is_bodyweight,
         };
 
   // From the selection: the exercise joins the selection and we go back.

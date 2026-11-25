@@ -128,6 +128,7 @@ export const read: RequestHandler = async (req, res) => {
           exercise.measure_codes === null
             ? []
             : (exercise.measure_codes.split(",") as MeasureCode[]),
+        is_bodyweight: exercise.is_bodyweight === 1,
         default_rest_seconds: exercise.default_rest_seconds,
         sets: sets
           .filter((set) => set.template_block_exercise_id === exercise.id)

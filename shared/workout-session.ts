@@ -90,6 +90,8 @@ export type WorkoutExerciseTree = {
   // "Pectoraux · Barre"
   meta: string | null;
   measure_codes: MeasureCode[];
+  // Body weight exercise: its load is an added weight ("lest", A7b)
+  is_bodyweight: boolean;
   default_rest_seconds: number | null;
   sets: WorkoutSetRow[];
 };
@@ -284,10 +286,12 @@ export function isObjectiveReached(set: WorkoutSetRow): boolean {
 export function formatActualValues(
   set: WorkoutSetRow,
   codes: MeasureCode[],
+  isBodyweight = false,
 ): string {
   return formatSetValues(
     { ...toActualValues(set), rest_after_seconds: null },
     codes,
+    isBodyweight,
   );
 }
 
@@ -348,9 +352,14 @@ export function formatSummaryDuration(seconds: number): string {
 // "3 / 3 · 10, 8, 10 rép.", "3 / 3 · 1 min, 1 min, 42 s", "3 / 3 · 18 min 12 s"
 // for cardio (durations added up), "2 / 3 · série 3 non faite".
 export function formatExerciseResult(
-  exercise: Pick<WorkoutExerciseTree, "sets" | "measure_codes">,
+  exercise: Pick<WorkoutExerciseTree, "sets" | "measure_codes"> & {
+    is_bodyweight?: boolean;
+  },
 ): string {
-  const profile = getMeasureProfile(exercise.measure_codes);
+  const profile = getMeasureProfile(
+    exercise.measure_codes,
+    exercise.is_bodyweight,
+  );
   const done = exercise.sets.filter((set) => set.validated_at !== null);
   const total = exercise.sets.length;
   const head = `${done.length} / ${total}`;

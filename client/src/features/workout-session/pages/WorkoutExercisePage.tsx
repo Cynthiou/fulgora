@@ -50,13 +50,17 @@ function describeNext(
   setIndex: number,
   nextExercise: WorkoutExerciseTree | undefined,
 ): string {
-  const profile = getMeasureProfile(exercise.measure_codes);
+  const profile = getMeasureProfile(
+    exercise.measure_codes,
+    exercise.is_bodyweight,
+  );
   const nextSet = exercise.sets[setIndex + 1];
   if (nextSet !== undefined) {
     const label = getSetLabel(profile, setIndex + 1).toLowerCase();
     const planned = formatSetValues(
       toPlannedValues(nextSet),
       exercise.measure_codes,
+      exercise.is_bodyweight,
     ).toLowerCase();
     return `${label} · prévu ${planned}`;
   }
@@ -217,7 +221,11 @@ function WorkoutExercisePage() {
                     key={set.id}
                     set={set}
                     index={index}
-                    profile={getMeasureProfile(exercise.measure_codes)}
+                    profile={getMeasureProfile(
+                      exercise.measure_codes,
+                      exercise.is_bodyweight,
+                    )}
+                    isBodyweight={exercise.is_bodyweight}
                     measureCodes={exercise.measure_codes}
                     state={
                       set.validated_at !== null && index !== pickedIndex
@@ -266,6 +274,7 @@ function WorkoutExercisePage() {
           set={editing.set}
           index={editing.index}
           measureCodes={exercise.measure_codes}
+          isBodyweight={exercise.is_bodyweight}
           onConfirm={confirmEdited}
           onCancel={() => setEditing(null)}
         />

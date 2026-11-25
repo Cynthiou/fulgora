@@ -21,6 +21,7 @@ type Props = {
   // Position of the set in its exercise, from 0
   index: number;
   measureCodes: MeasureCode[];
+  isBodyweight: boolean;
   onConfirm: (values: ActualSetValues) => void;
   onCancel: () => void;
 };
@@ -74,13 +75,14 @@ function ActualSetSheet({
   set,
   index,
   measureCodes,
+  isBodyweight,
   onConfirm,
   onCancel,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const profile = getMeasureProfile(measureCodes);
+  const profile = getMeasureProfile(measureCodes, isBodyweight);
   const isCardio = profile === "cardio";
-  const fields = getSetFields(measureCodes);
+  const fields = getSetFields(measureCodes, isBodyweight);
   const planned = plannedAsActual(set);
   const [values, setValues] = useState<ActualSetValues>(() =>
     set.validated_at === null

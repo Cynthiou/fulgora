@@ -72,6 +72,7 @@ const done: HistoryDetail = {
             name: "Squat à la barre",
             meta: "Jambes · Barre",
             measure_codes: ["reps", "weight"],
+            is_bodyweight: false,
             default_rest_seconds: 90,
             sets: [
               set(1, [8, 60], [8, 60]),
@@ -114,6 +115,7 @@ const missed: HistoryDetail = {
             "incline",
             "calories",
           ],
+          is_bodyweight: false,
           default_rest_seconds: null,
           sets: [
             {

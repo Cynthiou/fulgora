@@ -14,6 +14,7 @@ type Props = {
   index: number;
   profile: MeasureProfile;
   measureCodes: MeasureCode[];
+  isBodyweight: boolean;
   // "active": the set to do now, with its big planned values
   state: "done" | "active" | "upcoming";
   isPending: boolean;
@@ -30,6 +31,7 @@ function SetRow({
   index,
   profile,
   measureCodes,
+  isBodyweight,
   state,
   isPending,
   onValidate,
@@ -57,7 +59,7 @@ function SetRow({
               <span className="sr-only"> validée</span>
             </span>
             <span className="text-sm text-muted">
-              {formatActualValues(set, measureCodes)}
+              {formatActualValues(set, measureCodes, isBodyweight)}
             </span>
           </span>
           <span className="text-sm font-semibold text-secondary">Corriger</span>
@@ -67,7 +69,7 @@ function SetRow({
   }
 
   if (state === "active") {
-    const parts = describeSet(toPlannedValues(set), measureCodes);
+    const parts = describeSet(toPlannedValues(set), measureCodes, isBodyweight);
     return (
       <li className="flex flex-col gap-4 rounded-card border-2 border-primary bg-base-100 p-4 shadow-card">
         <p className="text-overline uppercase text-primary">{label}</p>
@@ -120,7 +122,11 @@ function SetRow({
         <span className="font-semibold">{label}</span>
         <span className="text-sm text-muted">
           prévu{" "}
-          {formatSetValues(toPlannedValues(set), measureCodes).toLowerCase()}
+          {formatSetValues(
+            toPlannedValues(set),
+            measureCodes,
+            isBodyweight,
+          ).toLowerCase()}
         </span>
       </span>
       <button

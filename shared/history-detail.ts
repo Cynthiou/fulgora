@@ -32,6 +32,7 @@ export type PlannedExercise = {
   name: string;
   meta: string | null;
   measure_codes: MeasureCode[];
+  is_bodyweight: boolean;
   default_rest_seconds: number | null;
   sets: PlannedSetValues[];
 };
@@ -67,9 +68,10 @@ export function countReachedObjectives(sets: WorkoutSetRow[]): number {
 export function formatComparisonValue(
   values: Omit<PlannedSetValues, "rest_after_seconds">,
   codes: MeasureCode[],
+  isBodyweight = false,
 ): string {
   const format = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
-  const profile = getMeasureProfile(codes);
+  const profile = getMeasureProfile(codes, isBodyweight);
   const parts: string[] = [];
 
   if (profile === "weighted" || profile === "bodyweight") {
@@ -105,10 +107,18 @@ export function formatComparisonValue(
   return parts.length === 0 ? "—" : parts.join(" · ");
 }
 
-export function formatPlannedSide(set: WorkoutSetRow, codes: MeasureCode[]) {
-  return formatComparisonValue(toPlannedValues(set), codes);
+export function formatPlannedSide(
+  set: WorkoutSetRow,
+  codes: MeasureCode[],
+  isBodyweight = false,
+) {
+  return formatComparisonValue(toPlannedValues(set), codes, isBodyweight);
 }
 
-export function formatActualSide(set: WorkoutSetRow, codes: MeasureCode[]) {
-  return formatComparisonValue(toActualValues(set), codes);
+export function formatActualSide(
+  set: WorkoutSetRow,
+  codes: MeasureCode[],
+  isBodyweight = false,
+) {
+  return formatComparisonValue(toActualValues(set), codes, isBodyweight);
 }

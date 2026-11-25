@@ -18,7 +18,10 @@ function SetComparisonTable({ exercise }: Props) {
   const done = exercise.sets.filter((set) => set.validated_at !== null).length;
   const reached = countReachedObjectives(exercise.sets);
   const noun =
-    getMeasureProfile(exercise.measure_codes) === "cardio" ? "É" : "S";
+    getMeasureProfile(exercise.measure_codes, exercise.is_bodyweight) ===
+    "cardio"
+      ? "É"
+      : "S";
   const captionId = `exercise-${exercise.id}`;
 
   return (
@@ -66,11 +69,19 @@ function SetComparisonTable({ exercise }: Props) {
                     {index + 1}
                   </th>
                   <td className="py-2 pr-2 text-muted">
-                    {formatPlannedSide(set, exercise.measure_codes)}
+                    {formatPlannedSide(
+                      set,
+                      exercise.measure_codes,
+                      exercise.is_bodyweight,
+                    )}
                   </td>
                   <td className="py-2 pr-2 font-semibold">
                     {isDone
-                      ? formatActualSide(set, exercise.measure_codes)
+                      ? formatActualSide(
+                          set,
+                          exercise.measure_codes,
+                          exercise.is_bodyweight,
+                        )
                       : "Non faite"}
                   </td>
                   <td className="py-2 font-semibold">

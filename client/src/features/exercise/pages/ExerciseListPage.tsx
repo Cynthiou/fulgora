@@ -100,6 +100,7 @@ function toSelected(exercise: ExerciseListItem): SelectedExercise {
         .filter((part) => part !== null)
         .join(" · ") || null,
     measure_codes: exercise.measure_codes,
+    is_bodyweight: exercise.is_bodyweight,
   };
 }
 

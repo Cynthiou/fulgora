@@ -69,6 +69,7 @@ const tree: WorkoutSessionTree = {
           name: "Développé couché",
           meta: "Pectoraux · Barre",
           measure_codes: ["reps", "weight"],
+          is_bodyweight: false,
           default_rest_seconds: 90,
           sets: [set(1, true), set(2, false), set(3, false)],
         },

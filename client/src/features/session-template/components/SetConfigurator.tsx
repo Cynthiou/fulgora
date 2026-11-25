@@ -55,8 +55,14 @@ function SetConfigurator({
   onChangeRest,
   onDone,
 }: Props) {
-  const profile = getMeasureProfile(exercise.measure_codes);
-  const allFields = getSetFields(exercise.measure_codes);
+  const profile = getMeasureProfile(
+    exercise.measure_codes,
+    exercise.is_bodyweight,
+  );
+  const allFields = getSetFields(
+    exercise.measure_codes,
+    exercise.is_bodyweight,
+  );
   const [openIndex, setOpenIndex] = useState(0);
   const [menuIndex, setMenuIndex] = useState<number | null>(null);
   // Field errors, by "setIndex:field"; "Valider" waits until they are gone.
@@ -216,7 +222,10 @@ function SetConfigurator({
             <p className="text-sm text-muted">
               Mesures suivies :{" "}
               <span className="font-semibold text-base-content">
-                {formatTrackedMeasures(exercise.measure_codes)}
+                {formatTrackedMeasures(
+                  exercise.measure_codes,
+                  exercise.is_bodyweight,
+                )}
               </span>
             </p>
           )}
@@ -286,7 +295,11 @@ function SetConfigurator({
                       >
                         <span className="font-semibold">{label}</span>
                         <span className="text-sm text-muted">
-                          {formatSetValues(set, exercise.measure_codes)}
+                          {formatSetValues(
+                            set,
+                            exercise.measure_codes,
+                            exercise.is_bodyweight,
+                          )}
                         </span>
                       </button>
                     )}

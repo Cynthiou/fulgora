@@ -30,6 +30,7 @@ function toListItem(row: ExerciseRow): ExerciseListItem {
       row.measure_codes === null
         ? []
         : (row.measure_codes.split(",") as MeasureCode[]),
+    is_bodyweight: row.is_bodyweight === 1,
   };
 }
 

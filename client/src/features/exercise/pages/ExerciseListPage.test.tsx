@@ -50,6 +50,7 @@ function exercise(id: number, name: string): ExerciseListItem {
     image_male_url: `/images/${id}-male.jpg`,
     is_personal: false,
     measure_codes: ["reps", "weight"],
+    is_bodyweight: false,
   };
 }
 
@@ -512,12 +513,14 @@ describe("ExerciseListPage · selection (US-14)", () => {
           name: "Exercice 002",
           meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
+          is_bodyweight: false,
         },
         {
           exercise_id: 3,
           name: "Exercice 003",
           meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
+          is_bodyweight: false,
         },
       ],
     });

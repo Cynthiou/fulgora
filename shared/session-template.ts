@@ -170,6 +170,8 @@ export type DraftExercise = {
   // "Pectoraux · Barre", shown under the name of the configuration screen
   meta?: string | null;
   measure_codes: MeasureCode[];
+  // Body weight exercise: its load is an added weight ("lest", A7b)
+  is_bodyweight?: boolean;
   default_rest_seconds: number | null;
   sets: PlannedSetValues[];
 };
@@ -314,6 +316,7 @@ export type SelectedExercise = {
   name: string;
   meta?: string | null;
   measure_codes: MeasureCode[];
+  is_bodyweight?: boolean;
 };
 
 // The four set layouts of US-15, decided by the measures of the exercise
@@ -333,12 +336,20 @@ const CARDIO_CODES: MeasureCode[] = [
   "calories",
 ];
 
-export function getMeasureProfile(codes: MeasureCode[]): MeasureProfile {
+// isBodyweight comes from the equipment of the exercise ("Poids du corps").
+// Those exercises often declare the weight measure too, but their load is an
+// added weight, so they follow the bodyweight layout (A7b).
+export function getMeasureProfile(
+  codes: MeasureCode[],
+  isBodyweight = false,
+): MeasureProfile {
   if (codes.some((code) => CARDIO_CODES.includes(code))) {
     return "cardio";
   }
   if (codes.includes("reps")) {
-    return codes.includes("weight") ? "weighted" : "bodyweight";
+    return isBodyweight || !codes.includes("weight")
+      ? "bodyweight"
+      : "weighted";
   }
   if (codes.includes("duration")) {
     return "duration";
@@ -348,9 +359,12 @@ export function getMeasureProfile(codes: MeasureCode[]): MeasureProfile {
 
 // The first set of a new exercise: 10 reps, or 1 min, or a 10 min stage
 // (cardio); the weight stays empty (US-15).
-export function createDefaultSet(codes: MeasureCode[]): PlannedSetValues {
+export function createDefaultSet(
+  codes: MeasureCode[],
+  isBodyweight = false,
+): PlannedSetValues {
   const set = createEmptySet();
-  switch (getMeasureProfile(codes)) {
+  switch (getMeasureProfile(codes, isBodyweight)) {
     case "weighted":
     case "bodyweight":
       return { ...set, reps: 10 };
@@ -385,14 +399,18 @@ const numberFormat = new Intl.NumberFormat("fr-FR", {
 export function describeSet(
   set: PlannedSetValues,
   codes: MeasureCode[],
+  isBodyweight = false,
 ): string[] {
   const parts: string[] = [];
   if (set.reps !== null) {
     parts.push(`${numberFormat.format(set.reps)} rép.`);
   }
   if (set.weight_kg !== null) {
-    // Without a "weight" measure, the load is an added weight (bodyweight).
-    const unit = codes.includes("weight") ? "kg" : "kg lest";
+    // A body weight exercise carries an added weight ("lest"), A7b.
+    const unit =
+      getMeasureProfile(codes, isBodyweight) === "bodyweight"
+        ? "kg lest"
+        : "kg";
     parts.push(`${numberFormat.format(set.weight_kg)} ${unit}`);
   }
   if (set.duration_seconds !== null) {
@@ -425,7 +443,7 @@ function sameValues(a: PlannedSetValues, b: PlannedSetValues): boolean {
 // "1 série · 10 rép. · 40 kg", "3 séries · 8 rép.", "1 étape · 10 min",
 // "3 étapes". The values are shown only when every set has the same ones.
 export function formatSetSummary(
-  exercise: Pick<DraftExercise, "sets" | "measure_codes">,
+  exercise: Pick<DraftExercise, "sets" | "measure_codes" | "is_bodyweight">,
 ): string {
   const count = exercise.sets.length;
   const isCardio = getMeasureProfile(exercise.measure_codes) === "cardio";
@@ -440,7 +458,9 @@ export function formatSetSummary(
     return `0 ${noun}`;
   }
   const allSame = exercise.sets.every((set) => sameValues(set, first));
-  const parts = allSame ? describeSet(first, exercise.measure_codes) : [];
+  const parts = allSame
+    ? describeSet(first, exercise.measure_codes, exercise.is_bodyweight)
+    : [];
   return [`${count} ${noun}`, ...parts].join(" · ");
 }
 
@@ -453,8 +473,9 @@ export function formatSelectedCount(count: number): string {
 export function formatSetValues(
   set: PlannedSetValues,
   codes: MeasureCode[],
+  isBodyweight = false,
 ): string {
-  const parts = describeSet(set, codes);
+  const parts = describeSet(set, codes, isBodyweight);
   return parts.length === 0 ? "Aucun objectif" : parts.join(" · ");
 }
 
@@ -493,9 +514,12 @@ const FIELD_ORDER: SetValueField[] = [
 // exercise may also carry an added weight (the "lest"), stored as weight_kg.
 // Used by the client to build the screen and by the server to refuse a value
 // that does not belong to the exercise (US-23).
-export function getSetFields(codes: MeasureCode[]): SetValueField[] {
+export function getSetFields(
+  codes: MeasureCode[],
+  isBodyweight = false,
+): SetValueField[] {
   const fields = new Set(codes.map((code) => FIELD_BY_MEASURE[code]));
-  if (getMeasureProfile(codes) === "bodyweight") {
+  if (getMeasureProfile(codes, isBodyweight) === "bodyweight") {
     fields.add("weight_kg");
   }
   return FIELD_ORDER.filter((field) => fields.has(field));
@@ -506,8 +530,9 @@ export function getSetFields(codes: MeasureCode[]): SetValueField[] {
 export function getDisallowedSetFields(
   set: PlannedSetValues,
   codes: MeasureCode[],
+  isBodyweight = false,
 ): SetValueField[] {
-  const allowed = getSetFields(codes);
+  const allowed = getSetFields(codes, isBodyweight);
   return FIELD_ORDER.filter(
     (field) => set[field] !== null && !allowed.includes(field),
   );
@@ -525,9 +550,16 @@ export const MEASURE_LABELS: Record<MeasureCode, string> = {
 };
 
 // "Répétitions · Charge", or "Répétitions · Lest" for a bodyweight exercise.
-export function formatTrackedMeasures(codes: MeasureCode[]): string {
-  const labels = codes.map((code) => MEASURE_LABELS[code]);
-  if (getMeasureProfile(codes) === "bodyweight") {
+export function formatTrackedMeasures(
+  codes: MeasureCode[],
+  isBodyweight = false,
+): string {
+  const isBody = getMeasureProfile(codes, isBodyweight) === "bodyweight";
+  const labels = codes
+    // A body weight exercise shows "Lest", never "Charge" (A7b)
+    .filter((code) => !(isBody && code === "weight"))
+    .map((code) => MEASURE_LABELS[code]);
+  if (isBody) {
     labels.push("Lest");
   }
   return labels.join(" · ");

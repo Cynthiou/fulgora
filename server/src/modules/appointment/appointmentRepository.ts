@@ -200,6 +200,7 @@ export type VersionExerciseRow = {
   equipment_names: string | null;
   // "reps,weight" or null
   measure_codes: string | null;
+  is_bodyweight: number;
 };
 
 // The exercises of a session version with their names, group, equipment and
@@ -218,7 +219,10 @@ export async function readVersionExercises(
               WHERE ee.exercise_id = e.id) AS equipment_names,
             (SELECT GROUP_CONCAT(m.code ORDER BY m.id SEPARATOR ',')
                FROM exercise_measure em JOIN measure m ON m.id = em.measure_id
-              WHERE em.exercise_id = e.id) AS measure_codes
+              WHERE em.exercise_id = e.id) AS measure_codes,
+            EXISTS (SELECT 1 FROM exercise_equipment ee2
+                      JOIN equipment eq2 ON eq2.id = ee2.equipment_id
+                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight
        FROM template_block_exercise tbe
        JOIN template_block tb ON tb.id = tbe.template_block_id
        JOIN exercise e ON e.id = tbe.exercise_id

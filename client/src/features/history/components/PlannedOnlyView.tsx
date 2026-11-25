@@ -39,8 +39,16 @@ function PlannedOnlyView({ blocks }: Props) {
                   first !== undefined &&
                   exercise.sets.every(
                     (set) =>
-                      formatSetValues(set, exercise.measure_codes) ===
-                      formatSetValues(first, exercise.measure_codes),
+                      formatSetValues(
+                        set,
+                        exercise.measure_codes,
+                        exercise.is_bodyweight,
+                      ) ===
+                      formatSetValues(
+                        first,
+                        exercise.measure_codes,
+                        exercise.is_bodyweight,
+                      ),
                   );
                 return (
                   <li
@@ -52,12 +60,13 @@ function PlannedOnlyView({ blocks }: Props) {
                       {exercise.sets.length === 0
                         ? "Aucune série prévue"
                         : sameValues && first !== undefined
-                          ? `${exercise.sets.length} × ${formatComparisonValue(first, exercise.measure_codes)}`
+                          ? `${exercise.sets.length} × ${formatComparisonValue(first, exercise.measure_codes, exercise.is_bodyweight)}`
                           : exercise.sets
                               .map((set) =>
                                 formatComparisonValue(
                                   set,
                                   exercise.measure_codes,
+                                  exercise.is_bodyweight,
                                 ),
                               )
                               .join(" · ")}
