@@ -25,6 +25,8 @@ type Props = {
   onValidate: () => void;
   onEdit: () => void;
   onPick: () => void;
+  // Only a set added during the session can be removed (RM-048)
+  onRemove: (() => void) | null;
 };
 
 // Screen B3a: one set of the exercise.
@@ -42,6 +44,7 @@ function SetRow({
   onValidate,
   onEdit,
   onPick,
+  onRemove,
 }: Props) {
   const label = getSetLabel(profile, index);
   const isCardio = profile === "cardio";
@@ -76,7 +79,14 @@ function SetRow({
     return (
       <li className="flex flex-col gap-4 rounded-card border-2 border-primary bg-base-100 p-4 shadow-card">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-overline uppercase text-accent">{label}</p>
+          <p className="flex items-center gap-2 text-overline uppercase text-accent">
+            {label}
+            {set.is_added && (
+              <span className="rounded-chip border border-base-300 px-2 py-0.5 text-base-content">
+                Ajoutée
+              </span>
+            )}
+          </p>
           <button
             type="button"
             onClick={onEdit}
@@ -129,6 +139,11 @@ function SetRow({
     <li className="flex items-center justify-between gap-2 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
       <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
         <span className="font-semibold">{label}</span>
+        {set.is_added && (
+          <span className="rounded-chip border border-base-300 px-2 text-overline uppercase">
+            Ajoutée
+          </span>
+        )}
         <span className="text-sm text-muted">
           prévu{" "}
           {formatSetValues(
@@ -146,14 +161,18 @@ function SetRow({
       >
         Faire
       </button>
-      {/* Removing a set that was not done arrives with US-32. */}
-      <span
-        aria-hidden="true"
-        title="Retirer une série arrive bientôt"
-        className="flex size-tap shrink-0 items-center justify-center text-faint"
-      >
-        <Icon src={trashIcon} className="size-5" />
-      </span>
+      {/* Only a set added during the session goes away (RM-048). */}
+      {onRemove !== null && (
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={isPending}
+          aria-label={`Retirer ${noun} ${index + 1}`}
+          className="flex size-tap shrink-0 items-center justify-center text-secondary disabled:opacity-60"
+        >
+          <Icon src={trashIcon} className="size-5" />
+        </button>
+      )}
     </li>
   );
 }

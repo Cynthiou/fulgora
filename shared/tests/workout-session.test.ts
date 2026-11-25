@@ -3,9 +3,11 @@ import {
   actualSetSchema,
   computeDurationSeconds,
   computeTonnage,
+  countAddedSets,
   countPlannedSets,
   countValidatedSets,
   formatActualValues,
+  formatAddedSets,
   formatClock,
   formatElapsed,
   formatExerciseResult,
@@ -274,5 +276,32 @@ describe("summary of a session (US-34)", () => {
         ],
       }),
     ).toBe("2 / 2 · 18 min 12");
+  });
+});
+
+describe("countAddedSets et formatAddedSets", () => {
+  it("counts only the sets added during the session", () => {
+    const withAdded = {
+      blocks: [
+        {
+          exercises: [
+            {
+              measure_codes: [],
+              sets: [
+                { ...set(1, true), is_added: false },
+                { ...set(2, true), is_added: true },
+                { ...set(3, false), is_added: true },
+              ],
+            },
+          ],
+        },
+      ],
+    } as never;
+    expect(countAddedSets(withAdded)).toBe(2);
+  });
+
+  it("agrees in number", () => {
+    expect(formatAddedSets(1)).toBe("1 série supplémentaire");
+    expect(formatAddedSets(2)).toBe("2 séries supplémentaires");
   });
 });

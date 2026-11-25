@@ -2,8 +2,10 @@ import { Link, Navigate, useParams } from "react-router";
 import {
   computeDurationSeconds,
   computeTonnage,
+  countAddedSets,
   countPlannedSets,
   countValidatedSets,
+  formatAddedSets,
   formatExerciseResult,
   formatLongDate,
   formatSummaryDuration,
@@ -112,6 +114,13 @@ function WorkoutSummaryPage() {
               <dt className="text-sm text-muted">volume</dt>
             </div>
           </dl>
+
+          {/* Sets added during the session are counted apart (US-32). */}
+          {countAddedSets(session) > 0 && (
+            <p className="text-sm text-muted">
+              Dont {formatAddedSets(countAddedSets(session))}.
+            </p>
+          )}
 
           <ul aria-label="Exercices" className="flex flex-col gap-2">
             {exercises.map((exercise) => {

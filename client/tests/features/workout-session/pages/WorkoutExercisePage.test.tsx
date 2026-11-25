@@ -5,7 +5,9 @@ import type { WorkoutSessionTree, WorkoutSetRow } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import WorkoutExercisePage from "../../../../src/features/workout-session/pages/WorkoutExercisePage";
 import {
+  addWorkoutSet,
   readWorkoutSession,
+  removeWorkoutSet,
   validateSet,
 } from "../../../../src/features/workout-session/services/workoutSessionService";
 import { ApiError } from "../../../../src/services/apiError";
@@ -15,10 +17,14 @@ vi.mock(
   () => ({
     readWorkoutSession: vi.fn(),
     validateSet: vi.fn(),
+    addWorkoutSet: vi.fn(),
+    removeWorkoutSet: vi.fn(),
   }),
 );
 const readMock = vi.mocked(readWorkoutSession);
 const validateMock = vi.mocked(validateSet);
+const addSetMock = vi.mocked(addWorkoutSet);
+const removeSetMock = vi.mocked(removeWorkoutSet);
 
 function set(id: number, validated: boolean): WorkoutSetRow {
   return {
@@ -277,5 +283,63 @@ describe("WorkoutExercisePage", () => {
         .getByRole("link", { name: "Retour aux exercices" })
         .getAttribute("href"),
     ).toBe("/entrainement/9");
+  });
+});
+
+describe("WorkoutExercisePage · ajouter et retirer une série (US-32)", () => {
+  beforeEach(() => {
+    readMock.mockReset();
+    validateMock.mockReset();
+    addSetMock.mockReset();
+    removeSetMock.mockReset();
+  });
+
+  it("adds a set at the end of the exercise", async () => {
+    readMock.mockResolvedValue(tree);
+    addSetMock.mockResolvedValue({ id: 99 });
+    const user = renderPage();
+    await screen.findByText("Développé couché");
+
+    await user.click(
+      screen.getByRole("button", { name: "+ Ajouter une série" }),
+    );
+
+    expect(addSetMock).toHaveBeenCalledWith(11);
+  });
+
+  it("removes a set that was added, never a planned one", async () => {
+    const added: WorkoutSetRow = {
+      ...set(5, false),
+      reps_planned: null,
+      weight_planned_kg: null,
+      is_added: true,
+    };
+    readMock.mockResolvedValue({
+      ...tree,
+      blocks: [
+        {
+          ...tree.blocks[0],
+          exercises: [
+            {
+              ...tree.blocks[0].exercises[0],
+              sets: [set(1, true), set(2, false), added],
+            },
+            tree.blocks[0].exercises[1],
+          ],
+        },
+      ],
+    });
+    removeSetMock.mockResolvedValue(undefined);
+    const user = renderPage();
+    await screen.findByText("Développé couché");
+
+    // Only the added set carries a trash
+    const trashes = screen.getAllByRole("button", {
+      name: /^Retirer la série/,
+    });
+    expect(trashes).toHaveLength(1);
+
+    await user.click(trashes[0]);
+    expect(removeSetMock).toHaveBeenCalledWith(5);
   });
 });

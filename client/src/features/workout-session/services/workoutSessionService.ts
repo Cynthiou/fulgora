@@ -60,3 +60,43 @@ export function completeWorkoutSession(
     method: "POST",
   });
 }
+
+// POST /api/workout-exercises/:id/sets: one more set during the session
+// (US-32). The set arrives empty, with nothing planned.
+export function addWorkoutSet(
+  workoutExerciseId: number,
+): Promise<{ id: number }> {
+  return apiFetch(`/workout-exercises/${workoutExerciseId}/sets`, {
+    method: "POST",
+  });
+}
+
+// DELETE /api/workout-sets/:id: removes a set added during the session.
+export function removeWorkoutSet(setId: number): Promise<void> {
+  return apiFetch(`/workout-sets/${setId}`, { method: "DELETE" });
+}
+
+// POST /api/workout-blocks/:id/exercises: the chosen exercises land at the
+// end of the block.
+export function addWorkoutExercises(
+  blockId: number,
+  exerciseIds: number[],
+): Promise<{ ids: number[] }> {
+  return apiFetch(`/workout-blocks/${blockId}/exercises`, {
+    method: "POST",
+    body: JSON.stringify({ exercise_ids: exerciseIds }),
+  });
+}
+
+// POST /api/workout-sessions/:id/blocks: a new block at the end, with its
+// exercises.
+export function addWorkoutBlock(
+  sessionId: number,
+  name: string | null,
+  exerciseIds: number[],
+): Promise<{ id: number }> {
+  return apiFetch(`/workout-sessions/${sessionId}/blocks`, {
+    method: "POST",
+    body: JSON.stringify({ name, exercise_ids: exerciseIds }),
+  });
+}

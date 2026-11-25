@@ -298,3 +298,57 @@ test("a session already finished never offers to start again", async ({
   await page.getByRole("link", { name: "Voir le résumé" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Pecs");
 });
+
+// US-32: the session grows while it runs. The plan never moves (RM-043).
+test("adds a set and an exercise during the session, and removes the added set", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+  await planSessionToday(page, "Haut du corps");
+  await page.reload();
+
+  await page.getByRole("link", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await expect(page.getByText(/Séries réalisées/)).toBeVisible();
+
+  // One more set on the first exercise (B3a)
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
+  await page.getByRole("button", { name: "+ Ajouter une série" }).click();
+  await expect(page.getByText("Ajoutée").first()).toBeVisible();
+
+  // The added set goes away; the planned ones have no trash (RM-048)
+  const trashes = page.getByRole("button", { name: /^Retirer la série/ });
+  await expect(trashes).toHaveCount(1);
+  await trashes.first().click();
+  await expect(trashes).toHaveCount(0);
+  await expect(page.getByText("Ajoutée")).toHaveCount(0);
+
+  // One more exercise, in a new block (B2)
+  await page.getByRole("link", { name: "Exercices", exact: true }).click();
+  await page
+    .getByRole("link", { name: "+ Ajouter un exercice ou un bloc" })
+    .click();
+  await expect(
+    page.getByText("Sélection pour la séance en cours"),
+  ).toBeVisible();
+  await page
+    .getByRole("list", { name: "Exercices" })
+    .getByRole("button")
+    .first()
+    .click();
+  await page.getByRole("button", { name: /^Ajouter à la séance/ }).click();
+
+  await expect(page.getByText("Où ajouter ces exercices ?")).toBeVisible();
+  await page.getByRole("button", { name: /Dans un nouveau bloc/ }).click();
+
+  // The new block is there, with its exercise and one empty set
+  await expect(
+    page.getByRole("heading", { name: /Classique · Bloc 2/ }),
+  ).toBeVisible();
+});

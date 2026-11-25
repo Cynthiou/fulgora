@@ -23,6 +23,10 @@ import RestTimer from "../components/RestTimer";
 import SetRow from "../components/SetRow";
 import { useValidateSet } from "../hooks/useValidateSet";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
+import {
+  addWorkoutSet,
+  removeWorkoutSet,
+} from "../services/workoutSessionService";
 
 const PRIMARY_LINK =
   "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
@@ -77,6 +81,8 @@ function WorkoutExercisePage() {
   const params = useParams();
   const sessionId = Number(params.id);
   const exerciseId = Number(params.exerciseId);
+  // While a set is being added or removed, the buttons wait.
+  const [isChanging, setIsChanging] = useState(false);
   const { session, isLoading, notFound, error, reload, replaceSet } =
     useWorkoutSession(sessionId);
   const validation = useValidateSet({ onReplace: replaceSet });
@@ -153,6 +159,35 @@ function WorkoutExercisePage() {
       Exercices
     </Link>
   );
+
+  // "+ Ajouter une série": one more set at the end, with nothing planned.
+  async function addSet() {
+    if (isChanging) {
+      return;
+    }
+    setIsChanging(true);
+    try {
+      await addWorkoutSet(exerciseId);
+      reload();
+    } finally {
+      setIsChanging(false);
+    }
+  }
+
+  // The trash of a set added during the session (RM-048).
+  async function removeSet(setId: number) {
+    if (isChanging) {
+      return;
+    }
+    setIsChanging(true);
+    try {
+      await removeWorkoutSet(setId);
+      setPickedIndex(null);
+      reload();
+    } finally {
+      setIsChanging(false);
+    }
+  }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -234,28 +269,28 @@ function WorkoutExercisePage() {
                           ? "active"
                           : "upcoming"
                     }
-                    isPending={validation.pendingId === set.id}
+                    isPending={validation.pendingId === set.id || isChanging}
                     onValidate={() => validateAsPlanned(set, index)}
                     onEdit={() => setEditing({ set, index })}
                     onPick={() => setPickedIndex(index)}
+                    onRemove={
+                      set.is_added && set.validated_at === null
+                        ? () => removeSet(set.id)
+                        : null
+                    }
                   />
                 ))}
               </ul>
 
               {session.status === "in_progress" && (
-                <>
-                  <button
-                    type="button"
-                    disabled
-                    aria-describedby="add-set-soon"
-                    className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
-                  >
-                    + Ajouter une série
-                  </button>
-                  <p id="add-set-soon" className="text-sm text-muted">
-                    Ajouter ou retirer une série arrive bientôt.
-                  </p>
-                </>
+                <button
+                  type="button"
+                  onClick={addSet}
+                  disabled={isChanging}
+                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                >
+                  + Ajouter une série
+                </button>
               )}
             </>
           )}

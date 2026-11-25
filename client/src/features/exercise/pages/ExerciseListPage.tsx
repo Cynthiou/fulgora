@@ -3,6 +3,7 @@ import {
   Navigate,
   useLocation,
   useNavigate,
+  useParams,
   useSearchParams,
 } from "react-router";
 import {
@@ -28,6 +29,7 @@ import {
   loadDraft,
   savePendingExercises,
 } from "../../session-template/services/sessionDraftStorage";
+import { savePendingWorkoutExercises } from "../../workout-session/services/workoutAddStorage";
 import ActiveFilterChips, {
   type ActiveFilter,
 } from "../components/ActiveFilterChips";
@@ -107,7 +109,8 @@ function toSelected(exercise: ExerciseListItem): SelectedExercise {
 type Props = {
   // "catalog": the Catalogue tab, where "Sélectionner" turns selection on.
   // "block": the selection page of a block of the draft (A5), always selecting.
-  selectionMode?: "catalog" | "block";
+  // "workout": the same, for the session in progress (US-32).
+  selectionMode?: "catalog" | "block" | "workout";
 };
 
 // Screen 04: the catalog, its search and its three filters. Search and
@@ -118,6 +121,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories, equipments } = useReferenceLists();
 
@@ -137,9 +141,17 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
       ? "/seances/nouvelle"
       : `/seances/${editedAppointmentId}/modifier`;
 
+  // The session in progress, when the catalog was opened from it (US-32)
+  const workoutSessionId =
+    selectionMode === "workout" ? Number(params.id) : null;
+
   const selection = useExerciseSelection(
-    selectionMode === "block" ? `block:${blockKey ?? ""}` : "catalog",
-    { alwaysActive: selectionMode === "block" },
+    selectionMode === "block"
+      ? `block:${blockKey ?? ""}`
+      : selectionMode === "workout"
+        ? `workout:${workoutSessionId ?? ""}`
+        : "catalog",
+    { alwaysActive: selectionMode !== "catalog" },
   );
   const [isChoosingDestination, setIsChoosingDestination] = useState(false);
   const isLimitReached =
@@ -299,6 +311,20 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
     }
   }
 
+  // "Ajouter à la séance": the exercises wait in the tab, and the session
+  // asks where they go (US-32).
+  function addToWorkout() {
+    if (workoutSessionId === null || selection.items.length === 0) {
+      return;
+    }
+    savePendingWorkoutExercises({
+      workoutSessionId,
+      exercises: selection.items,
+    });
+    selection.cancel();
+    navigate(`/entrainement/${workoutSessionId}`, { replace: true });
+  }
+
   // "Ajouter au bloc": the exercises wait in the tab for the editor.
   function addToBlock() {
     if (blockKey !== null && selection.items.length > 0) {
@@ -324,7 +350,11 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
         : {};
 
   const actionLabel =
-    selectionMode === "block" ? "Ajouter au bloc" : "Ajouter à une séance";
+    selectionMode === "block"
+      ? "Ajouter au bloc"
+      : selectionMode === "workout"
+        ? "Ajouter à la séance"
+        : "Ajouter à une séance";
 
   const counterText =
     search === "" && !hasFilters
@@ -346,15 +376,25 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
         selection.isActive ? "pb-28" : ""
       }`}
     >
-      {selectionMode === "block" ? (
+      {selectionMode !== "catalog" ? (
         <div className="-mx-2 flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
               selection.cancel();
-              backToEditor();
+              if (selectionMode === "workout") {
+                navigate(`/entrainement/${workoutSessionId}`, {
+                  replace: true,
+                });
+              } else {
+                backToEditor();
+              }
             }}
-            aria-label="Retour au bloc"
+            aria-label={
+              selectionMode === "workout"
+                ? "Retour à la séance"
+                : "Retour au bloc"
+            }
             className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
           >
             <Icon src={chevronLeftIcon} className="size-7" />
@@ -362,7 +402,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
           <div className="flex min-w-0 flex-col">
             <h1 className="text-display-md">Catalogue</h1>
             <p className="text-sm font-semibold text-muted">
-              Sélection pour le bloc {blockIndex + 1}
+              {selectionMode === "workout"
+                ? "Sélection pour la séance en cours"
+                : `Sélection pour le bloc ${blockIndex + 1}`}
             </p>
           </div>
         </div>
@@ -622,7 +664,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
       {selection.isActive && (
         <div
           className={`fixed inset-x-0 z-10 border-t border-base-300 bg-base-100 p-4 ${
-            selectionMode === "block" ? "bottom-0" : "bottom-nav"
+            selectionMode === "catalog" ? "bottom-nav" : "bottom-0"
           }`}
         >
           <div className="mx-auto max-w-md">
@@ -632,7 +674,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
               onClick={
                 selectionMode === "block"
                   ? addToBlock
-                  : () => setIsChoosingDestination(true)
+                  : selectionMode === "workout"
+                    ? addToWorkout
+                    : () => setIsChoosingDestination(true)
               }
               // "Ajouter au bloc · 6" on screen, "Ajouter au bloc, 6 sélectionnés" aloud
               aria-label={`${actionLabel}, ${formatSelectedCount(selection.items.length)}`}

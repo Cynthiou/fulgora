@@ -88,6 +88,11 @@ const router = createBrowserRouter([
                 path: "/entrainement/:id/resume",
                 element: <WorkoutSummaryPage />,
               },
+              // The catalog in selection mode, to add to the session (US-32)
+              {
+                path: "/entrainement/:id/exercices",
+                element: <ExerciseListPage selectionMode="workout" />,
+              },
               // The catalog in selection mode for a block of the draft
               {
                 path: "/seances/nouvelle/exercices",

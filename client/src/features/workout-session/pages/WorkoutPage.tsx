@@ -1,6 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { countPlannedSets, countValidatedSets, getBlockLabel } from "shared";
+import {
+  countPlannedSets,
+  countValidatedSets,
+  getBlockLabel,
+  type SelectedExercise,
+} from "shared";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import StatusBadge from "../../../components/StatusBadge";
@@ -8,11 +13,18 @@ import { ApiError } from "../../../services/apiError";
 import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
 import AutoClosedNotice from "../components/AutoClosedNotice";
 import CompleteWorkoutDialog from "../components/CompleteWorkoutDialog";
+import WorkoutDestinationSheet from "../components/WorkoutDestinationSheet";
 import WorkoutExerciseRow from "../components/WorkoutExerciseRow";
 import { useSessionChrono } from "../hooks/useSessionChrono";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
 import {
+  clearPendingWorkoutExercises,
+  readPendingWorkoutExercises,
+} from "../services/workoutAddStorage";
+import {
   abandonWorkoutSession,
+  addWorkoutBlock,
+  addWorkoutExercises,
   completeWorkoutSession,
   readWorkoutSession,
 } from "../services/workoutSessionService";
@@ -51,6 +63,47 @@ function WorkoutPage() {
   // "Aucune série n'est faite" (D-10): the way out is to abandon
   const [cannotComplete, setCannotComplete] = useState<string | null>(null);
   const inFlight = useRef(false);
+  // The exercises chosen in the catalog, waiting for their place (US-32)
+  const [pending, setPending] = useState<SelectedExercise[] | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  // Coming back from the catalog: the chosen exercises are taken once, and
+  // the session asks where they go.
+  useEffect(() => {
+    const waiting = readPendingWorkoutExercises();
+    if (waiting !== null && waiting.workoutSessionId === id) {
+      setPending(waiting.exercises);
+    }
+    clearPendingWorkoutExercises();
+  }, [id]);
+
+  // The destination sheet: an existing block, or a new one at the end.
+  async function addToDestination(blockId: number | null) {
+    if (pending === null || isAdding) {
+      return;
+    }
+    setIsAdding(true);
+    setAddError(null);
+    const ids = pending.map((exercise) => exercise.exercise_id);
+    try {
+      if (blockId === null) {
+        await addWorkoutBlock(id, null, ids);
+      } else {
+        await addWorkoutExercises(blockId, ids);
+      }
+      setPending(null);
+      reload();
+    } catch (caught) {
+      setAddError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible d'ajouter ces exercices. Réessaie.",
+      );
+    } finally {
+      setIsAdding(false);
+    }
+  }
 
   function openSummary() {
     navigate(`/entrainement/${id}/resume`, { replace: true });
@@ -191,6 +244,17 @@ function WorkoutPage() {
               />
             )}
 
+            {pending !== null && session !== null && (
+              <WorkoutDestinationSheet
+                exercises={pending}
+                blocks={session.blocks}
+                isSending={isAdding}
+                error={addError}
+                onPick={addToDestination}
+                onCancel={() => setPending(null)}
+              />
+            )}
+
             {cannotComplete !== null && (
               <div
                 role="alert"
@@ -271,24 +335,14 @@ function WorkoutPage() {
 
             {isInProgress && (
               <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby="add-during-soon"
-                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                <Link
+                  to={`/entrainement/${id}/exercices`}
+                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold"
                 >
                   + Ajouter un exercice ou un bloc
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  aria-describedby="add-during-soon"
-                  className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
-                >
-                  + Ajouter une série
-                </button>
-                <p id="add-during-soon" className="text-sm text-muted">
-                  Ajouter pendant la séance arrive bientôt.
+                </Link>
+                <p className="text-sm text-muted">
+                  Une série en plus s'ajoute depuis l'exercice.
                 </p>
               </div>
             )}
