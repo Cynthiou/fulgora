@@ -7,7 +7,13 @@ import {
 } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { formatSignupErrorSummary, type PublicUser } from "shared";
-import logo from "../../../assets/logo/fulgora-logo-light-bg.svg";
+import boltIcon from "../../../assets/icons/ui/app/bolt.svg";
+import eyeIcon from "../../../assets/icons/ui/app/eye.svg";
+import eyeOffIcon from "../../../assets/icons/ui/app/eye-off.svg";
+import lockIcon from "../../../assets/icons/ui/app/lock.svg";
+import mailIcon from "../../../assets/icons/ui/app/mail.svg";
+import userIcon from "../../../assets/icons/ui/app/user.svg";
+import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
 import { useAuth } from "../../../hooks/useAuth";
 import SignupSuccess from "../components/SignupSuccess";
@@ -15,6 +21,9 @@ import { SIGNUP_FIELDS, type SignupField, useSignup } from "../hooks/useSignup";
 
 const PASSWORD_HELP = "8 caractères minimum, dont un chiffre.";
 const PASSWORD_CLEARED_HELP = "Pour ta sécurité, ressaisis ton mot de passe.";
+
+const PRIMARY_BUTTON =
+  "flex h-btn w-full items-center justify-center rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60";
 
 // Screen 01: signup form (states 1 to 4) and success screen (state 5).
 function SignupPage() {
@@ -106,11 +115,17 @@ function SignupPage() {
     );
 
   return (
-    <section className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <img src={logo} alt="Fulgora" className="h-10 w-auto self-start" />
-      <div className="flex flex-col gap-2">
-        <h1 className="text-display-md">Créer mon compte</h1>
-        <p className="text-muted">
+    <section className="mx-auto flex min-h-screen max-w-md flex-col gap-4 px-[22px] pt-3 pb-4">
+      {/* The logo of the mockups: the bolt and the name (01-1). */}
+      <span className="flex items-center gap-2 pt-1">
+        <Icon src={boltIcon} className="size-6 shrink-0 text-secondary" />
+        <span className="font-display text-[26px] font-extrabold uppercase italic leading-none tracking-[0.1em]">
+          Fulgora
+        </span>
+      </span>
+      <div className="flex flex-col gap-2.5 pt-1.5">
+        <h1 className="text-[54px] leading-none">Créer mon compte</h1>
+        <p className="text-sm leading-[1.45] text-muted">
           Crée ton compte pour planifier tes séances et suivre ta progression.
         </p>
       </div>
@@ -127,10 +142,11 @@ function SignupPage() {
         </div>
       )}
 
-      <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         <TextField
           id="username"
           label="Pseudo"
+          icon={userIcon}
           required
           ref={usernameRef}
           value={username}
@@ -143,6 +159,7 @@ function SignupPage() {
         <TextField
           id="email"
           label="Adresse e-mail"
+          icon={mailIcon}
           required
           ref={emailRef}
           type="email"
@@ -157,6 +174,7 @@ function SignupPage() {
         <TextField
           id="password"
           label="Mot de passe"
+          icon={lockIcon}
           required
           ref={passwordRef}
           type={showPassword ? "text" : "password"}
@@ -174,9 +192,17 @@ function SignupPage() {
             <button
               type="button"
               onClick={() => setShowPassword((shown) => !shown)}
-              className="h-field shrink-0 rounded-btn border border-base-300 bg-base-100 px-3 font-semibold text-secondary"
+              aria-label={
+                showPassword
+                  ? "Masquer le mot de passe"
+                  : "Afficher le mot de passe"
+              }
+              className="absolute right-1 grid size-tap place-items-center text-muted"
             >
-              {showPassword ? "Masquer" : "Afficher"}
+              <Icon
+                src={showPassword ? eyeOffIcon : eyeIcon}
+                className="size-5"
+              />
             </button>
           }
         />
@@ -199,9 +225,9 @@ function SignupPage() {
                   ? undefined
                   : "terms_accepted-error"
               }
-              className="mt-1 size-5 shrink-0 accent-secondary"
+              className="mt-0.5 size-[22px] shrink-0 rounded-[5px] accent-secondary"
             />
-            <span>
+            <span className="text-[13px] leading-[1.45] text-muted">
               J'accepte les{" "}
               <a
                 href="/cgu"
@@ -236,12 +262,14 @@ function SignupPage() {
           )}
         </div>
 
-        <p className="text-sm text-muted">* Champs obligatoires</p>
+        <p className="text-xs font-medium leading-[1.45] text-muted">
+          * Champs obligatoires
+        </p>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="h-btn rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+          className={PRIMARY_BUTTON}
         >
           {isSubmitting ? "Création du compte…" : "Créer mon compte"}
         </button>
@@ -252,9 +280,9 @@ function SignupPage() {
         )}
       </form>
 
-      <p className="text-center text-muted">
+      <p className="pt-1 text-center text-sm text-muted">
         Déjà un compte ?{" "}
-        <Link to="/connexion" className="font-semibold text-secondary">
+        <Link to="/connexion" className="font-bold text-secondary">
           Se connecter
         </Link>
       </p>

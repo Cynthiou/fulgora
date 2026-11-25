@@ -1,4 +1,5 @@
 import type { ComponentPropsWithRef, ReactNode } from "react";
+import Icon from "./Icon";
 
 type Props = Omit<ComponentPropsWithRef<"input">, "id" | "className"> & {
   id: string;
@@ -9,6 +10,8 @@ type Props = Omit<ComponentPropsWithRef<"input">, "id" | "className"> & {
   error?: ReactNode;
   // Something placed at the end of the field, for example the "Afficher" button.
   trailing?: ReactNode;
+  // The small icon drawn inside the field, on the left (01-1)
+  icon?: string;
 };
 
 // A labelled text input with its help and error texts, linked for screen
@@ -19,6 +22,7 @@ function TextField({
   help,
   error,
   trailing,
+  icon,
   required,
   ...inputProps
 }: Props) {
@@ -39,13 +43,20 @@ function TextField({
         {label}
         {required ? " *" : ""}
       </label>
-      <div className="flex items-center gap-2">
+      <div className="relative flex items-center gap-2">
+        {icon !== undefined && (
+          <span className="pointer-events-none absolute left-4 text-muted">
+            <Icon src={icon} className="size-[18px]" />
+          </span>
+        )}
         <input
           id={id}
           aria-required={required}
           aria-invalid={error === undefined ? undefined : true}
           aria-describedby={describedBy}
-          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 px-4 text-[15px] shadow-card placeholder:text-faint ${borderClasses}`}
+          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 text-[15px] shadow-card placeholder:text-faint ${
+            icon === undefined ? "px-4" : "pr-4 pl-11"
+          } ${borderClasses}`}
           {...inputProps}
         />
         {trailing}
