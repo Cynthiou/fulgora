@@ -43,15 +43,15 @@ En tant que développeuse, je veux faire évoluer la base avec des migrations nu
 
 ## Tâches techniques
 
-- [ ] BDD : `001` = le schéma actuel de `schema.sql`
-- [ ] BDD : `002` : `appointment.cancelled_at` + contrainte `ck_appointment_cancelled_at`
-- [ ] BDD : `003` : `program.status` avec `draft`
-- [ ] BDD : `004` : `user.terms_accepted_at DATETIME(3) NOT NULL` et `workout_session.auto_closed BOOLEAN NOT NULL DEFAULT FALSE`
-- [ ] Backend : réécrire `server/bin/migrate.ts` : crée `schema_migration`, lit les fichiers dans l'ordre, applique les manquants, enregistre chaque version
-- [ ] Backend : `--reset` : refusé si `NODE_ENV=production`, sinon supprime et recrée la base puis applique tout
-- [ ] Tests : base vide → 4 versions ; relance → rien ; reset en production → refus
+- [x] BDD : `001` = le schéma actuel de `schema.sql`
+- [x] BDD : `002` : `appointment.cancelled_at` + contrainte `ck_appointment_cancelled_at`
+- [x] BDD : `003` : `program.status` avec `draft`
+- [x] BDD : `004` : `user.terms_accepted_at DATETIME(3) NOT NULL` et `workout_session.auto_closed BOOLEAN NOT NULL DEFAULT FALSE`
+- [x] Backend : réécrire `server/bin/migrate.ts` : crée `schema_migration`, lit les fichiers dans l'ordre, applique les manquants, enregistre chaque version
+- [x] Backend : `--reset` : refusé si `NODE_ENV=production`, sinon supprime et recrée la base puis applique tout
+- [x] Tests : base vide → 4 versions ; relance → rien ; reset en production → refus
 
 ## Definition of Done
 
-- [ ] Base de développement et base de test migrées sans erreur
-- [ ] `schema.sql` mis à jour pour refléter l'état final (documentation)
+- [x] Base de développement et base de test migrées sans erreur
+- [x] `schema.sql` mis à jour pour refléter l'état final (documentation)
