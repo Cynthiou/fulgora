@@ -12,6 +12,7 @@ import AppLayout from "./components/AppLayout";
 import PageLayout from "./components/PageLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import PlannedSessionPage from "./features/appointment/pages/PlannedSessionPage";
 import PlanningPage from "./features/appointment/pages/PlanningPage";
 import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
@@ -20,6 +21,7 @@ import SessionEditorPage from "./features/session-template/pages/SessionEditorPa
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
+import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -57,6 +59,12 @@ const router = createBrowserRouter([
               { path: "/profil", element: <ProfilePage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
+              // A planned session (B1) and the session in progress (B2)
+              {
+                path: "/seances/:appointmentId",
+                element: <PlannedSessionPage />,
+              },
+              { path: "/entrainement/:id", element: <WorkoutPage /> },
               // The catalog in selection mode for a block of the draft
               {
                 path: "/seances/nouvelle/exercices",

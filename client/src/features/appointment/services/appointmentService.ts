@@ -1,4 +1,5 @@
 import type {
+  AppointmentDetail,
   AppointmentListItem,
   FreeSessionCreated,
   SessionDraft,
@@ -24,4 +25,12 @@ export function readAppointments(
 ): Promise<AppointmentListItem[]> {
   const query = new URLSearchParams({ from, to });
   return apiFetch<AppointmentListItem[]>(`/appointments?${query}`, { signal });
+}
+
+// GET /api/appointments/:id: one planned session with its blocks (B1).
+export function readAppointment(
+  id: number,
+  signal?: AbortSignal,
+): Promise<AppointmentDetail> {
+  return apiFetch<AppointmentDetail>(`/appointments/${id}`, { signal });
 }
