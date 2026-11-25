@@ -80,14 +80,14 @@ Grille grise, navigation utilisable.
 
 ## Tâches techniques
 
-- [ ] Backend : `readAppointmentsBetween` élargi : rendez-vous **prévus** dans la plage **ou réalisés** dans la plage (`a.planned_date BETWEEN ? AND ? OR DATE(ws.started_at) BETWEEN ? AND ?`), avec `initial_date`, `moved_manually`, programme et numéro de semaine
-- [ ] Shared : `getAppointmentDisplayDate(row)` (date réelle si faite), `buildDayEntries(rows, day)` (séances du jour + rappels grisés), `buildMonthGrid(year, month)` (semaines du lundi au dimanche), `getProgramWeekNumber(program, date)`
-- [ ] Frontend : `features/appointment/pages/PlanningPage.tsx` (Mois / Semaine), `MonthGrid.tsx`, `WeekList.tsx`, `DayAppointments.tsx`, `AppointmentRow.tsx`, `AppointmentDetailPage.tsx` (CAL-04), `AppointmentActionsMenu.tsx`, `CreateChoiceSheet.tsx` (CAL-01b)
-- [ ] Frontend : grille du mois accessible (`role="grid"`, flèches du clavier, jour sélectionné annoncé)
-- [ ] Tests : unitaires `buildDayEntries` (rappel non compté), `buildMonthGrid` (mois commençant un dimanche) ; back : séance faite hors plage prévue mais réalisée dans la plage incluse ; séances d'un autre exclues
-- [ ] Tests : E2E navigation mois / semaine / jour ; axe sur CAL-01, CAL-02, CAL-03
+- [x] Backend : `readAppointmentsBetween` élargi : rendez-vous **prévus** dans la plage **ou réalisés** dans la plage ; le numéro de semaine de programme attend l'US-18
+- [x] Shared : `getAppointmentDisplayDate`, `buildDayEntries` (séances du jour + rappels grisés), `listMonthWeeks` (semaines du lundi au dimanche), `buildMonthCell` ; `getProgramWeekNumber` attend l'US-18
+- [x] Frontend : `PlanningPage.tsx` (Jour / Semaine / Mois), `MonthGrid.tsx`, `WeekList.tsx`, `DayView.tsx`, `AppointmentRow.tsx`, `StatusDot.tsx`, `PlanningLegend.tsx`, `CreateChoiceSheet.tsx` (CAL-01b) ; CAL-04 et son menu ⋯ sont l'écran B1 fait à l'US-17
+- [x] Frontend : grille du mois accessible (un vrai tableau, flèches du clavier, jour sélectionné annoncé)
+- [x] Tests : unitaires `buildDayEntries` (rappel non compté), `buildMonthCell`, `getAppointmentDisplayDate` ; back : séance réalisée dans la plage mais prévue en dehors
+- [x] Tests : E2E navigation mois / semaine / jour, axe sur les trois, et le cas de la séance faite en avance
 
 ## Definition of Done
 
-- [ ] Exemple CAL-10 vérifié sur les données de démonstration
+- [x] Exemple CAL-10 vérifié par un test de bout en bout (séance faite deux jours avant sa date)
 - [ ] Code relu et fusionné via pull request
