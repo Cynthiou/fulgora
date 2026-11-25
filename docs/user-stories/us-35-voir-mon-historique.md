@@ -108,7 +108,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 - [x] Routing : `/suivi` et `/suivi/historique`
 - [x] Tests : unitaires : `getHistoryStatus`, `groupByWeek` (un dimanche reste dans la semaine du lundi précédent), `formatWeekLabel`
 - [x] Tests : back : ordre par date réelle (prévue le 19, faite le 17 → rangée au 17) ; séance en cours absente ; annulée future absente ; séance d'un autre absente ; `has_more` exact
-- [ ] Tests : E2E : historique vide, puis après une séance terminée ; axe sur SUI-05 et SUI-07
+- [x] Tests : E2E : historique vide, puis après une séance terminée ; axe sur SUI-05 et SUI-07
 
 ## Definition of Done
 

@@ -91,18 +91,18 @@ Messages ci-dessus.
 
 ## Tâches techniques
 
-- [ ] Backend : `historyActions.read(appointmentId, userId)` : `readHistoryAppointment` (rendez-vous + séance + programme, filtré par `owner_user_id`) ; s'il y a une séance réalisée → fonctions `readWorkout…` de l'US-28 ; sinon → `readVersionBlocks`, `readVersionExercises`, `readVersionSets` (prévu de la version d'origine)
-- [ ] Backend : `GET /api/history/:appointmentId` → `authenticate` → `validate({ params })` → action
-- [ ] Shared : `getSetGap`, `isObjectiveReached`, `countReachedObjectives`, `computeTonnage`, `computeDurationSeconds` (déjà créés, réutilisés) ; `formatSetValues` (« 8 × 62,5 kg », « 1:10 »)
-- [ ] Frontend : `historyService.readHistoryDetail(id)`, `hooks/useHistoryDetail.ts`
-- [ ] Frontend : `pages/HistoryDetailPage.tsx` ; `components/SessionStats.tsx` ; `components/SetComparisonTable.tsx` (vrai `<table>` avec `<th scope="col">` PRÉVU, RÉALISÉ, ÉCART) ; `components/PlannedOnlyView.tsx` (SUI-06b)
-- [ ] Routing : `/suivi/historique/:appointmentId`
-- [ ] Tests : unitaires : `getSetGap` (répétitions, charge, durée, vide), `countReachedObjectives` (exemple SUI-06 : 6 / 10)
-- [ ] Tests : back : séance faite (prévu + réalisé), séance manquée (prévu seul), séance d'un autre → 404
-- [ ] Tests : E2E : de la liste au détail ; axe sur SUI-06 et SUI-06b
+- [x] Backend : `historyActions.read(appointmentId, userId)` : `readHistoryAppointment` (rendez-vous + séance + programme, filtré par `owner_user_id`) ; s'il y a une séance réalisée → fonctions `readWorkout…` de l'US-28 ; sinon → `readVersionBlocks`, `readVersionExercises`, `readVersionSets` (prévu de la version d'origine)
+- [x] Backend : `GET /api/history/:appointmentId` → `authenticate` → `validate({ params })` → action
+- [x] Shared : `getSetGap`, `isObjectiveReached`, `countReachedObjectives`, `computeTonnage`, `computeDurationSeconds` (déjà créés, réutilisés) ; `formatSetValues` (« 8 × 62,5 kg », « 1:10 »)
+- [x] Frontend : `historyService.readHistoryDetail(id)`, `hooks/useHistoryDetail.ts`
+- [x] Frontend : `pages/HistoryDetailPage.tsx` ; `components/SessionStats.tsx` ; `components/SetComparisonTable.tsx` (vrai `<table>` avec `<th scope="col">` PRÉVU, RÉALISÉ, ÉCART) ; `components/PlannedOnlyView.tsx` (SUI-06b)
+- [x] Routing : `/suivi/historique/:appointmentId`
+- [x] Tests : unitaires : `getSetGap` (répétitions, charge, durée, vide), `countReachedObjectives` (exemple SUI-06 : 6 / 10)
+- [x] Tests : back : séance faite (prévu + réalisé), séance manquée (prévu seul), séance d'un autre → 404
+- [x] Tests : E2E : de la liste au détail ; axe sur SUI-06 et SUI-06b
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement, chiffres de SUI-06 retrouvés sur les données d'exemple
-- [ ] Tableau lisible au lecteur d'écran
+- [x] Tableau lisible au lecteur d'écran
 - [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
