@@ -37,7 +37,7 @@ function BlockCard({ block, index, onOpen, onRemove }: Props) {
         type="button"
         onClick={onRemove}
         aria-label={`Retirer le bloc ${label}`}
-        className="min-h-tap shrink-0 px-3 text-sm font-semibold text-status-missed"
+        className="min-h-tap shrink-0 px-3 text-sm font-semibold text-secondary"
       >
         Retirer
       </button>

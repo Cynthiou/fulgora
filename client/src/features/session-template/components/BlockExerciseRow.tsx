@@ -19,7 +19,7 @@ function BlockExerciseRow({ exercise, onRemove }: Props) {
         type="button"
         onClick={onRemove}
         aria-label={`Retirer ${exercise.name}`}
-        className="min-h-tap shrink-0 px-3 text-sm font-semibold text-status-missed"
+        className="min-h-tap shrink-0 px-3 text-sm font-semibold text-secondary"
       >
         Retirer
       </button>

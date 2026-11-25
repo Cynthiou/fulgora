@@ -311,6 +311,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
         ? { selection: "catalog" }
         : {};
 
+  const actionLabel =
+    selectionMode === "block" ? "Ajouter au bloc" : "Ajouter à une séance";
+
   const counterText =
     search === "" && !hasFilters
       ? formatExerciseCount(total)
@@ -619,17 +622,14 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
                   ? addToBlock
                   : () => setIsChoosingDestination(true)
               }
+              // "Ajouter au bloc · 6" on screen, "Ajouter au bloc, 6 sélectionnés" aloud
+              aria-label={`${actionLabel}, ${formatSelectedCount(selection.items.length)}`}
               className="flex h-btn w-full items-center justify-center gap-2 rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
             >
-              {selectionMode === "block"
-                ? "Ajouter au bloc"
-                : "Ajouter à une séance"}
+              {actionLabel}
               {selection.items.length > 0 && (
                 <span aria-hidden="true"> · {selection.items.length}</span>
               )}
-              <span className="sr-only">
-                , {formatSelectedCount(selection.items.length)}
-              </span>
             </button>
           </div>
         </div>
