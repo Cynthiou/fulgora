@@ -79,12 +79,12 @@ NOT-07e.
 
 ## Tâches techniques
 
-- [ ] Backend : `notificationRepository.readNotifications(userId, limit, offset)`, `countUnreadNotifications(userId)`, `markNotificationRead(id, userId)`, `markAllNotificationsRead(userId)` ; `notificationRouter.ts`
-- [ ] Backend : la route `/read-all` et `/unread-count` **déclarées avant** `/:id`
-- [ ] Frontend : `NotificationBell.tsx` (en-tête, `aria-label` avec le nombre), `NotificationsPage.tsx`, `NotificationItem.tsx`, `useUnreadCount` (rafraîchi à chaque changement de page)
-- [ ] Frontend : routage vers l'élément lié selon le type ; gestion du 404 (NOT-07e)
-- [ ] Tests : back : liste triée, notifications d'un autre invisibles, lecture, tout lu ; front : compteur « 9+ », mention « NON LUE »
-- [ ] Tests : E2E notification → séance → compteur diminué ; axe
+- [x] Backend : `readNotifications`, `countUnreadNotifications`, `markNotificationRead`, `markAllNotificationsRead`, `markAppointmentNotificationsRead`, `createAppointmentNotifications` ; `notificationRouter.ts`
+- [x] Backend : `/read-all` et `/unread-count` déclarées avant `/:id`
+- [x] Frontend : `NotificationBell.tsx` (en-tête des 4 onglets), `NotificationsPage.tsx`, `NotificationRow.tsx`, `useUnreadCount` (rafraîchi à chaque changement de page)
+- [x] Frontend : la notification d'un rendez-vous mène à la séance ; programmes et records attendent leurs écrans (US-48, US-40)
+- [x] Tests : back : liste triée, celles d'un autre invisibles, lecture, tout lu, pas de doublon ; front : compteur « 9+ », mention « NON LUE », groupes
+- [x] Tests : E2E cloche → liste vide → retour, avec axe ; la création passe par la tâche planifiée, couverte côté serveur
 
 ## Definition of Done
 
