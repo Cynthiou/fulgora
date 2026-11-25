@@ -6,17 +6,20 @@ import {
   type Sex,
 } from "shared";
 import eyeIcon from "../../../assets/icons/ui/fields/eye.svg";
+import HighlightedText from "../../../components/HighlightedText";
 import Icon from "../../../components/Icon";
 
 type Props = {
   exercise: ExerciseListItem;
   // The illustrations follow the profile (RM-014); null = not chosen yet.
   sex: Sex | null;
+  // The searched term, written in bold in the name (US-08).
+  searchTerm?: string;
 };
 
 // Screen 04: one exercise of the list. The whole card is the link to the
 // detail (US-09); the eye "Fiche" inside it is a visual reminder of that.
-function ExerciseCard({ exercise, sex }: Props) {
+function ExerciseCard({ exercise, sex, searchTerm = "" }: Props) {
   const image = getExerciseImage(exercise, sex);
 
   return (
@@ -40,7 +43,9 @@ function ExerciseCard({ exercise, sex }: Props) {
           />
         )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate font-semibold">{exercise.name}</span>
+          <span className="truncate font-semibold">
+            <HighlightedText text={exercise.name} term={searchTerm} />
+          </span>
           <span className="text-sm text-muted">
             {formatExerciseMeta(exercise.category_name, exercise.difficulty)}
           </span>
