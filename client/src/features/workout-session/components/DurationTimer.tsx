@@ -57,8 +57,7 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
     return (
       <div className="flex flex-col gap-3">
         {plannedSeconds !== null && (
-          <div
-            role="group"
+          <fieldset
             aria-label="Façon de compter"
             className="grid grid-cols-2 overflow-hidden rounded-btn border border-base-300"
           >
@@ -82,7 +81,7 @@ function DurationTimer({ plannedSeconds, isPending, onDone }: Props) {
                 {label}
               </button>
             ))}
-          </div>
+          </fieldset>
         )}
 
         <div className="flex flex-col items-center gap-2 rounded-card border border-base-300 p-4">

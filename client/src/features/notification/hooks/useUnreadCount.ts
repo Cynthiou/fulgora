@@ -10,6 +10,8 @@ export function useUnreadCount() {
   const location = useLocation();
   const [count, setCount] = useState(0);
 
+  // The path is not read inside: it is the trigger, a new page asks again.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     const controller = new AbortController();
     readUnreadCount(controller.signal)

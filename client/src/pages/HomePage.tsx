@@ -10,7 +10,6 @@ import {
 } from "shared";
 import calendarIcon from "../assets/icons/ui/app/calendar.svg";
 import alertCircleIcon from "../assets/icons/ui/states/alert-circle.svg";
-import EmptyState from "../components/EmptyState";
 import Icon from "../components/Icon";
 import QuickActions from "../components/QuickActions";
 import TodaySelector from "../features/appointment/components/TodaySelector";
