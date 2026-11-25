@@ -198,6 +198,7 @@ describe("ExerciseDetailPage", () => {
         {
           exercise_id: 12,
           name: "Squat à la barre",
+          meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
         },
       ],

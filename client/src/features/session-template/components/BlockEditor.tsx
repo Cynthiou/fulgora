@@ -23,6 +23,7 @@ type Props = {
   onRequestTypeChange: () => void;
   // "Ajouter des exercices": opens the catalog in selection mode (A5)
   onAddExercises: () => void;
+  onOpenExercise: (exerciseKey: string) => void;
   onRemoveExercise: (exerciseKey: string) => void;
   // "Enregistrer le bloc" and the back arrow both return to the session
   onDone: () => void;
@@ -38,6 +39,7 @@ function BlockEditor({
   onChangeInstructions,
   onRequestTypeChange,
   onAddExercises,
+  onOpenExercise,
   onRemoveExercise,
   onDone,
 }: Props) {
@@ -151,6 +153,7 @@ function BlockEditor({
                   <BlockExerciseRow
                     key={exercise.key}
                     exercise={exercise}
+                    onOpen={() => onOpenExercise(exercise.key)}
                     onRemove={() => onRemoveExercise(exercise.key)}
                   />
                 ))}

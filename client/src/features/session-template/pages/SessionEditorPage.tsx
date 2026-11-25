@@ -28,6 +28,7 @@ import UndoToast from "../../../components/UndoToast";
 import BlockEditor from "../components/BlockEditor";
 import BlockTypePicker from "../components/BlockTypePicker";
 import SessionReview from "../components/SessionReview";
+import SetConfigurator from "../components/SetConfigurator";
 import { nextKey, sessionDraftReducer } from "../hooks/sessionDraftReducer";
 import { useSessionDraft } from "../hooks/useSessionDraft";
 import {
@@ -138,6 +139,8 @@ function SessionEditorPage() {
     initial.current.openBlockKey,
   );
   const [picker, setPicker] = useState<PickerMode>("closed");
+  // The exercise whose sets are being configured (A7), inside the open block
+  const [openExerciseKey, setOpenExerciseKey] = useState<string | null>(null);
   const [removed, setRemoved] = useState<Removed | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -166,6 +169,9 @@ function SessionEditorPage() {
     (block) => block.key === openBlockKey,
   );
   const openBlock = openBlockIndex === -1 ? null : draft.blocks[openBlockIndex];
+  const openExercise =
+    openBlock?.exercises.find((exercise) => exercise.key === openExerciseKey) ??
+    null;
 
   // In-app navigation with unsaved changes: blocked until the user answers,
   // except towards the catalog selection, which comes back here.
@@ -298,6 +304,38 @@ function SessionEditorPage() {
     />
   );
 
+  if (
+    openBlock !== undefined &&
+    openBlock !== null &&
+    openBlockKey !== null &&
+    openExercise !== null &&
+    openExerciseKey !== null
+  ) {
+    const target = { blockKey: openBlockKey, exerciseKey: openExerciseKey };
+    return (
+      <>
+        <SetConfigurator
+          exercise={openExercise}
+          onUpdateSet={(index, values) =>
+            dispatch({ type: "updateSet", ...target, index, values })
+          }
+          onAddSet={() => dispatch({ type: "addSet", ...target })}
+          onDuplicateLastSet={() =>
+            dispatch({ type: "duplicateLastSet", ...target })
+          }
+          onRemoveSet={(index) =>
+            dispatch({ type: "removeSet", ...target, index })
+          }
+          onChangeRest={(seconds) =>
+            dispatch({ type: "updateExerciseRest", ...target, seconds })
+          }
+          onDone={() => setOpenExerciseKey(null)}
+        />
+        {exitDialog}
+      </>
+    );
+  }
+
   if (openBlock !== undefined && openBlock !== null && openBlockKey !== null) {
     return (
       <>
@@ -317,6 +355,7 @@ function SessionEditorPage() {
           }
           onRequestTypeChange={() => setPicker("change")}
           onAddExercises={() => addExercises(openBlockKey)}
+          onOpenExercise={setOpenExerciseKey}
           onRemoveExercise={(exerciseKey) =>
             removeExercise(openBlockKey, exerciseKey)
           }

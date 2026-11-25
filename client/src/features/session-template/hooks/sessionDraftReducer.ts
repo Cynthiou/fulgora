@@ -19,6 +19,7 @@ import {
 export type NewDraftExercise = {
   exercise_id: number;
   name: string;
+  meta?: string | null;
   measure_codes: MeasureCode[];
   // Pre-filled sets (US-15); one empty set when not given.
   sets?: PlannedSetValues[];
@@ -201,6 +202,7 @@ export function sessionDraftReducer(
               key: nextKey(),
               exercise_id: added.exercise_id,
               name: added.name,
+              meta: added.meta ?? null,
               measure_codes: added.measure_codes,
               default_rest_seconds:
                 added.default_rest_seconds ?? DEFAULT_REST_SECONDS,

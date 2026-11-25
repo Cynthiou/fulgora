@@ -94,6 +94,11 @@ function toSelected(exercise: ExerciseListItem): SelectedExercise {
   return {
     exercise_id: exercise.id,
     name: exercise.name,
+    // "Pectoraux · Barre" under the name of the configuration screen (A7)
+    meta:
+      [exercise.category_name, exercise.equipment_names]
+        .filter((part) => part !== null)
+        .join(" · ") || null,
     measure_codes: exercise.measure_codes,
   };
 }

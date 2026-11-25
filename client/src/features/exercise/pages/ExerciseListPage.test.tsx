@@ -510,11 +510,13 @@ describe("ExerciseListPage · selection (US-14)", () => {
         {
           exercise_id: 2,
           name: "Exercice 002",
+          meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
         },
         {
           exercise_id: 3,
           name: "Exercice 003",
+          meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
         },
       ],

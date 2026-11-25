@@ -63,6 +63,10 @@ function ExerciseDetailPage() {
       : {
           exercise_id: exercise.id,
           name: exercise.name,
+          meta:
+            [exercise.categories.join(" · "), exercise.equipments.join(" · ")]
+              .filter((part) => part !== "")
+              .join(" · ") || null,
           measure_codes: exercise.measures.map((measure) => measure.code),
         };
 
