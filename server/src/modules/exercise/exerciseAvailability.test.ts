@@ -6,7 +6,10 @@ import {
   deleteTestUsers,
   type TestUser,
 } from "../../test-helpers/fixtures.js";
-import { readAvailableExerciseIds } from "./exerciseRepository.js";
+import {
+  readAvailableExerciseIds,
+  readExerciseMeasureCodes,
+} from "./exerciseRepository.js";
 
 const PREFIX = "test_avail_";
 
@@ -64,5 +67,19 @@ describe("readAvailableExerciseIds", () => {
 
   it("asks nothing for an empty list", async () => {
     expect(await readAvailableExerciseIds(lea.id, [])).toEqual([]);
+  });
+});
+
+describe("readExerciseMeasureCodes", () => {
+  it("gives the codes of several exercises, none for an exercise without measure", async () => {
+    const rows = await readExerciseMeasureCodes([catalogId, mineId]);
+
+    const ofCatalog = rows.filter((row) => row.exercise_id === catalogId);
+    expect(ofCatalog.length).toBeGreaterThan(0);
+    expect(ofCatalog[0]?.code).toMatch(
+      /^(reps|weight|duration|distance|speed|resistance|incline|calories)$/,
+    );
+    expect(rows.some((row) => row.exercise_id === mineId)).toBe(false);
+    expect(await readExerciseMeasureCodes([])).toEqual([]);
   });
 });

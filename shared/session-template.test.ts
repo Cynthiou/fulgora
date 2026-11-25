@@ -12,14 +12,23 @@ import {
   draftBlockSchema,
   formatBlockCount,
   formatDuration,
+  formatMinSec,
   formatRangeMessage,
   formatSelectedCount,
   formatSetSummary,
+  formatSetValues,
+  formatTrackedMeasures,
   getBlockLabel,
-  getExerciseProfile,
+  getDisallowedSetFields,
+  getMeasureProfile,
+  getSetFieldLabel,
+  getSetFields,
+  getSetLabel,
+  parseMinSec,
   plannedSetSchema,
   SET_LIMITS,
   sessionDraftSchema,
+  validateSetValue,
 } from "./session-template.js";
 
 function validSet() {
@@ -230,13 +239,13 @@ describe("BLOCK_TYPES", () => {
 
 describe("exercise profiles and default sets (US-14)", () => {
   it("finds the profile from the measures", () => {
-    expect(getExerciseProfile(["reps", "weight"])).toBe("reps_weight");
-    expect(getExerciseProfile(["reps"])).toBe("bodyweight");
-    expect(getExerciseProfile(["duration"])).toBe("duration");
-    expect(getExerciseProfile(["duration", "distance", "calories"])).toBe(
+    expect(getMeasureProfile(["reps", "weight"])).toBe("weighted");
+    expect(getMeasureProfile(["reps"])).toBe("bodyweight");
+    expect(getMeasureProfile(["duration"])).toBe("duration");
+    expect(getMeasureProfile(["duration", "distance", "calories"])).toBe(
       "cardio",
     );
-    expect(getExerciseProfile([])).toBe("none");
+    expect(getMeasureProfile([])).toBe("none");
   });
 
   it("pre-fills the first set: 10 reps, 1 min, or a 10 min stage", () => {
@@ -309,5 +318,78 @@ describe("formatSetSummary", () => {
     expect(formatDuration(3900)).toBe("1 h 05");
     expect(formatSelectedCount(1)).toBe("1 sélectionné");
     expect(formatSelectedCount(3)).toBe("3 sélectionnés");
+  });
+});
+
+describe("set fields (US-15)", () => {
+  it("lists the fields of each profile, with the added weight for bodyweight", () => {
+    expect(getSetFields(["reps", "weight"])).toEqual(["reps", "weight_kg"]);
+    expect(getSetFields(["reps"])).toEqual(["reps", "weight_kg"]);
+    expect(getSetFields(["duration"])).toEqual(["duration_seconds"]);
+    expect(
+      getSetFields(["duration", "distance", "speed", "incline", "calories"]),
+    ).toEqual([
+      "duration_seconds",
+      "distance_meters",
+      "speed_kmh",
+      "incline_percent",
+      "calories",
+    ]);
+    expect(getSetFields([])).toEqual([]);
+  });
+
+  it("finds a value that the exercise does not measure", () => {
+    const set = { ...createEmptySet(), reps: 10, duration_seconds: 60 };
+    expect(getDisallowedSetFields(set, ["reps", "weight"])).toEqual([
+      "duration_seconds",
+    ]);
+    expect(getDisallowedSetFields(set, ["reps", "duration"])).toEqual([]);
+  });
+
+  it("labels the fields, the measures and the sets", () => {
+    expect(getSetFieldLabel("weight_kg", "weighted")).toBe("Charge (kg)");
+    expect(getSetFieldLabel("weight_kg", "bodyweight")).toBe("Lest (kg)");
+    expect(getSetFieldLabel("distance_meters", "cardio")).toBe("Distance (km)");
+    expect(formatTrackedMeasures(["reps", "weight"])).toBe(
+      "Répétitions · Charge",
+    );
+    expect(formatTrackedMeasures(["reps"])).toBe("Répétitions · Lest");
+    expect(getSetLabel("cardio", 0)).toBe("Étape 1");
+    expect(getSetLabel("weighted", 2)).toBe("Série 3");
+    expect(
+      formatSetValues({ ...createEmptySet(), reps: 10, weight_kg: 40 }, [
+        "reps",
+        "weight",
+      ]),
+    ).toBe("10 rép. · 40 kg");
+    expect(formatSetValues(createEmptySet(), ["reps"])).toBe("Aucun objectif");
+  });
+
+  it("validates one value against its limits", () => {
+    expect(validateSetValue("reps", 10)).toBeNull();
+    expect(validateSetValue("reps", null)).toBeNull();
+    expect(validateSetValue("reps", 1001)).toBe(
+      formatRangeMessage(SET_LIMITS.reps),
+    );
+    expect(validateSetValue("weight_kg", 40.3)).toBe(
+      "Entre une valeur par pas de 0,25.",
+    );
+    expect(validateSetValue("rest_after_seconds", 601)).toBe(
+      formatRangeMessage(SET_LIMITS.rest_after_seconds),
+    );
+  });
+
+  it("reads and writes min:s", () => {
+    expect(parseMinSec("1:30")).toBe(90);
+    expect(parseMinSec("01:30")).toBe(90);
+    expect(parseMinSec("10:00")).toBe(600);
+    expect(parseMinSec("1:02:05")).toBe(3725);
+    expect(parseMinSec("90")).toBe(90);
+    expect(parseMinSec("1:75")).toBeNull();
+    expect(parseMinSec("abc")).toBeNull();
+    expect(formatMinSec(90)).toBe("1:30");
+    expect(formatMinSec(600)).toBe("10:00");
+    expect(formatMinSec(5)).toBe("0:05");
+    expect(formatMinSec(3725)).toBe("1:02:05");
   });
 });

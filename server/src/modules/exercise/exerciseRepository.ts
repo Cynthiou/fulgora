@@ -1,4 +1,9 @@
-import { type Difficulty, type ExerciseFilters, escapeLike } from "shared";
+import {
+  type Difficulty,
+  type ExerciseFilters,
+  escapeLike,
+  type MeasureCode,
+} from "shared";
 import client, { type Queryable, type Rows } from "../../database/client.js";
 
 // One function, one query. No business rule here: the action decides.
@@ -146,4 +151,29 @@ export async function readAvailableExerciseIds(
     [ids, userId],
   );
   return rows.map((row) => Number(row.id));
+}
+
+export type ExerciseMeasureCodeRow = { exercise_id: number; code: MeasureCode };
+
+// The measure codes of several exercises at once, to check the planned sets
+// of a whole session (US-15, US-23). Uses query because of IN (?).
+export async function readExerciseMeasureCodes(
+  ids: number[],
+  db: Queryable = client,
+): Promise<ExerciseMeasureCodeRow[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const [rows] = await db.query<Rows[]>(
+    `SELECT em.exercise_id, m.code
+       FROM exercise_measure em
+       JOIN measure m ON m.id = em.measure_id
+      WHERE em.exercise_id IN (?)
+      ORDER BY em.exercise_id, m.id`,
+    [ids],
+  );
+  return rows.map((row) => ({
+    exercise_id: Number(row.exercise_id),
+    code: row.code as MeasureCode,
+  }));
 }

@@ -166,6 +166,8 @@ export type DraftExercise = {
   exercise_id: number;
   // Display fields, known from the catalog
   name: string;
+  // "Pectoraux · Barre", shown under the name of the configuration screen
+  meta?: string | null;
   measure_codes: MeasureCode[];
   default_rest_seconds: number | null;
   sets: PlannedSetValues[];
@@ -306,12 +308,14 @@ export function formatExerciseCountShort(count: number): string {
 export type SelectedExercise = {
   exercise_id: number;
   name: string;
+  meta?: string | null;
   measure_codes: MeasureCode[];
 };
 
-// The four set layouts of US-15, decided by the measures of the exercise.
-export type ExerciseProfile =
-  | "reps_weight"
+// The four set layouts of US-15, decided by the measures of the exercise
+// (RM-010); "none" for an exercise without any measure.
+export type MeasureProfile =
+  | "weighted"
   | "bodyweight"
   | "duration"
   | "cardio"
@@ -325,12 +329,12 @@ const CARDIO_CODES: MeasureCode[] = [
   "calories",
 ];
 
-export function getExerciseProfile(codes: MeasureCode[]): ExerciseProfile {
+export function getMeasureProfile(codes: MeasureCode[]): MeasureProfile {
   if (codes.some((code) => CARDIO_CODES.includes(code))) {
     return "cardio";
   }
   if (codes.includes("reps")) {
-    return codes.includes("weight") ? "reps_weight" : "bodyweight";
+    return codes.includes("weight") ? "weighted" : "bodyweight";
   }
   if (codes.includes("duration")) {
     return "duration";
@@ -342,8 +346,8 @@ export function getExerciseProfile(codes: MeasureCode[]): ExerciseProfile {
 // (cardio); the weight stays empty (US-15).
 export function createDefaultSet(codes: MeasureCode[]): PlannedSetValues {
   const set = createEmptySet();
-  switch (getExerciseProfile(codes)) {
-    case "reps_weight":
+  switch (getMeasureProfile(codes)) {
+    case "weighted":
     case "bodyweight":
       return { ...set, reps: 10 };
     case "duration":
@@ -373,7 +377,11 @@ const numberFormat = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,
 });
 
-function describeSet(set: PlannedSetValues, codes: MeasureCode[]): string[] {
+// The values of one set, in order: ["10 rép.", "40 kg"].
+export function describeSet(
+  set: PlannedSetValues,
+  codes: MeasureCode[],
+): string[] {
   const parts: string[] = [];
   if (set.reps !== null) {
     parts.push(`${numberFormat.format(set.reps)} rép.`);
@@ -416,7 +424,7 @@ export function formatSetSummary(
   exercise: Pick<DraftExercise, "sets" | "measure_codes">,
 ): string {
   const count = exercise.sets.length;
-  const isCardio = getExerciseProfile(exercise.measure_codes) === "cardio";
+  const isCardio = getMeasureProfile(exercise.measure_codes) === "cardio";
   let noun: string;
   if (isCardio) {
     noun = count > 1 ? "étapes" : "étape";
@@ -435,4 +443,155 @@ export function formatSetSummary(
 // "1 sélectionné", "3 sélectionnés".
 export function formatSelectedCount(count: number): string {
   return `${count} ${count > 1 ? "sélectionnés" : "sélectionné"}`;
+}
+
+// "10 rép. · 40 kg" for a folded set; "Aucun objectif" when every field is empty.
+export function formatSetValues(
+  set: PlannedSetValues,
+  codes: MeasureCode[],
+): string {
+  const parts = describeSet(set, codes);
+  return parts.length === 0 ? "Aucun objectif" : parts.join(" · ");
+}
+
+// --- Set fields (US-15) ------------------------------------------------------
+
+// The value fields of a set, without the rest (which every set may have).
+export type SetValueField = Exclude<
+  keyof PlannedSetValues,
+  "rest_after_seconds"
+>;
+
+const FIELD_BY_MEASURE: Record<MeasureCode, SetValueField> = {
+  reps: "reps",
+  weight: "weight_kg",
+  duration: "duration_seconds",
+  distance: "distance_meters",
+  speed: "speed_kmh",
+  resistance: "resistance",
+  incline: "incline_percent",
+  calories: "calories",
+};
+
+// Display order of the fields on the configuration screen (A7).
+const FIELD_ORDER: SetValueField[] = [
+  "reps",
+  "weight_kg",
+  "duration_seconds",
+  "distance_meters",
+  "speed_kmh",
+  "incline_percent",
+  "resistance",
+  "calories",
+];
+
+// The fields an exercise may fill, from its measures (RM-010). A bodyweight
+// exercise may also carry an added weight (the "lest"), stored as weight_kg.
+// Used by the client to build the screen and by the server to refuse a value
+// that does not belong to the exercise (US-23).
+export function getSetFields(codes: MeasureCode[]): SetValueField[] {
+  const fields = new Set(codes.map((code) => FIELD_BY_MEASURE[code]));
+  if (getMeasureProfile(codes) === "bodyweight") {
+    fields.add("weight_kg");
+  }
+  return FIELD_ORDER.filter((field) => fields.has(field));
+}
+
+// The fields of a set that hold a value although the exercise does not
+// measure them: ["duration_seconds"] for a duration on a bench press.
+export function getDisallowedSetFields(
+  set: PlannedSetValues,
+  codes: MeasureCode[],
+): SetValueField[] {
+  const allowed = getSetFields(codes);
+  return FIELD_ORDER.filter(
+    (field) => set[field] !== null && !allowed.includes(field),
+  );
+}
+
+export const MEASURE_LABELS: Record<MeasureCode, string> = {
+  reps: "Répétitions",
+  weight: "Charge",
+  duration: "Durée",
+  distance: "Distance",
+  speed: "Vitesse",
+  resistance: "Résistance",
+  incline: "Inclinaison",
+  calories: "Calories",
+};
+
+// "Répétitions · Charge", or "Répétitions · Lest" for a bodyweight exercise.
+export function formatTrackedMeasures(codes: MeasureCode[]): string {
+  const labels = codes.map((code) => MEASURE_LABELS[code]);
+  if (getMeasureProfile(codes) === "bodyweight") {
+    labels.push("Lest");
+  }
+  return labels.join(" · ");
+}
+
+// The label of a field on screen, with its unit (DT-11: km shown, meters stored).
+export function getSetFieldLabel(
+  field: SetValueField,
+  profile: MeasureProfile,
+): string {
+  switch (field) {
+    case "reps":
+      return "Répétitions";
+    case "weight_kg":
+      return profile === "bodyweight" ? "Lest (kg)" : "Charge (kg)";
+    case "duration_seconds":
+      return "Durée (min:s)";
+    case "distance_meters":
+      return "Distance (km)";
+    case "speed_kmh":
+      return "Vitesse (km/h)";
+    case "incline_percent":
+      return "Inclinaison (%)";
+    case "resistance":
+      return "Résistance";
+    case "calories":
+      return "Calories";
+  }
+}
+
+// "Série 1" or, for cardio, "Étape 1" (a stage is a set in the database).
+export function getSetLabel(profile: MeasureProfile, index: number): string {
+  return `${profile === "cardio" ? "Étape" : "Série"} ${index + 1}`;
+}
+
+// Checks one value against its limits: null when fine, the message otherwise.
+export function validateSetValue(
+  field: keyof PlannedSetValues,
+  value: number | null,
+): string | null {
+  const result = plannedSetSchema.shape[field].safeParse(value);
+  return result.success ? null : (result.error.issues[0]?.message ?? null);
+}
+
+// "1:30" from 90 seconds, "10:00" from 600, "1:02:05" above an hour.
+export function formatMinSec(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  const minSec = `${hours > 0 ? String(minutes).padStart(2, "0") : minutes}:${String(rest).padStart(2, "0")}`;
+  return hours > 0 ? `${hours}:${minSec}` : minSec;
+}
+
+// Seconds from "1:30", "01:30", "1:02:05" or a plain "90"; null when unreadable.
+export function parseMinSec(text: string): number | null {
+  const trimmed = text.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed);
+  }
+  const match = /^(?:(\d+):)?(\d{1,2}):(\d{2})$/.exec(trimmed);
+  if (match === null) {
+    return null;
+  }
+  const hours = Number(match[1] ?? 0);
+  const minutes = Number(match[2]);
+  const seconds = Number(match[3]);
+  if (seconds > 59 || (match[1] !== undefined && minutes > 59)) {
+    return null;
+  }
+  return hours * 3600 + minutes * 60 + seconds;
 }
