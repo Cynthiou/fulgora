@@ -4,19 +4,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import mysql, { type RowDataPacket } from "mysql2/promise";
+import type { DatabaseConfig } from "./config.js";
+
+export type { DatabaseConfig };
 
 export const MIGRATIONS_DIR = path.join(
   import.meta.dirname,
   "../../database/migrations",
 );
-
-export type DatabaseConfig = {
-  host: string;
-  port: number;
-  user: string;
-  password: string;
-  database: string;
-};
 
 export type MigrationFile = {
   version: number;
