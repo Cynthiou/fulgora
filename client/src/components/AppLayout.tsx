@@ -15,18 +15,16 @@ function AppLayout() {
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-base-300 bg-base-100 px-4">
         <img src={logo} alt="Fulgora" className="h-8 w-auto" />
         {user !== null && (
+          // Read as "LM, mon profil": the visible initials stay part of the name.
           <Link
             to="/profil"
             state={{ from: location.pathname }}
-            aria-label={`Mon profil, ${user.username}`}
             className="flex size-tap items-center justify-center"
           >
-            <span
-              aria-hidden="true"
-              className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-extrabold text-secondary-content"
-            >
+            <span className="flex size-10 items-center justify-center rounded-full bg-secondary font-display text-base font-extrabold text-secondary-content">
               {getInitials(user.username)}
             </span>
+            <span className="sr-only">, mon profil</span>
           </Link>
         )}
       </header>
