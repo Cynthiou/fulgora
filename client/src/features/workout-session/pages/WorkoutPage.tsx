@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { countPlannedSets, countValidatedSets, getBlockLabel } from "shared";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
@@ -7,11 +7,13 @@ import StatusBadge from "../../../components/StatusBadge";
 import { ApiError } from "../../../services/apiError";
 import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
 import AutoClosedNotice from "../components/AutoClosedNotice";
+import CompleteWorkoutDialog from "../components/CompleteWorkoutDialog";
 import WorkoutExerciseRow from "../components/WorkoutExerciseRow";
 import { useSessionChrono } from "../hooks/useSessionChrono";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
 import {
   abandonWorkoutSession,
+  completeWorkoutSession,
   readWorkoutSession,
 } from "../services/workoutSessionService";
 
@@ -37,14 +39,54 @@ function WorkoutSkeleton() {
 function WorkoutPage() {
   const params = useParams();
   const id = Number(params.id);
+  const navigate = useNavigate();
   const { session, isLoading, notFound, error, reload, replaceSession } =
     useWorkoutSession(id);
   const isInProgress = session?.status === "in_progress";
   const chrono = useSessionChrono(isInProgress ? session.started_at : null);
   const [isConfirmingAbandon, setIsConfirmingAbandon] = useState(false);
-  const [isAbandoning, setIsAbandoning] = useState(false);
-  const [abandonError, setAbandonError] = useState<string | null>(null);
+  const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  const [endError, setEndError] = useState<string | null>(null);
+  // "Aucune série n'est faite" (D-10): the way out is to abandon
+  const [cannotComplete, setCannotComplete] = useState<string | null>(null);
   const inFlight = useRef(false);
+
+  function openSummary() {
+    navigate(`/entrainement/${id}/resume`, { replace: true });
+  }
+
+  // "Terminer la séance": completed, the undone sets stay empty (RM-046),
+  // then the summary (B6). A 409 loads the true state back.
+  async function complete() {
+    if (inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    setIsConfirmingEnd(false);
+    setIsEnding(true);
+    setEndError(null);
+    setCannotComplete(null);
+    try {
+      replaceSession(await completeWorkoutSession(id));
+      openSummary();
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 422) {
+        setCannotComplete(caught.message);
+      } else if (caught instanceof ApiError && caught.status === 409) {
+        const latest = await readWorkoutSession(id).catch(() => null);
+        if (latest !== null) {
+          replaceSession(latest);
+          openSummary();
+        }
+      } else {
+        setEndError("Impossible de terminer la séance. Réessaie.");
+      }
+    } finally {
+      inFlight.current = false;
+      setIsEnding(false);
+    }
+  }
 
   // "Abandonner": over for good, validated sets kept (RM-045). On failure,
   // the true state is loaded back (already over: shown as such).
@@ -54,22 +96,25 @@ function WorkoutPage() {
     }
     inFlight.current = true;
     setIsConfirmingAbandon(false);
-    setIsAbandoning(true);
-    setAbandonError(null);
+    setIsEnding(true);
+    setEndError(null);
+    setCannotComplete(null);
     try {
       replaceSession(await abandonWorkoutSession(id));
+      openSummary();
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
         const latest = await readWorkoutSession(id).catch(() => null);
         if (latest !== null) {
           replaceSession(latest);
+          openSummary();
         }
       } else {
-        setAbandonError("Impossible d'abandonner la séance. Réessaie.");
+        setEndError("Impossible d'abandonner la séance. Réessaie.");
       }
     } finally {
       inFlight.current = false;
-      setIsAbandoning(false);
+      setIsEnding(false);
     }
   }
 
@@ -130,8 +175,31 @@ function WorkoutPage() {
 
             {session.auto_closed && <AutoClosedNotice />}
 
-            {abandonError !== null && (
-              <ErrorState title={abandonError} onRetry={abandon} />
+            {endError !== null && (
+              <ErrorState
+                title={endError}
+                onRetry={
+                  endError.startsWith("Impossible d'abandonner")
+                    ? abandon
+                    : complete
+                }
+              />
+            )}
+
+            {cannotComplete !== null && (
+              <div
+                role="alert"
+                className="flex flex-col gap-3 rounded-card border border-status-pending bg-base-100 p-4"
+              >
+                <p className="font-semibold">{cannotComplete}</p>
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingAbandon(true)}
+                  className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+                >
+                  Abandonner
+                </button>
+              </div>
             )}
 
             <div className="flex items-center justify-between rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
@@ -178,13 +246,21 @@ function WorkoutPage() {
         <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
           <div className="mx-auto max-w-md">
             <Link
-              to="/"
+              to={`/entrainement/${id}/resume`}
               className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
             >
-              Retour à l'accueil
+              Voir le résumé
             </Link>
           </div>
         </div>
+      )}
+
+      {isConfirmingEnd && session !== null && (
+        <CompleteWorkoutDialog
+          missingCount={countPlannedSets(session) - countValidatedSets(session)}
+          onConfirm={complete}
+          onCancel={() => setIsConfirmingEnd(false)}
+        />
       )}
 
       {isConfirmingAbandon && (
@@ -197,27 +273,23 @@ function WorkoutPage() {
       {!isLoading && session !== null && isInProgress && (
         <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
           <div className="mx-auto flex max-w-md gap-3">
-            {/* Finishing (US-34) arrives next. */}
             <button
               type="button"
               onClick={() => setIsConfirmingAbandon(true)}
-              disabled={isAbandoning}
+              disabled={isEnding}
               className="h-btn flex-1 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
             >
-              {isAbandoning ? "Abandon…" : "Abandonner"}
+              Abandonner
             </button>
             <button
               type="button"
-              disabled
-              aria-describedby="end-later"
+              onClick={() => setIsConfirmingEnd(true)}
+              disabled={isEnding}
               className="h-btn flex-1 rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
             >
-              Terminer la séance
+              {isEnding ? "Un instant…" : "Terminer la séance"}
             </button>
           </div>
-          <p id="end-later" className="sr-only">
-            Disponible à l'étape suivante.
-          </p>
         </div>
       )}
     </div>

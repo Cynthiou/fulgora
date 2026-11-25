@@ -51,3 +51,12 @@ export function abandonWorkoutSession(id: number): Promise<WorkoutSessionTree> {
     method: "POST",
   });
 }
+
+// POST /api/workout-sessions/:id/complete: the end of the session (US-34).
+export function completeWorkoutSession(
+  id: number,
+): Promise<WorkoutSessionTree> {
+  return apiFetch<WorkoutSessionTree>(`/workout-sessions/${id}/complete`, {
+    method: "POST",
+  });
+}

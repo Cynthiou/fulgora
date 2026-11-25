@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../../services/apiError";
 import {
   abandonWorkoutSession,
+  completeWorkoutSession,
   readWorkoutSession,
 } from "../services/workoutSessionService";
 import WorkoutPage from "./WorkoutPage";
@@ -13,9 +14,11 @@ import WorkoutPage from "./WorkoutPage";
 vi.mock("../services/workoutSessionService", () => ({
   readWorkoutSession: vi.fn(),
   abandonWorkoutSession: vi.fn(),
+  completeWorkoutSession: vi.fn(),
 }));
 const readMock = vi.mocked(readWorkoutSession);
 const abandonMock = vi.mocked(abandonWorkoutSession);
+const completeMock = vi.mocked(completeWorkoutSession);
 
 function set(position: number, validated: boolean): WorkoutSetRow {
   return {
@@ -84,7 +87,10 @@ const tree: WorkoutSessionTree = {
 
 function renderPage() {
   const router = createMemoryRouter(
-    [{ path: "/entrainement/:id", element: <WorkoutPage /> }],
+    [
+      { path: "/entrainement/:id", element: <WorkoutPage /> },
+      { path: "/entrainement/:id/resume", element: <p>Page résumé</p> },
+    ],
     { initialEntries: ["/entrainement/9"] },
   );
   render(<RouterProvider router={router} />);
@@ -94,6 +100,7 @@ describe("WorkoutPage", () => {
   beforeEach(() => {
     readMock.mockReset();
     abandonMock.mockReset();
+    completeMock.mockReset();
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-11-26T07:12:40.000Z"));
   });
@@ -117,12 +124,8 @@ describe("WorkoutPage", () => {
     expect(screen.getByText("3 séries · 10 rép. · 40 kg")).toBeTruthy();
     expect(screen.getByText("Penser à respirer.")).toBeTruthy();
     expect(
-      (
-        screen.getByRole("button", {
-          name: "Terminer la séance",
-        }) as HTMLButtonElement
-      ).disabled,
-    ).toBe(true);
+      screen.getByRole("button", { name: "Terminer la séance" }),
+    ).toBeTruthy();
   });
 
   it("abandons after a confirmation, keeps the sets and shows the session as unfinished", async () => {
@@ -152,13 +155,63 @@ describe("WorkoutPage", () => {
     );
 
     expect(abandonMock).toHaveBeenCalledWith(9);
-    expect(await screen.findByText("Inachevée")).toBeTruthy();
-    expect(screen.queryByText("12:40")).toBeNull();
-    expect(screen.getByText("1 / 3")).toBeTruthy();
+    expect(await screen.findByText("Page résumé")).toBeTruthy();
+  });
+
+  it("asks how many sets are undone, completes and opens the summary", async () => {
+    readMock.mockResolvedValue(tree);
+    completeMock.mockResolvedValue({
+      ...tree,
+      status: "completed",
+      ended_at: "2026-11-26T07:48:00.000Z",
+    });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderPage();
+    await screen.findByRole("heading", { level: 1, name: "Haut du corps" });
+
+    await user.click(
+      screen.getByRole("button", { name: "Terminer la séance" }),
+    );
+
+    expect(screen.getByText("Terminer la séance ?")).toBeTruthy();
     expect(
-      screen.getByRole("link", { name: "Retour à l'accueil" }),
+      screen.getByText(
+        "2 séries ne sont pas faites. Elles resteront non faites dans ton historique.",
+      ),
     ).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Abandonner" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Terminer" }));
+
+    expect(completeMock).toHaveBeenCalledWith(9);
+    expect(await screen.findByText("Page résumé")).toBeTruthy();
+  });
+
+  it("refuses to complete without any validated set and offers to abandon", async () => {
+    readMock.mockResolvedValue(tree);
+    completeMock.mockRejectedValue(
+      new ApiError(
+        422,
+        "NO_VALIDATED_SET",
+        "Aucune série n'est faite. Tu peux abandonner la séance.",
+      ),
+    );
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderPage();
+    await screen.findByRole("heading", { level: 1, name: "Haut du corps" });
+
+    await user.click(
+      screen.getByRole("button", { name: "Terminer la séance" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Terminer" }));
+
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Aucune série n'est faite. Tu peux abandonner la séance.",
+    );
+    await user.click(
+      within(screen.getByRole("alert")).getByRole("button", {
+        name: "Abandonner",
+      }),
+    );
+    expect(screen.getByText("Abandonner cette séance ?")).toBeTruthy();
   });
 
   it("shows the message of a session closed after 4 hours, and a retry on error", async () => {

@@ -23,6 +23,7 @@ import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
 import WorkoutExercisePage from "./features/workout-session/pages/WorkoutExercisePage";
 import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
+import WorkoutSummaryPage from "./features/workout-session/pages/WorkoutSummaryPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
               {
                 path: "/entrainement/:id/exercices/:exerciseId",
                 element: <WorkoutExercisePage />,
+              },
+              {
+                path: "/entrainement/:id/resume",
+                element: <WorkoutSummaryPage />,
               },
               // The catalog in selection mode for a block of the draft
               {
