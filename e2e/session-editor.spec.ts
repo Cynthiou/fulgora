@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
+import { formatLongDate, todayInParis } from "shared";
 import { expectHomePage, signUp } from "./helpers";
 
 async function expectNoA11yViolation(page: Page) {
@@ -259,4 +260,63 @@ test("configures the planned sets of one exercise of each profile", async ({
   await expect(
     page.getByRole("button", { name: /^Tapis de course/ }),
   ).toContainText("2 étapes");
+});
+
+test("plans a free session from the home page and finds it there (A1 to A9)", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+
+  // "+" then "Séance libre": the editor opens on today
+  await page.getByRole("button", { name: "Ajouter une séance" }).click();
+  await expect(page.getByText("Nouvelle séance")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("link", { name: /^Séance libre/ }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Nouvelle séance",
+  );
+  await expect(page.getByRole("button", { name: /^Date/ })).toContainText(
+    formatLongDate(todayInParis()),
+  );
+
+  // The date picker opens and keeps today
+  await page.getByRole("button", { name: /^Date/ }).click();
+  await expect(page.getByText("Date de la séance")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Aujourd'hui", exact: true }).click();
+  await page.getByRole("button", { name: "Valider la date" }).click();
+
+  // Name, one block, one exercise
+  await page.getByLabel(/^Nom de la séance/).fill("Haut du corps");
+  await page.getByRole("button", { name: "Ajouter un bloc" }).click();
+  await page.getByRole("button", { name: /^Classique/ }).click();
+  await page.getByRole("button", { name: "Ajouter des exercices" }).click();
+  await pickFromCatalog(page, "Développé poitrine à la machine");
+  await page
+    .getByRole("button", { name: "Ajouter au bloc, 1 sélectionné" })
+    .click();
+  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
+
+  // Save: A9
+  await page.getByRole("button", { name: "Enregistrer la séance" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Séance enregistrée" }),
+  ).toBeVisible();
+  await expect(page.getByText("Haut du corps")).toBeVisible();
+  await expect(
+    page.getByText("1 bloc · 1 exercice · Séance libre"),
+  ).toBeVisible();
+  await expect(page.getByRole("status")).toContainText(
+    `Séance enregistrée le ${formatLongDate(todayInParis()).charAt(0).toLowerCase()}${formatLongDate(todayInParis()).slice(1)}.`,
+  );
+  await expectNoA11yViolation(page);
+
+  // Back home: the session of the day is there
+  await page.getByRole("link", { name: "Retour à l'accueil" }).click();
+  await expectHomePage(page);
+  await expect(page.getByText("Séance du jour")).toBeVisible();
+  await expect(page.getByText("Haut du corps")).toBeVisible();
+  await expect(page.getByText("Aucune séance prévue")).toHaveCount(0);
 });
