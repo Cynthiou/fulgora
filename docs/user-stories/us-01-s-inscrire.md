@@ -113,28 +113,28 @@ Bouton « Création du compte… » désactivé, champs en lecture seule, statut
 
 ## Tâches techniques
 
-- [ ] BDD : utiliser `user` avec `terms_accepted_at` (migration 004) ; unicité par `uq_user_username` et `uq_user_email`
-- [ ] Shared : `shared/user.ts` : `signupSchema` (règles ci-dessus, `terms_accepted` doit valoir `true`) et type `PublicUser` (sans hachage)
-- [ ] Backend : `userRepository.createUser` : `INSERT INTO user (username, email, password_hash, terms_accepted_at) VALUES (?, ?, ?, NOW(3))`
-- [ ] Backend : ne pas faire de `SELECT` avant l'`INSERT` pour tester l'unicité : laisser l'index refuser (deux inscriptions simultanées) et lire `ER_DUP_ENTRY` pour savoir quel index (`uq_user_username` ou `uq_user_email`) a refusé
-- [ ] Backend : `userActions.create` : hacher, créer, poser le cookie (`setAuthCookie`), répondre 201 sans le hachage
-- [ ] Backend : `userRouter.ts` : `POST /api/users` → `checkOrigin` → `authLimiter` → `validate({ body: signupSchema })` → action
-- [ ] Frontend : `features/user/services/userService.ts` : `createUser(data)`
-- [ ] Frontend : `features/user/hooks/useSignup.ts` : envoi, `isSubmitting`, erreurs par champ à partir de `ApiError.field`
-- [ ] Frontend : `features/user/pages/SignupPage.tsx` : formulaire contrôlé, `autocomplete` (`username`, `email`, `new-password`), `type="email"`, bouton Afficher
-- [ ] Frontend : résumé d'erreurs `role="alert"`, focus sur le premier champ en erreur, mot de passe vidé
-- [ ] Frontend : après succès : `AuthContext.login(user)`, écran « Compte créé », puis Accueil
-- [ ] Routing : `/inscription` (publique) ; un utilisateur déjà connecté est envoyé vers l'Accueil
-- [ ] Tests : schéma : mot de passe sans chiffre, 7 caractères, pseudo avec espace, CGU non cochée, e-mail mis en minuscules
-- [ ] Tests : back : 201 + cookie `httpOnly`, 409 pseudo pris, 409 e-mail pris (même en majuscules), 400 champs vides, hachage `$argon2id$`, réponse sans hachage
-- [ ] Tests : front : erreurs par champ, mot de passe vidé, double clic = un seul envoi
-- [ ] Tests : E2E : inscription complète → Accueil ; axe sans violation sur les 5 états
-- [ ] Sécurité : limiteur de tentatives actif ; aucun mot de passe dans les logs
+- [x] BDD : utiliser `user` avec `terms_accepted_at` (migration 004) ; unicité par `uq_user_username` et `uq_user_email`
+- [x] Shared : `shared/user.ts` : `signupSchema` (règles ci-dessus, `terms_accepted` doit valoir `true`) et type `PublicUser` (sans hachage)
+- [x] Backend : `userRepository.createUser` : `INSERT INTO user (username, email, password_hash, terms_accepted_at) VALUES (?, ?, ?, NOW(3))`
+- [x] Backend : ne pas faire de `SELECT` avant l'`INSERT` pour tester l'unicité : laisser l'index refuser (deux inscriptions simultanées) et lire `ER_DUP_ENTRY` pour savoir quel index (`uq_user_username` ou `uq_user_email`) a refusé
+- [x] Backend : `userActions.create` : hacher, créer, poser le cookie (`setAuthCookie`), répondre 201 sans le hachage
+- [x] Backend : `userRouter.ts` : `POST /api/users` → `checkOrigin` → `authLimiter` → `validate({ body: signupSchema })` → action
+- [x] Frontend : `features/user/services/userService.ts` : `createUser(data)`
+- [x] Frontend : `features/user/hooks/useSignup.ts` : envoi, `isSubmitting`, erreurs par champ à partir de `ApiError.field`
+- [x] Frontend : `features/user/pages/SignupPage.tsx` : formulaire contrôlé, `autocomplete` (`username`, `email`, `new-password`), `type="email"`, bouton Afficher
+- [x] Frontend : résumé d'erreurs `role="alert"`, focus sur le premier champ en erreur, mot de passe vidé
+- [x] Frontend : après succès : `AuthContext.login(user)`, écran « Compte créé », puis Accueil
+- [x] Routing : `/inscription` (publique) ; un utilisateur déjà connecté est envoyé vers l'Accueil
+- [x] Tests : schéma : mot de passe sans chiffre, 7 caractères, pseudo avec espace, CGU non cochée, e-mail mis en minuscules
+- [x] Tests : back : 201 + cookie `httpOnly`, 409 pseudo pris, 409 e-mail pris (même en majuscules), 400 champs vides, hachage `$argon2id$`, réponse sans hachage
+- [x] Tests : front : erreurs par champ, mot de passe vidé, double clic = un seul envoi
+- [x] Tests : E2E : inscription complète → Accueil ; axe sans violation sur les 5 états
+- [x] Sécurité : limiteur de tentatives actif ; aucun mot de passe dans les logs
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement sur la branche
-- [ ] États formulaire, erreur, envoi, échec réseau et succès implémentés et testés
+- [x] États formulaire, erreur, envoi, échec réseau et succès implémentés et testés
 - [ ] Développé en mobile-first : conçu à 375 px puis élargi, vérifié sur tablette et ordinateur
 - [ ] Accessibilité : focus visible, erreurs annoncées, zones de 44 px, aucune information par la couleur seule
-- [ ] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
+- [x] Code relu et fusionné via pull request, aucune erreur Biome / TypeScript / console
