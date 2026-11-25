@@ -1,18 +1,33 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router";
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router";
 import {
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   type Difficulty,
   EXERCISE_PAGE_SIZE,
   type ExerciseFilters,
+  type ExerciseListItem,
   formatExerciseCount,
   formatResultCount,
+  formatSelectedCount,
+  MAX_EXERCISES_PER_BLOCK,
+  type SelectedExercise,
 } from "shared";
+import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import { useAuth } from "../../../hooks/useAuth";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
+import {
+  loadDraft,
+  savePendingExercises,
+} from "../../session-template/services/sessionDraftStorage";
 import ActiveFilterChips, {
   type ActiveFilter,
 } from "../components/ActiveFilterChips";
@@ -26,6 +41,9 @@ import ExerciseCardSkeleton from "../components/ExerciseCardSkeleton";
 import ExerciseSearch from "../components/ExerciseSearch";
 import FilterGrid from "../components/FilterGrid";
 import FilterToggle from "../components/FilterToggle";
+import SelectableExerciseCard from "../components/SelectableExerciseCard";
+import SessionDestinationSheet from "../components/SessionDestinationSheet";
+import { useExerciseSelection } from "../hooks/useExerciseSelection";
 import { useExercises } from "../hooks/useExercises";
 import { useReferenceLists } from "../hooks/useReferenceLists";
 
@@ -72,13 +90,48 @@ function readDifficulties(raw: string | null): Difficulty[] {
         );
 }
 
+function toSelected(exercise: ExerciseListItem): SelectedExercise {
+  return {
+    exercise_id: exercise.id,
+    name: exercise.name,
+    measure_codes: exercise.measure_codes,
+  };
+}
+
+type Props = {
+  // "catalog": the Catalogue tab, where "Sélectionner" turns selection on.
+  // "block": the selection page of a block of the draft (A5), always selecting.
+  selectionMode?: "catalog" | "block";
+};
+
 // Screen 04: the catalog, its search and its three filters. Search and
-// filters live in the address, so a reload or a return keeps them.
-function ExerciseListPage() {
+// filters live in the address, so a reload or a return keeps them. In
+// selection mode (state 5 / A5), the cards become toggles and the chosen
+// exercises leave for the session editor.
+function ExerciseListPage({ selectionMode = "catalog" }: Props) {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories, equipments } = useReferenceLists();
+
+  // Block mode: which block of the kept draft receives the exercises.
+  const blockKey = selectionMode === "block" ? searchParams.get("block") : null;
+  const storedDraft = selectionMode === "block" ? loadDraft() : null;
+  const blockIndex =
+    storedDraft?.draft.blocks.findIndex((block) => block.key === blockKey) ??
+    -1;
+  const block =
+    blockIndex === -1 ? null : storedDraft?.draft.blocks[blockIndex];
+  const existingCount = block?.exercises.length ?? 0;
+
+  const selection = useExerciseSelection(
+    selectionMode === "block" ? `block:${blockKey ?? ""}` : "catalog",
+    { alwaysActive: selectionMode === "block" },
+  );
+  const [isChoosingDestination, setIsChoosingDestination] = useState(false);
+  const isLimitReached =
+    existingCount + selection.items.length >= MAX_EXERCISES_PER_BLOCK;
 
   // What the address says
   const search = searchParams.get("search") ?? "";
@@ -224,6 +277,40 @@ function ExerciseListPage() {
     updateParams({ search: null });
   }
 
+  // Back to the editor (block mode): the previous page, or its address when
+  // the selection page was opened directly.
+  function backToEditor() {
+    if (location.key === "default") {
+      navigate("/seances/nouvelle", { replace: true });
+    } else {
+      navigate(-1);
+    }
+  }
+
+  // "Ajouter au bloc": the exercises wait in the tab for the editor.
+  function addToBlock() {
+    if (blockKey !== null && selection.items.length > 0) {
+      savePendingExercises({ blockKey, exercises: selection.items });
+      selection.cancel();
+      backToEditor();
+    }
+  }
+
+  // "Continuer vers l'éditeur": a new free session holding the selection.
+  function continueToEditor() {
+    const exercises = selection.items;
+    setIsChoosingDestination(false);
+    selection.cancel();
+    navigate("/seances/nouvelle", { state: { exercises } });
+  }
+
+  const detailState =
+    selection.isActive && selectionMode === "block"
+      ? { selection: `block:${blockKey ?? ""}` }
+      : selection.isActive
+        ? { selection: "catalog" }
+        : {};
+
   const counterText =
     search === "" && !hasFilters
       ? formatExerciseCount(total)
@@ -233,9 +320,59 @@ function ExerciseListPage() {
           activeFilters.map((filter) => filter.label),
         );
 
+  // Block mode without a known block: nothing to select for, back to the editor.
+  if (selectionMode === "block" && block === null) {
+    return <Navigate to="/seances/nouvelle" replace />;
+  }
+
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-4 p-4">
-      <h1 className="text-display-md">Catalogue</h1>
+    <div
+      className={`mx-auto flex max-w-md flex-col gap-4 p-4 ${
+        selection.isActive ? "pb-28" : ""
+      }`}
+    >
+      {selectionMode === "block" ? (
+        <div className="-mx-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              selection.cancel();
+              backToEditor();
+            }}
+            aria-label="Retour au bloc"
+            className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
+          >
+            <Icon src={chevronLeftIcon} className="size-7" />
+          </button>
+          <div className="flex min-w-0 flex-col">
+            <h1 className="text-display-md">Catalogue</h1>
+            <p className="text-sm font-semibold text-muted">
+              Sélection pour le bloc {blockIndex + 1}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-display-md">Catalogue</h1>
+          {selection.isActive ? (
+            <button
+              type="button"
+              onClick={selection.cancel}
+              className="min-h-tap px-2 font-semibold text-secondary"
+            >
+              Annuler
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={selection.start}
+              className="min-h-tap px-2 font-semibold text-secondary"
+            >
+              Sélectionner
+            </button>
+          )}
+        </div>
+      )}
 
       <ExerciseSearch value={typed} onChange={setTyped} onClear={clearSearch} />
 
@@ -326,6 +463,29 @@ function ExerciseListPage() {
 
       <ActiveFilterChips filters={activeFilters} onClearAll={clearAllFilters} />
 
+      {selection.isActive && selectionMode === "catalog" && (
+        <div className="flex items-center justify-between gap-2">
+          <p aria-live="polite" className="font-semibold">
+            {formatSelectedCount(selection.items.length)}
+          </p>
+          {selection.items.length > 0 && (
+            <button
+              type="button"
+              onClick={selection.clear}
+              className="min-h-tap px-2 text-sm font-semibold text-secondary"
+            >
+              Tout désélectionner
+            </button>
+          )}
+        </div>
+      )}
+
+      {selection.isActive && isLimitReached && (
+        <p role="status" className="text-sm font-semibold text-muted">
+          {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
+        </p>
+      )}
+
       {isLoading && (
         <>
           <p role="status" className="text-muted">
@@ -386,14 +546,28 @@ function ExerciseListPage() {
           )}
 
           <ul aria-label="Exercices" className="flex flex-col gap-2">
-            {items.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                sex={user?.sex ?? null}
-                searchTerm={search}
-              />
-            ))}
+            {items.map((exercise) =>
+              selection.isActive ? (
+                <SelectableExerciseCard
+                  key={exercise.id}
+                  exercise={exercise}
+                  sex={user?.sex ?? null}
+                  searchTerm={search}
+                  position={selection.positionOf(exercise.id)}
+                  total={selection.items.length}
+                  isLimitReached={isLimitReached}
+                  onToggle={() => selection.toggle(toSelected(exercise))}
+                  detailState={detailState}
+                />
+              ) : (
+                <ExerciseCard
+                  key={exercise.id}
+                  exercise={exercise}
+                  sex={user?.sex ?? null}
+                  searchTerm={search}
+                />
+              ),
+            )}
             {isLoadingMore && <ExerciseCardSkeleton />}
           </ul>
 
@@ -428,6 +602,45 @@ function ExerciseListPage() {
             </p>
           )}
         </>
+      )}
+
+      {selection.isActive && (
+        <div
+          className={`fixed inset-x-0 z-10 border-t border-base-300 bg-base-100 p-4 ${
+            selectionMode === "block" ? "bottom-0" : "bottom-nav"
+          }`}
+        >
+          <div className="mx-auto max-w-md">
+            <button
+              type="button"
+              disabled={selection.items.length === 0}
+              onClick={
+                selectionMode === "block"
+                  ? addToBlock
+                  : () => setIsChoosingDestination(true)
+              }
+              className="flex h-btn w-full items-center justify-center gap-2 rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+            >
+              {selectionMode === "block"
+                ? "Ajouter au bloc"
+                : "Ajouter à une séance"}
+              {selection.items.length > 0 && (
+                <span aria-hidden="true"> · {selection.items.length}</span>
+              )}
+              <span className="sr-only">
+                , {formatSelectedCount(selection.items.length)}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isChoosingDestination && (
+        <SessionDestinationSheet
+          exercises={selection.items}
+          onContinue={continueToEditor}
+          onCancel={() => setIsChoosingDestination(false)}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createMemoryRouter, RouterProvider } from "react-router";
+import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import type { ExerciseDetail, PublicUser } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -50,7 +50,19 @@ const squat: ExerciseDetail = {
   alternatives: ["Goblet squat.", "Presse à cuisses."],
 };
 
-function renderDetail(initialState?: { name: string }) {
+// Shows what the editor receives through the navigation state.
+function EditorStub() {
+  const location = useLocation();
+  const state = location.state as { exercises?: { name: string }[] } | null;
+  return (
+    <p>
+      Page nouvelle séance ·{" "}
+      {state?.exercises?.map((exercise) => exercise.name).join(", ")}
+    </p>
+  );
+}
+
+function renderDetail(initialState?: { name: string; selection?: string }) {
   const auth: AuthContextValue = {
     user: lea,
     isLoading: false,
@@ -61,7 +73,7 @@ function renderDetail(initialState?: { name: string }) {
     [
       { path: "/catalogue", element: <p>Page catalogue</p> },
       { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
-      { path: "/seances/nouvelle", element: <p>Page nouvelle séance</p> },
+      { path: "/seances/nouvelle", element: <EditorStub /> },
     ],
     {
       initialEntries: [
@@ -131,10 +143,65 @@ describe("ExerciseDetailPage", () => {
     expect(screen.getByText("Répétitions")).toBeTruthy();
     expect(screen.getByText("Charge")).toBeTruthy();
     expect(
-      screen
-        .getByRole("link", { name: "Ajouter à une séance" })
-        .getAttribute("href"),
-    ).toBe("/seances/nouvelle");
+      (
+        screen.getByRole("button", {
+          name: "Ajouter à une séance",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(false);
+  });
+
+  it("offers a new free session as destination and hands the exercise over", async () => {
+    readExerciseMock.mockResolvedValue(squat);
+    const user = renderDetail();
+    await screen.findByText("Quadriceps · Fessiers");
+
+    await user.click(
+      screen.getByRole("button", { name: "Ajouter à une séance" }),
+    );
+
+    expect(screen.getByText("Ajouter 1 exercice")).toBeTruthy();
+    expect(screen.getByText("Nouvelle séance libre")).toBeTruthy();
+    expect(screen.getByText("Tu choisiras la date ensuite")).toBeTruthy();
+
+    await user.click(
+      screen.getByRole("button", { name: "Continuer vers l'éditeur" }),
+    );
+
+    expect(
+      await screen.findByText("Page nouvelle séance · Squat à la barre"),
+    ).toBeTruthy();
+  });
+
+  it("adds to the selection and goes back when opened from a selection", async () => {
+    sessionStorage.clear();
+    readExerciseMock.mockResolvedValue(squat);
+    const user = renderDetail({
+      name: "Squat à la barre",
+      selection: "block:b1",
+    });
+    await screen.findByText("Quadriceps · Fessiers");
+    expect(
+      screen.getByRole("button", { name: "Retour à la sélection" }),
+    ).toBeTruthy();
+
+    await user.click(
+      screen.getByRole("button", { name: "Ajouter à la sélection" }),
+    );
+
+    expect(await screen.findByText("Page catalogue")).toBeTruthy();
+    expect(
+      JSON.parse(sessionStorage.getItem("catalogue:selection:block:b1") ?? ""),
+    ).toEqual({
+      active: true,
+      items: [
+        {
+          exercise_id: 12,
+          name: "Squat à la barre",
+          measure_codes: ["reps", "weight"],
+        },
+      ],
+    });
   });
 
   it("uses the singular for one primary muscle and hides empty alternatives", async () => {

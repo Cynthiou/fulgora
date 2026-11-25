@@ -57,6 +57,11 @@ const router = createBrowserRouter([
               { path: "/profil", element: <ProfilePage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
+              // The catalog in selection mode for a block of the draft
+              {
+                path: "/seances/nouvelle/exercices",
+                element: <ExerciseListPage selectionMode="block" />,
+              },
             ],
           },
         ],

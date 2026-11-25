@@ -124,7 +124,7 @@ describe("sessionDraftReducer", () => {
     expect(exercises[0]).toMatchObject({
       exercise_id: 31,
       default_rest_seconds: 90,
-      sets: [createEmptySet()],
+      sets: [{ ...createEmptySet(), reps: 10 }],
     });
     expect(exercises[0]?.key).not.toBe(exercises[1]?.key);
   });
@@ -279,5 +279,57 @@ describe("sessionDraftReducer · block details (US-13)", () => {
         blockType: "note",
       }),
     ).toBe(draft);
+  });
+});
+
+describe("sessionDraftReducer · exercises (US-14)", () => {
+  it("removes an exercise and puts it back at its place", () => {
+    const { draft, blockKey, exerciseKey } = draftWithExercises();
+    const removed = draft.blocks[0]?.exercises[0];
+    if (removed === undefined) {
+      throw new Error("missing exercise");
+    }
+
+    const without = sessionDraftReducer(draft, {
+      type: "removeExercise",
+      blockKey,
+      exerciseKey,
+    });
+    expect(without.blocks[0]?.exercises.map((e) => e.name)).toEqual([
+      "Tractions",
+    ]);
+
+    const restored = sessionDraftReducer(without, {
+      type: "restoreExercise",
+      blockKey,
+      exercise: removed,
+      index: 0,
+    });
+    expect(restored.blocks[0]?.exercises.map((e) => e.name)).toEqual([
+      "Développé couché",
+      "Tractions",
+    ]);
+  });
+
+  it("pre-fills the first set from the measures of the exercise", () => {
+    const withBlock = apply(base, {
+      type: "addBlock",
+      blockType: "classic",
+      key: "b",
+    });
+    const draft = apply(withBlock, {
+      type: "addExercises",
+      blockKey: "b",
+      exercises: [
+        { exercise_id: 1, name: "Gainage", measure_codes: ["duration"] },
+        {
+          exercise_id: 2,
+          name: "Tapis",
+          measure_codes: ["duration", "distance", "speed"],
+        },
+      ],
+    });
+    expect(draft.blocks[0]?.exercises[0]?.sets[0]?.duration_seconds).toBe(60);
+    expect(draft.blocks[0]?.exercises[1]?.sets[0]?.duration_seconds).toBe(600);
   });
 });

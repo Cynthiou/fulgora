@@ -10,9 +10,12 @@ import {
   countDraftExercises,
   createEmptyDraft,
   type DraftBlock,
+  type DraftExercise,
   dateSchema,
   formatBlockCount,
   MAX_BLOCKS,
+  type SelectedExercise,
+  type SessionDraft,
   sessionDraftSchema,
   todayInParis,
 } from "shared";
@@ -25,8 +28,19 @@ import UndoToast from "../../../components/UndoToast";
 import BlockEditor from "../components/BlockEditor";
 import BlockTypePicker from "../components/BlockTypePicker";
 import SessionReview from "../components/SessionReview";
-import { nextKey } from "../hooks/sessionDraftReducer";
+import { nextKey, sessionDraftReducer } from "../hooks/sessionDraftReducer";
 import { useSessionDraft } from "../hooks/useSessionDraft";
+import {
+  clearDraft,
+  clearPendingExercises,
+  loadDraft,
+  readPendingExercises,
+  saveDraft,
+} from "../services/sessionDraftStorage";
+
+// The catalog in selection mode for a block (A5); leaving for it is not
+// leaving the editor.
+export const SELECTION_PATH = "/seances/nouvelle/exercices";
 
 // The date comes from the Planning or the home page (?date=), today otherwise.
 function readInitialDate(raw: string | null): string {
@@ -35,30 +49,116 @@ function readInitialDate(raw: string | null): string {
     : todayInParis();
 }
 
+// Exercises handed over by the catalog ("Ajouter à une séance").
+type NavigationState = { exercises?: SelectedExercise[] } | null;
+
+type InitialState = {
+  draft: SessionDraft;
+  openBlockKey: string | null;
+  isDirty: boolean;
+};
+
+// Where the editor starts: with exercises from the catalog (a fresh draft and
+// a Classic block), or the draft kept during a detour (plus the exercises
+// chosen for a block), or an empty draft.
+function readInitialState(
+  state: NavigationState,
+  dateParam: string | null,
+): InitialState {
+  if (state?.exercises !== undefined && state.exercises.length > 0) {
+    const key = nextKey();
+    const withBlock = sessionDraftReducer(
+      createEmptyDraft(readInitialDate(dateParam)),
+      { type: "addBlock", blockType: "classic", key },
+    );
+    const draft = sessionDraftReducer(withBlock, {
+      type: "addExercises",
+      blockKey: key,
+      exercises: state.exercises,
+    });
+    return { draft, openBlockKey: null, isDirty: true };
+  }
+
+  const stored = loadDraft();
+  if (stored !== null) {
+    const pending = readPendingExercises();
+    const draft =
+      pending === null
+        ? stored.draft
+        : sessionDraftReducer(stored.draft, {
+            type: "addExercises",
+            blockKey: pending.blockKey,
+            exercises: pending.exercises,
+          });
+    return { draft, openBlockKey: stored.openBlockKey, isDirty: true };
+  }
+
+  return {
+    draft: createEmptyDraft(readInitialDate(dateParam)),
+    openBlockKey: null,
+    isDirty: false,
+  };
+}
+
 // Which panel is open: none, "add" a block, or "change" the open block's type.
 type PickerMode = "closed" | "add" | "change";
 
+// The last removal, kept 5 seconds for "Annuler".
+type Removed =
+  | { kind: "block"; block: DraftBlock; index: number }
+  | {
+      kind: "exercise";
+      blockKey: string;
+      exercise: DraftExercise;
+      index: number;
+    };
+
 // Screen A2: a new free session. The draft lives in useSessionDraft; leaving
 // with unsaved changes asks for a confirmation (back arrow and tab closing).
-// A block opens full screen (A4) over the session; the type panel (A3) is a
-// dialog.
+// A block opens full screen (A4/A6) over the session; the type panel (A3) is
+// a dialog.
 function SessionEditorPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const initial = useRef<InitialState | null>(null);
+  if (initial.current === null) {
+    initial.current = readInitialState(
+      location.state as NavigationState,
+      searchParams.get("date"),
+    );
+  }
   const { draft, isDirty, dispatch } = useSessionDraft(
-    createEmptyDraft(readInitialDate(searchParams.get("date"))),
+    initial.current.draft,
+    initial.current.isDirty,
   );
   const [nameError, setNameError] = useState<string | null>(null);
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
-  const [openBlockKey, setOpenBlockKey] = useState<string | null>(null);
+  const [openBlockKey, setOpenBlockKey] = useState<string | null>(
+    initial.current.openBlockKey,
+  );
   const [picker, setPicker] = useState<PickerMode>("closed");
-  // The last removed block, kept 5 seconds for "Annuler".
-  const [removed, setRemoved] = useState<{
-    block: DraftBlock;
-    index: number;
-  } | null>(null);
+  const [removed, setRemoved] = useState<Removed | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+
+  // What was handed over has been taken: a reload must not add it twice.
+  useEffect(() => {
+    clearPendingExercises();
+    const state = location.state as NavigationState;
+    if (state?.exercises !== undefined) {
+      navigate(`${location.pathname}${location.search}`, {
+        replace: true,
+        state: null,
+      });
+    }
+  }, [location.pathname, location.search, location.state, navigate]);
+
+  // A changed draft is kept in the tab, for the detour through the catalog.
+  useEffect(() => {
+    if (isDirty) {
+      saveDraft({ draft, openBlockKey });
+    }
+  }, [draft, openBlockKey, isDirty]);
 
   const blockCount = draft.blocks.length;
   const exerciseCount = countDraftExercises(draft);
@@ -67,8 +167,11 @@ function SessionEditorPage() {
   );
   const openBlock = openBlockIndex === -1 ? null : draft.blocks[openBlockIndex];
 
-  // In-app navigation with unsaved changes: blocked until the user answers.
-  const blocker = useBlocker(isDirty);
+  // In-app navigation with unsaved changes: blocked until the user answers,
+  // except towards the catalog selection, which comes back here.
+  const blocker = useBlocker(
+    ({ nextLocation }) => isDirty && nextLocation.pathname !== SELECTION_PATH,
+  );
 
   // Closing or reloading the tab: the browser shows its own question.
   useEffect(() => {
@@ -87,6 +190,14 @@ function SessionEditorPage() {
       navigate("/");
     } else {
       navigate(-1);
+    }
+  }
+
+  // "Quitter": the draft is dropped for good.
+  function leave() {
+    clearDraft();
+    if (blocker.state === "blocked") {
+      blocker.proceed();
     }
   }
 
@@ -125,21 +236,69 @@ function SessionEditorPage() {
       return;
     }
     dispatch({ type: "removeBlock", key });
-    setRemoved({ block, index });
+    setRemoved({ kind: "block", block, index });
+  }
+
+  function removeExercise(blockKey: string, exerciseKey: string) {
+    const block = draft.blocks.find((candidate) => candidate.key === blockKey);
+    const index =
+      block?.exercises.findIndex((exercise) => exercise.key === exerciseKey) ??
+      -1;
+    const exercise = block?.exercises[index];
+    if (exercise === undefined) {
+      return;
+    }
+    dispatch({ type: "removeExercise", blockKey, exerciseKey });
+    setRemoved({ kind: "exercise", blockKey, exercise, index });
   }
 
   function undoRemove() {
-    if (removed !== null) {
+    if (removed === null) {
+      return;
+    }
+    if (removed.kind === "block") {
       dispatch({
         type: "restoreBlock",
         block: removed.block,
         index: removed.index,
       });
-      setRemoved(null);
+    } else {
+      dispatch({
+        type: "restoreExercise",
+        blockKey: removed.blockKey,
+        exercise: removed.exercise,
+        index: removed.index,
+      });
     }
+    setRemoved(null);
   }
 
-  if (openBlock !== null && openBlockKey !== null) {
+  // The catalog in selection mode; the draft is saved in the tab first.
+  function addExercises(blockKey: string) {
+    saveDraft({ draft, openBlockKey: blockKey });
+    navigate(`${SELECTION_PATH}?block=${encodeURIComponent(blockKey)}`);
+  }
+
+  const exitDialog = blocker.state === "blocked" && (
+    <ConfirmDialog
+      title="Quitter sans enregistrer ?"
+      message="Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
+      confirmLabel="Quitter"
+      cancelLabel="Continuer la séance"
+      onConfirm={leave}
+      onCancel={() => blocker.reset()}
+    />
+  );
+
+  const undoToast = removed !== null && (
+    <UndoToast
+      message={removed.kind === "block" ? "Bloc retiré" : "Exercice retiré"}
+      onUndo={undoRemove}
+      onDismiss={() => setRemoved(null)}
+    />
+  );
+
+  if (openBlock !== undefined && openBlock !== null && openBlockKey !== null) {
     return (
       <>
         <BlockEditor
@@ -157,6 +316,10 @@ function SessionEditorPage() {
             })
           }
           onRequestTypeChange={() => setPicker("change")}
+          onAddExercises={() => addExercises(openBlockKey)}
+          onRemoveExercise={(exerciseKey) =>
+            removeExercise(openBlockKey, exerciseKey)
+          }
           onDone={() => setOpenBlockKey(null)}
         />
         {picker === "change" && (
@@ -165,16 +328,8 @@ function SessionEditorPage() {
             onClose={() => setPicker("closed")}
           />
         )}
-        {blocker.state === "blocked" && (
-          <ConfirmDialog
-            title="Quitter sans enregistrer ?"
-            message="Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
-            confirmLabel="Quitter"
-            cancelLabel="Continuer la séance"
-            onConfirm={() => blocker.proceed()}
-            onCancel={() => blocker.reset()}
-          />
-        )}
+        {undoToast}
+        {exitDialog}
       </>
     );
   }
@@ -321,24 +476,8 @@ function SessionEditorPage() {
         />
       )}
 
-      {removed !== null && (
-        <UndoToast
-          message="Bloc retiré"
-          onUndo={undoRemove}
-          onDismiss={() => setRemoved(null)}
-        />
-      )}
-
-      {blocker.state === "blocked" && (
-        <ConfirmDialog
-          title="Quitter sans enregistrer ?"
-          message="Ta séance n'est pas encore enregistrée. Si tu quittes, elle sera perdue."
-          confirmLabel="Quitter"
-          cancelLabel="Continuer la séance"
-          onConfirm={() => blocker.proceed()}
-          onCancel={() => blocker.reset()}
-        />
-      )}
+      {undoToast}
+      {exitDialog}
     </div>
   );
 }

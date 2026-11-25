@@ -2,11 +2,13 @@ import {
   BLOCK_TYPE_LABELS,
   type DraftBlock,
   formatExerciseCountShort,
+  MAX_EXERCISES_PER_BLOCK,
 } from "shared";
 import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import Icon from "../../../components/Icon";
 import TextField from "../../../components/TextField";
+import BlockExerciseRow from "./BlockExerciseRow";
 
 const NOTE_MAX_LENGTH = 2000;
 
@@ -19,12 +21,15 @@ type Props = {
   onChangeInstructions: (instructions: string | null) => void;
   // "Changer": reopens the type panel; only offered on an empty block (D-03)
   onRequestTypeChange: () => void;
+  // "Ajouter des exercices": opens the catalog in selection mode (A5)
+  onAddExercises: () => void;
+  onRemoveExercise: (exerciseKey: string) => void;
   // "Enregistrer le bloc" and the back arrow both return to the session
   onDone: () => void;
 };
 
-// Screen A4: one block of the draft. Changes apply to the draft as they are
-// typed; "Enregistrer le bloc" simply goes back to the session.
+// Screens A4 and A6: one block of the draft. Changes apply to the draft as
+// they are typed; "Enregistrer le bloc" simply goes back to the session.
 function BlockEditor({
   block,
   index,
@@ -32,11 +37,14 @@ function BlockEditor({
   onChangeName,
   onChangeInstructions,
   onRequestTypeChange,
+  onAddExercises,
+  onRemoveExercise,
   onDone,
 }: Props) {
   const typeLabel = BLOCK_TYPE_LABELS[block.block_type];
   const isNote = block.block_type === "note";
   const canChangeType = block.exercises.length === 0;
+  const isFull = block.exercises.length >= MAX_EXERCISES_PER_BLOCK;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -135,30 +143,34 @@ function BlockEditor({
                 Choisis tes exercices dans le catalogue.
               </p>
             ) : (
-              <ul className="flex flex-col gap-2">
+              <ul
+                aria-label="Exercices du bloc"
+                className="flex flex-col gap-2"
+              >
                 {block.exercises.map((exercise) => (
-                  <li
+                  <BlockExerciseRow
                     key={exercise.key}
-                    className="rounded-card border border-base-300 bg-base-100 p-4 font-semibold shadow-card"
-                  >
-                    {exercise.name}
-                  </li>
+                    exercise={exercise}
+                    onRemove={() => onRemoveExercise(exercise.key)}
+                  />
                 ))}
               </ul>
             )}
-            {/* Wired to the catalog selection by US-14. */}
             <button
               type="button"
-              disabled
-              aria-describedby="add-exercises-soon"
+              onClick={onAddExercises}
+              disabled={isFull}
+              aria-describedby={isFull ? "block-exercises-limit" : undefined}
               className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
             >
               <Icon src={plusIcon} className="size-5" />
               Ajouter des exercices
             </button>
-            <p id="add-exercises-soon" className="text-sm text-muted">
-              Disponible à l'étape suivante.
-            </p>
+            {isFull && (
+              <p id="block-exercises-limit" className="text-sm text-muted">
+                {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
+              </p>
+            )}
           </section>
         )}
       </div>

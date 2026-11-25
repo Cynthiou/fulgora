@@ -8,6 +8,7 @@ import {
   type AuthContextValue,
 } from "../../../contexts/AuthContext";
 import { ApiError } from "../../../services/apiError";
+import { saveDraft } from "../../session-template/services/sessionDraftStorage";
 import {
   readCategories,
   readEquipments,
@@ -333,5 +334,197 @@ describe("ExerciseListPage", () => {
       screen.getByRole("button", { name: "Effacer la recherche" }),
     );
     expect(address()).toBe("");
+  });
+});
+
+// Shows what the editor receives, for the selection tests.
+function EditorStub() {
+  const location = useLocation();
+  const state = location.state as { exercises?: { name: string }[] } | null;
+  return (
+    <p>Page éditeur · {state?.exercises?.map((e) => e.name).join(", ")}</p>
+  );
+}
+
+function renderSelection(path: string) {
+  const auth: AuthContextValue = {
+    user: lea,
+    isLoading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  };
+  const router = createMemoryRouter(
+    [
+      { path: "/catalogue", element: <ExerciseListPage /> },
+      { path: "/catalogue/:id", element: <p>Page fiche</p> },
+      { path: "/seances/nouvelle", element: <EditorStub /> },
+      {
+        path: "/seances/nouvelle/exercices",
+        element: <ExerciseListPage selectionMode="block" />,
+      },
+    ],
+    { initialEntries: ["/seances/nouvelle", path], initialIndex: 1 },
+  );
+  render(
+    <AuthContext.Provider value={auth}>
+      <RouterProvider router={router} />
+    </AuthContext.Provider>,
+  );
+  return userEvent.setup();
+}
+
+function pressed(name: RegExp): string | null {
+  return screen.getByRole("button", { name }).getAttribute("aria-pressed");
+}
+
+describe("ExerciseListPage · selection (US-14)", () => {
+  beforeEach(() => {
+    readExercisesMock.mockReset();
+    readCategoriesMock.mockReset();
+    readEquipmentsMock.mockReset();
+    readCategoriesMock.mockResolvedValue([]);
+    readEquipmentsMock.mockResolvedValue([]);
+    sessionStorage.clear();
+  });
+
+  it("numbers the cards in the order they are touched and renumbers on removal", async () => {
+    readExercisesMock.mockResolvedValue(page(1, 3, 3));
+    const user = renderSelection("/catalogue");
+    await screen.findByText("3 exercices");
+
+    await user.click(screen.getByRole("button", { name: "Sélectionner" }));
+
+    expect(screen.getByText("0 sélectionné")).toBeTruthy();
+    expect(pressed(/^Exercice 001/)).toBe("false");
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Ajouter à une séance, 0 sélectionné",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: /^Exercice 002/ }));
+    await user.click(screen.getByRole("button", { name: /^Exercice 001/ }));
+
+    expect(screen.getByText("2 sélectionnés")).toBeTruthy();
+    expect(pressed(/^Exercice 002, sélectionné, 1 sur 2/)).toBe("true");
+    expect(pressed(/^Exercice 001, sélectionné, 2 sur 2/)).toBe("true");
+
+    // Touching again removes it: the other moves up
+    await user.click(screen.getByRole("button", { name: /^Exercice 002/ }));
+    expect(screen.getByText("1 sélectionné")).toBeTruthy();
+    expect(pressed(/^Exercice 001, sélectionné, 1 sur 1/)).toBe("true");
+
+    // The eye still leads to the detail
+    expect(
+      screen
+        .getByRole("link", { name: "Fiche de Exercice 001" })
+        .getAttribute("href"),
+    ).toBe("/catalogue/1");
+
+    await user.click(
+      screen.getByRole("button", { name: "Tout désélectionner" }),
+    );
+    expect(screen.getByText("0 sélectionné")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+    expect(screen.getByRole("button", { name: "Sélectionner" })).toBeTruthy();
+    expect(screen.getAllByRole("link")).toHaveLength(3);
+  });
+
+  it("sends the selection to a new free session through the destination choice", async () => {
+    readExercisesMock.mockResolvedValue(page(1, 3, 3));
+    const user = renderSelection("/catalogue");
+    await screen.findByText("3 exercices");
+
+    await user.click(screen.getByRole("button", { name: "Sélectionner" }));
+    await user.click(screen.getByRole("button", { name: /^Exercice 003/ }));
+    await user.click(screen.getByRole("button", { name: /^Exercice 001/ }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Ajouter à une séance, 2 sélectionnés",
+      }),
+    );
+
+    expect(screen.getByText("Ajouter 2 exercices")).toBeTruthy();
+    expect(screen.getByText("Exercice 003, Exercice 001")).toBeTruthy();
+
+    await user.click(
+      screen.getByRole("button", { name: "Continuer vers l'éditeur" }),
+    );
+
+    expect(
+      await screen.findByText("Page éditeur · Exercice 003, Exercice 001"),
+    ).toBeTruthy();
+    expect(sessionStorage.getItem("catalogue:selection:catalog")).toBeNull();
+  });
+
+  it("selects for a block of the kept draft and hands the exercises back", async () => {
+    saveDraft({
+      draft: {
+        name: "Haut du corps",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "warm_up",
+            name: null,
+            instructions: null,
+            exercises: [],
+          },
+          {
+            key: "b2",
+            block_type: "classic",
+            name: "Force",
+            instructions: null,
+            exercises: [],
+          },
+        ],
+      },
+      openBlockKey: "b2",
+    });
+    readExercisesMock.mockResolvedValue(page(1, 3, 3));
+    const user = renderSelection("/seances/nouvelle/exercices?block=b2");
+    await screen.findByText("3 exercices");
+
+    expect(screen.getByText("Sélection pour le bloc 2")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Retour au bloc" })).toBeTruthy();
+    expect(screen.queryByText("Sélectionner")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /^Exercice 002/ }));
+    await user.click(screen.getByRole("button", { name: /^Exercice 003/ }));
+    await user.click(
+      screen.getByRole("button", { name: "Ajouter au bloc, 2 sélectionnés" }),
+    );
+
+    expect(await screen.findByText(/^Page éditeur/)).toBeTruthy();
+    expect(
+      JSON.parse(
+        sessionStorage.getItem("session-editor:pending-exercises") ?? "",
+      ),
+    ).toEqual({
+      blockKey: "b2",
+      exercises: [
+        {
+          exercise_id: 2,
+          name: "Exercice 002",
+          measure_codes: ["reps", "weight"],
+        },
+        {
+          exercise_id: 3,
+          name: "Exercice 003",
+          measure_codes: ["reps", "weight"],
+        },
+      ],
+    });
+  });
+
+  it("goes back to the editor when the block of the address is unknown", async () => {
+    readExercisesMock.mockResolvedValue(page(1, 3, 3));
+    renderSelection("/seances/nouvelle/exercices?block=nope");
+
+    expect(await screen.findByText(/^Page éditeur/)).toBeTruthy();
   });
 });

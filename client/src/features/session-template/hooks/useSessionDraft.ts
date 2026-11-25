@@ -24,10 +24,14 @@ function reducer(state: State, action: Action): State {
 
 // The draft of the editor, driven by actions (useReducer), plus whether it
 // has unsaved changes (for the exit confirmation).
-export function useSessionDraft(initialDraft: SessionDraft) {
+// A draft restored from storage or started with exercises is already dirty.
+export function useSessionDraft(
+  initialDraft: SessionDraft,
+  initiallyDirty = false,
+) {
   const [state, dispatch] = useReducer(reducer, {
     draft: initialDraft,
-    isDirty: false,
+    isDirty: initiallyDirty,
   });
 
   return {

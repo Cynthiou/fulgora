@@ -1,5 +1,6 @@
 import {
   type BlockType,
+  createDefaultSet,
   createEmptySet,
   DEFAULT_REST_SECONDS,
   type DraftBlock,
@@ -38,6 +39,12 @@ export type SessionDraftAction =
   | { type: "moveBlock"; from: number; to: number }
   | { type: "addExercises"; blockKey: string; exercises: NewDraftExercise[] }
   | { type: "removeExercise"; blockKey: string; exerciseKey: string }
+  | {
+      type: "restoreExercise";
+      blockKey: string;
+      exercise: DraftExercise;
+      index: number;
+    }
   | {
       type: "updateExerciseRest";
       blockKey: string;
@@ -197,10 +204,11 @@ export function sessionDraftReducer(
               measure_codes: added.measure_codes,
               default_rest_seconds:
                 added.default_rest_seconds ?? DEFAULT_REST_SECONDS,
+              // One pre-filled set by default: 10 reps, 1 min... (US-15)
               sets:
                 added.sets !== undefined && added.sets.length > 0
                   ? added.sets
-                  : [createEmptySet()],
+                  : [createDefaultSet(added.measure_codes)],
             }),
           ),
         ],
@@ -214,6 +222,14 @@ export function sessionDraftReducer(
         return exercises.length === block.exercises.length
           ? block
           : { ...block, exercises };
+      });
+
+    // "Annuler" after a removal: the exercise goes back to its place.
+    case "restoreExercise":
+      return updateBlock(draft, action.blockKey, (block) => {
+        const exercises = [...block.exercises];
+        exercises.splice(action.index, 0, action.exercise);
+        return { ...block, exercises };
       });
 
     case "updateExerciseRest":

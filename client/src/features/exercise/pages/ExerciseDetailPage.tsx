@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import { formatExerciseMeta, getExerciseImage } from "shared";
+import {
+  formatExerciseMeta,
+  getExerciseImage,
+  type SelectedExercise,
+} from "shared";
 import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
@@ -8,7 +13,12 @@ import { useAuth } from "../../../hooks/useAuth";
 import ExerciseTextList from "../components/ExerciseTextList";
 import MeasureList from "../components/MeasureList";
 import MuscleMap from "../components/MuscleMap";
+import SessionDestinationSheet from "../components/SessionDestinationSheet";
 import { useExercise } from "../hooks/useExercise";
+import {
+  appendToSelection,
+  readSelection,
+} from "../hooks/useExerciseSelection";
 
 const PRIMARY_BUTTON =
   "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
@@ -35,11 +45,42 @@ function ExerciseDetailPage() {
   const location = useLocation();
   const { user } = useAuth();
   const { exercise, isLoading, notFound, error, reload } = useExercise(id);
+  const [isChoosingDestination, setIsChoosingDestination] = useState(false);
 
   // The name travels with the navigation from the list (state), so the
-  // header can show it before the detail arrives.
-  const state = location.state as { name?: string } | null;
+  // header can show it before the detail arrives. "selection" is set when
+  // the page was opened from the catalog in selection mode (US-14).
+  const state = location.state as { name?: string; selection?: string } | null;
   const title = exercise?.name ?? state?.name ?? "Exercice";
+  const selectionScope = state?.selection ?? null;
+  const isAlreadySelected =
+    selectionScope !== null &&
+    readSelection(selectionScope).some((item) => item.exercise_id === id);
+
+  const selected: SelectedExercise | null =
+    exercise === null
+      ? null
+      : {
+          exercise_id: exercise.id,
+          name: exercise.name,
+          measure_codes: exercise.measures.map((measure) => measure.code),
+        };
+
+  // From the selection: the exercise joins the selection and we go back.
+  function addToSelection() {
+    if (selectionScope !== null && selected !== null) {
+      appendToSelection(selectionScope, selected);
+      goBack();
+    }
+  }
+
+  // From the catalog: a new free session holding this exercise.
+  function continueToEditor() {
+    if (selected !== null) {
+      setIsChoosingDestination(false);
+      navigate("/seances/nouvelle", { state: { exercises: [selected] } });
+    }
+  }
 
   // Back to the catalog as it was (address and position). Arriving straight
   // on this address leaves no page to go back to: the catalog then.
@@ -60,7 +101,11 @@ function ExerciseDetailPage() {
         <button
           type="button"
           onClick={goBack}
-          aria-label="Retour au catalogue"
+          aria-label={
+            selectionScope === null
+              ? "Retour au catalogue"
+              : "Retour à la sélection"
+          }
           className="flex size-tap items-center justify-center rounded-btn text-secondary"
         >
           <Icon src={chevronLeftIcon} className="size-7" />
@@ -166,25 +211,37 @@ function ExerciseDetailPage() {
       {!notFound && error === null && (
         <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
           <div className="mx-auto max-w-md">
-            {isLoading ? (
+            {selectionScope !== null ? (
               <button
                 type="button"
-                disabled
-                className={`${PRIMARY_BUTTON} opacity-60`}
+                disabled={isLoading || isAlreadySelected}
+                onClick={addToSelection}
+                className={`${PRIMARY_BUTTON} disabled:opacity-60`}
+              >
+                {isAlreadySelected
+                  ? "Déjà dans la sélection"
+                  : "Ajouter à la sélection"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() => setIsChoosingDestination(true)}
+                className={`${PRIMARY_BUTTON} disabled:opacity-60`}
               >
                 Ajouter à une séance
               </button>
-            ) : (
-              <Link
-                to="/seances/nouvelle"
-                state={{ exerciseIds: [id] }}
-                className={PRIMARY_BUTTON}
-              >
-                Ajouter à une séance
-              </Link>
             )}
           </div>
         </div>
+      )}
+
+      {isChoosingDestination && selected !== null && (
+        <SessionDestinationSheet
+          exercises={[selected]}
+          onContinue={continueToEditor}
+          onCancel={() => setIsChoosingDestination(false)}
+        />
       )}
     </div>
   );

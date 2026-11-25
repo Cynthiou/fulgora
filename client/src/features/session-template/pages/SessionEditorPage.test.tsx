@@ -1,16 +1,25 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import type { SelectedExercise } from "shared";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  loadDraft,
+  saveDraft,
+  savePendingExercises,
+} from "../services/sessionDraftStorage";
 import SessionEditorPage from "./SessionEditorPage";
 
-function renderEditor(search = "?date=2026-11-26") {
+type Entry = string | { pathname: string; state: unknown };
+
+function renderEditor(entry: Entry = "/seances/nouvelle?date=2026-11-26") {
   const router = createMemoryRouter(
     [
       { path: "/", element: <p>Page accueil</p> },
       { path: "/seances/nouvelle", element: <SessionEditorPage /> },
+      { path: "/seances/nouvelle/exercices", element: <p>Page sélection</p> },
     ],
-    { initialEntries: ["/", `/seances/nouvelle${search}`], initialIndex: 1 },
+    { initialEntries: ["/", entry], initialIndex: 1 },
   );
   render(<RouterProvider router={router} />);
   return userEvent.setup();
@@ -31,7 +40,22 @@ async function addBlock(
   );
 }
 
+const bench: SelectedExercise = {
+  exercise_id: 31,
+  name: "Développé couché",
+  measure_codes: ["reps", "weight"],
+};
+const pullUps: SelectedExercise = {
+  exercise_id: 45,
+  name: "Tractions",
+  measure_codes: ["reps"],
+};
+
 describe("SessionEditorPage", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -55,7 +79,7 @@ describe("SessionEditorPage", () => {
   });
 
   it("falls back on today when the date of the address is unusable", () => {
-    renderEditor("?date=hier");
+    renderEditor("/seances/nouvelle?date=hier");
 
     expect(inputValue(/^Date/)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
@@ -140,13 +164,6 @@ describe("SessionEditorPage", () => {
     expect(
       screen.getByText("Choisis tes exercices dans le catalogue."),
     ).toBeTruthy();
-    expect(
-      (
-        screen.getByRole("button", {
-          name: "Ajouter des exercices",
-        }) as HTMLButtonElement
-      ).disabled,
-    ).toBe(true);
 
     await user.type(screen.getByLabelText(/^Intitulé/), "Mise en route");
     await user.click(
@@ -232,6 +249,93 @@ describe("SessionEditorPage", () => {
     expect(screen.getByText("0 bloc")).toBeTruthy();
   });
 
+  it("goes to the catalog selection without asking, keeping the draft in the tab", async () => {
+    const user = renderEditor();
+    await user.type(
+      screen.getByLabelText(/^Nom de la séance/),
+      "Haut du corps",
+    );
+    await addBlock(user, "Classique");
+
+    await user.click(
+      screen.getByRole("button", { name: "Ajouter des exercices" }),
+    );
+
+    expect(screen.queryByText("Quitter sans enregistrer ?")).toBeNull();
+    expect(await screen.findByText("Page sélection")).toBeTruthy();
+    const stored = loadDraft();
+    expect(stored?.draft.name).toBe("Haut du corps");
+    expect(stored?.draft.blocks).toHaveLength(1);
+    expect(stored?.openBlockKey).toBe(stored?.draft.blocks[0]?.key);
+  });
+
+  it("comes back from the selection with the exercises in the open block", async () => {
+    saveDraft({
+      draft: {
+        name: "Haut du corps",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "classic",
+            name: "Force",
+            instructions: null,
+            exercises: [],
+          },
+        ],
+      },
+      openBlockKey: "b1",
+    });
+    savePendingExercises({ blockKey: "b1", exercises: [bench, pullUps] });
+    const user = renderEditor("/seances/nouvelle");
+
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+      "Classique",
+    );
+    expect(screen.getByText("2 exercices")).toBeTruthy();
+    const rows = screen.getByRole("list", { name: "Exercices du bloc" });
+    expect(rows.textContent).toContain("Développé couché");
+    expect(rows.textContent).toContain("Tractions");
+    expect(screen.getAllByText("1 série · 10 rép.")).toHaveLength(2);
+    // Taken once: a reload must not add them again.
+    expect(sessionStorage.getItem("session-editor:pending-exercises")).toBe(
+      null,
+    );
+
+    // Remove, then undo
+    await user.click(
+      screen.getByRole("button", { name: "Retirer Développé couché" }),
+    );
+    expect(screen.getByText("1 exercice")).toBeTruthy();
+    expect(screen.getByText("Exercice retiré")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+    expect(screen.getByText("2 exercices")).toBeTruthy();
+    expect(
+      screen.getByRole("list", { name: "Exercices du bloc" }).textContent,
+    ).toMatch(/Développé couché.*Tractions/);
+
+    // Back to the session: the card sums the block up, no more warning
+    await user.click(
+      screen.getByRole("button", { name: "Enregistrer le bloc" }),
+    );
+    expect(screen.getByText("Classique · Force")).toBeTruthy();
+    expect(screen.getByText("Développé couché · Tractions")).toBeTruthy();
+    expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
+  });
+
+  it("starts a session with a Classic block when the catalog hands exercises over", () => {
+    renderEditor({
+      pathname: "/seances/nouvelle",
+      state: { exercises: [bench] },
+    });
+
+    expect(screen.getByText("1 bloc")).toBeTruthy();
+    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
+    expect(screen.getByText("Développé couché")).toBeTruthy();
+    expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
+  });
+
   it("leaves at once when nothing changed", async () => {
     const user = renderEditor();
 
@@ -242,9 +346,10 @@ describe("SessionEditorPage", () => {
     });
   });
 
-  it("asks before leaving a changed draft and can stay", async () => {
+  it("asks before leaving a changed draft, can stay, and drops the draft on leaving", async () => {
     const user = renderEditor();
     await user.type(screen.getByLabelText(/^Nom de la séance/), "Jambes");
+    expect(loadDraft()?.draft.name).toBe("Jambes");
 
     await user.click(screen.getByRole("button", { name: "Retour" }));
 
@@ -263,6 +368,7 @@ describe("SessionEditorPage", () => {
     await waitFor(() => {
       expect(screen.getByText("Page accueil")).toBeTruthy();
     });
+    expect(loadDraft()).toBeNull();
   });
 
   it("warns the browser before closing a changed draft", async () => {
