@@ -125,6 +125,12 @@
   --fulgora-pick: #0b1220;
   /* The dashed rule of an empty day in the week view (CAL-02) */
   --fulgora-rule: #c9cfd8;
+  /* The dashed border of an "add" button (A2) */
+  --fulgora-dash: #b8bfca;
+  /* The teal of the charter on its own tint only reaches 4.08:1 in
+     10 px bold (A7a chip), under the 4.5:1 of RM-064: a darker teal
+     is used for a small word on a teal ground. */
+  --fulgora-accent-text: #0b5c73;
   /* The word "À suivre" of the mockups is written in the orange of the
      action. On the light page it only reaches 2.45:1, under the 4.5:1 of
      RM-064, so small orange text uses this darker orange. */
@@ -142,6 +148,8 @@
   --fulgora-track: #1e293b;
   --fulgora-pick: #2a3a5c;
   --fulgora-rule: #3a4763;
+  --fulgora-dash: #3a4763;
+  --fulgora-accent-text: #22d3ee;
   --fulgora-action-text: #ff6b35;
   --fulgora-shadow-card:
     inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -156,6 +164,8 @@
     --fulgora-track: #1e293b;
     --fulgora-pick: #2a3a5c;
     --fulgora-rule: #3a4763;
+    --fulgora-dash: #3a4763;
+    --fulgora-accent-text: #22d3ee;
     --fulgora-action-text: #ff6b35;
     --fulgora-shadow-card:
       inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -172,6 +182,8 @@
   --color-pick: var(--fulgora-pick);
   --color-pick-content: #ffffff;
   --color-rule: var(--fulgora-rule);
+  --color-dash: var(--fulgora-dash);
+  --color-accent-text: var(--fulgora-accent-text);
   --color-action-text: var(--fulgora-action-text);
   --color-status-done: #16a34a;
   --color-status-pending: #d97706;
@@ -190,6 +202,9 @@
   --text-overline--line-height: 1.2;
   --text-overline--letter-spacing: 0.14em;
   --text-overline--font-weight: 700;
+  /* The title of a section inside a page (A2, A6) */
+  --text-display-xs: 22px;
+  --text-display-xs--line-height: 1;
   --text-display-sm: 24px;
   --text-display-sm--line-height: 0.9;
   --text-display-md: 32px;

@@ -253,7 +253,7 @@ test("configures the planned sets of one exercise of each profile", async ({
     page.getByRole("button", { name: "Valider l'exercice" }),
   ).toBeDisabled();
   await page.getByRole("textbox", { name: "Vitesse (km/h)" }).fill("9");
-  await page.getByRole("button", { name: "+ Étape" }).click();
+  await page.getByRole("button", { name: "Ajouter une étape" }).click();
   await expect(page.getByText("Étape 2")).toBeVisible();
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: "Valider l'exercice" }).click();

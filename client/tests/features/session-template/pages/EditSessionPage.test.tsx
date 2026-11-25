@@ -91,7 +91,9 @@ describe("EditSessionPage", () => {
     expect(
       (screen.getByLabelText(/Nom de la séance/) as HTMLInputElement).value,
     ).toBe("Jambes");
-    expect(screen.getByText("Classique · Force")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Force/ }),
+    ).toBeTruthy();
     // The date is read only: moving a session is US-25
     expect(screen.queryByLabelText(/Heure/)).toBeNull();
     expect(

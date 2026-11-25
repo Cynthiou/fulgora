@@ -21,11 +21,12 @@ import {
   sessionDraftSchema,
   todayInParis,
 } from "shared";
-import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
-import chevronDownIcon from "../../../assets/icons/ui/chevrons/chevron-down.svg";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import blockIcon from "../../../assets/icons/ui/app/block.svg";
+import calendarIcon from "../../../assets/icons/ui/app/calendar.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import Icon from "../../../components/Icon";
+import PageHeader from "../../../components/PageHeader";
 import TextField from "../../../components/TextField";
 import UndoToast from "../../../components/UndoToast";
 import { ApiError } from "../../../services/apiError";
@@ -591,55 +592,48 @@ function SessionEditorPage({ edit }: Props) {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label="Retour"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <div className="flex min-w-0 flex-col">
-          <h1 className="text-display-sm">
-            {edit === undefined ? "Nouvelle séance" : "Modifier la séance"}
-          </h1>
-          <p className="truncate text-sm text-muted">
-            {edit === undefined
-              ? "Séance libre"
-              : (edit.subtitle ?? draft.name)}
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        onBack={goBack}
+        title={edit === undefined ? "Nouvelle séance" : "Modifier la séance"}
+        subtitle={
+          edit === undefined ? "Séance libre" : (edit.subtitle ?? draft.name)
+        }
+      />
 
       <form
         noValidate
         onSubmit={handleSave}
-        className="flex flex-1 flex-col p-4 pb-28"
+        className="flex flex-1 flex-col px-[18px] pt-1 pb-28"
       >
         {/* While saving, nothing can change anymore: one fieldset freezes all. */}
-        <fieldset disabled={isSaving} className="flex flex-col gap-6">
+        <fieldset disabled={isSaving} className="flex flex-col gap-3.5">
           {edit === undefined ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsPickingDate(true)}
-                aria-haspopup="dialog"
-                className="flex h-field items-center justify-between rounded-btn border border-base-300 bg-base-100 px-4 text-left"
-              >
-                <span className="flex flex-col">
-                  <span className="text-overline uppercase text-accent">
-                    Date *
-                  </span>
-                  <span className="font-semibold">
+            <div className="grid grid-cols-[1.5fr_1fr] gap-2.5">
+              <div className="flex flex-col gap-1.5">
+                <span className="font-sans text-overline uppercase not-italic text-accent">
+                  Date *
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsPickingDate(true)}
+                  aria-haspopup="dialog"
+                  aria-label={`Date : ${formatLongDate(
+                    draft.planned_date,
+                  )}, choisir une autre date`}
+                  className="flex h-field items-center gap-2.5 rounded-btn border border-base-300 bg-base-100 px-4 text-left shadow-card"
+                >
+                  <Icon
+                    src={calendarIcon}
+                    className="size-[18px] shrink-0 text-muted"
+                  />
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium">
                     {formatLongDate(draft.planned_date)}
                   </span>
-                </span>
-                <Icon src={chevronDownIcon} className="size-5 text-muted" />
-              </button>
+                </button>
+              </div>
               <TextField
                 id="planned_time"
-                label="Heure (facultatif)"
+                label="Heure"
                 type="time"
                 value={draft.planned_time ?? ""}
                 onChange={(event) =>
@@ -649,13 +643,13 @@ function SessionEditorPage({ edit }: Props) {
                   })
                 }
               />
-            </>
+            </div>
           ) : (
             // The date and the time belong to the appointment: they change
             // through "Déplacer" (US-25), never here. A day of a program
             // shows its weekday instead (PRO-03).
             <div className="flex flex-col gap-1">
-              <p className="flex h-field items-center rounded-btn border border-base-300 bg-soft px-4">
+              <p className="flex h-field items-center rounded-btn border border-base-300 bg-soft px-4 shadow-card">
                 <span className="flex flex-col">
                   <span className="text-overline uppercase text-accent">
                     {edit.dayLabel === undefined || edit.dayLabel === null
@@ -701,21 +695,26 @@ function SessionEditorPage({ edit }: Props) {
             className="flex flex-col gap-3"
           >
             <div className="flex items-baseline justify-between">
-              <h2
-                id="blocks-title"
-                className="font-sans text-overline not-italic uppercase text-accent"
-              >
+              <h2 id="blocks-title" className="text-display-xs">
                 Blocs
               </h2>
-              <p className="text-sm font-semibold text-muted">
+              <p className="text-xs font-semibold leading-[1.45] text-muted">
                 {formatBlockCount(blockCount)}
               </p>
             </div>
 
             {blockCount === 0 ? (
-              <p className="rounded-card border border-base-300 bg-base-100 p-4 text-muted shadow-card">
-                Ajoute un premier bloc pour y mettre des exercices.
-              </p>
+              <div className="flex flex-col items-center gap-2 rounded-card border border-base-300 bg-base-100 p-4 py-6 text-center shadow-card">
+                <span
+                  aria-hidden="true"
+                  className="grid size-12 place-items-center rounded-hero bg-secondary/[0.08] text-secondary"
+                >
+                  <Icon src={blockIcon} className="size-6" />
+                </span>
+                <p className="text-sm leading-[1.45] text-muted">
+                  Ajoute un premier bloc pour y mettre des exercices.
+                </p>
+              </div>
             ) : (
               <SessionReview
                 blocks={draft.blocks}
@@ -731,9 +730,9 @@ function SessionEditorPage({ edit }: Props) {
               aria-describedby={
                 blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
               }
-              className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+              className="flex h-13 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
             >
-              <Icon src={plusIcon} className="size-5" />
+              <Icon src={plusIcon} className="size-[18px]" />
               Ajouter un bloc
             </button>
             {blockCount >= MAX_BLOCKS && (
@@ -772,7 +771,7 @@ function SessionEditorPage({ edit }: Props) {
             </div>
           )}
 
-          <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+          <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
             <div className="mx-auto max-w-md">
               <button
                 type="submit"
@@ -784,7 +783,7 @@ function SessionEditorPage({ edit }: Props) {
                     ? "no-change"
                     : undefined
                 }
-                className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+                className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
               >
                 {edit !== undefined
                   ? "Vérifier les changements"

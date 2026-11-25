@@ -32,7 +32,10 @@ function TextField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-overline uppercase text-accent">
+      <label
+        htmlFor={id}
+        className="font-sans text-overline uppercase not-italic text-accent"
+      >
         {label}
         {required ? " *" : ""}
       </label>
@@ -42,7 +45,7 @@ function TextField({
           aria-required={required}
           aria-invalid={error === undefined ? undefined : true}
           aria-describedby={describedBy}
-          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 px-4 ${borderClasses}`}
+          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 px-4 text-[15px] shadow-card placeholder:text-faint ${borderClasses}`}
           {...inputProps}
         />
         {trailing}

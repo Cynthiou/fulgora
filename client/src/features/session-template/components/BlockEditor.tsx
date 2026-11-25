@@ -4,10 +4,11 @@ import {
   formatExerciseCountShort,
   MAX_EXERCISES_PER_BLOCK,
 } from "shared";
-import plusIcon from "../../../assets/icons/ui/actions/plus.svg";
-import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import Icon from "../../../components/Icon";
+import PageHeader from "../../../components/PageHeader";
 import TextField from "../../../components/TextField";
 import BlockExerciseRow from "./BlockExerciseRow";
 
@@ -54,33 +55,26 @@ function BlockEditor({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={onDone}
-          aria-label="Retour à la séance"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="text-display-sm">{typeLabel}</h1>
-          <p className="truncate text-sm text-muted">
-            Bloc {index + 1} ·{" "}
-            {sessionName.trim() === "" ? "Nouvelle séance" : sessionName}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onRemoveBlock}
-          aria-label="Retirer le bloc"
-          className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={trashIcon} className="size-6" />
-        </button>
-      </header>
+      <PageHeader
+        onBack={onDone}
+        backLabel="Retour à la séance"
+        title={typeLabel}
+        subtitle={`Bloc ${index + 1} · ${
+          sessionName.trim() === "" ? "Nouvelle séance" : sessionName
+        }`}
+        action={
+          <button
+            type="button"
+            onClick={onRemoveBlock}
+            aria-label="Retirer le bloc"
+            className="grid size-tap shrink-0 place-items-center rounded-btn text-status-missed"
+          >
+            <Icon src={trashIcon} className="size-5" />
+          </button>
+        }
+      />
 
-      <div className="flex flex-1 flex-col gap-6 p-4 pb-28">
+      <div className="flex flex-1 flex-col gap-3 px-[18px] pt-1 pb-28">
         <TextField
           id="block_name"
           label="Intitulé (facultatif)"
@@ -95,10 +89,10 @@ function BlockEditor({
 
         <div className="flex items-center justify-between gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card">
           <div className="flex flex-col">
-            <span className="text-overline uppercase text-accent">
+            <span className="font-sans text-overline uppercase not-italic text-accent">
               Type de bloc
             </span>
-            <span className="font-semibold">{typeLabel}</span>
+            <span className="text-sm font-bold">{typeLabel}</span>
           </div>
           <button
             type="button"
@@ -112,7 +106,7 @@ function BlockEditor({
         </div>
 
         {!canChangeType && (
-          <p id="change-type-soon" className="-mt-4 text-sm text-muted">
+          <p id="change-type-soon" className="-mt-1 text-xs text-muted">
             Changer le type d'un bloc qui a des exercices arrive bientôt.
           </p>
         )}
@@ -121,7 +115,7 @@ function BlockEditor({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="block_instructions"
-              className="text-overline uppercase text-accent"
+              className="font-sans text-overline uppercase not-italic text-accent"
             >
               Note
             </label>
@@ -136,7 +130,7 @@ function BlockEditor({
               maxLength={NOTE_MAX_LENGTH}
               rows={6}
               placeholder="Ex. Penser à bien respirer entre les blocs."
-              className="rounded-btn border border-base-300 bg-base-100 p-4"
+              className="rounded-btn border border-base-300 bg-base-100 p-4 text-[15px] shadow-card placeholder:text-faint"
             />
             <p className="text-sm text-muted">
               {(block.instructions ?? "").length} / {NOTE_MAX_LENGTH} caractères
@@ -148,29 +142,27 @@ function BlockEditor({
             className="flex flex-col gap-3"
           >
             <div className="flex items-baseline justify-between">
-              <h2
-                id="block-exercises-title"
-                className="font-sans text-overline not-italic uppercase text-accent"
-              >
+              <h2 id="block-exercises-title" className="text-display-xs">
                 Exercices
               </h2>
-              <p className="text-sm font-semibold text-muted">
+              <p className="text-xs font-semibold leading-[1.45] text-muted">
                 {formatExerciseCountShort(block.exercises.length)}
               </p>
             </div>
             {block.exercises.length === 0 ? (
-              <p className="rounded-card border border-base-300 bg-base-100 p-4 text-muted shadow-card">
+              <p className="rounded-card border border-base-300 bg-base-100 p-4 text-sm leading-[1.45] text-muted shadow-card">
                 Choisis tes exercices dans le catalogue.
               </p>
             ) : (
               <ul
                 aria-label="Exercices du bloc"
-                className="flex flex-col gap-2"
+                className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card"
               >
-                {block.exercises.map((exercise) => (
+                {block.exercises.map((exercise, position) => (
                   <BlockExerciseRow
                     key={exercise.key}
                     exercise={exercise}
+                    isFirst={position === 0}
                     onOpen={() => onOpenExercise(exercise.key)}
                     onRemove={() => onRemoveExercise(exercise.key)}
                   />
@@ -182,13 +174,13 @@ function BlockEditor({
               onClick={onAddExercises}
               disabled={isFull}
               aria-describedby={isFull ? "block-exercises-limit" : undefined}
-              className="flex h-12 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+              className="flex h-13 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
             >
-              <Icon src={plusIcon} className="size-5" />
+              <Icon src={plusIcon} className="size-[18px]" />
               Ajouter des exercices
             </button>
             {isFull && (
-              <p id="block-exercises-limit" className="text-sm text-muted">
+              <p id="block-exercises-limit" className="text-xs text-muted">
                 {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
               </p>
             )}
@@ -196,13 +188,14 @@ function BlockEditor({
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+      <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
         <div className="mx-auto max-w-md">
           <button
             type="button"
             onClick={onDone}
-            className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action"
+            className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action"
           >
+            <Icon src={checkIcon} className="size-[18px]" />
             Enregistrer le bloc
           </button>
         </div>

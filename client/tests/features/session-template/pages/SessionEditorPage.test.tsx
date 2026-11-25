@@ -207,7 +207,9 @@ describe("SessionEditorPage", () => {
       "Nouvelle séance",
     );
     expect(screen.getByText("1 bloc")).toBeTruthy();
-    expect(screen.getByText("Échauffement · Mise en route")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Échauffement · Mise en route/ }),
+    ).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /^Ouvrir le bloc/ }));
     expect(inputValue(/^Intitulé/)).toBe("Mise en route");
@@ -228,7 +230,7 @@ describe("SessionEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: "Retour à la séance" }),
     );
-    expect(screen.getByText("Note · Bloc 1")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Note · Bloc 1/ })).toBeTruthy();
     expect(screen.getByText("Penser à respirer.")).toBeTruthy();
   });
 
@@ -238,7 +240,9 @@ describe("SessionEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: "Enregistrer le bloc" }),
     );
-    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+    ).toBeTruthy();
 
     await user.click(
       screen.getByRole("button", {
@@ -252,7 +256,9 @@ describe("SessionEditorPage", () => {
     await user.click(screen.getByRole("button", { name: "Annuler" }));
 
     expect(screen.getByText("1 bloc")).toBeTruthy();
-    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+    ).toBeTruthy();
     expect(screen.queryByText("Bloc retiré")).toBeNull();
   });
 
@@ -348,7 +354,9 @@ describe("SessionEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: "Enregistrer le bloc" }),
     );
-    expect(screen.getByText("Classique · Force")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Force/ }),
+    ).toBeTruthy();
     expect(screen.getByText("Développé couché · Tractions")).toBeTruthy();
     expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
   });
@@ -360,7 +368,9 @@ describe("SessionEditorPage", () => {
     });
 
     expect(screen.getByText("1 bloc")).toBeTruthy();
-    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+    ).toBeTruthy();
     expect(screen.getByText("Développé couché")).toBeTruthy();
     expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
   });
@@ -615,7 +625,7 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
     );
     expect(field("Durée (min:s)").value).toBe("1:15");
 
-    await user.click(screen.getByRole("button", { name: "+ Série" }));
+    await user.click(screen.getByRole("button", { name: "Ajouter une série" }));
     expect(screen.getByText("Série 2")).toBeTruthy();
     expect(field("Durée (min:s)").value).toBe("");
 
@@ -655,7 +665,9 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
 
     expect(screen.getByText("Étape 1")).toBeTruthy();
     expect(field("Durée (min:s)").value).toBe("10:00");
-    expect(screen.getByRole("button", { name: "+ Étape" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Ajouter une étape" }),
+    ).toBeTruthy();
     expect(screen.queryByText("Dupliquer la dernière")).toBeNull();
 
     await user.type(field("Distance (km)"), "2,5");
@@ -685,7 +697,7 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
     expect(screen.getByRole("status").textContent).toContain(
       "Cet exercice n'a pas de mesure : tu pourras seulement le cocher comme fait.",
     );
-    expect(screen.queryByText("+ Série")).toBeNull();
+    expect(screen.queryByText("Ajouter une série")).toBeNull();
     expect(
       screen.getByRole("group", { name: "Repos par défaut" }),
     ).toBeTruthy();
@@ -838,6 +850,8 @@ describe("SessionEditorPage · saving (US-23)", () => {
     expect((await screen.findByRole("alert")).textContent).toContain(
       "« Mon tirage élastique » n'est plus disponible. Retire-le pour enregistrer.",
     );
-    expect(screen.getByText("Classique · Bloc 1")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+    ).toBeTruthy();
   });
 });

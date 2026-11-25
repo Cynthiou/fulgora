@@ -1,4 +1,6 @@
 import { formatDuration, SET_LIMITS } from "shared";
+import stopwatchIcon from "../../../assets/icons/ui/app/stopwatch.svg";
+import Icon from "../../../components/Icon";
 
 type Props = {
   id: string;
@@ -19,25 +21,36 @@ function RestInput({ id, label, value, onChange }: Props) {
     onChange(Math.min(max, Math.max(0, (value ?? 0) + direction * STEP)));
   }
 
+  // The mockup draws small squares of 28 px; the button around them keeps
+  // the 44 px of a comfortable target (A7a).
   const buttonClasses =
-    "flex size-tap shrink-0 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-xl font-bold text-secondary";
+    "grid size-tap shrink-0 place-items-center text-xl font-semibold";
+  const squareClasses = "grid size-7 place-items-center rounded-ctl bg-soft";
 
   return (
     <fieldset
       id={id}
-      className="flex items-center justify-between gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
+      className="flex items-center justify-between gap-2 rounded-card border border-base-300 bg-base-100 py-1 pr-2 pl-3.5 shadow-card"
     >
-      <legend className="float-left font-semibold">{label}</legend>
-      <div className="flex items-center gap-2">
+      <legend className="float-left flex items-center gap-2 text-sm font-semibold">
+        <Icon src={stopwatchIcon} className="size-[18px] text-secondary" />
+        {label}
+      </legend>
+      <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={() => nudge(-1)}
           aria-label={`Diminuer ${label}`}
           className={buttonClasses}
         >
-          −
+          <span aria-hidden="true" className={squareClasses}>
+            −
+          </span>
         </button>
-        <span aria-live="polite" className="min-w-16 text-center font-semibold">
+        <span
+          aria-live="polite"
+          className="min-w-16 text-center text-sm font-extrabold"
+        >
           {value === null ? "Aucun" : formatDuration(value)}
         </span>
         <button
@@ -46,7 +59,9 @@ function RestInput({ id, label, value, onChange }: Props) {
           aria-label={`Augmenter ${label}`}
           className={buttonClasses}
         >
-          +
+          <span aria-hidden="true" className={squareClasses}>
+            +
+          </span>
         </button>
       </div>
     </fieldset>

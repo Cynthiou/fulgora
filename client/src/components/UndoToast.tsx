@@ -23,13 +23,13 @@ function UndoToast({ message, onUndo, onDismiss, durationMs = 5000 }: Props) {
   return (
     <div
       role="status"
-      className="fixed inset-x-4 bottom-28 z-20 mx-auto flex max-w-md items-center justify-between gap-3 rounded-card bg-neutral p-3 text-neutral-content shadow-card"
+      className="fixed inset-x-[18px] bottom-28 z-20 mx-auto flex max-w-md items-center justify-between gap-2.5 rounded-card bg-pick px-4 py-3.5 text-pick-content shadow-hero"
     >
-      <span className="font-semibold">{message}</span>
+      <span className="text-sm font-semibold">{message}</span>
       <button
         type="button"
         onClick={onUndo}
-        className="min-h-tap px-3 font-extrabold uppercase tracking-wide text-primary"
+        className="min-h-tap px-2 text-sm font-extrabold uppercase tracking-[0.02em] text-primary"
       >
         Annuler
       </button>

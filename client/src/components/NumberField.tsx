@@ -17,6 +17,8 @@ type Props = {
   max: number;
   // Decimal keyboard (weight, distance, speed) or digits only (reps)
   decimal?: boolean;
+  // The label is teal in a form (A2), grey inside a set card (A7a)
+  labelTone?: "accent" | "muted";
   // Unit shown on screen when it differs from the stored one (km for meters)
   toDisplay?: (stored: number) => number;
   fromDisplay?: (shown: number) => number;
@@ -40,6 +42,7 @@ function parseNumber(text: string): number {
 function NumberField({
   id,
   label,
+  labelTone = "accent",
   value,
   onChange,
   validate,
@@ -99,20 +102,35 @@ function NumberField({
   }
 
   const errorId = `${id}-error`;
-  const buttonClasses =
-    "flex size-tap shrink-0 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-xl font-bold text-secondary";
+  // The stepper of the mockups (A7a): one box of 52 px, the − and the + in
+  // their own 44 px column, separated by a thin line.
+  const stepClasses =
+    "grid h-full place-items-center text-xl font-semibold text-base-content";
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-overline uppercase text-accent">
+      <label
+        htmlFor={id}
+        className={
+          labelTone === "muted"
+            ? "text-[10px] font-bold uppercase tracking-[0.14em] text-muted"
+            : "font-sans text-overline uppercase not-italic text-accent"
+        }
+      >
         {label}
       </label>
-      <div className="flex items-center gap-2">
+      <div
+        className={`grid h-13 grid-cols-[44px_1fr_44px] items-center overflow-hidden rounded-btn border bg-base-100 shadow-card ${
+          error === null
+            ? "border-base-300"
+            : "border-[1.5px] border-status-missed"
+        }`}
+      >
         <button
           type="button"
           onClick={() => nudge(-1)}
           aria-label={`Diminuer ${label}`}
-          className={buttonClasses}
+          className={`${stepClasses} border-r border-base-300`}
         >
           −
         </button>
@@ -126,17 +144,13 @@ function NumberField({
           placeholder="—"
           aria-invalid={error === null ? undefined : true}
           aria-describedby={error === null ? undefined : errorId}
-          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 text-center font-display text-display-sm ${
-            error === null
-              ? "border-base-300"
-              : "border-[1.5px] border-status-missed"
-          }`}
+          className="h-full w-full min-w-0 bg-transparent text-center text-lg font-extrabold"
         />
         <button
           type="button"
           onClick={() => nudge(1)}
           aria-label={`Augmenter ${label}`}
-          className={buttonClasses}
+          className={`${stepClasses} border-l border-base-300`}
         >
           +
         </button>

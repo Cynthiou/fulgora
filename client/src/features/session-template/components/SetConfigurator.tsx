@@ -13,11 +13,15 @@ import {
   type SetValueField,
   validateSetValue,
 } from "shared";
-import trashIcon from "../../../assets/icons/ui/actions/trash.svg";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import copyIcon from "../../../assets/icons/ui/app/copy.svg";
+import dotsIcon from "../../../assets/icons/ui/app/dots.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import Icon from "../../../components/Icon";
 import MinSecField from "../../../components/MinSecField";
 import NumberField from "../../../components/NumberField";
+import PageHeader from "../../../components/PageHeader";
 import RestInput from "./RestInput";
 
 type Props = {
@@ -163,6 +167,7 @@ function SetConfigurator({
           key={field}
           id={id}
           label={label}
+          labelTone="muted"
           value={set.duration_seconds}
           max={SET_LIMITS.duration_seconds.max}
           onChange={(value) => onUpdateSet(index, { duration_seconds: value })}
@@ -177,6 +182,7 @@ function SetConfigurator({
         key={field}
         id={id}
         label={label}
+        labelTone="muted"
         value={set[field]}
         step={STEPPER[field].step}
         decimal={STEPPER[field].decimal}
@@ -194,35 +200,26 @@ function SetConfigurator({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={onDone}
-          disabled={hasError}
-          aria-label="Retour au bloc"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary disabled:opacity-60"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="truncate text-display-sm">{exercise.name}</h1>
-          {exercise.meta !== undefined && exercise.meta !== null && (
-            <p className="truncate text-sm text-muted">{exercise.meta}</p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`Retirer ${exercise.name}`}
-          className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={trashIcon} className="size-6" />
-        </button>
-      </header>
+      <PageHeader
+        onBack={hasError ? undefined : onDone}
+        backLabel="Retour au bloc"
+        title={exercise.name}
+        subtitle={exercise.meta ?? undefined}
+        action={
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Retirer ${exercise.name}`}
+            className="grid size-tap shrink-0 place-items-center rounded-btn text-status-missed"
+          >
+            <Icon src={trashIcon} className="size-5" />
+          </button>
+        }
+      />
 
-      <div className="flex flex-1 flex-col gap-5 p-4 pb-28">
-        <div className="flex flex-col gap-2">
-          <p className="self-start rounded-chip border border-base-300 px-2 py-1 text-overline uppercase text-accent">
+      <div className="flex flex-1 flex-col gap-2.5 px-[18px] pt-1 pb-28">
+        <div className="flex flex-col gap-1.5">
+          <p className="self-start rounded-chip bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] text-accent-text">
             Préparation · Objectifs prévus
           </p>
           {profile === "none" ? (
@@ -231,9 +228,9 @@ function SetConfigurator({
               comme fait.
             </p>
           ) : (
-            <p className="text-sm text-muted">
+            <p className="text-[13px] font-medium leading-[1.45] text-muted">
               Mesures suivies :{" "}
-              <span className="font-semibold text-base-content">
+              <span className="font-bold text-base-content">
                 {formatTrackedMeasures(
                   exercise.measure_codes,
                   exercise.is_bodyweight,
@@ -284,7 +281,7 @@ function SetConfigurator({
         />
 
         {profile !== "none" && (
-          <ul aria-label={`${setNoun}s`} className="flex flex-col gap-3">
+          <ul aria-label={`${setNoun}s`} className="flex flex-col gap-2.5">
             {exercise.sets.map((set, index) => {
               const label = getSetLabel(profile, index);
               const isOpen = index === openIndex;
@@ -292,21 +289,25 @@ function SetConfigurator({
                 <li
                   // biome-ignore lint/suspicious/noArrayIndexKey: a set has no id of its own, its position is its identity in the draft
                   key={index}
-                  className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
+                  className={`flex flex-col gap-2.5 rounded-card bg-base-100 ${
+                    isOpen
+                      ? "border-[1.5px] border-secondary p-3.5 shadow-next"
+                      : "border border-base-300 px-3.5 py-3 shadow-card"
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     {isOpen ? (
-                      <h2 className="font-sans text-base font-semibold not-italic">
+                      <h2 className="font-sans text-sm font-extrabold normal-case not-italic">
                         {label}
                       </h2>
                     ) : (
                       <button
                         type="button"
                         onClick={() => setOpenIndex(index)}
-                        className="flex min-h-tap min-w-0 flex-1 flex-col text-left"
+                        className="flex min-h-11 min-w-0 flex-1 items-center justify-between gap-3 text-left"
                       >
-                        <span className="font-semibold">{label}</span>
-                        <span className="text-sm text-muted">
+                        <span className="text-sm font-bold">{label}</span>
+                        <span className="text-right text-xs font-medium leading-[1.35] text-muted">
                           {formatSetValues(
                             set,
                             exercise.measure_codes,
@@ -323,9 +324,9 @@ function SetConfigurator({
                         onClick={() =>
                           setMenuIndex(menuIndex === index ? null : index)
                         }
-                        className="flex size-tap items-center justify-center rounded-btn text-xl font-bold text-secondary"
+                        className="grid size-tap place-items-center rounded-btn text-muted"
                       >
-                        ⋯
+                        <Icon src={dotsIcon} className="size-5" />
                       </button>
                       {menuIndex === index && (
                         <div className="absolute right-0 z-10 flex w-48 flex-col rounded-card border border-base-300 bg-base-100 p-1 shadow-card">
@@ -352,7 +353,7 @@ function SetConfigurator({
                   </div>
 
                   {isOpen && (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       {fields.map((field) => renderField(field, index, set))}
                       {ownRest.includes(index) && (
                         <RestInput
@@ -380,28 +381,35 @@ function SetConfigurator({
                 onClick={addSet}
                 disabled={isFull}
                 aria-describedby={isFull ? "sets-limit" : undefined}
-                className="flex h-12 flex-1 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                className="flex h-13 flex-1 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
               >
-                + {setNoun}
+                <Icon src={plusIcon} className="size-[18px]" />
+                {/* "Série" on screen, "Ajouter une série" read aloud. */}
+                <span className="sr-only">
+                  Ajouter une {setNoun.toLowerCase()}
+                </span>
+                <span aria-hidden="true">{setNoun}</span>
               </button>
               {profile !== "cardio" && (
                 <button
                   type="button"
                   onClick={duplicateLastSet}
                   disabled={isFull}
-                  className="flex h-12 flex-1 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+                  className="flex h-13 flex-1 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
                 >
-                  Dupliquer la dernière
+                  <Icon src={copyIcon} className="size-[18px]" />
+                  <span className="sr-only">Dupliquer la dernière</span>
+                  <span aria-hidden="true">Dupliquer</span>
                 </button>
               )}
             </div>
             {isFull && (
-              <p id="sets-limit" className="text-sm text-muted">
+              <p id="sets-limit" className="text-xs text-muted">
                 {MAX_SETS_PER_EXERCISE} séries au maximum
               </p>
             )}
             {profile === "duration" && (
-              <p className="text-sm text-muted">
+              <p className="text-xs text-muted">
                 Pendant la séance : minuteur ou chrono au choix.
               </p>
             )}
@@ -409,14 +417,15 @@ function SetConfigurator({
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-base-300 bg-base-100 p-4">
+      <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
         <div className="mx-auto max-w-md">
           <button
             type="button"
             onClick={onDone}
             disabled={hasError}
-            className="flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+            className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
           >
+            <Icon src={checkIcon} className="size-[18px]" />
             Valider l'exercice
           </button>
         </div>
