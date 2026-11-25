@@ -79,18 +79,18 @@ Aucune : tout se passe dans le navigateur.
 
 ## Tâches techniques
 
-- [ ] Shared : `getRestDuration(set, exercise)` (série → exercice → 90 s)
-- [ ] Frontend : `hooks/useCountdown.ts` : `endsAt`, `secondsLeft` calculé à partir de `Date.now()`, `addSeconds`, `skip`, nettoyage de l'intervalle
-- [ ] Frontend : `hooks/useTimerAlerts.ts` : bips (Web Audio API, contexte audio créé au premier appui de l'utilisateur), `navigator.vibrate` seulement s'il existe, chaque alerte déclenchée une seule fois
-- [ ] Frontend : `components/RestTimer.tsx` : temps `mm:ss`, boutons, zone `aria-live="polite"` pour les deux annonces, `motion-safe` pour l'animation
-- [ ] Frontend : `shared/format` : `formatClock(seconds)` (« 1:12 »)
-- [ ] Frontend : branchement : la validation d'une série (US-29) appelle `startRest(getRestDuration(...))`
-- [ ] Tests : unitaires avec faux minuteurs (`vi.useFakeTimers`) : temps exact après une « veille » simulée ; − 15 s ne descend pas sous 0 ; alertes à 3, 2, 1 et 0 déclenchées une seule fois ; `navigator.vibrate` absent → pas d'erreur
-- [ ] Tests : unitaires : `getRestDuration`, `formatClock`
-- [ ] Tests : E2E : valider une série → repos → Passer ; axe sur B4
+- [x] Shared : `getRestDuration(set, exercise)` (série → exercice → 90 s)
+- [x] Frontend : `hooks/useCountdown.ts` : `endsAt`, `secondsLeft` calculé à partir de `Date.now()`, `addSeconds`, `skip`, nettoyage de l'intervalle
+- [x] Frontend : `hooks/useTimerAlerts.ts` : bips (Web Audio API, contexte audio créé au premier appui de l'utilisateur), `navigator.vibrate` seulement s'il existe, chaque alerte déclenchée une seule fois
+- [x] Frontend : `components/RestTimer.tsx` : temps `mm:ss`, boutons, zone `aria-live="polite"` pour les deux annonces, `motion-safe` pour l'animation
+- [x] Frontend : `shared/format` : `formatClock(seconds)` (« 1:12 »)
+- [x] Frontend : branchement : la validation d'une série (US-29) appelle `startRest(getRestDuration(...))`
+- [x] Tests : unitaires avec faux minuteurs (`vi.useFakeTimers`) : temps exact après une « veille » simulée ; − 15 s ne descend pas sous 0 ; alertes à 3, 2, 1 et 0 déclenchées une seule fois ; `navigator.vibrate` absent → pas d'erreur
+- [x] Tests : unitaires : `getRestDuration`, `formatClock`
+- [x] Tests : E2E : valider une série → repos → Passer ; axe sur B4
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés sur un vrai téléphone (Android et iPhone)
-- [ ] Aucune information portée par le son seul
+- [x] Aucune information portée par le son seul
 - [ ] Code relu et fusionné via pull request
