@@ -153,6 +153,14 @@ describe("WorkoutExercisePage", () => {
       incline_percent: null,
       calories: null,
     });
+    // The rest starts right away (B4), then the exercise comes back
+    expect(screen.getByText("Repos · 1 min 30 s par défaut")).toBeTruthy();
+    expect(
+      screen.getByText("Ensuite : série 3 · prévu 10 rép. · 40 kg"),
+    ).toBeTruthy();
+    expect(screen.getByText("1:30")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Passer le repos" }));
+
     // Set 2 is done, set 3 becomes the active one
     expect(
       await screen.findByRole("button", { name: "Valider la série 3" }),
@@ -196,6 +204,11 @@ describe("WorkoutExercisePage", () => {
       3,
       expect.objectContaining({ reps: 8, weight_kg: 40 }),
     );
+    // Last set of the exercise: the rest announces the next exercise
+    expect(
+      screen.getByText("Ensuite : exercice suivant, Tractions"),
+    ).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Passer le repos" }));
     expect(await screen.findByText("8 rép. · 40 kg")).toBeTruthy();
   });
 
@@ -223,6 +236,7 @@ describe("WorkoutExercisePage", () => {
     await user.click(
       screen.getByRole("button", { name: "Valider la série 2" }),
     );
+    await user.click(screen.getByRole("button", { name: "Passer le repos" }));
 
     expect((await screen.findByRole("alert")).textContent).toContain(
       "La série n'a pas été enregistrée. Réessaie.",

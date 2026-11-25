@@ -3,8 +3,12 @@ import { Link, useParams } from "react-router";
 import {
   type ActualSetValues,
   formatDuration,
+  formatSetValues,
   getMeasureProfile,
+  getRestDuration,
+  getSetLabel,
   plannedAsActual,
+  toPlannedValues,
   type WorkoutExerciseTree,
   type WorkoutSetRow,
 } from "shared";
@@ -15,6 +19,7 @@ import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import ActualSetSheet from "../components/ActualSetSheet";
+import RestTimer from "../components/RestTimer";
 import SetRow from "../components/SetRow";
 import { useValidateSet } from "../hooks/useValidateSet";
 import { useWorkoutSession } from "../hooks/useWorkoutSession";
@@ -31,8 +36,39 @@ function formatRest(seconds: number | null): string | null {
   return /\d+ min \d+$/.test(text) ? `${text} s` : text;
 }
 
+// The rest shown after a validated set (B4).
+type Rest = {
+  durationSeconds: number;
+  isSetRest: boolean;
+  nextLabel: string;
+};
+
+// What comes after the set just done: the next set of the exercise, the next
+// exercise, or nothing more.
+function describeNext(
+  exercise: WorkoutExerciseTree,
+  setIndex: number,
+  nextExercise: WorkoutExerciseTree | undefined,
+): string {
+  const profile = getMeasureProfile(exercise.measure_codes);
+  const nextSet = exercise.sets[setIndex + 1];
+  if (nextSet !== undefined) {
+    const label = getSetLabel(profile, setIndex + 1).toLowerCase();
+    const planned = formatSetValues(
+      toPlannedValues(nextSet),
+      exercise.measure_codes,
+    ).toLowerCase();
+    return `${label} · prévu ${planned}`;
+  }
+  if (nextExercise !== undefined) {
+    return `exercice suivant, ${nextExercise.name}`;
+  }
+  return "dernière série de la séance faite";
+}
+
 // Screen B3: one exercise of the session in progress, set by set. One tap
 // when done as planned, "Modifier" otherwise; the order is free (RM-024).
+// Every validated set starts the rest timer (US-30).
 function WorkoutExercisePage() {
   const params = useParams();
   const sessionId = Number(params.id);
@@ -46,6 +82,7 @@ function WorkoutExercisePage() {
     set: WorkoutSetRow;
     index: number;
   } | null>(null);
+  const [rest, setRest] = useState<Rest | null>(null);
 
   const exercises: WorkoutExerciseTree[] =
     session?.blocks.flatMap((block) => block.exercises) ?? [];
@@ -64,9 +101,22 @@ function WorkoutExercisePage() {
         ? null
         : firstUndone;
 
-  function validateAsPlanned(set: WorkoutSetRow) {
+  // The rest starts as soon as the set is validated (RM-023 for its length).
+  function startRest(set: WorkoutSetRow, index: number) {
+    if (exercise === undefined || exercise === null) {
+      return;
+    }
+    setRest({
+      durationSeconds: getRestDuration(set, exercise),
+      isSetRest: set.planned_rest_seconds !== null,
+      nextLabel: describeNext(exercise, index, next),
+    });
+  }
+
+  function validateAsPlanned(set: WorkoutSetRow, index: number) {
     validation.validate(set, plannedAsActual(set));
     setPickedIndex(null);
+    startRest(set, index);
   }
 
   function confirmEdited(values: ActualSetValues) {
@@ -74,7 +124,20 @@ function WorkoutExercisePage() {
       validation.validate(editing.set, values);
       setEditing(null);
       setPickedIndex(null);
+      startRest(editing.set, editing.index);
     }
+  }
+
+  if (rest !== null && exercise !== undefined && exercise !== null) {
+    return (
+      <RestTimer
+        exerciseName={exercise.name}
+        durationSeconds={rest.durationSeconds}
+        isSetRest={rest.isSetRest}
+        nextLabel={rest.nextLabel}
+        onFinish={() => setRest(null)}
+      />
+    );
   }
 
   const backLink = (
@@ -164,7 +227,7 @@ function WorkoutExercisePage() {
                           : "upcoming"
                     }
                     isPending={validation.pendingId === set.id}
-                    onValidate={() => validateAsPlanned(set)}
+                    onValidate={() => validateAsPlanned(set, index)}
                     onEdit={() => setEditing({ set, index })}
                     onPick={() => setPickedIndex(index)}
                   />
