@@ -2,9 +2,12 @@ import type { RequestHandler } from "express";
 import {
   type AppointmentDetail,
   type AppointmentListItem,
+  computeAppointmentStatus,
   type DateRange,
   type FreeSessionCreated,
   type FreeSessionInput,
+  type MoveAppointmentInput,
+  todayInParis,
   toHourMinute,
 } from "shared";
 import { withTransaction } from "../../database/withTransaction.js";
@@ -24,7 +27,9 @@ import {
   countVersionContent,
   countWorkoutSetsBySession,
   createAppointment,
+  moveAppointment,
   readAppointment,
+  readAppointmentForUpdate,
   readAppointmentsBetween,
   readVersionBlocks,
   readVersionExercises,
@@ -161,6 +166,8 @@ export const read: RequestHandler = async (req, res) => {
     status: row.status,
     cancelled_at:
       row.cancelled_at === null ? null : row.cancelled_at.toISOString(),
+    initial_date: row.initial_date,
+    moved_manually: row.moved_manually === 1,
     session_name: row.session_name,
     program_name: row.program_name,
     workout_session:
@@ -211,4 +218,54 @@ export const cancel: RequestHandler = async (req, res) => {
   }
 
   res.json({ status: "cancelled" });
+};
+
+// PATCH /api/appointments/:id/move: the session changes day (US-25). The new
+// status comes from the new date (RM-068), and the date it was first planned
+// for is kept (RM-032).
+export const move: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const { planned_date, planned_time } = req.body as MoveAppointmentInput;
+
+  await withTransaction(async (connection) => {
+    const appointment = await readAppointmentForUpdate(id, userId, connection);
+    if (appointment === null) {
+      throw new HttpError(
+        404,
+        "APPOINTMENT_NOT_FOUND",
+        "Cette séance n'existe pas.",
+      );
+    }
+    if (
+      appointment.status === "attended" ||
+      appointment.status === "cancelled"
+    ) {
+      throw new HttpError(
+        409,
+        "APPOINTMENT_NOT_MOVABLE",
+        "Cette séance a été faite ou annulée : elle ne se déplace plus.",
+      );
+    }
+
+    const status = computeAppointmentStatus(planned_date, todayInParis());
+    await moveAppointment(id, planned_date, planned_time, status, connection);
+  });
+
+  // The client reads the appointment again right after: it gets the new
+  // date, the first one and the "moved" flag in one answer.
+  const row = await readAppointment(id, userId);
+  if (row === null) {
+    throw new HttpError(
+      404,
+      "APPOINTMENT_NOT_FOUND",
+      "Cette séance n'existe pas.",
+    );
+  }
+  res.json({
+    id: row.id,
+    planned_date: row.planned_date,
+    planned_time: toHourMinute(row.planned_time),
+    status: row.status,
+  });
 };

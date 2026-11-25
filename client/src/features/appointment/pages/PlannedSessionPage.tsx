@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
+  formatDayMonth,
   formatDayTime,
   formatLongDate,
   formatSessionContent,
@@ -17,9 +18,13 @@ import { ApiError } from "../../../services/apiError";
 import AlreadyInProgressDialog from "../../workout-session/components/AlreadyInProgressDialog";
 import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
 import CancelAppointmentDialog from "../components/CancelAppointmentDialog";
+import MoveAppointmentSheet from "../components/MoveAppointmentSheet";
 import SessionActionsSheet from "../components/SessionActionsSheet";
 import { useAppointment } from "../hooks/useAppointment";
-import { cancelAppointment } from "../services/appointmentService";
+import {
+  cancelAppointment,
+  moveAppointment,
+} from "../services/appointmentService";
 
 const PRIMARY_BUTTON =
   "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60";
@@ -40,6 +45,10 @@ function PlannedSessionPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isSendingCancel, setIsSendingCancel] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  // The move sheet (CAL-05)
+  const [isMoving, setIsMoving] = useState(false);
+  const [isSendingMove, setIsSendingMove] = useState(false);
+  const [moveError, setMoveError] = useState<string | null>(null);
   // "Séance modifiée.", handed over by the editor
   const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   function goBack() {
@@ -52,6 +61,25 @@ function PlannedSessionPage() {
 
   function start() {
     workoutStart.start(id);
+  }
+
+  // "Confirmer" of CAL-05: the session changes day (US-25).
+  async function confirmMove(date: string, time: string | null) {
+    setIsSendingMove(true);
+    setMoveError(null);
+    try {
+      await moveAppointment(id, date, time);
+      setIsMoving(false);
+      reload();
+    } catch (caught) {
+      setMoveError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible de déplacer la séance. Réessaie.",
+      );
+    } finally {
+      setIsSendingMove(false);
+    }
   }
 
   // "Annuler la séance" of CAL-07: the appointment stays, as cancelled.
@@ -86,6 +114,8 @@ function PlannedSessionPage() {
     workout === null &&
     appointment.status !== "cancelled" &&
     appointment.status !== "attended";
+  // A session done or cancelled never moves (RM-068).
+  const canMove = canCancel;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
@@ -186,6 +216,13 @@ function PlannedSessionPage() {
               >
                 {appointment.session_name}
               </h2>
+              {appointment.initial_date !== null && !isCancelled && (
+                <p className="text-sm text-muted">
+                  <span aria-hidden="true">↷ </span>
+                  Prévue le {formatDayMonth(appointment.initial_date)} ·
+                  déplacée au {formatDayMonth(appointment.planned_date)}
+                </p>
+              )}
               {isCancelled ? (
                 // CAL-07c: what was planned, then when it was given up
                 <>
@@ -319,12 +356,30 @@ function PlannedSessionPage() {
           appointmentId={appointment.id}
           canEdit={canCancel}
           canCancel={canCancel}
+          canMove={canMove}
+          onMove={() => {
+            setIsMenuOpen(false);
+            setMoveError(null);
+            setIsMoving(true);
+          }}
           onCancel={() => {
             setIsMenuOpen(false);
             setCancelError(null);
             setIsCancelling(true);
           }}
           onClose={() => setIsMenuOpen(false)}
+        />
+      )}
+
+      {isMoving && appointment !== null && (
+        <MoveAppointmentSheet
+          sessionName={appointment.session_name}
+          plannedDate={appointment.planned_date}
+          plannedTime={appointment.planned_time}
+          isSending={isSendingMove}
+          error={moveError}
+          onConfirm={confirmMove}
+          onClose={() => setIsMoving(false)}
         />
       )}
 

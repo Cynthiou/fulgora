@@ -149,6 +149,8 @@ export type AppointmentDetailRow = {
   planned_time: string | null;
   status: AppointmentStatus;
   cancelled_at: Date | null;
+  initial_date: string | null;
+  moved_manually: number;
   session_version_id: number;
   session_name: string;
   program_name: string | null;
@@ -164,7 +166,7 @@ export async function readAppointment(
 ): Promise<AppointmentDetailRow | null> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT a.id, a.planned_date, a.planned_time, a.status, a.cancelled_at,
-            a.session_version_id,
+            a.initial_date, a.moved_manually, a.session_version_id,
             st.name AS session_name, p.name AS program_name,
             ws.id AS workout_session_id, ws.status AS workout_status
        FROM appointment a
@@ -347,4 +349,26 @@ export async function cancelAppointment(
     [id, userId],
   );
   return result.affectedRows === 1;
+}
+
+// Moves an appointment to another day (US-25). The first move remembers the
+// date it was planned for, the next ones keep that first one (RM-032).
+export async function moveAppointment(
+  id: number,
+  plannedDate: string,
+  plannedTime: string | null,
+  status: AppointmentStatus,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE appointment
+        SET initial_date = COALESCE(initial_date, planned_date),
+            planned_date = ?,
+            planned_time = ?,
+            moved_manually = TRUE,
+            status = ?,
+            cancelled_at = NULL
+      WHERE id = ?`,
+    [plannedDate, plannedTime, status, id],
+  );
 }

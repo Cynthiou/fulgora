@@ -10,6 +10,9 @@ type Props = {
   canEdit: boolean;
   // False once it was started, done or already cancelled (RM-035)
   canCancel: boolean;
+  // False once it was done or cancelled (RM-068)
+  canMove: boolean;
+  onMove: () => void;
   onCancel: () => void;
   onClose: () => void;
 };
@@ -24,6 +27,8 @@ function SessionActionsSheet({
   appointmentId,
   canEdit,
   canCancel,
+  canMove,
+  onMove,
   onCancel,
   onClose,
 }: Props) {
@@ -81,12 +86,18 @@ function SessionActionsSheet({
         <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
       </button>
 
-      {/* Moving a session is US-25. */}
-      <button type="button" disabled className={`${ROW} opacity-60`}>
+      <button
+        type="button"
+        disabled={!canMove}
+        onClick={onMove}
+        className={`${ROW} disabled:opacity-60`}
+      >
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="font-display text-display-sm">Déplacer</span>
           <span className="text-sm text-muted">
-            Autre date ou heure · bientôt
+            {canMove
+              ? "Autre date ou heure"
+              : "Cette séance a été faite ou annulée"}
           </span>
         </span>
         <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />

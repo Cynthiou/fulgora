@@ -11,6 +11,10 @@ export default defineConfig({
   use: {
     // page.goto("/") opens the Vite dev server of the tests.
     baseURL: E2E_ORIGIN,
+    // The app is written in French for French phones: the browser of the
+    // tests speaks French too, so a time field shows 18:30 and not 06:30 PM.
+    locale: "fr-FR",
+    timezoneId: "Europe/Paris",
   },
   // Every test runs once per project: once on a phone, once on a computer.
   projects: [

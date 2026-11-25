@@ -3,11 +3,18 @@ import {
   dateRangeSchema,
   freeSessionSchema,
   idParamSchema,
+  moveAppointmentSchema,
   sessionEditSchema,
 } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { browse, cancel, createFree, read } from "./appointmentActions.js";
+import {
+  browse,
+  cancel,
+  createFree,
+  move,
+  read,
+} from "./appointmentActions.js";
 import { editSession, readSession } from "./sessionEditActions.js";
 
 const appointmentRouter = express.Router();
@@ -59,6 +66,14 @@ appointmentRouter.patch(
   authenticate,
   validate({ params: idParamSchema }),
   cancel,
+);
+
+// PATCH /api/appointments/:id/move: the session changes day (US-25).
+appointmentRouter.patch(
+  "/:id/move",
+  authenticate,
+  validate({ params: idParamSchema, body: moveAppointmentSchema }),
+  move,
 );
 
 export default appointmentRouter;

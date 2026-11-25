@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest";
 import type { AppointmentListItem } from "../appointment.js";
+import { addYears, todayInParis } from "../dates.js";
 import {
   buildDayEntries,
   buildMonthCell,
+  computeAppointmentStatus,
   countDaySessions,
   type DayEntry,
   describeEntry,
+  formatConfirmDeadline,
   formatDayCount,
   formatMovedFrom,
   getAppointmentDisplayDate,
   getEntryTime,
   isDoneAnotherDay,
+  moveAppointmentSchema,
 } from "../planning.js";
 
 type Options = Partial<AppointmentListItem>;
@@ -232,5 +236,69 @@ describe("describeEntry", () => {
     const entry = firstEntry(buildDayEntries([item], "2026-11-24"));
     expect(describeEntry(entry)).toBe("Cardio base · ↷ déplacée du 21");
     expect(formatMovedFrom(item)).toBe("déplacée du 21");
+  });
+});
+
+describe("computeAppointmentStatus", () => {
+  it("keeps today and the future planned", () => {
+    expect(computeAppointmentStatus("2026-11-25", "2026-11-25")).toBe(
+      "planned",
+    );
+    expect(computeAppointmentStatus("2026-11-30", "2026-11-25")).toBe(
+      "planned",
+    );
+  });
+
+  it("asks for a confirmation during 72 hours after the day", () => {
+    // Planned on the 21st: to confirm on the 22nd, 23rd, 24th... until the
+    // 25th at 00 h, counted from midnight after the 21st (RM-052).
+    expect(computeAppointmentStatus("2026-11-21", "2026-11-22")).toBe(
+      "to_confirm",
+    );
+    expect(computeAppointmentStatus("2026-11-21", "2026-11-24")).toBe(
+      "to_confirm",
+    );
+  });
+
+  it("gives up after the 72 hours", () => {
+    expect(computeAppointmentStatus("2026-11-21", "2026-11-25")).toBe("missed");
+    expect(computeAppointmentStatus("2026-01-01", "2026-11-25")).toBe("missed");
+  });
+
+  it("names the moment a session becomes missed", () => {
+    expect(formatConfirmDeadline("2026-11-24")).toBe("28 novembre à 00 h");
+  });
+});
+
+describe("moveAppointmentSchema", () => {
+  it("accepts a day with or without a time", () => {
+    const today = todayInParis();
+    expect(
+      moveAppointmentSchema.safeParse({
+        planned_date: today,
+        planned_time: "07:00",
+      }).success,
+    ).toBe(true);
+    expect(
+      moveAppointmentSchema.safeParse({
+        planned_date: today,
+        planned_time: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses a day too far away and a wrong time", () => {
+    expect(
+      moveAppointmentSchema.safeParse({
+        planned_date: addYears(todayInParis(), 3),
+        planned_time: null,
+      }).success,
+    ).toBe(false);
+    expect(
+      moveAppointmentSchema.safeParse({
+        planned_date: todayInParis(),
+        planned_time: "25:00",
+      }).success,
+    ).toBe(false);
   });
 });

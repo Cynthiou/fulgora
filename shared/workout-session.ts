@@ -43,6 +43,9 @@ export type AppointmentDetail = {
   status: AppointmentStatus;
   // When the appointment was cancelled, in ISO (RM-035); null otherwise
   cancelled_at: string | null;
+  // The day it was first planned for, once it was moved by hand (RM-032)
+  initial_date: string | null;
+  moved_manually: boolean;
   session_name: string;
   program_name: string | null;
   // The realized session, when the appointment was started

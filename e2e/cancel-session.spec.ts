@@ -63,7 +63,6 @@ test("cancels a planned session, which stays visible as cancelled", async ({
   await page.getByRole("button", { name: "Annuler la séance" }).click();
 
   // CAL-07c: the session is kept, without any way to start it
-  await expect(page.getByText("Annulée")).toBeVisible();
   await expect(page.getByText(/^Annulée le /)).toBeVisible();
   await expect(page.getByText("Ce rendez-vous est annulé.")).toBeVisible();
   await expect(

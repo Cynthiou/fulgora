@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import PlannedSessionPage from "../../../../src/features/appointment/pages/PlannedSessionPage";
 import {
   cancelAppointment,
+  moveAppointment,
   readAppointment,
 } from "../../../../src/features/appointment/services/appointmentService";
 import {
@@ -19,6 +20,7 @@ vi.mock(
   () => ({
     readAppointment: vi.fn(),
     cancelAppointment: vi.fn(),
+    moveAppointment: vi.fn(),
   }),
 );
 vi.mock(
@@ -30,6 +32,7 @@ vi.mock(
 );
 const readAppointmentMock = vi.mocked(readAppointment);
 const cancelAppointmentMock = vi.mocked(cancelAppointment);
+const moveAppointmentMock = vi.mocked(moveAppointment);
 const startMock = vi.mocked(startWorkoutSession);
 const readCurrentMock = vi.mocked(readCurrentWorkoutSession);
 
@@ -39,6 +42,8 @@ const planned: AppointmentDetail = {
   planned_time: "18:30",
   status: "planned",
   cancelled_at: null,
+  initial_date: null,
+  moved_manually: false,
   session_name: "Haut du corps",
   program_name: null,
   workout_session: null,
@@ -188,11 +193,7 @@ describe("PlannedSessionPage", () => {
       screen.getByRole("button", { name: "Actions de la séance" }),
     );
     expect(screen.getByText("Blocs, exercices, séries")).toBeTruthy();
-    // Moving and cancelling arrive with US-25 and US-26
-    expect(
-      (screen.getByRole("button", { name: /Déplacer/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
+    expect(screen.getByText("Autre date ou heure")).toBeTruthy();
 
     await user.click(
       screen.getByRole("button", { name: /Modifier la séance/ }),
@@ -332,6 +333,77 @@ describe("PlannedSessionPage · annuler (US-26)", () => {
           name: /Annuler le rendez-vous/,
         }) as HTMLButtonElement
       ).disabled,
+    ).toBe(true);
+  });
+});
+
+describe("PlannedSessionPage · déplacer (US-25)", () => {
+  beforeEach(() => {
+    readAppointmentMock.mockReset();
+    moveAppointmentMock.mockReset();
+    readCurrentMock.mockReset();
+    readCurrentMock.mockResolvedValue(null);
+  });
+
+  it("moves the session to another day and shows where it came from", async () => {
+    readAppointmentMock.mockResolvedValue(planned);
+    moveAppointmentMock.mockResolvedValue({
+      id: 12,
+      planned_date: "2026-11-27",
+      status: "planned",
+    });
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+    await user.click(screen.getByRole("button", { name: /Déplacer/ }));
+
+    expect(screen.getByText("Déplacer « Haut du corps »")).toBeTruthy();
+    // Nothing chosen yet: the confirmation waits
+    expect(
+      (screen.getByRole("button", { name: "Confirmer" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+
+    await user.click(
+      screen.getByRole("button", { name: /^Vendredi 27 novembre/ }),
+    );
+
+    // The session comes back moved
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      planned_date: "2026-11-27",
+      initial_date: "2026-11-26",
+      moved_manually: true,
+    });
+    await user.click(screen.getByRole("button", { name: "Confirmer" }));
+
+    expect(moveAppointmentMock).toHaveBeenCalledWith(12, "2026-11-27", "18:30");
+    expect(
+      await screen.findByText(
+        /Prévue le 26 novembre · déplacée au 27 novembre/,
+      ),
+    ).toBeTruthy();
+  });
+
+  it("never offers to move a session already done", async () => {
+    readAppointmentMock.mockResolvedValue({
+      ...planned,
+      status: "attended",
+      workout_session: { id: 8, status: "completed" },
+    });
+    const user = renderPage();
+    await screen.findByText("Haut du corps");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions de la séance" }),
+    );
+
+    expect(
+      (screen.getByRole("button", { name: /Déplacer/ }) as HTMLButtonElement)
+        .disabled,
     ).toBe(true);
   });
 });

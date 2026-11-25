@@ -66,3 +66,18 @@ export function cancelAppointment(id: number): Promise<{ status: string }> {
     method: "PATCH",
   });
 }
+
+// PATCH /api/appointments/:id/move: the session changes day (US-25).
+export function moveAppointment(
+  id: number,
+  plannedDate: string,
+  plannedTime: string | null,
+): Promise<{ id: number; planned_date: string; status: string }> {
+  return apiFetch(`/appointments/${id}/move`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      planned_date: plannedDate,
+      planned_time: plannedTime,
+    }),
+  });
+}
