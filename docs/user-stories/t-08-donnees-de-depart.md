@@ -34,10 +34,10 @@ Les exercices au poids du corps n'ont que la mesure « répétitions » : imposs
 
 ## Tâches techniques
 
-- [ ] BDD : mettre à jour `catalog.json` (mesure « charge » sur le profil `bodyweight`)
-- [ ] Backend : `bin/seedDev.ts` : compte de démonstration (mot de passe lu dans l'environnement), une séance libre, refus si `NODE_ENV=production`
-- [ ] Tests : après seed, `exercise_measure` contient la charge pour Tractions
+- [x] BDD : mettre à jour `catalog.json` (mesure « charge » sur le profil `bodyweight`)
+- [x] Backend : `bin/seedDev.ts` : compte de démonstration (mot de passe lu dans l'environnement), une séance libre, refus si `NODE_ENV=production`
+- [x] Tests : après seed, `exercise_measure` contient la charge pour Tractions
 
 ## Definition of Done
 
-- [ ] Seed relancé sur une base vide sans erreur
+- [x] Seed relancé sur une base vide sans erreur
