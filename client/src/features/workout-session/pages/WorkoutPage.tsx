@@ -10,7 +10,7 @@ import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
-import StatusBadge from "../../../components/StatusBadge";
+import StatusChip from "../../../components/StatusChip";
 import { ApiError } from "../../../services/apiError";
 import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
 import AutoClosedNotice from "../components/AutoClosedNotice";
@@ -212,7 +212,7 @@ function WorkoutPage() {
                   </p>
                 ) : (
                   <p className="flex items-center gap-2 text-xs text-muted">
-                    <StatusBadge
+                    <StatusChip
                       status={
                         session.status === "completed"
                           ? "completed"

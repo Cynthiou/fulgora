@@ -315,7 +315,8 @@ describe("HomePage · séance déjà faite (correction 5)", () => {
     renderHome();
     await waitForContent();
 
-    expect(screen.getByText("Effectuée")).toBeTruthy();
+    // The chip carries its symbol: "✓ Effectuée" (03-2).
+    expect(screen.getByText("✓ Effectuée")).toBeTruthy();
     expect(screen.getByText(/17 \/ 18 séries/)).toBeTruthy();
     expect(
       screen.getByRole("link", { name: "Voir le résumé" }).getAttribute("href"),

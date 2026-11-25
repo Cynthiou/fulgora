@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { formatLongDate, formatSessionContent } from "shared";
 import checkIcon from "../../../assets/icons/ui/app/check.svg";
 import Icon from "../../../components/Icon";
-import StatusBadge from "../../../components/StatusBadge";
+import StatusChip from "../../../components/StatusChip";
 
 type Props = {
   name: string;
@@ -34,7 +34,7 @@ function SessionSavedPanel({
             {formatLongDate(plannedDate)}
             {plannedTime === null ? "" : ` · ${plannedTime}`}
           </span>
-          <StatusBadge status="planned" />
+          <StatusChip status="planned" />
         </div>
         <p className="font-display text-display-sm">{name}</p>
         <p className="text-xs font-medium leading-[1.45] text-muted">

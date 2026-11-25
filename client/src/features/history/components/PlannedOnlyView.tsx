@@ -13,26 +13,23 @@ type Props = {
 // only the plan of its original version is shown (RM-058).
 function PlannedOnlyView({ blocks }: Props) {
   return (
-    <div className="flex flex-col gap-4">
-      <p role="status" className="text-muted">
-        Aucun résultat : seul le prévu est affiché.
-      </p>
+    <div className="flex flex-col gap-2.5">
       {blocks.map((block, index) => (
         <section
           key={block.id}
           aria-labelledby={`planned-block-${block.id}`}
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
         >
           <h2
             id={`planned-block-${block.id}`}
-            className="font-sans text-overline not-italic uppercase text-accent"
+            className="font-sans text-overline uppercase not-italic text-muted"
           >
             Prévu · {getBlockLabel(block, index)}
           </h2>
           {block.exercises.length === 0 ? (
             <p className="text-sm text-muted">Aucun exercice</p>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-2.5">
               {block.exercises.map((exercise) => {
                 const first = exercise.sets[0];
                 const sameValues =
@@ -53,10 +50,10 @@ function PlannedOnlyView({ blocks }: Props) {
                 return (
                   <li
                     key={exercise.id}
-                    className="flex flex-col gap-1 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
+                    className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm"
                   >
-                    <span className="font-semibold">{exercise.name}</span>
-                    <span className="text-sm text-muted">
+                    <span className="font-bold">{exercise.name} ·</span>
+                    <span className="font-medium text-muted">
                       {exercise.sets.length === 0
                         ? "Aucune série prévue"
                         : sameValues && first !== undefined
@@ -78,6 +75,13 @@ function PlannedOnlyView({ blocks }: Props) {
           )}
         </section>
       ))}
+
+      <p
+        role="status"
+        className="rounded-card border border-base-300 bg-base-100 p-4 text-sm leading-[1.45] text-muted shadow-card"
+      >
+        Aucun résultat : seul le prévu est affiché.
+      </p>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
 import playIcon from "../../../assets/icons/ui/app/play.svg";
 import Icon from "../../../components/Icon";
-import StatusBadge from "../../../components/StatusBadge";
+import StatusChip from "../../../components/StatusChip";
 
 type Props = {
   appointment: AppointmentListItem;
@@ -51,7 +51,7 @@ function TodaySessionCard({ appointment, detail, currentSession }: Props) {
               <span aria-hidden="true">● </span>En cours
             </p>
           ) : isOver ? (
-            <StatusBadge status={getAppointmentStatus(appointment)} />
+            <StatusChip status={getAppointmentStatus(appointment)} />
           ) : (
             <p className="font-display text-display-sm">
               {appointment.planned_time ?? "Sans heure"}
