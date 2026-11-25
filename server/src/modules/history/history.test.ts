@@ -111,6 +111,10 @@ function browse(query: string, cookie: string) {
   return request(app).get(`/api/history${query}`).set("Cookie", cookie);
 }
 
+function read(id: number | string, cookie: string) {
+  return request(app).get(`/api/history/${id}`).set("Cookie", cookie);
+}
+
 describe("GET /api/history", () => {
   it("lists the past sessions newest first, filed under the real day", async () => {
     const response = await browse("", lea.cookie);
@@ -152,5 +156,49 @@ describe("GET /api/history", () => {
 
     expect((await browse("?offset=-1", lea.cookie)).status).toBe(400);
     expect((await request(app).get("/api/history")).status).toBe(401);
+  });
+});
+
+describe("GET /api/history/:id", () => {
+  it("gives the realized tree of a started session, the plan of a missed one", async () => {
+    const list = await browse("", lea.cookie);
+    const done = list.body.items.find(
+      (item: { session_name: string }) => item.session_name === "Dos",
+    );
+    const missed = list.body.items.find(
+      (item: { session_name: string }) => item.session_name === "Course",
+    );
+
+    const doneDetail = await read(done.appointment_id, lea.cookie);
+    expect(doneDetail.status).toBe(200);
+    expect(doneDetail.body).toMatchObject({
+      kind: "done",
+      appointment: {
+        id: done.appointment_id,
+        status: "attended",
+        session_name: "Dos",
+        program_name: null,
+      },
+      workout: { status: "unfinished" },
+    });
+
+    const missedDetail = await read(missed.appointment_id, lea.cookie);
+    expect(missedDetail.status).toBe(200);
+    expect(missedDetail.body).toMatchObject({
+      kind: "planned_only",
+      appointment: { status: "missed", session_name: "Course" },
+    });
+    expect(missedDetail.body.blocks).toHaveLength(1);
+    expect(missedDetail.body.blocks[0].exercises).toHaveLength(1);
+    expect(missedDetail.body.blocks[0].exercises[0]).toMatchObject({
+      name: expect.stringMatching(/^Exercice /),
+      measure_codes: [],
+      sets: [],
+    });
+
+    expect((await read(done.appointment_id, someoneElse.cookie)).status).toBe(
+      404,
+    );
+    expect((await read("abc", lea.cookie)).status).toBe(400);
   });
 });

@@ -1,8 +1,8 @@
 import express from "express";
-import { historyQuerySchema } from "shared";
+import { historyQuerySchema, idParamSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { browse } from "./historyActions.js";
+import { browse, read } from "./historyActions.js";
 
 const historyRouter = express.Router();
 
@@ -12,6 +12,14 @@ historyRouter.get(
   authenticate,
   validate({ query: historyQuerySchema }),
   browse,
+);
+
+// GET /api/history/:id: the detail of a past session (US-36)
+historyRouter.get(
+  "/:id",
+  authenticate,
+  validate({ params: idParamSchema }),
+  read,
 );
 
 export default historyRouter;

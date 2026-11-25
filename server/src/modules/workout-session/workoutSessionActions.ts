@@ -176,7 +176,7 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
 }
 
 // The whole tree of a realized session, or null when it is not the user's.
-async function buildTree(
+export async function buildTree(
   id: number,
   userId: number,
 ): Promise<WorkoutSessionTree | null> {
