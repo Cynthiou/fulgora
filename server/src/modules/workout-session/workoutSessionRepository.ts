@@ -362,3 +362,19 @@ export async function closeInactiveWorkoutSessions(
   );
   return result.affectedRows;
 }
+
+// "Terminer": over as completed, the sets not done stay without a validation
+// date (RM-046). Same shape as the abandon: conditional on the status.
+export async function completeWorkoutSession(
+  id: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE workout_session
+        SET status = 'completed', ended_at = NOW(3)
+      WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`,
+    [id, userId],
+  );
+  return result.affectedRows;
+}

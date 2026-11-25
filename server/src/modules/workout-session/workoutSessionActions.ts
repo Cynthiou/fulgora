@@ -1,7 +1,8 @@
 import type { RequestHandler } from "express";
-import type {
-  CurrentWorkoutSession,
-  MeasureCode,
+import {
+  countValidatedSets,
+  type CurrentWorkoutSession,
+  type MeasureCode,
   StartWorkoutInput,
   WorkoutBlockTree,
   WorkoutExerciseTree,
@@ -20,6 +21,7 @@ import {
 import { countVersionExercises } from "../session-template/sessionTemplateRepository.js";
 import {
   abandonWorkoutSession,
+  completeWorkoutSession,
   copyPlannedSets,
   copyTemplateBlocks,
   copyTemplateExercises,
@@ -263,4 +265,41 @@ export const abandon: RequestHandler = async (req, res) => {
     );
   }
   res.json(tree);
+};
+
+// POST /api/workout-sessions/:id/complete: the session ends as completed,
+// the sets not done stay empty (RM-046). Without any validated set the end
+// is refused (D-10): the way out is to abandon.
+export const complete: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const before = await buildTree(id, userId);
+  if (before === null) {
+    throw new HttpError(404, "WORKOUT_NOT_FOUND", "Cette séance n'existe pas.");
+  }
+  if (before.status !== "in_progress") {
+    throw new HttpError(
+      409,
+      "WORKOUT_NOT_IN_PROGRESS",
+      "Cette séance n'est plus en cours.",
+    );
+  }
+  if (countValidatedSets(before) === 0) {
+    throw new HttpError(
+      422,
+      "NO_VALIDATED_SET",
+      "Aucune série n'est faite. Tu peux abandonner la séance.",
+    );
+  }
+
+  const changed = await completeWorkoutSession(id, userId);
+  if (changed === 0) {
+    throw new HttpError(
+      409,
+      "WORKOUT_NOT_IN_PROGRESS",
+      "Cette séance n'est plus en cours.",
+    );
+  }
+  res.json(await buildTree(id, userId));
 };

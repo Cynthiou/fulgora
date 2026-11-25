@@ -62,6 +62,13 @@ async function startSession(user: TestUser, name: string): Promise<number> {
   return Number(response.body.id);
 }
 
+function complete(id: number, cookie: string) {
+  return request(app)
+    .post(`/api/workout-sessions/${id}/complete`)
+    .set("Origin", ORIGIN)
+    .set("Cookie", cookie);
+}
+
 function abandon(id: number, cookie: string) {
   return request(app)
     .post(`/api/workout-sessions/${id}/abandon`)
@@ -173,5 +180,60 @@ describe("closeInactiveWorkoutSessions", () => {
       status: "unfinished",
       auto_closed: true,
     });
+  });
+});
+
+describe("POST /api/workout-sessions/:id/complete", () => {
+  it("refuses without any validated set, then completes and leaves the others empty", async () => {
+    const id = await startSession(lea, "Terminée");
+    await client.execute(
+      `INSERT INTO workout_set (workout_exercise_id, position, reps_planned)
+       SELECT we.id, 2, 8 FROM workout_exercise we
+         JOIN workout_block wb ON wb.id = we.workout_block_id
+        WHERE wb.workout_session_id = ?`,
+      [id],
+    );
+
+    const empty = await complete(id, lea.cookie);
+    expect(empty.status).toBe(422);
+    expect(empty.body.error.code).toBe("NO_VALIDATED_SET");
+
+    const tree = await request(app)
+      .get(`/api/workout-sessions/${id}`)
+      .set("Cookie", lea.cookie);
+    const [first] = tree.body.blocks[0].exercises[0].sets;
+    await request(app)
+      .put(`/api/workout-sets/${first.id}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie)
+      .send({
+        reps: 10,
+        weight_kg: null,
+        duration_seconds: null,
+        distance_meters: null,
+        speed_kmh: null,
+        resistance: null,
+        incline_percent: null,
+        calories: null,
+      })
+      .expect(200);
+
+    const response = await complete(id, lea.cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ id, status: "completed" });
+    expect(response.body.ended_at).toEqual(expect.any(String));
+    const sets = response.body.blocks[0].exercises[0].sets;
+    expect(sets[0].validated_at).toEqual(expect.any(String));
+    expect(sets[1].validated_at).toBeNull();
+
+    expect((await complete(id, lea.cookie)).status).toBe(409);
+    expect((await abandon(id, lea.cookie)).status).toBe(409);
+  });
+
+  it("answers 404 for another user's session", async () => {
+    const id = await startSession(someoneElse, "Pas la mienne non plus");
+    expect((await complete(id, lea.cookie)).status).toBe(404);
+    await abandon(id, someoneElse.cookie).expect(200);
   });
 });

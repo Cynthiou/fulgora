@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   actualSetSchema,
+  computeDurationSeconds,
+  computeTonnage,
   countPlannedSets,
   countValidatedSets,
   formatActualValues,
   formatClock,
   formatElapsed,
+  formatExerciseResult,
   formatSetProgress,
+  formatSummaryDuration,
+  formatTonnage,
   getRestDuration,
   getSetGap,
   isEmptySet,
@@ -194,5 +199,79 @@ describe("rest timer helpers (US-30)", () => {
     expect(formatClock(72)).toBe("1:12");
     expect(formatClock(0)).toBe("0:00");
     expect(formatClock(-3)).toBe("0:00");
+  });
+});
+
+describe("summary of a session (US-34)", () => {
+  it("computes the duration from the start to the end, or to now", () => {
+    expect(
+      computeDurationSeconds(
+        "2026-11-26T07:00:00.000Z",
+        "2026-11-26T07:48:00.000Z",
+      ),
+    ).toBe(2880);
+    expect(
+      computeDurationSeconds(
+        "2026-11-26T07:00:00.000Z",
+        null,
+        new Date("2026-11-26T07:10:30.000Z"),
+      ),
+    ).toBe(630);
+    expect(formatSummaryDuration(2880)).toBe("48 min");
+  });
+
+  it("adds up reps x weight of the validated sets only", () => {
+    const sets = [
+      { ...set(1, true), reps_actual: 10, weight_actual_kg: 40 },
+      { ...set(2, true), reps_actual: 8, weight_actual_kg: 62.5 },
+      { ...set(3, false), reps_actual: null, weight_actual_kg: null },
+      { ...set(4, true), reps_actual: 12, weight_actual_kg: null },
+    ];
+    expect(computeTonnage(sets)).toBe(900);
+    expect(formatTonnage(3240)).toBe("3 240 kg".replace(" ", "\u202f"));
+    expect(computeTonnage([])).toBe(0);
+  });
+
+  it("writes the result of an exercise, with the sets not done", () => {
+    const reps = (value: number, validated = true) => ({
+      ...set(value, validated),
+      reps_actual: validated ? value : null,
+    });
+    expect(
+      formatExerciseResult({
+        measure_codes: ["reps", "weight"],
+        sets: [reps(10), reps(8), reps(10)],
+      }),
+    ).toBe("3 / 3 · 10, 8, 10 rép.");
+    expect(
+      formatExerciseResult({
+        measure_codes: ["reps"],
+        sets: [reps(10), reps(8), reps(3, false)],
+      }),
+    ).toBe("2 / 3 · 10, 8 rép. · série 3 non faite");
+    expect(
+      formatExerciseResult({
+        measure_codes: ["reps"],
+        sets: [reps(1, false), reps(2, false), reps(3, false)],
+      }),
+    ).toBe("0 / 3 · séries 1, 2 et 3 non faites");
+    expect(
+      formatExerciseResult({
+        measure_codes: ["duration"],
+        sets: [
+          { ...set(1, true), duration_actual_seconds: 60 },
+          { ...set(2, true), duration_actual_seconds: 42 },
+        ],
+      }),
+    ).toBe("2 / 2 · 1 min, 42 s");
+    expect(
+      formatExerciseResult({
+        measure_codes: ["duration", "distance"],
+        sets: [
+          { ...set(1, true), duration_actual_seconds: 600 },
+          { ...set(2, true), duration_actual_seconds: 492 },
+        ],
+      }),
+    ).toBe("2 / 2 · 18 min 12");
   });
 });
