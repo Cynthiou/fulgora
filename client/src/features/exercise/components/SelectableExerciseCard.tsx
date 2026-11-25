@@ -1,13 +1,15 @@
 import { Link } from "react-router";
 import {
+  DIFFICULTY_LABELS,
   type ExerciseListItem,
-  formatExerciseMeta,
+  formatExerciseOrigin,
   getExerciseImage,
   type Sex,
 } from "shared";
-import eyeIcon from "../../../assets/icons/ui/fields/eye.svg";
+import eyeIcon from "../../../assets/icons/ui/app/eye.svg";
 import HighlightedText from "../../../components/HighlightedText";
 import Icon from "../../../components/Icon";
+import ExerciseThumbnail from "./ExerciseThumbnail";
 
 type Props = {
   exercise: ExerciseListItem;
@@ -24,10 +26,11 @@ type Props = {
   detailState: Record<string, unknown>;
 };
 
-// Screen 04 state 5 / A5: a card in selection mode. The card itself is a
-// toggle button (aria-pressed): picked cards invert their colours and show
-// their order number, so the state never rests on colour alone. The eye on the
-// right stays a separate link to the detail.
+// Screen 04-5 / A5: a card in selection mode. The card itself is a toggle
+// button (aria-pressed): a picked card is ringed in blue and carries its
+// order number, so the state never rests on colour alone. The eye of the
+// right corner stays a link to the detail, over the button, even on a picked
+// card: the fiche of the US-14 asks for it.
 function SelectableExerciseCard({
   exercise,
   sex,
@@ -42,44 +45,21 @@ function SelectableExerciseCard({
   const isSelected = position !== null;
 
   return (
-    <li className="flex items-stretch gap-1">
+    <li className="relative">
       <button
         type="button"
         aria-pressed={isSelected}
         disabled={!isSelected && isLimitReached}
         onClick={onToggle}
-        className={`flex min-h-24 min-w-0 flex-1 items-center gap-3 rounded-card border p-3 text-left shadow-card disabled:opacity-60 ${
+        className={`flex w-full items-center gap-3 rounded-card p-2 pr-12 text-left shadow-card disabled:opacity-60 ${
           isSelected
-            ? "border-neutral bg-neutral text-neutral-content"
-            : "border-base-300 bg-base-100"
+            ? "border-2 border-secondary bg-secondary/5"
+            : "border border-base-300 bg-base-100"
         }`}
       >
-        <span
-          aria-hidden="true"
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full font-display text-base font-extrabold ${
-            isSelected
-              ? "bg-primary text-primary-content"
-              : "border border-base-300 text-muted"
-          }`}
-        >
-          {position ?? ""}
-        </span>
-        {image === null ? (
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-ctl bg-soft p-1 text-center text-overline text-muted">
-            Illustration non disponible
-          </span>
-        ) : (
-          <img
-            src={image}
-            alt=""
-            width={56}
-            height={56}
-            loading="lazy"
-            className="size-14 shrink-0 rounded-ctl bg-white object-contain"
-          />
-        )}
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate font-semibold">
+        <ExerciseThumbnail src={image} />
+        <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
+          <span className="w-full truncate pt-0.5 text-[14.5px] font-bold leading-[1.15]">
             <HighlightedText text={exercise.name} term={searchTerm} />
             <span className="sr-only">
               {isSelected
@@ -87,30 +67,38 @@ function SelectableExerciseCard({
                 : ", non sélectionné"}
             </span>
           </span>
-          <span
-            className={`text-sm ${isSelected ? "text-neutral-content/80" : "text-muted"}`}
-          >
-            {formatExerciseMeta(exercise.category_name, exercise.difficulty)}
+          <span className="w-full truncate text-xs font-medium leading-[1.45] text-muted">
+            {formatExerciseOrigin(
+              exercise.category_name,
+              exercise.equipment_names,
+            )}
           </span>
-          {exercise.equipment_names !== null && (
-            <span
-              className={`text-sm ${isSelected ? "text-neutral-content/80" : "text-muted"}`}
-            >
-              {exercise.equipment_names}
-            </span>
-          )}
+          {/* On a picked card the chip sits on the blue tint: it keeps a
+              white ground, otherwise the grey word falls under 4.5:1. */}
+          <span
+            className={`rounded-chip px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em] text-muted ${
+              isSelected ? "bg-base-100" : "bg-neutral/[0.06]"
+            }`}
+          >
+            {DIFFICULTY_LABELS[exercise.difficulty]}
+          </span>
         </span>
+        {isSelected && (
+          <span
+            aria-hidden="true"
+            className="mr-1.5 grid size-[30px] shrink-0 place-items-center rounded-full bg-secondary text-[13px] font-extrabold text-secondary-content"
+          >
+            {position}
+          </span>
+        )}
       </button>
       <Link
         to={`/catalogue/${exercise.id}`}
         state={{ name: exercise.name, ...detailState }}
         aria-label={`Fiche de ${exercise.name}`}
-        className="flex w-14 shrink-0 flex-col items-center justify-center rounded-card border border-base-300 bg-base-100 text-secondary shadow-card"
+        className="absolute inset-y-0 right-0 grid w-12 place-items-center text-muted"
       >
-        <Icon src={eyeIcon} className="size-6" />
-        <span aria-hidden="true" className="text-xs font-semibold">
-          Fiche
-        </span>
+        <Icon src={eyeIcon} className="size-5" />
       </Link>
     </li>
   );

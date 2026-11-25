@@ -19,7 +19,8 @@ import {
   MAX_EXERCISES_PER_BLOCK,
   type SelectedExercise,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
+import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
@@ -369,8 +370,8 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
 
   return (
     <div
-      className={`mx-auto flex max-w-md flex-col gap-4 p-4 ${
-        selection.isActive ? "pb-28" : ""
+      className={`mx-auto flex max-w-md flex-col gap-2.5 px-[18px] pt-1 ${
+        selection.isActive ? "pb-28" : "pb-3.5"
       }`}
     >
       {selectionMode !== "catalog" ? (
@@ -406,26 +407,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="text-display-md">Catalogue</h1>
-          {selection.isActive ? (
-            <button
-              type="button"
-              onClick={selection.cancel}
-              className="min-h-tap px-2 font-semibold text-secondary"
-            >
-              Annuler
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={selection.start}
-              className="min-h-tap px-2 font-semibold text-secondary"
-            >
-              Sélectionner
-            </button>
-          )}
-        </div>
+        <h1 className="sr-only">Catalogue</h1>
       )}
 
       <ExerciseSearch value={typed} onChange={setTyped} onClear={clearSearch} />
@@ -518,19 +500,31 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
       <ActiveFilterChips filters={activeFilters} onClearAll={clearAllFilters} />
 
       {selection.isActive && selectionMode === "catalog" && (
-        <div className="flex items-center justify-between gap-2">
-          <p aria-live="polite" className="font-semibold">
+        <div className="flex items-center justify-between gap-2 rounded-btn bg-secondary/[0.08] px-3 py-2">
+          <p
+            aria-live="polite"
+            className="text-[13px] font-semibold leading-[1.45] text-secondary"
+          >
             {formatSelectedCount(selection.items.length)}
           </p>
-          {selection.items.length > 0 && (
+          <div className="flex items-center gap-3">
+            {selection.items.length > 0 && (
+              <button
+                type="button"
+                onClick={selection.clear}
+                className="text-[13px] font-semibold text-secondary"
+              >
+                Tout désélectionner
+              </button>
+            )}
             <button
               type="button"
-              onClick={selection.clear}
-              className="min-h-tap px-2 text-sm font-semibold text-secondary"
+              onClick={selection.cancel}
+              className="text-[13px] font-semibold text-secondary"
             >
-              Tout désélectionner
+              Annuler
             </button>
-          )}
+          </div>
         </div>
       )}
 
@@ -563,9 +557,23 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
 
       {!isLoading && error === null && (
         <>
-          <p aria-live="polite" className="font-semibold text-muted">
-            {counterText}
-          </p>
+          <div className="flex items-baseline justify-between gap-3">
+            <p
+              aria-live="polite"
+              className="font-sans text-overline uppercase not-italic text-accent"
+            >
+              {counterText}
+            </p>
+            {selectionMode === "catalog" && !selection.isActive && (
+              <button
+                type="button"
+                onClick={selection.start}
+                className="text-[13px] font-semibold text-secondary"
+              >
+                Sélectionner
+              </button>
+            )}
+          </div>
 
           {items.length === 0 && (
             <EmptyState
@@ -660,7 +668,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
 
       {selection.isActive && (
         <div
-          className={`fixed inset-x-0 z-10 border-t border-base-300 bg-base-100 p-4 ${
+          className={`fixed inset-x-0 z-10 px-3.5 pb-4 ${
             selectionMode === "catalog" ? "bottom-nav" : "bottom-0"
           }`}
         >
@@ -677,8 +685,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
               }
               // "Ajouter au bloc · 6" on screen, "Ajouter au bloc, 6 sélectionnés" aloud
               aria-label={`${actionLabel}, ${formatSelectedCount(selection.items.length)}`}
-              className="flex h-btn w-full items-center justify-center gap-2 rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action disabled:opacity-60"
+              className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
             >
+              <Icon src={plusIcon} className="size-[18px]" />
               {actionLabel}
               {selection.items.length > 0 && (
                 <span aria-hidden="true"> · {selection.items.length}</span>

@@ -130,7 +130,10 @@ describe("ExerciseListPage", () => {
     expect(await screen.findByText("45 exercices")).toBeTruthy();
     expect(screen.getAllByRole("link")).toHaveLength(20);
     expect(screen.getByText("Exercice 001")).toBeTruthy();
-    expect(screen.getAllByText("Jambes · Intermédiaire")).toHaveLength(20);
+    // The card of the mockup writes the group and the gear, and puts the
+    // difficulty in a chip of its own (04-1).
+    expect(screen.getAllByText("Jambes · Barre")).toHaveLength(20);
+    expect(screen.getAllByText("Intermédiaire")).toHaveLength(20);
     expect(readExercisesMock).toHaveBeenCalledWith(
       { offset: 0 },
       expect.anything(),

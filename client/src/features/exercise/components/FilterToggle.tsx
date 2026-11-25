@@ -1,5 +1,5 @@
-import chevronDownIcon from "../../../assets/icons/ui/chevrons/chevron-down.svg";
-import chevronUpIcon from "../../../assets/icons/ui/chevrons/chevron-up.svg";
+import chevronDownIcon from "../../../assets/icons/ui/app/chevron-down.svg";
+import chevronUpIcon from "../../../assets/icons/ui/app/chevron-up.svg";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -20,19 +20,22 @@ function FilterToggle({ label, count, isOpen, controls, onToggle }: Props) {
       onClick={onToggle}
       aria-expanded={isOpen}
       aria-controls={controls}
-      className={`flex min-h-tap flex-1 items-center justify-center gap-1 rounded-btn border px-2 text-sm font-semibold ${
+      className={`flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-ctl border bg-base-100 px-2.5 text-[13px] font-semibold shadow-card ${
         isOpen || count > 0
-          ? "border-secondary bg-base-100 text-secondary"
-          : "border-base-300 bg-base-100"
+          ? "border-secondary text-secondary"
+          : "border-base-300"
       }`}
     >
       {label}
       {count > 0 && (
-        <span className="flex size-5 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-content">
+        <span className="flex size-[18px] items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-secondary-content">
           {count}
         </span>
       )}
-      <Icon src={isOpen ? chevronUpIcon : chevronDownIcon} className="size-4" />
+      <Icon
+        src={isOpen ? chevronUpIcon : chevronDownIcon}
+        className="size-3.5"
+      />
     </button>
   );
 }

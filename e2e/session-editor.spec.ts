@@ -94,9 +94,9 @@ test("picks three exercises from the catalog for a block, in the touched order",
     .getByRole("list", { name: "Exercices" })
     .getByRole("button");
   const names = [
-    await cards.nth(2).locator("span.truncate").textContent(),
-    await cards.nth(0).locator("span.truncate").textContent(),
-    await cards.nth(1).locator("span.truncate").textContent(),
+    await cards.nth(2).locator("span.truncate").first().textContent(),
+    await cards.nth(0).locator("span.truncate").first().textContent(),
+    await cards.nth(1).locator("span.truncate").first().textContent(),
   ].map((name) => (name ?? "").replace(/, (non )?sélectionné.*$/, ""));
   await cards.nth(2).click();
   await cards.nth(0).click();

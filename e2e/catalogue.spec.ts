@@ -71,7 +71,11 @@ test("search and filters live in the address and survive a detour", async ({
 
   // Detour through the detail of the first card, then back
   const firstCard = exerciseCards(page).first();
-  const firstName = await firstCard.locator("span.truncate").textContent();
+  // The first truncated line of a card is its name (04-1).
+  const firstName = await firstCard
+    .locator("span.truncate")
+    .first()
+    .textContent();
   await firstCard.click();
   await expect(
     page.getByRole("heading", { level: 2, name: firstName ?? "" }),
@@ -88,9 +92,9 @@ test("search and filters live in the address and survive a detour", async ({
   expect(page.url()).toContain("category_ids=");
   await expect(page.getByRole("searchbox")).toHaveValue("squat");
   await expect(page.getByText(/pour « squat » · Jambes/)).toBeVisible();
-  await expect(exerciseCards(page).first().locator("span.truncate")).toHaveText(
-    firstName ?? "",
-  );
+  await expect(
+    exerciseCards(page).first().locator("span.truncate").first(),
+  ).toHaveText(firstName ?? "");
 
   // No result
   await page.getByRole("searchbox").fill("squaat");

@@ -174,6 +174,17 @@ export function formatExerciseMeta(
   return categoryName === null ? label : `${categoryName} · ${label}`;
 }
 
+// "Jambes · Barre": the line under the name of a card of the catalog, where
+// the difficulty has a chip of its own (04-1).
+export function formatExerciseOrigin(
+  categoryName: string | null,
+  equipmentNames: string | null,
+): string {
+  return [categoryName, equipmentNames]
+    .filter((part): part is string => part !== null && part !== "")
+    .join(" · ");
+}
+
 // "151 exercices", "1 exercice".
 export function formatExerciseCount(total: number): string {
   return `${total} ${total === 1 ? "exercice" : "exercices"}`;
