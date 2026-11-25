@@ -71,5 +71,7 @@ export function useWorkoutSession(id: number) {
     error,
     reload: () => setAttempt((count) => count + 1),
     replaceSet,
+    // The server answered with the whole tree (abandon, finish)
+    replaceSession: setSession,
   };
 }

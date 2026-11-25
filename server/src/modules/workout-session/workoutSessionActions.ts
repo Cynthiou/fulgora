@@ -1,13 +1,14 @@
 import type { RequestHandler } from "express";
-import type {
-  CurrentWorkoutSession,
-  MeasureCode,
-  StartWorkoutInput,
-  WorkoutBlockTree,
-  WorkoutExerciseTree,
-  WorkoutSessionTree,
-  WorkoutSetRow,
-  WorkoutStarted,
+import {
+  type CurrentWorkoutSession,
+  countValidatedSets,
+  type MeasureCode,
+  type StartWorkoutInput,
+  type WorkoutBlockTree,
+  type WorkoutExerciseTree,
+  type WorkoutSessionTree,
+  type WorkoutSetRow,
+  type WorkoutStarted,
 } from "shared";
 import { readDuplicateKeyName } from "../../database/errors.js";
 import { withTransaction } from "../../database/withTransaction.js";
@@ -19,6 +20,8 @@ import {
 } from "../appointment/appointmentRepository.js";
 import { countVersionExercises } from "../session-template/sessionTemplateRepository.js";
 import {
+  abandonWorkoutSession,
+  completeWorkoutSession,
   copyPlannedSets,
   copyTemplateBlocks,
   copyTemplateExercises,
@@ -172,15 +175,14 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
   };
 }
 
-// GET /api/workout-sessions/:id: the whole tree of a realized session.
-// Another user's session answers 404, as if it did not exist (DT-05).
-export const read: RequestHandler = async (req, res) => {
-  const userId = readUserId(req);
-  const { id } = req.params as unknown as { id: number };
-
+// The whole tree of a realized session, or null when it is not the user's.
+export async function buildTree(
+  id: number,
+  userId: number,
+): Promise<WorkoutSessionTree | null> {
   const session = await readWorkoutSession(id, userId);
   if (session === null) {
-    throw new HttpError(404, "WORKOUT_NOT_FOUND", "Cette séance n'existe pas.");
+    return null;
   }
   const blocks = await readWorkoutBlocks(id);
   const exercises = await readWorkoutExercises(id);
@@ -218,7 +220,7 @@ export const read: RequestHandler = async (req, res) => {
     ),
   }));
 
-  const tree: WorkoutSessionTree = {
+  return {
     id: session.id,
     appointment_id: session.appointment_id,
     session_name: session.session_name,
@@ -226,7 +228,78 @@ export const read: RequestHandler = async (req, res) => {
     status: session.status,
     started_at: session.started_at.toISOString(),
     ended_at: session.ended_at === null ? null : session.ended_at.toISOString(),
+    auto_closed: session.auto_closed === 1,
     blocks: blockTrees,
   };
+}
+
+// GET /api/workout-sessions/:id: the whole tree of a realized session.
+// Another user's session answers 404, as if it did not exist (DT-05).
+export const read: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const tree = await buildTree(id, userId);
+  if (tree === null) {
+    throw new HttpError(404, "WORKOUT_NOT_FOUND", "Cette séance n'existe pas.");
+  }
   res.json(tree);
+};
+
+// POST /api/workout-sessions/:id/abandon: the session ends now as unfinished,
+// its validated sets kept (RM-045). Already over: 409; not the user's: 404.
+export const abandon: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const changed = await abandonWorkoutSession(id, userId);
+  const tree = await buildTree(id, userId);
+  if (tree === null) {
+    throw new HttpError(404, "WORKOUT_NOT_FOUND", "Cette séance n'existe pas.");
+  }
+  if (changed === 0) {
+    throw new HttpError(
+      409,
+      "WORKOUT_NOT_IN_PROGRESS",
+      "Cette séance n'est plus en cours.",
+    );
+  }
+  res.json(tree);
+};
+
+// POST /api/workout-sessions/:id/complete: the session ends as completed,
+// the sets not done stay empty (RM-046). Without any validated set the end
+// is refused (D-10): the way out is to abandon.
+export const complete: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  const before = await buildTree(id, userId);
+  if (before === null) {
+    throw new HttpError(404, "WORKOUT_NOT_FOUND", "Cette séance n'existe pas.");
+  }
+  if (before.status !== "in_progress") {
+    throw new HttpError(
+      409,
+      "WORKOUT_NOT_IN_PROGRESS",
+      "Cette séance n'est plus en cours.",
+    );
+  }
+  if (countValidatedSets(before) === 0) {
+    throw new HttpError(
+      422,
+      "NO_VALIDATED_SET",
+      "Aucune série n'est faite. Tu peux abandonner la séance.",
+    );
+  }
+
+  const changed = await completeWorkoutSession(id, userId);
+  if (changed === 0) {
+    throw new HttpError(
+      409,
+      "WORKOUT_NOT_IN_PROGRESS",
+      "Cette séance n'est plus en cours.",
+    );
+  }
+  res.json(await buildTree(id, userId));
 };

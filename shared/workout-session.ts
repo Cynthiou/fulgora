@@ -7,6 +7,7 @@ import {
   formatDuration,
   formatMinSec,
   formatSetValues,
+  getMeasureProfile,
   type PlannedSetValues,
   plannedSetSchema,
 } from "./session-template.js";
@@ -110,6 +111,8 @@ export type WorkoutSessionTree = {
   status: WorkoutStatus;
   started_at: string;
   ended_at: string | null;
+  // True when the server closed it after 4 hours without activity (RM-065)
+  auto_closed: boolean;
   blocks: WorkoutBlockTree[];
 };
 
@@ -306,4 +309,85 @@ export function getRestDuration(
 // "1:12" on the rest screen: the same writing as the min:s fields.
 export function formatClock(seconds: number): string {
   return formatMinSec(Math.max(0, seconds));
+}
+
+// --- Summary of a session (US-34) ----------------------------------------------
+
+// Seconds between the real start and the end (now when still running).
+export function computeDurationSeconds(
+  startedAt: string,
+  endedAt: string | null,
+  now: Date = new Date(),
+): number {
+  const end = endedAt === null ? now.getTime() : new Date(endedAt).getTime();
+  return Math.max(0, Math.floor((end - new Date(startedAt).getTime()) / 1000));
+}
+
+// Kilograms moved: reps x weight of every validated set; no weight counts 0
+// (RM-051: computed, never stored).
+export function computeTonnage(sets: WorkoutSetRow[]): number {
+  const total = sets
+    .filter((set) => set.validated_at !== null)
+    .reduce(
+      (sum, set) => sum + (set.reps_actual ?? 0) * (set.weight_actual_kg ?? 0),
+      0,
+    );
+  return Math.round(total * 1000) / 1000;
+}
+
+// "3 240 kg".
+export function formatTonnage(kilograms: number): string {
+  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(kilograms)} kg`;
+}
+
+// "48 min", "1 h 05", "42 s".
+export function formatSummaryDuration(seconds: number): string {
+  return formatDuration(seconds);
+}
+
+// "3 / 3 · 10, 8, 10 rép.", "3 / 3 · 1 min, 1 min, 42 s", "3 / 3 · 18 min 12 s"
+// for cardio (durations added up), "2 / 3 · série 3 non faite".
+export function formatExerciseResult(
+  exercise: Pick<WorkoutExerciseTree, "sets" | "measure_codes">,
+): string {
+  const profile = getMeasureProfile(exercise.measure_codes);
+  const done = exercise.sets.filter((set) => set.validated_at !== null);
+  const total = exercise.sets.length;
+  const head = `${done.length} / ${total}`;
+
+  const parts: string[] = [];
+  if (done.length > 0) {
+    if (profile === "weighted" || profile === "bodyweight") {
+      const reps = done.map((set) => set.reps_actual ?? 0);
+      parts.push(`${reps.join(", ")} rép.`);
+    } else if (profile === "duration") {
+      parts.push(
+        done
+          .map((set) => formatDuration(set.duration_actual_seconds ?? 0))
+          .join(", "),
+      );
+    } else if (profile === "cardio") {
+      const seconds = done.reduce(
+        (sum, set) => sum + (set.duration_actual_seconds ?? 0),
+        0,
+      );
+      if (seconds > 0) {
+        parts.push(formatDuration(seconds));
+      }
+    }
+  }
+
+  const missing = exercise.sets
+    .map((set, index) => (set.validated_at === null ? index + 1 : null))
+    .filter((position): position is number => position !== null);
+  if (missing.length > 0) {
+    const noun = profile === "cardio" ? "étape" : "série";
+    const list =
+      missing.length === 1
+        ? `${noun} ${missing[0]} non faite`
+        : `${noun}s ${missing.slice(0, -1).join(", ")} et ${missing[missing.length - 1]} non faites`;
+    parts.push(list);
+  }
+
+  return [head, ...parts].join(" · ");
 }

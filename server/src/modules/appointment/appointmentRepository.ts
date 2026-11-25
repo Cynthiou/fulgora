@@ -194,16 +194,31 @@ export type VersionExerciseRow = {
   template_block_id: number;
   exercise_id: number;
   position: number;
+  default_rest_seconds: number | null;
   name: string;
+  category_name: string | null;
+  equipment_names: string | null;
+  // "reps,weight" or null
+  measure_codes: string | null;
 };
 
-// The exercises of a session version with their names, in order (B1).
+// The exercises of a session version with their names, group, equipment and
+// measures, in order (B1, SUI-06b).
 export async function readVersionExercises(
   versionId: number,
   db: Queryable = client,
 ): Promise<VersionExerciseRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT tbe.id, tbe.template_block_id, tbe.exercise_id, tbe.position, e.name
+    `SELECT tbe.id, tbe.template_block_id, tbe.exercise_id, tbe.position,
+            tbe.default_rest_seconds, e.name,
+            (SELECT c.name FROM exercise_category ec JOIN category c ON c.id = ec.category_id
+              WHERE ec.exercise_id = e.id ORDER BY c.id LIMIT 1) AS category_name,
+            (SELECT GROUP_CONCAT(eq.name ORDER BY eq.name SEPARATOR ' · ')
+               FROM exercise_equipment ee JOIN equipment eq ON eq.id = ee.equipment_id
+              WHERE ee.exercise_id = e.id) AS equipment_names,
+            (SELECT GROUP_CONCAT(m.code ORDER BY m.id SEPARATOR ',')
+               FROM exercise_measure em JOIN measure m ON m.id = em.measure_id
+              WHERE em.exercise_id = e.id) AS measure_codes
        FROM template_block_exercise tbe
        JOIN template_block tb ON tb.id = tbe.template_block_id
        JOIN exercise e ON e.id = tbe.exercise_id
@@ -212,4 +227,38 @@ export async function readVersionExercises(
     [versionId],
   );
   return rows as VersionExerciseRow[];
+}
+
+export type VersionSetRow = {
+  template_block_exercise_id: number;
+  position: number;
+  reps: number | null;
+  weight_kg: string | null;
+  duration_seconds: number | null;
+  distance_meters: string | null;
+  speed_kmh: string | null;
+  resistance: string | null;
+  incline_percent: string | null;
+  calories: string | null;
+  rest_after_seconds: number | null;
+};
+
+// The planned sets of a session version, in order (history of a session
+// never started, RM-058). Decimals arrive as text from MySQL.
+export async function readVersionSets(
+  versionId: number,
+  db: Queryable = client,
+): Promise<VersionSetRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT ps.template_block_exercise_id, ps.position, ps.reps, ps.weight_kg,
+            ps.duration_seconds, ps.distance_meters, ps.speed_kmh, ps.resistance,
+            ps.incline_percent, ps.calories, ps.rest_after_seconds
+       FROM planned_set ps
+       JOIN template_block_exercise tbe ON tbe.id = ps.template_block_exercise_id
+       JOIN template_block tb ON tb.id = tbe.template_block_id
+      WHERE tb.session_version_id = ?
+      ORDER BY tb.position, tbe.position, ps.position`,
+    [versionId],
+  );
+  return rows as VersionSetRow[];
 }

@@ -44,3 +44,19 @@ export function validateSet(
     body: JSON.stringify(values),
   });
 }
+
+// POST /api/workout-sessions/:id/abandon: stops the session for good (US-33).
+export function abandonWorkoutSession(id: number): Promise<WorkoutSessionTree> {
+  return apiFetch<WorkoutSessionTree>(`/workout-sessions/${id}/abandon`, {
+    method: "POST",
+  });
+}
+
+// POST /api/workout-sessions/:id/complete: the end of the session (US-34).
+export function completeWorkoutSession(
+  id: number,
+): Promise<WorkoutSessionTree> {
+  return apiFetch<WorkoutSessionTree>(`/workout-sessions/${id}/complete`, {
+    method: "POST",
+  });
+}

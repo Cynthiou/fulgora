@@ -84,20 +84,20 @@ Message + « Réessayer » ; l'état réel est rechargé (déjà inachevée → 
 
 ## Tâches techniques
 
-- [ ] BDD : `workout_session.auto_closed` (migration 004)
-- [ ] Backend : `workoutSessionRepository.abandonWorkoutSession(id, userId)` : `UPDATE workout_session SET status = 'unfinished', ended_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`
-- [ ] Backend : action : 0 ligne modifiée → relire la séance → absente : 404, sinon 409
-- [ ] Backend : `closeInactiveWorkoutSessions()` : `UPDATE workout_session SET status = 'unfinished', ended_at = last_activity_at, auto_closed = TRUE WHERE status = 'in_progress' AND last_activity_at < NOW(3) - INTERVAL 4 HOUR`
-- [ ] Backend : `main.ts` : `setInterval(closeInactiveWorkoutSessions, 5 * 60 * 1000)`, jamais démarré pendant les tests ; erreurs loguées sans arrêter le serveur
-- [ ] Backend : `POST /api/workout-sessions/:id/abandon` → `checkOrigin` → `authenticate` → `validate({ params })` → action
-- [ ] Frontend : `workoutSessionService.abandonWorkoutSession(id)`
-- [ ] Frontend : `components/AbandonWorkoutDialog.tsx` ; `components/AutoClosedNotice.tsx`
-- [ ] Tests : back : abandon → `unfinished`, séries gardées, rendez-vous `attended` ; 2ᵉ abandon → 409 ; séance d'un autre → 404
-- [ ] Tests : back : `closeInactiveWorkoutSessions` avec une séance à 3 h 59 (non touchée) et une à 4 h 01 (clôturée, `ended_at = last_activity_at`, `auto_closed = TRUE`)
-- [ ] Tests : E2E : abandonner après 2 séries → résumé « INACHEVÉE »
+- [x] BDD : `workout_session.auto_closed` (migration 004)
+- [x] Backend : `workoutSessionRepository.abandonWorkoutSession(id, userId)` : `UPDATE workout_session SET status = 'unfinished', ended_at = NOW(3) WHERE id = ? AND owner_user_id = ? AND status = 'in_progress'`
+- [x] Backend : action : 0 ligne modifiée → relire la séance → absente : 404, sinon 409
+- [x] Backend : `closeInactiveWorkoutSessions()` : `UPDATE workout_session SET status = 'unfinished', ended_at = last_activity_at, auto_closed = TRUE WHERE status = 'in_progress' AND last_activity_at < NOW(3) - INTERVAL 4 HOUR`
+- [x] Backend : `main.ts` : `setInterval(closeInactiveWorkoutSessions, 5 * 60 * 1000)`, jamais démarré pendant les tests ; erreurs loguées sans arrêter le serveur
+- [x] Backend : `POST /api/workout-sessions/:id/abandon` → `checkOrigin` → `authenticate` → `validate({ params })` → action
+- [x] Frontend : `workoutSessionService.abandonWorkoutSession(id)`
+- [x] Frontend : `components/AbandonWorkoutDialog.tsx` ; `components/AutoClosedNotice.tsx`
+- [x] Tests : back : abandon → `unfinished`, séries gardées, rendez-vous `attended` ; 2ᵉ abandon → 409 ; séance d'un autre → 404
+- [x] Tests : back : `closeInactiveWorkoutSessions` avec une séance à 3 h 59 (non touchée) et une à 4 h 01 (clôturée, `ended_at = last_activity_at`, `auto_closed = TRUE`)
+- [x] Tests : E2E : abandonner après 2 séries → résumé « INACHEVÉE »
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Modale accessible (focus piégé, Échap = continuer)
+- [x] Modale accessible (focus piégé, Échap = continuer)
 - [ ] Code relu et fusionné via pull request

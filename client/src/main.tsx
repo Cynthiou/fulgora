@@ -16,6 +16,7 @@ import PlannedSessionPage from "./features/appointment/pages/PlannedSessionPage"
 import PlanningPage from "./features/appointment/pages/PlanningPage";
 import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
+import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -23,6 +24,7 @@ import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
 import WorkoutExercisePage from "./features/workout-session/pages/WorkoutExercisePage";
 import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
+import WorkoutSummaryPage from "./features/workout-session/pages/WorkoutSummaryPage";
 import HomePage from "./pages/HomePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
@@ -49,6 +51,7 @@ const router = createBrowserRouter([
               { path: "/", element: <HomePage /> },
               { path: "/planning", element: <PlanningPage /> },
               { path: "/suivi", element: <TrackingPage /> },
+              { path: "/suivi/historique", element: <TrackingPage /> },
               { path: "/catalogue", element: <ExerciseListPage /> },
             ],
           },
@@ -60,6 +63,11 @@ const router = createBrowserRouter([
               { path: "/profil", element: <ProfilePage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
               { path: "/seances/nouvelle", element: <SessionEditorPage /> },
+              // A past session, planned against done (SUI-06)
+              {
+                path: "/suivi/historique/:appointmentId",
+                element: <HistoryDetailPage />,
+              },
               // A planned session (B1) and the session in progress (B2)
               {
                 path: "/seances/:appointmentId",
@@ -69,6 +77,10 @@ const router = createBrowserRouter([
               {
                 path: "/entrainement/:id/exercices/:exerciseId",
                 element: <WorkoutExercisePage />,
+              },
+              {
+                path: "/entrainement/:id/resume",
+                element: <WorkoutSummaryPage />,
               },
               // The catalog in selection mode for a block of the draft
               {
