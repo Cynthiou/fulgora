@@ -88,7 +88,7 @@ test("captures the screens of the MVP", async ({ page }) => {
   await expect(page.getByText(/résultats? pour/)).toBeVisible();
   await shoot(page, "04-catalogue-recherche");
   await page
-    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("list", { name: "Exercices" })
     .getByRole("link")
     .first()
     .click();
@@ -164,7 +164,11 @@ test("captures the screens of the MVP", async ({ page }) => {
   await page.getByRole("button", { name: /Démarrer la séance/ }).click();
   await expect(page.getByText("En cours · séance libre")).toBeVisible();
   await shoot(page, "b2-seance-en-cours");
-  await page.getByRole("link", { name: /0 \/ 2 séries/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
   await expect(page.getByText(/^Exercice 1 \/ 1/)).toBeVisible();
   await shoot(page, "b3a-serie-en-cours");
   await page.getByRole("button", { name: "Modifier" }).click();
