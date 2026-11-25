@@ -19,11 +19,18 @@ function BlockTypePicker({ onPick, onClose }: Props) {
     if (dialog === null || dialog.open) {
       return;
     }
+    // The button that opened the panel gets the focus back when it closes.
+    const opener = document.activeElement;
     if (typeof dialog.showModal === "function") {
       dialog.showModal();
     } else {
       dialog.setAttribute("open", "");
     }
+    return () => {
+      if (opener instanceof HTMLElement && opener.isConnected) {
+        opener.focus();
+      }
+    };
   }, []);
 
   return (

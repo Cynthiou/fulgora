@@ -118,6 +118,9 @@ describe("SessionEditorPage", () => {
 
     expect(screen.queryByText("Type de bloc")).toBeNull();
     expect(screen.getByText("0 bloc")).toBeTruthy();
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Ajouter un bloc" }),
+    );
   });
 
   it("adds a block of the chosen type, opens it, names it and comes back", async () => {
