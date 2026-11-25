@@ -2,9 +2,9 @@ import { Link } from "react-router";
 import {
   describeHistoryDates,
   formatDayBadge,
+  formatLongDate,
   getHistoryStatus,
   type HistoryItem,
-  STATUSES,
 } from "shared";
 import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
 import Icon from "../../../components/Icon";
@@ -26,9 +26,10 @@ function HistoryRow({ item }: Props) {
     <li>
       <Link
         to={`/suivi/historique/${item.appointment_id}`}
-        aria-label={`${item.session_name}, ${STATUSES[status].label}, ${badge.weekday} ${badge.day}`}
         className="flex items-center gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
       >
+        {/* The badge is decorative: the date is read in full instead. */}
+        <span className="sr-only">{formatLongDate(item.history_date)} · </span>
         <span
           aria-hidden="true"
           className="flex w-11 shrink-0 flex-col items-center rounded-ctl bg-soft py-1"

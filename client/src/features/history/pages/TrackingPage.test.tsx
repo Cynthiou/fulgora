@@ -72,14 +72,14 @@ describe("TrackingPage", () => {
 
     expect(await screen.findByText("Semaine du 23 nov.")).toBeTruthy();
     expect(screen.getByText("Semaine du 16 nov.")).toBeTruthy();
+    // The link is named by its content: the full date, then the line
     expect(
-      screen.getByRole("link", {
-        name: "Réveil musculaire, Effectuée, Jeu 26",
-      }),
-    ).toBeTruthy();
+      screen.getByRole("link", { name: /Réveil musculaire.*Effectuée/ })
+        .textContent,
+    ).toContain("Jeudi 26 novembre");
     expect(
       screen
-        .getByRole("link", { name: "Dos, À confirmer, Mar 24" })
+        .getByRole("link", { name: /Dos.*À confirmer/ })
         .getAttribute("href"),
     ).toBe("/suivi/historique/2");
     expect(screen.getByText("· ↷ déplacée du 21")).toBeTruthy();

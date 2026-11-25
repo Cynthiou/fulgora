@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { createEmptySet, todayInParis } from "shared";
-import { expectHomePage, signUp } from "./helpers";
+import { E2E_ORIGIN, expectHomePage, signUp } from "./helpers";
 
 async function expectNoA11yViolation(page: Page) {
   const results = await new AxeBuilder({ page }).analyze();
@@ -13,7 +13,7 @@ async function planSessionToday(page: Page, name: string, exerciseCount = 1) {
   const exercises = await page.request.get("/api/exercises");
   const items = (await exercises.json()).items.slice(0, exerciseCount);
   const response = await page.request.post("/api/appointments", {
-    headers: { Origin: "http://localhost:3000" },
+    headers: { Origin: E2E_ORIGIN },
     data: {
       name,
       planned_date: todayInParis(),

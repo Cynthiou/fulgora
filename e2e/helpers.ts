@@ -1,6 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 import { formatLongDate, todayInParis } from "shared";
 
+// The origin of the test client, for the calls made straight to the API.
+export const E2E_ORIGIN = "http://localhost:3100";
 export const E2E_PASSWORD = "secret-2026";
 
 function uniqueStamp() {
