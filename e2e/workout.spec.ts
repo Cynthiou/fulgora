@@ -9,9 +9,9 @@ async function expectNoA11yViolation(page: Page) {
 }
 
 // Plans a session for today through the API, as the editor would (US-23).
-async function planSessionToday(page: Page, name: string) {
-  const exercises = await page.request.get("/api/exercises?search=Pompes");
-  const first = (await exercises.json()).items[0];
+async function planSessionToday(page: Page, name: string, exerciseCount = 1) {
+  const exercises = await page.request.get("/api/exercises");
+  const items = (await exercises.json()).items.slice(0, exerciseCount);
   const response = await page.request.post("/api/appointments", {
     headers: { Origin: "http://localhost:3000" },
     data: {
@@ -23,16 +23,14 @@ async function planSessionToday(page: Page, name: string) {
           block_type: "classic",
           name: null,
           instructions: null,
-          exercises: [
-            {
-              exercise_id: first.id,
-              default_rest_seconds: 90,
-              sets: [
-                { ...createEmptySet(), reps: 10 },
-                { ...createEmptySet(), reps: 10 },
-              ],
-            },
-          ],
+          exercises: items.map((item: { id: number }) => ({
+            exercise_id: item.id,
+            default_rest_seconds: 90,
+            sets: [
+              { ...createEmptySet(), reps: 10 },
+              { ...createEmptySet(), reps: 10 },
+            ],
+          })),
         },
       ],
     },
@@ -92,4 +90,57 @@ test("starts the session of the day, survives a reload and resumes it from the h
   // The appointment cannot start twice
   await page.goBack();
   await expectHomePage(page);
+});
+
+test("validates the sets of an exercise, one as planned and one changed, then moves on", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+  await planSessionToday(page, "Pecs", 2);
+  await page.reload();
+  await page.getByRole("link", { name: /Démarrer la séance/ }).click();
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await expect(page.getByText("En cours · séance libre")).toBeVisible();
+
+  // B2 -> B3
+  await page
+    .getByRole("link", { name: /0 \/ 2 séries/ })
+    .first()
+    .click();
+  await expect(
+    page.getByText("Exercice 1 / 2 · repos 1 min 30 s"),
+  ).toBeVisible();
+  await expectNoA11yViolation(page);
+
+  // Set 1 as planned: one tap
+  await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await expect(page.getByText("Série 1 validée")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Valider la série 2" }),
+  ).toBeVisible();
+
+  // Set 2 changed through the sheet
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await expect(page.getByText("Ce que tu as réellement fait")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page
+    .getByRole("button", { name: "Diminuer Répétitions · prévu 10" })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Valider la série 2" })
+    .click();
+  await expect(page.getByText("Série 2 validée")).toBeVisible();
+  await expect(page.getByText("9 rép.")).toBeVisible();
+
+  // Next exercise, then back to B2 with the counters updated
+  await page.getByRole("link", { name: /^Suivant :/ }).click();
+  await expect(
+    page.getByText("Exercice 2 / 2 · repos 1 min 30 s"),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Exercices", exact: true }).click();
+  await expect(page.getByText("2 / 4", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 / 2 séries")).toBeVisible();
 });
