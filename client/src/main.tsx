@@ -16,6 +16,7 @@ import PlanningPage from "./features/appointment/pages/PlanningPage";
 import ExerciseDetailPage from "./features/exercise/pages/ExerciseDetailPage";
 import ExerciseListPage from "./features/exercise/pages/ExerciseListPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
+import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
             children: [
               { path: "/profil", element: <ProfilePage /> },
               { path: "/catalogue/:id", element: <ExerciseDetailPage /> },
+              { path: "/seances/nouvelle", element: <SessionEditorPage /> },
             ],
           },
         ],
