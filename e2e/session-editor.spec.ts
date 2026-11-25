@@ -167,3 +167,96 @@ test("starts a session from the catalog with « Sélectionner » and « Ajouter 
   await expect(page.getByText("Classique · Bloc 1")).toBeVisible();
   await expect(page.getByText(/n'a pas encore d'exercice/)).toHaveCount(0);
 });
+
+// Picks one exercise by name in the catalog selection (search, first card).
+async function pickFromCatalog(page: Page, name: string) {
+  const search = page.getByRole("searchbox");
+  await search.fill(name);
+  const cards = page
+    .getByRole("list", { name: "Exercices" })
+    .getByRole("button");
+  await expect(cards.first()).toContainText(name);
+  await cards.first().click();
+  await expect(cards.first()).toHaveAttribute("aria-pressed", "true");
+}
+
+test("configures the planned sets of one exercise of each profile", async ({
+  page,
+}) => {
+  await signUp(page);
+  await page.goto("/seances/nouvelle");
+  await page.getByLabel(/^Nom de la séance/).fill("Full body");
+  await page.getByRole("button", { name: "Ajouter un bloc" }).click();
+  await page.getByRole("button", { name: /^Classique/ }).click();
+  await page.getByRole("button", { name: "Ajouter des exercices" }).click();
+  await expect(page.getByText("Sélection pour le bloc 1")).toBeVisible();
+
+  await pickFromCatalog(page, "Développé poitrine à la machine");
+  await pickFromCatalog(page, "Anges au mur");
+  await pickFromCatalog(page, "Gainage (planche)");
+  await pickFromCatalog(page, "Tapis de course");
+  await page
+    .getByRole("button", { name: "Ajouter au bloc, 4 sélectionnés" })
+    .click();
+  await expect(page.getByText("4 exercices")).toBeVisible();
+
+  // A7a: reps + weight
+  await page
+    .getByRole("button", { name: /^Développé poitrine à la machine/ })
+    .click();
+  await expect(page.getByText("Répétitions · Charge")).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Répétitions" })).toHaveValue(
+    "10",
+  );
+  await page.getByRole("textbox", { name: "Charge (kg)" }).fill("40");
+  await page.getByRole("button", { name: "Dupliquer la dernière" }).click();
+  await expect(page.getByText("Série 2")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Valider l'exercice" }).click();
+  await expect(
+    page.getByRole("button", { name: /^Développé poitrine à la machine/ }),
+  ).toContainText("2 séries · 10 rép. · 40 kg");
+
+  // A7b: bodyweight with an added weight
+  await page.getByRole("button", { name: /^Anges au mur/ }).click();
+  await expect(page.getByText("Répétitions · Lest")).toBeVisible();
+  await page.getByRole("switch", { name: "Ajouter un lest" }).click();
+  await page.getByRole("textbox", { name: "Lest (kg)" }).fill("5");
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Valider l'exercice" }).click();
+  await expect(
+    page.getByRole("button", { name: /^Anges au mur/ }),
+  ).toContainText("1 série · 10 rép. · 5 kg lest");
+
+  // A7c: duration
+  await page.getByRole("button", { name: /^Gainage \(planche\)/ }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Durée (min:s)" }),
+  ).toHaveValue("1:00");
+  await page.getByRole("button", { name: "Augmenter Durée (min:s)" }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Durée (min:s)" }),
+  ).toHaveValue("1:15");
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Valider l'exercice" }).click();
+  await expect(
+    page.getByRole("button", { name: /^Gainage \(planche\)/ }),
+  ).toContainText("1 série · 1 min 15");
+
+  // A7d: cardio stages, with a value out of range first
+  await page.getByRole("button", { name: /^Tapis de course/ }).click();
+  await expect(page.getByText("Étape 1")).toBeVisible();
+  await page.getByRole("textbox", { name: "Vitesse (km/h)" }).fill("80");
+  await expect(page.getByText(/Entre un nombre entre 0 et 60\./)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Valider l'exercice" }),
+  ).toBeDisabled();
+  await page.getByRole("textbox", { name: "Vitesse (km/h)" }).fill("9");
+  await page.getByRole("button", { name: "+ Étape" }).click();
+  await expect(page.getByText("Étape 2")).toBeVisible();
+  await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Valider l'exercice" }).click();
+  await expect(
+    page.getByRole("button", { name: /^Tapis de course/ }),
+  ).toContainText("2 étapes");
+});
