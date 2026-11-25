@@ -84,9 +84,10 @@ describe("TrackingPage", () => {
         .getByRole("link", { name: /Dos.*À confirmer/ })
         .getAttribute("href"),
     ).toBe("/suivi/historique/2");
-    expect(screen.getByText("· ↷ déplacée du 21")).toBeTruthy();
-    expect(screen.getByText("· Prévue le 19")).toBeTruthy();
-    expect(screen.getByText("· Force 8 semaines")).toBeTruthy();
+    // One line per session: "Séance libre · ↷ déplacée du 21" (SUI-05).
+    expect(screen.getByText("Séance libre · ↷ déplacée du 21")).toBeTruthy();
+    expect(screen.getByText(/Prévue le 19/)).toBeTruthy();
+    expect(screen.getByText(/Force 8 semaines/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Charger plus" })).toBeNull();
   });
 

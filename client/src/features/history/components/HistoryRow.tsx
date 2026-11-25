@@ -6,52 +6,50 @@ import {
   getHistoryStatus,
   type HistoryItem,
 } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/chevrons/chevron-right.svg";
-import Icon from "../../../components/Icon";
-import StatusBadge from "../../../components/StatusBadge";
+import StatusChip from "../../../components/StatusChip";
 
 type Props = {
   item: HistoryItem;
 };
 
 // Screen SUI-05: one past session. The day badge, the name, then
-// "Effectuée · Séance libre · Prévue le 19". The whole line opens the detail.
+// "Séance libre · ↷ déplacée du 21", with the status chip on the right.
+// The whole line opens the detail.
 function HistoryRow({ item }: Props) {
   const status = getHistoryStatus(item);
   const badge = formatDayBadge(item.history_date);
   const notes = describeHistoryDates(item);
   const source = item.program_name ?? "Séance libre";
+  const subtitle = [source, ...notes].join(" · ");
 
   return (
     <li>
       <Link
         to={`/suivi/historique/${item.appointment_id}`}
-        className="flex items-center gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card"
+        className="flex items-center gap-3 rounded-card border border-base-300 bg-base-100 px-3 py-2.5 shadow-card"
       >
         {/* The badge is decorative: the date is read in full instead. */}
         <span className="sr-only">{formatLongDate(item.history_date)} · </span>
         <span
           aria-hidden="true"
-          className="flex w-11 shrink-0 flex-col items-center rounded-ctl bg-soft py-1"
+          className="flex size-[42px] shrink-0 flex-col items-center justify-center rounded-btn bg-soft"
         >
-          <span className="text-overline uppercase text-muted">
+          <span className="text-[9px] font-bold uppercase text-muted">
             {badge.weekday}
           </span>
-          <span className="font-display text-display-sm leading-none">
+          <span className="text-base font-extrabold leading-none">
             {badge.day}
           </span>
         </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="truncate font-semibold">{item.session_name}</span>
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-            <StatusBadge status={status} />
-            <span>· {source}</span>
-            {notes.map((note) => (
-              <span key={note}>· {note}</span>
-            ))}
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-sm font-bold">
+            {item.session_name}
+          </span>
+          <span className="truncate text-[11px] font-medium leading-[1.45] text-muted">
+            {subtitle}
           </span>
         </span>
-        <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
+        <StatusChip status={status} />
       </Link>
     </li>
   );

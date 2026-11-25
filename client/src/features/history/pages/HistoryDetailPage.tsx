@@ -1,22 +1,17 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import {
-  formatLongDate,
-  formatTimeOfDay,
-  getHistoryStatus,
-  STATUSES,
-} from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/chevrons/chevron-left.svg";
+import { formatLongDate, formatTimeOfDay, getHistoryStatus } from "shared";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
-import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
+import PageHeader from "../../../components/PageHeader";
+import StatusChip from "../../../components/StatusChip";
 import PlannedOnlyView from "../components/PlannedOnlyView";
 import SessionStats from "../components/SessionStats";
 import SetComparisonTable from "../components/SetComparisonTable";
 import { useHistoryDetail } from "../hooks/useHistoryDetail";
 
 const PRIMARY_LINK =
-  "flex h-btn w-full items-center justify-center rounded-btn bg-primary font-extrabold uppercase tracking-wide text-primary-content shadow-action";
+  "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action";
 
 // "jeudi 19 novembre"
 function lower(date: string): string {
@@ -65,21 +60,14 @@ function HistoryDetailPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-base-300 bg-base-100 px-2">
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label="Retour à l'historique"
-          className="flex size-tap items-center justify-center rounded-btn text-secondary"
-        >
-          <Icon src={chevronLeftIcon} className="size-7" />
-        </button>
-        <h1 className="truncate text-display-sm">
-          {detail?.appointment.session_name ?? "Séance"}
-        </h1>
-      </header>
+      <PageHeader
+        onBack={goBack}
+        backLabel="Retour à l'historique"
+        title={detail?.appointment.session_name ?? "Séance"}
+        subtitle={detail?.appointment.program_name ?? "Séance libre"}
+      />
 
-      <div className="flex flex-1 flex-col gap-5 p-4 pb-8">
+      <div className="flex flex-1 flex-col gap-2.5 px-[18px] pt-1 pb-8">
         {isLoading && <LoadingState label="Chargement de la séance…" />}
 
         {!isLoading && notFound && (
@@ -107,22 +95,10 @@ function HistoryDetailPage() {
           error === null &&
           !notFound && (
             <>
-              <div className="flex flex-col gap-1">
-                <p className="text-overline uppercase text-base-content">
-                  {/* Colour on the symbol only: green and amber are too pale
-                      for running text (brand guidelines, RM-064). */}
-                  <span
-                    aria-hidden="true"
-                    className={
-                      status === "completed" ? "text-status-done" : "text-muted"
-                    }
-                  >
-                    {STATUSES[status].symbol}{" "}
-                  </span>
-                  {STATUSES[status].label}
-                </p>
+              <div className="flex flex-col items-start gap-1.5">
+                <StatusChip status={status} />
                 {detail.kind === "done" ? (
-                  <p className="text-muted">
+                  <p className="text-[13px] font-semibold leading-[1.45] text-muted">
                     {detail.workout.status === "completed"
                       ? "Effectuée"
                       : "Commencée"}{" "}
@@ -130,14 +106,11 @@ function HistoryDetailPage() {
                     {formatTimeOfDay(detail.workout.started_at)}
                   </p>
                 ) : (
-                  <p className="text-muted">
+                  <p className="text-[13px] font-semibold leading-[1.45] text-muted">
                     Prévue {lower(detail.appointment.planned_date)} ·{" "}
                     {detail.appointment.planned_time ?? "sans heure"}
                   </p>
                 )}
-                <p className="text-muted">
-                  {detail.appointment.program_name ?? "Séance libre"}
-                </p>
               </div>
 
               {detail.kind === "done" ? (

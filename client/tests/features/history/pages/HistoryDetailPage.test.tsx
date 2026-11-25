@@ -167,7 +167,8 @@ describe("HistoryDetailPage", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Jambes" }),
     ).toBeTruthy();
-    expect(screen.getByText("Effectuée")).toBeTruthy();
+    // The chip of the status, then the line with the date (SUI-06).
+    expect(screen.getByText("✓ Effectuée")).toBeTruthy();
     expect(
       screen.getByText(/^Effectuée jeudi 19 novembre · \d{2}:\d{2}$/),
     ).toBeTruthy();
@@ -183,13 +184,14 @@ describe("HistoryDetailPage", () => {
       within(table)
         .getAllByRole("columnheader")
         .map((header) => header.textContent),
-    ).toEqual(["Série#", "Prévu", "Réalisé", "Écart"]);
+      // The mockup writes what was done first, then the plan (SUI-06).
+    ).toEqual(["Série", "Réalisé", "Prévu", "Écart"]);
     const rows = within(table).getAllByRole("row").slice(1);
     expect(rows.map((row) => row.textContent)).toEqual([
-      "S18 × 60 kg8 × 60 kg=",
-      "S28 × 60 kg7 × 60 kg▼ 1 rép.",
-      "S38 × 60 kg8 × 62,5 kg▲ 2,5 kg",
-      "S48 × 60 kgNon faite—",
+      "S118 × 60 kgprévu 8 × 60 kg=",
+      "S227 × 60 kgprévu 8 × 60 kg▼ 1 rép.",
+      "S338 × 62,5 kgprévu 8 × 60 kg▲ 2,5 kg",
+      "S44Non faiteprévu 8 × 60 kg—",
     ]);
   });
 
@@ -200,7 +202,7 @@ describe("HistoryDetailPage", () => {
     expect(
       await screen.findByRole("heading", { level: 1, name: "Course" }),
     ).toBeTruthy();
-    expect(screen.getByText("Manquée")).toBeTruthy();
+    expect(screen.getByText(/Manquée/)).toBeTruthy();
     expect(
       screen.getByText("Prévue samedi 21 novembre · sans heure"),
     ).toBeTruthy();

@@ -12,7 +12,7 @@ function HistoryWeekGroup({ week }: Props) {
     <section aria-labelledby={id} className="flex flex-col gap-2">
       <h2
         id={id}
-        className="font-sans text-overline not-italic uppercase text-accent"
+        className="font-sans text-overline uppercase not-italic text-muted"
       >
         {formatWeekLabel(week.monday)}
       </h2>

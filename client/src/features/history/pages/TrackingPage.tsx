@@ -36,11 +36,12 @@ function TrackingPage() {
   } = useHistory();
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 p-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-display-md">Suivi</h1>
-        <p className="text-overline uppercase text-accent">Historique</p>
-      </div>
+    <div className="mx-auto flex max-w-md flex-col gap-2 px-[18px] pt-1 pb-3.5">
+      {/* The title lives in the header of the shell (SUI-05). */}
+      <h1 className="sr-only">Suivi</h1>
+      <p className="font-sans text-overline uppercase not-italic text-accent">
+        Historique
+      </p>
 
       {isLoading && <HistorySkeleton />}
 
@@ -80,7 +81,7 @@ function TrackingPage() {
             <button
               type="button"
               onClick={loadMore}
-              className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+              className="h-13 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
             >
               Charger plus
             </button>
