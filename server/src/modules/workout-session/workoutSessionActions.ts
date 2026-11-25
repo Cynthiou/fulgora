@@ -1,14 +1,14 @@
 import type { RequestHandler } from "express";
 import {
-  countValidatedSets,
   type CurrentWorkoutSession,
+  countValidatedSets,
   type MeasureCode,
-  StartWorkoutInput,
-  WorkoutBlockTree,
-  WorkoutExerciseTree,
-  WorkoutSessionTree,
-  WorkoutSetRow,
-  WorkoutStarted,
+  type StartWorkoutInput,
+  type WorkoutBlockTree,
+  type WorkoutExerciseTree,
+  type WorkoutSessionTree,
+  type WorkoutSetRow,
+  type WorkoutStarted,
 } from "shared";
 import { readDuplicateKeyName } from "../../database/errors.js";
 import { withTransaction } from "../../database/withTransaction.js";

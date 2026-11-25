@@ -2,6 +2,7 @@
 export * from "./appointment.js";
 export * from "./catalog.js";
 export * from "./dates.js";
+export * from "./history.js";
 export * from "./session-template.js";
 export * from "./status.js";
 export * from "./user.js";
