@@ -60,7 +60,7 @@ test("answers « Pas faite » on a session waiting for a confirmation", async ({
 
   // CAL-08: the question, the deadline and the two answers
   await expect(page.getByText("Tu as fait cette séance ?")).toBeVisible();
-  await expect(page.getByText(/^Sans réponse, elle passera/)).toBeVisible();
+  await expect(page.getByText(/Sans réponse, elle passera/)).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Je l'ai faite" }),
   ).toBeDisabled();

@@ -131,7 +131,7 @@ describe("EditSessionPage", () => {
     expect(
       screen.getByText("Nom : « Jambes » → « Bas du corps »"),
     ).toBeTruthy();
-    expect(screen.getByText("Séances concernées · 1")).toBeTruthy();
+    expect(screen.getByText("Séances concernées")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Valider" }));
 

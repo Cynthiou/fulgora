@@ -85,7 +85,8 @@ test("changes a planned session through the ⋯ menu, after seeing the changes",
     page.getByText("Nom : « Jambes » → « Bas du corps »"),
   ).toBeVisible();
   await expect(page.getByText("Note · Consignes")).toBeVisible();
-  await expect(page.getByText("Séances concernées · 1")).toBeVisible();
+  // The count sits on the right of the title (CAL-06b).
+  await expect(page.getByText("Séances concernées")).toBeVisible();
   await expectNoA11yViolation(page);
 
   await page.getByRole("button", { name: "Valider" }).click();

@@ -1,5 +1,8 @@
-import { formatConfirmDeadline, formatLongDate } from "shared";
-import StatusBadge from "../../../components/StatusBadge";
+import { formatConfirmDeadline } from "shared";
+import arrowRightIcon from "../../../assets/icons/ui/app/arrow-right.svg";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
+import xIcon from "../../../assets/icons/ui/app/x.svg";
+import Icon from "../../../components/Icon";
 
 type Props = {
   sessionName: string;
@@ -13,14 +16,12 @@ type Props = {
 };
 
 // Screen CAL-08: a session whose day is past and which was never started.
-// "Je l'ai faite" writes the results after the fact (US-38), so it waits;
-// "Pas faite" marks it missed right away, and it can still be declared done
-// later (RM-054, RM-067).
+// The status, the name and the date are already written by the page above:
+// here come the question and the three answers. "Je l'ai faite" writes the
+// results after the fact (US-38), so it waits; "Pas faite" marks it missed
+// right away, and it can still be declared done later (RM-054, RM-067).
 function ConfirmPastSession({
-  sessionName,
   plannedDate,
-  plannedTime,
-  programName,
   isSending,
   error,
   onNotDone,
@@ -29,63 +30,55 @@ function ConfirmPastSession({
   return (
     <section
       aria-labelledby="confirm-title"
-      className="flex flex-col gap-3 rounded-card border border-dashed border-base-300 p-4"
+      className="flex flex-col gap-3 rounded-card border border-base-300 bg-base-100 p-4 shadow-card"
     >
-      <StatusBadge status="to_confirm" />
-      <h2 id="confirm-title" className="text-display-md">
-        {sessionName}
+      <h2 id="confirm-title" className="text-[26px] leading-none">
+        Tu as fait cette séance ?
       </h2>
-      <p className="text-muted">
-        Prévue {formatLongDate(plannedDate).toLocaleLowerCase("fr-FR")}
-        {plannedTime === null ? "" : ` · ${plannedTime}`} ·{" "}
-        {programName ?? "séance libre"}
+      <p className="text-sm leading-[1.45] text-muted">
+        Tu pourras toujours la déclarer faite plus tard. Sans réponse, elle
+        passera « Manquée » le {formatConfirmDeadline(plannedDate)}.
       </p>
-      <p className="font-semibold">Tu as fait cette séance ?</p>
 
       {error !== null && (
-        <p role="alert" className="font-semibold">
+        <p role="alert" className="text-sm font-semibold">
           {error}
         </p>
       )}
 
-      {/* Writing the results after the fact is US-38. */}
-      <button
-        type="button"
-        disabled
-        aria-describedby="declare-later"
-        className="flex h-btn items-center justify-center rounded-btn bg-neutral font-extrabold uppercase tracking-wide text-neutral-content disabled:opacity-60"
-      >
-        Je l'ai faite
-      </button>
-      <p id="declare-later" className="text-center text-sm text-muted">
-        Saisir les résultats après coup arrive bientôt.
-      </p>
-
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <button
           type="button"
           onClick={onNotDone}
           disabled={isSending}
-          className="flex h-btn flex-1 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+          className="flex h-13 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
         >
+          <Icon src={xIcon} className="size-4" />
           {isSending ? "Enregistrement…" : "Pas faite"}
         </button>
         <button
           type="button"
           onClick={onMove}
           disabled={isSending}
-          className="flex h-btn flex-1 items-center justify-center rounded-btn border border-base-300 bg-base-100 font-semibold disabled:opacity-60"
+          className="flex h-13 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
         >
+          <Icon src={arrowRightIcon} className="size-4" />
           Déplacer
         </button>
       </div>
 
-      <p className="text-sm text-muted">
-        Tu pourras toujours la déclarer faite plus tard.
-      </p>
-      <p className="text-sm text-muted">
-        Sans réponse, elle passera « Manquée » le{" "}
-        {formatConfirmDeadline(plannedDate)}.
+      {/* Writing the results after the fact is US-38. */}
+      <button
+        type="button"
+        disabled
+        aria-describedby="declare-later"
+        className="flex h-btn items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
+      >
+        <Icon src={checkIcon} className="size-[18px]" />
+        Je l'ai faite
+      </button>
+      <p id="declare-later" className="text-center text-xs text-muted">
+        Saisir les résultats après coup arrive bientôt.
       </p>
     </section>
   );

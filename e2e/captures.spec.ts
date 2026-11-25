@@ -226,7 +226,9 @@ test("captures the screens of the MVP", async ({ page }) => {
     "Vérifier les changements",
   );
   await shoot(page, "cal-06b-verifier-les-changements");
-  await page.getByRole("button", { name: "Revenir" }).click();
+  await page
+    .getByRole("button", { name: "Revenir", exact: true })
+    .click();
   // Leaving a changed draft asks first (the name went back, the draft is
   // still seen as touched).
   await page.getByRole("button", { name: "Retour" }).click();

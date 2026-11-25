@@ -437,9 +437,10 @@ describe("PlannedSessionPage · confirmer une séance passée (US-27)", () => {
     const user = renderPage();
     await screen.findByText("Tu as fait cette séance ?");
 
+    // One paragraph holds the two sentences of the mockup (CAL-08).
     expect(
       screen.getByText(
-        "Sans réponse, elle passera « Manquée » le samedi 28 novembre à 00 h.",
+        /Sans réponse, elle passera « Manquée » le samedi 28 novembre à 00 h\./,
       ),
     ).toBeTruthy();
     // Writing the results after the fact is US-38
