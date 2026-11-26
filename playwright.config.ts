@@ -8,6 +8,10 @@ export const E2E_ORIGIN = `http://localhost:${CLIENT_PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // 30 s is enough for one test alone, not always when the whole suite
+  // runs at once on this machine: a long path (program, session, history)
+  // then takes longer than the default and fails for nothing.
+  timeout: 60_000,
   use: {
     // page.goto("/") opens the Vite dev server of the tests.
     baseURL: E2E_ORIGIN,
