@@ -1,9 +1,19 @@
 import express from "express";
-import { preferencesSchema, signupSchema, updateProfileSchema } from "shared";
+import {
+  changePasswordSchema,
+  preferencesSchema,
+  signupSchema,
+  updateProfileSchema,
+} from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { authLimiter } from "../../middlewares/rateLimiters.js";
 import { validate } from "../../middlewares/validate.js";
-import { create, updatePreferences, updateProfile } from "./userActions.js";
+import {
+  changePassword,
+  create,
+  updatePreferences,
+  updateProfile,
+} from "./userActions.js";
 
 const userRouter = express.Router();
 
@@ -25,6 +35,16 @@ userRouter.patch(
   authenticate,
   validate({ body: preferencesSchema }),
   updatePreferences,
+);
+
+// PUT /api/users/me/password: 5 tries per 15 minutes, like the login
+// (DT-07): the current password must not be guessed by brute force.
+userRouter.put(
+  "/me/password",
+  authLimiter,
+  authenticate,
+  validate({ body: changePasswordSchema }),
+  changePassword,
 );
 
 export default userRouter;

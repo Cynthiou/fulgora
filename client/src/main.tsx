@@ -31,6 +31,7 @@ import ExerciseProgressPage from "./features/progress/pages/ExerciseProgressPage
 import TrackingSummaryPage from "./features/progress/pages/TrackingSummaryPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
+import AccountSettingsPage from "./features/user/pages/AccountSettingsPage";
 import EditProfilePage from "./features/user/pages/EditProfilePage";
 import IllustrationSettingsPage from "./features/user/pages/IllustrationSettingsPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -94,6 +95,8 @@ const router = createBrowserRouter([
               // The preferences of the account (US-05)
               { path: "/profil/affichage", element: <PreferencesPage /> },
               { path: "/profil/sons", element: <SoundSettingsPage /> },
+              // The account: password today, deletion with US-06
+              { path: "/profil/compte", element: <AccountSettingsPage /> },
               { path: "/notifications", element: <NotificationsPage /> },
               // The programs of the user (US-48) and their creation (US-18)
               { path: "/programmes", element: <ProgramsPage /> },

@@ -145,6 +145,15 @@ function ProfilePage() {
           >
             Compte
           </h2>
+          <div className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+            <SheetRow
+              isFirst
+              icon={lockIcon}
+              title="Paramètres du compte"
+              subtitle="Mot de passe, suppression"
+              onClick={() => navigate("/profil/compte")}
+            />
+          </div>
           {error !== null && (
             <div
               role="alert"
@@ -170,10 +179,6 @@ function ProfilePage() {
             <Icon src={logoutIcon} className="size-[18px]" />
             {isLoggingOut ? "Déconnexion…" : "Se déconnecter"}
           </button>
-          {/* Password and deletion arrive with US-47 and US-06. */}
-          <p className="text-center text-xs text-muted">
-            Paramètres du compte (mot de passe, suppression) : bientôt.
-          </p>
         </section>
 
         <p className="mt-auto text-center text-xs text-muted">

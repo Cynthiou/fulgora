@@ -1,4 +1,5 @@
 import type {
+  ChangePasswordInput,
   LoginPayload,
   PublicUser,
   UpdatePreferencesInput,
@@ -38,6 +39,15 @@ export function updatePreferences(
 ): Promise<PublicUser> {
   return apiFetch<PublicUser>("/users/me/preferences", {
     method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+// PUT /api/users/me/password: the password changes, the session stays
+// open (US-47). Nothing comes back (204).
+export function changePassword(input: ChangePasswordInput): Promise<void> {
+  return apiFetch<void>("/users/me/password", {
+    method: "PUT",
     body: JSON.stringify(input),
   });
 }

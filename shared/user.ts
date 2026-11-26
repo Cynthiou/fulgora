@@ -9,6 +9,8 @@ export type PublicUser = {
   username: string;
   email: string;
   sex: Sex | null;
+  // The day the account was created, "2026-05-18" (D-05, PRF-06)
+  created_at: string;
   // The units, the alerts and the home indicator (US-05, RM-005)
   preferences: UserPreferences;
 };
@@ -111,3 +113,39 @@ export function getInitials(username: string): string {
       : (parts[0] ?? username).slice(0, 2);
   return letters.toUpperCase();
 }
+
+// US-47: the three fields of the password change (RM-001, RM-002). The
+// new password follows the rules of the signup, and the confirmation must
+// be the same. The current one is only checked by the server.
+export const PASSWORD_MISMATCH_MESSAGE =
+  "Les deux mots de passe ne correspondent pas.";
+export const PASSWORD_RULES_MESSAGE =
+  "Ne respecte pas les règles de l'inscription.";
+export const WRONG_PASSWORD_MESSAGE = "Mot de passe actuel incorrect.";
+
+export const changePasswordSchema = z
+  .object({
+    current_password: requiredString.pipe(z.string().max(128)),
+    new_password: requiredString.pipe(
+      z
+        .string()
+        .max(128, { error: PASSWORD_MAX_MESSAGE })
+        .refine((password) => password.length >= 8 && /\d/.test(password), {
+          error: PASSWORD_RULES_MESSAGE,
+        }),
+    ),
+    confirm_password: requiredString,
+  })
+  .strict()
+  .refine((values) => values.new_password === values.confirm_password, {
+    error: PASSWORD_MISMATCH_MESSAGE,
+    path: ["confirm_password"],
+  });
+
+export type ChangePasswordPayload = {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+};
+
+export type ChangePasswordInput = z.output<typeof changePasswordSchema>;

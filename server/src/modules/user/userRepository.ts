@@ -30,7 +30,7 @@ export async function createUser(
 
 // The columns every read of a user needs, preferences included (US-05).
 const USER_COLUMNS =
-  "id, username, email, sex, weight_unit, distance_unit, home_metric, sound_enabled, vibration_enabled, timer_notification_enabled";
+  "id, username, email, sex, DATE_FORMAT(created_at, '%Y-%m-%d') AS created_at, weight_unit, distance_unit, home_metric, sound_enabled, vibration_enabled, timer_notification_enabled";
 
 // One row of the table turned into the user the client reads. The booleans
 // arrive as 0 or 1, and an empty home_metric means the default one (D-04).
@@ -40,6 +40,7 @@ function toPublicUser(row: Rows): PublicUser {
     username: row.username,
     email: row.email,
     sex: row.sex,
+    created_at: row.created_at,
     preferences: {
       weight_unit: row.weight_unit,
       distance_unit: row.distance_unit,
@@ -122,6 +123,31 @@ export async function updateUserPreferences(
   const assignments = columns.map((column) => `${column} = ?`).join(", ");
   await db.query(`UPDATE \`user\` SET ${assignments} WHERE id = ?`, [
     ...columns.map((column) => values[column]),
+    id,
+  ]);
+}
+
+// US-47: the hash of the connected user, to check the current password.
+export async function readUserPasswordHash(
+  id: number,
+  db: Queryable = client,
+): Promise<string | null> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT password_hash FROM `user` WHERE id = ?",
+    [id],
+  );
+  const row = rows[0];
+  return row === undefined ? null : String(row.password_hash);
+}
+
+// The new hash. The password itself never comes here (DT-01).
+export async function updateUserPassword(
+  id: number,
+  passwordHash: string,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("UPDATE `user` SET password_hash = ? WHERE id = ?", [
+    passwordHash,
     id,
   ]);
 }

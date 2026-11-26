@@ -54,6 +54,7 @@ describe("POST /api/users", () => {
       username: body.username,
       email: body.email,
       sex: null,
+      created_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
       preferences: DEFAULT_PREFERENCES,
     });
     expect(JSON.stringify(response.body)).not.toContain("argon2");

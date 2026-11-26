@@ -23,6 +23,7 @@ const lea: PublicUser = {
   username: "lea.m",
   email: "lea.martin@mail.fr",
   sex: null,
+  created_at: "2026-05-18",
   preferences: DEFAULT_PREFERENCES,
 };
 

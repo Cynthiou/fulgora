@@ -49,6 +49,7 @@ describe("ProtectedRoute", () => {
         username: "lea.m",
         email: "lea@exemple.fr",
         sex: null,
+        created_at: "2026-05-18",
         preferences: DEFAULT_PREFERENCES,
       },
     });

@@ -174,6 +174,16 @@ export function formatDayTime(
   return `${day} à ${formatTimeOfDay(date, timeZone)}`;
 }
 
+// "2026-05-18" -> "18 mai 2026" (the day an account was created, PRF-06).
+export function formatFullDate(date: string): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00Z`));
+}
+
 // "2026-11-19" -> "19 novembre" (inside a sentence, "prévue le 19 novembre").
 export function formatDayMonth(date: string): string {
   return new Intl.DateTimeFormat("fr-FR", {

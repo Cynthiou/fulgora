@@ -25,6 +25,7 @@ function userWith(preferences: UserPreferences): PublicUser {
     username: "lucas_m",
     email: "lucas.martin@exemple.fr",
     sex: null,
+    created_at: "2026-05-18",
     preferences,
   };
 }

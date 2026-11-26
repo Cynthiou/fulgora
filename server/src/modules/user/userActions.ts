@@ -1,20 +1,23 @@
 import type { RequestHandler } from "express";
 import {
-  DEFAULT_PREFERENCES,
+  type ChangePasswordInput,
   type PublicUser,
   type SignupInput,
   type UpdatePreferencesInput,
   type UpdateProfileInput,
+  WRONG_PASSWORD_MESSAGE,
 } from "shared";
 import { readDuplicateKeyName } from "../../database/errors.js";
 import { setAuthCookie } from "../../utils/authCookie.js";
 import { HttpError } from "../../utils/httpError.js";
-import { hashPassword } from "../../utils/password.js";
+import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { readUserId } from "../../utils/requestUser.js";
 import { signToken } from "../../utils/token.js";
 import {
   createUser,
   readUser,
+  readUserPasswordHash,
+  updateUserPassword,
   updateUserPreferences,
   updateUserProfile,
 } from "./userRepository.js";
@@ -59,14 +62,13 @@ export const create: RequestHandler = async (req, res) => {
   setAuthCookie(res, signToken(id));
 
   // A new account carries the default preferences, like its columns.
-  const user: PublicUser = {
-    id,
-    username,
-    email,
-    sex: null,
-    preferences: DEFAULT_PREFERENCES,
-  };
-  res.status(201).json(user);
+  // The account is read back: its creation date and its preferences come
+  // from the table, with no second source of truth.
+  const user = await readUser(id);
+  if (user === null) {
+    throw new HttpError(404, "USER_NOT_FOUND", "Ce compte n'existe pas.");
+  }
+  res.status(201).json(user satisfies PublicUser);
 };
 
 // PATCH /api/users/me: the pseudo and the illustrations (US-04). The
@@ -100,4 +102,28 @@ export const updatePreferences: RequestHandler = async (req, res) => {
     throw new HttpError(404, "USER_NOT_FOUND", "Ce compte n'existe pas.");
   }
   res.json(user);
+};
+
+// PUT /api/users/me/password: the password changes, the session stays open
+// (US-47). The current password is checked first; the new one is hashed and
+// never logged (DT-01).
+export const changePassword: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { current_password, new_password } = req.body as ChangePasswordInput;
+
+  const hash = await readUserPasswordHash(userId);
+  if (hash === null) {
+    throw new HttpError(404, "USER_NOT_FOUND", "Ce compte n'existe pas.");
+  }
+  if (!(await verifyPassword(hash, current_password))) {
+    throw new HttpError(
+      422,
+      "WRONG_CURRENT_PASSWORD",
+      WRONG_PASSWORD_MESSAGE,
+      "current_password",
+    );
+  }
+
+  await updateUserPassword(userId, await hashPassword(new_password));
+  res.status(204).end();
 };
