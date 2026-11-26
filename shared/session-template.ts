@@ -781,11 +781,19 @@ export function formatMinSec(seconds: number): string {
   return hours > 0 ? `${hours}:${minSec}` : minSec;
 }
 
-// Seconds from "1:30", "01:30", "1:02:05" or a plain "90"; null when unreadable.
-export function parseMinSec(text: string): number | null {
+// What a plain number means in a duration field: seconds for a plank or a
+// stretch, minutes for a run or a bike ride (RM-083).
+export type BareDurationUnit = "seconds" | "minutes";
+
+// Seconds from "1:30", "01:30", "1:02:05" or a plain number ("90" is 90 s,
+// or 90 min when bareUnit is "minutes"); null when unreadable.
+export function parseMinSec(
+  text: string,
+  bareUnit: BareDurationUnit = "seconds",
+): number | null {
   const trimmed = text.trim();
   if (/^\d+$/.test(trimmed)) {
-    return Number(trimmed);
+    return Number(trimmed) * (bareUnit === "minutes" ? 60 : 1);
   }
   const match = /^(?:(\d+):)?(\d{1,2}):(\d{2})$/.exec(trimmed);
   if (match === null) {
@@ -798,6 +806,19 @@ export function parseMinSec(text: string): number | null {
     return null;
   }
   return hours * 3600 + minutes * 60 + seconds;
+}
+
+// How the duration field behaves for an exercise (RM-083): in cardio a plain
+// number is minutes and − / + move by one minute; elsewhere a plain number
+// is seconds and − / + move by 15 s.
+export function getDurationInput(profile: MeasureProfile): {
+  bareUnit: BareDurationUnit;
+  step: number;
+  placeholder: string;
+} {
+  return profile === "cardio"
+    ? { bareUnit: "minutes", step: 60, placeholder: "ex. 30:00" }
+    : { bareUnit: "seconds", step: 15, placeholder: "ex. 0:45" };
 }
 
 // --- Saving a free session (US-23) --------------------------------------------

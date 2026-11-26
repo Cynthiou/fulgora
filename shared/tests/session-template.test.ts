@@ -22,6 +22,7 @@ import {
   freeSessionSchema,
   getBlockLabel,
   getDisallowedSetFields,
+  getDurationInput,
   getMeasureProfile,
   getSetFieldLabel,
   getSetFieldStepper,
@@ -402,6 +403,23 @@ describe("set fields (US-15)", () => {
     expect(formatMinSec(600)).toBe("10:00");
     expect(formatMinSec(5)).toBe("0:05");
     expect(formatMinSec(3725)).toBe("1:02:05");
+  });
+
+  it("reads a plain number as minutes in cardio (RM-083)", () => {
+    expect(parseMinSec("30", "minutes")).toBe(1800);
+    expect(parseMinSec("30", "seconds")).toBe(30);
+    expect(parseMinSec("1:30", "minutes")).toBe(90);
+    expect(parseMinSec("1:30:00", "minutes")).toBe(5400);
+    expect(getDurationInput("cardio")).toEqual({
+      bareUnit: "minutes",
+      step: 60,
+      placeholder: "ex. 30:00",
+    });
+    expect(getDurationInput("duration")).toEqual({
+      bareUnit: "seconds",
+      step: 15,
+      placeholder: "ex. 0:45",
+    });
   });
 });
 

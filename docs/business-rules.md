@@ -102,6 +102,7 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 - **RM-050** · La date historique de référence est la date réelle de début déclarée dans la séance réalisée ; la date de planification reste indépendante.
 - **RM-051** · Les performances et les records sont calculés à partir des résultats réels, sans table de records.
 - **RM-065** · Une séance `in_progress` sans aucune action enregistrée pendant **4 heures** est clôturée automatiquement en `unfinished` ; les résultats partiels sont conservés, le rendez-vous reste `attended`. À la prochaine ouverture, l'utilisateur voit : « Cette séance a été clôturée après 4 heures sans activité. Tes résultats ont été conservés. », avec les boutons « Voir le résumé » et « Corriger les résultats ». La séance ne peut pas être reprise comme séance en cours, mais elle peut être corrigée selon RM-047. _(Décision du 23/11/2026, ex-question O-01.)_
+- **RM-083** · Saisie d'une durée : « 1:30 » vaut toujours 1 min 30 et « 1:30:00 » 1 h 30. Un nombre seul vaut des **minutes** pour un exercice cardio (course, vélo, rameur, corde…) et des **secondes** pour les autres (gainage, étirements, mobilité). Les boutons − et + avancent d'1 minute en cardio, de 15 secondes ailleurs. Le champ vide montre un exemple adapté (« ex. 30:00 » ou « ex. 0:45 »). Vaut pour la préparation de la séance et pour la saisie du réel. _(Décision du 26/11/2026.)_
 
 ## Confirmation, historique et notifications
 

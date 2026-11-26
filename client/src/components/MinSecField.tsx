@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { formatMinSec, parseMinSec } from "shared";
+import { type BareDurationUnit, formatMinSec, parseMinSec } from "shared";
 
 type Props = {
   id: string;
@@ -13,6 +13,10 @@ type Props = {
   labelTone?: "accent" | "muted";
   // Seconds added or removed by − and +
   step?: number;
+  // What a plain number means: seconds, or minutes in cardio (RM-083)
+  bareUnit?: BareDurationUnit;
+  // The example shown in the empty field
+  placeholder?: string;
   max: number;
 };
 
@@ -28,6 +32,8 @@ function MinSecField({
   validate,
   onErrorChange,
   step = 15,
+  bareUnit = "seconds",
+  placeholder = "—",
   max,
 }: Props) {
   const [text, setText] = useState(value === null ? "" : formatMinSec(value));
@@ -35,14 +41,14 @@ function MinSecField({
 
   useEffect(() => {
     setText((current) =>
-      (current.trim() === "" ? null : parseMinSec(current)) === value
+      (current.trim() === "" ? null : parseMinSec(current, bareUnit)) === value
         ? current
         : value === null
           ? ""
           : formatMinSec(value),
     );
     setError(null);
-  }, [value]);
+  }, [value, bareUnit]);
 
   function report(next: string | null) {
     setError(next);
@@ -56,7 +62,7 @@ function MinSecField({
       onChange(null);
       return;
     }
-    const seconds = parseMinSec(next);
+    const seconds = parseMinSec(next, bareUnit);
     if (seconds === null) {
       report(FORMAT_MESSAGE);
       return;
@@ -115,7 +121,7 @@ function MinSecField({
           autoComplete="off"
           value={text}
           onChange={(event) => handleText(event.target.value)}
-          placeholder="—"
+          placeholder={placeholder}
           aria-invalid={error === null ? undefined : true}
           aria-describedby={error === null ? undefined : errorId}
           className="h-full w-full min-w-0 bg-transparent text-center text-lg font-extrabold"

@@ -3,6 +3,7 @@ import {
   type DraftExercise,
   formatSetValues,
   formatTrackedMeasures,
+  getDurationInput,
   getMeasureProfile,
   getSetFieldDisplay,
   getSetFieldLabel,
@@ -187,6 +188,8 @@ function SetConfigurator({
     const label = getSetFieldLabel(field, profile, isPerSide);
     const key = `${index}:${field}`;
     if (field === "duration_seconds") {
+      // Minutes for a run or a ride, seconds for a plank (RM-083)
+      const durationInput = getDurationInput(profile);
       return (
         <MinSecField
           key={field}
@@ -195,6 +198,9 @@ function SetConfigurator({
           labelTone="muted"
           value={set.duration_seconds}
           max={SET_LIMITS.duration_seconds.max}
+          bareUnit={durationInput.bareUnit}
+          step={durationInput.step}
+          placeholder={durationInput.placeholder}
           onChange={(value) => onUpdateSet(index, { duration_seconds: value })}
           validate={(value) => validateSetValue(field, value)}
           onErrorChange={(message) => setError(key, message)}

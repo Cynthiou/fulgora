@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   type ActualSetValues,
+  getDurationInput,
   getMeasureProfile,
   getSetFieldDisplay,
   getSetFieldLabel,
@@ -161,6 +162,8 @@ function ActualSetSheet({
           const title = fieldLabel(field, isCardio, profile);
           const hint = `${title} · prévu ${formatPlanned(field, planned[field])}`;
           if (field === "duration_seconds") {
+            // Minutes for a run or a ride, seconds for a plank (RM-083)
+            const durationInput = getDurationInput(profile);
             return (
               <MinSecField
                 key={field}
@@ -169,6 +172,9 @@ function ActualSetSheet({
                 labelTone="muted"
                 value={values.duration_seconds}
                 max={SET_LIMITS.duration_seconds.max}
+                bareUnit={durationInput.bareUnit}
+                step={durationInput.step}
+                placeholder={durationInput.placeholder}
                 onChange={(value) => {
                   setEmptyMessage(null);
                   setValues((current) => ({
