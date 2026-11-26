@@ -25,6 +25,7 @@ import {
 } from "../../program/services/programService";
 import HistoryFilterSheet from "../components/HistoryFilterSheet";
 import HistoryWeekGroup from "../components/HistoryWeekGroup";
+import TrackingTabs from "../components/TrackingTabs";
 import { useHistory } from "../hooks/useHistory";
 
 const SKELETON_KEYS = ["a", "b", "c", "d"];
@@ -154,6 +155,7 @@ function TrackingPage() {
     <div className="mx-auto flex max-w-md flex-col gap-2 px-[18px] pt-1 pb-3.5">
       {/* The title lives in the header of the shell (SUI-05). */}
       <h1 className="sr-only">Suivi</h1>
+      <TrackingTabs current="historique" />
 
       <div className="flex items-center justify-between gap-2">
         <p className="font-sans text-overline uppercase not-italic text-accent">

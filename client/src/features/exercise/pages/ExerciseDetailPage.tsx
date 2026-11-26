@@ -246,7 +246,16 @@ function ExerciseDetailPage() {
 
       {!notFound && error === null && (
         <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
-          <div className="mx-auto max-w-md">
+          <div className="mx-auto flex max-w-md flex-col gap-2">
+            {/* "Ma progression" only outside a selection (US-39). */}
+            {selectionScope === null && exercise !== null && (
+              <Link
+                to={`/suivi/exercices/${exercise.id}`}
+                className="flex h-13 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
+              >
+                Ma progression
+              </Link>
+            )}
             {selectionScope !== null ? (
               <button
                 type="button"
