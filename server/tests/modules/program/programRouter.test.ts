@@ -529,3 +529,241 @@ describe("plusieurs séances le même jour", () => {
     expect(response.status).toBe(409);
   });
 });
+
+// US-20: changing the day, the hour or the end of a program already
+// created. The preview and the writing must agree (RM-031, RM-033).
+describe("modifier les jours, les heures et la fin", () => {
+  function put(path: string, body: object, cookie: string) {
+    return request(app)
+      .put(path)
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(body);
+  }
+
+  // A program of two weeks, Monday and Thursday, already in the Planning.
+  async function runningProgram() {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    for (const session of draft.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+    await post(
+      `/api/programs/${draft.body.id}/activate`,
+      undefined,
+      lea.cookie,
+    );
+    const read = await request(app)
+      .get(`/api/programs/${draft.body.id}`)
+      .set("Cookie", lea.cookie);
+    const monday = read.body.sessions.find(
+      (session: { weekday: number }) => session.weekday === 1,
+    );
+    const thursday = read.body.sessions.find(
+      (session: { weekday: number }) => session.weekday === 4,
+    );
+    return { id: draft.body.id as number, monday, thursday };
+  }
+
+  function wish(
+    monday: { schedule_id: number },
+    thursday: { schedule_id: number },
+    overrides: { weekday?: number; time?: string | null; end?: string } = {},
+  ) {
+    return {
+      name: "Hypertrophie",
+      end_date: overrides.end ?? END,
+      sessions: [
+        {
+          schedule_id: monday.schedule_id,
+          weekday: overrides.weekday ?? 1,
+          planned_time: overrides.time === undefined ? "18:30" : overrides.time,
+        },
+        {
+          schedule_id: thursday.schedule_id,
+          weekday: 4,
+          planned_time: "18:30",
+        },
+      ],
+    };
+  }
+
+  async function datesOf(programId: number) {
+    const [rows] = await client.execute<Rows[]>(
+      `SELECT planned_date, status FROM appointment
+        WHERE program_id = ? ORDER BY planned_date`,
+      [programId],
+    );
+    return rows as { planned_date: string; status: string }[];
+  }
+
+  it("moves the Mondays to Tuesday, exactly as the preview said", async () => {
+    const { id, monday, thursday } = await runningProgram();
+    const body = wish(monday, thursday, { weekday: 2 });
+
+    const preview = await post(
+      `/api/programs/${id}/schedule/preview`,
+      body,
+      lea.cookie,
+    );
+
+    expect(preview.status).toBe(200);
+    expect(
+      preview.body.moved.map(
+        (moved: { from_date: string; to_date: string }) =>
+          `${moved.from_date} → ${moved.to_date}`,
+      ),
+    ).toEqual(["2026-11-30 → 2026-12-01", "2026-12-07 → 2026-12-08"]);
+    expect(preview.body.created).toEqual([]);
+    expect(preview.body.cancelled).toEqual([]);
+    expect(preview.body.notes).toContain(
+      "Séance du jeudi du jeudi : inchangé.",
+    );
+
+    const applied = await put(`/api/programs/${id}/schedule`, body, lea.cookie);
+
+    expect(applied.status).toBe(200);
+    expect((await datesOf(id)).map((row) => row.planned_date)).toEqual([
+      "2026-12-01",
+      "2026-12-03",
+      "2026-12-08",
+      "2026-12-10",
+    ]);
+
+    // The old rule keeps its date, a new one takes the appointments
+    const [schedules] = await client.execute<Rows[]>(
+      `SELECT weekday, deactivated_at FROM weekly_schedule
+        WHERE program_id = ? ORDER BY id`,
+      [id],
+    );
+    expect(schedules).toHaveLength(3);
+    expect(schedules[0]?.deactivated_at).not.toBeNull();
+    expect(schedules[2]?.weekday).toBe(2);
+
+    // And the change left a trace (RM-037)
+    const [changes] = await client.execute<Rows[]>(
+      "SELECT change_type FROM program_change WHERE program_id = ?",
+      [id],
+    );
+    expect(changes.map((row) => row.change_type)).toContain("schedule");
+
+    // Asking the same thing again, with the new rules, changes nothing
+    const read = await request(app)
+      .get(`/api/programs/${id}`)
+      .set("Cookie", lea.cookie);
+    const again = await post(
+      `/api/programs/${id}/schedule/preview`,
+      {
+        name: "Hypertrophie",
+        end_date: END,
+        sessions: read.body.sessions.map(
+          (session: {
+            schedule_id: number;
+            weekday: number;
+            planned_time: string | null;
+          }) => ({
+            schedule_id: session.schedule_id,
+            weekday: session.weekday,
+            planned_time: session.planned_time,
+          }),
+        ),
+      },
+      lea.cookie,
+    );
+    expect(again.body.moved).toEqual([]);
+    expect(again.body.created).toEqual([]);
+  });
+
+  it("keeps an appointment moved by hand and cancels what falls after a shorter end", async () => {
+    const { id, monday, thursday } = await runningProgram();
+    // Thursday 10 December moved by hand to Friday 11 December (US-25)
+    await client.execute(
+      `UPDATE appointment
+          SET planned_date = '2026-12-11', initial_date = '2026-12-10',
+              moved_manually = TRUE
+        WHERE program_id = ? AND planned_date = '2026-12-10'`,
+      [id],
+    );
+
+    const body = wish(monday, thursday, { end: "2026-12-06" });
+    const preview = await post(
+      `/api/programs/${id}/schedule/preview`,
+      body,
+      lea.cookie,
+    );
+
+    expect(
+      preview.body.cancelled.map(
+        (one: { planned_date: string }) => one.planned_date,
+      ),
+    ).toEqual(["2026-12-07"]);
+    expect(preview.body.moved).toEqual([]);
+
+    await put(`/api/programs/${id}/schedule`, body, lea.cookie);
+
+    const after = await datesOf(id);
+    expect(after.map((row) => `${row.planned_date} ${row.status}`)).toEqual([
+      "2026-11-30 planned",
+      "2026-12-03 planned",
+      "2026-12-07 cancelled",
+      "2026-12-11 planned",
+    ]);
+  });
+
+  it("adds the weeks of a longer program", async () => {
+    const { id, monday, thursday } = await runningProgram();
+    const body = wish(monday, thursday, { end: "2026-12-20" });
+
+    const preview = await post(
+      `/api/programs/${id}/schedule/preview`,
+      body,
+      lea.cookie,
+    );
+    expect(
+      preview.body.created.map(
+        (one: { planned_date: string }) => one.planned_date,
+      ),
+    ).toEqual(["2026-12-14", "2026-12-17"]);
+
+    await put(`/api/programs/${id}/schedule`, body, lea.cookie);
+
+    expect((await datesOf(id)).map((row) => row.planned_date)).toEqual([
+      "2026-11-30",
+      "2026-12-03",
+      "2026-12-07",
+      "2026-12-10",
+      "2026-12-14",
+      "2026-12-17",
+    ]);
+  });
+
+  it("refuses to change a draft, and the program of somebody else", async () => {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    const session = draft.body.sessions[0];
+    const body = {
+      name: "Hypertrophie",
+      end_date: END,
+      sessions: [
+        {
+          schedule_id: session.schedule_id,
+          weekday: 2,
+          planned_time: "18:30",
+        },
+      ],
+    };
+
+    const onDraft = await put(
+      `/api/programs/${draft.body.id}/schedule`,
+      body,
+      lea.cookie,
+    );
+    expect(onDraft.status).toBe(409);
+    expect(onDraft.body.error.code).toBe("PROGRAM_NOT_EDITABLE");
+
+    const stranger = await put(
+      `/api/programs/${draft.body.id}/schedule`,
+      body,
+      someoneElse.cookie,
+    );
+    expect(stranger.status).toBe(404);
+  });
+});
