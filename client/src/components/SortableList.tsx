@@ -36,6 +36,11 @@ type Props = {
   renderRow: (item: Item, handle: ReactNode) => ReactNode;
   // The space between two rows ("gap-0" for rows glued in one card)
   gapClass?: string;
+  // What the grip shows: the grip icon in a 44 px square by default. A
+  // screen that already draws the number of the row makes that badge the
+  // grip instead (handoff 3.2), so nothing is added to the card.
+  renderHandleContent?: (position: number) => ReactNode;
+  handleClass?: string;
   // "f" for a feminine item (une série), so the announcements agree
   gender?: "m" | "f";
 };
@@ -51,6 +56,8 @@ function SortableList({
   renderRow,
   gapClass = "gap-2",
   gender = "m",
+  renderHandleContent,
+  handleClass,
 }: Props) {
   // "saisi" or "saisie", "le déplacer" or "la déplacer"
   const end = gender === "f" ? "e" : "";
@@ -120,8 +127,15 @@ function SortableList({
         strategy={verticalListSortingStrategy}
       >
         <ul aria-label={label} className={`flex flex-col ${gapClass}`}>
-          {items.map((item) => (
-            <SortableRow key={item.id} item={item} renderRow={renderRow} />
+          {items.map((item, position) => (
+            <SortableRow
+              key={item.id}
+              item={item}
+              position={position}
+              renderRow={renderRow}
+              renderHandleContent={renderHandleContent}
+              handleClass={handleClass}
+            />
           ))}
         </ul>
       </SortableContext>
@@ -139,10 +153,20 @@ function positionOf(items: Item[], id: string | number): number {
 
 type RowProps = {
   item: Item;
+  // Place in the list, from 0: the number the grip may show
+  position: number;
   renderRow: Props["renderRow"];
+  renderHandleContent: Props["renderHandleContent"];
+  handleClass: Props["handleClass"];
 };
 
-function SortableRow({ item, renderRow }: RowProps) {
+function SortableRow({
+  item,
+  position,
+  renderRow,
+  renderHandleContent,
+  handleClass,
+}: RowProps) {
   const {
     attributes,
     listeners,
@@ -158,9 +182,16 @@ function SortableRow({ item, renderRow }: RowProps) {
       {...attributes}
       {...listeners}
       aria-label={`Déplacer ${item.label}`}
-      className="grid size-tap shrink-0 cursor-grab touch-none place-items-center text-faint"
+      className={
+        handleClass ??
+        "grid size-tap shrink-0 cursor-grab touch-none place-items-center text-faint"
+      }
     >
-      <Icon src={gripIcon} className="size-[18px]" />
+      {renderHandleContent === undefined ? (
+        <Icon src={gripIcon} className="size-[18px]" />
+      ) : (
+        renderHandleContent(position)
+      )}
     </button>
   );
 

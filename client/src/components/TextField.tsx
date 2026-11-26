@@ -71,7 +71,7 @@ function TextField({
           aria-describedby={describedBy}
           className={`w-full min-w-0 border bg-base-100 ${
             isForm
-              ? "h-[46px] rounded-[12px] text-sm font-medium placeholder:text-faint focus:border-accent focus:outline-none"
+              ? "h-[46px] rounded-[12px] text-sm font-bold placeholder:font-medium placeholder:text-faint focus:border-accent focus:outline-none"
               : "h-field rounded-btn text-[15px] shadow-card placeholder:text-faint"
           } ${
             icon === undefined

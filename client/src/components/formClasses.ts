@@ -1,9 +1,11 @@
 // The pieces the v3 forms repeat word for word (handoff du programme and
 // handoff des blocs). They live here so one value changes in one place.
 
-// A field label: 10 px, extra bold, uppercase, widely spaced, cyan.
+// A field label: 10 px, extra bold, uppercase, widely spaced, cyan. The
+// font is named because a label may be a heading, and a heading is slanted
+// by default.
 export const FORM_LABEL =
-  "text-[10px] font-extrabold uppercase leading-[1.2] tracking-[0.14em] text-accent";
+  "font-sans text-[10px] font-extrabold uppercase not-italic leading-[1.2] tracking-[0.14em] text-accent";
 
 // A field that is only read (a date, a day of the week): the look of an
 // input, without being one.

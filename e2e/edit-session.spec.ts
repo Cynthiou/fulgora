@@ -74,7 +74,7 @@ test("changes a planned session through the ⋯ menu, after seeing the changes",
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Défi/ }).click();
   await page.getByLabel(/^Intitulé/).fill("Consignes");
-  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
+  await page.getByRole("button", { name: "Retour à la séance" }).click();
 
   // CAL-06b: the changes, then the validation
   await page.getByRole("button", { name: "Vérifier les changements" }).click();

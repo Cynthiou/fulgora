@@ -197,15 +197,18 @@ describe("SessionEditorPage", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
       "Échauffement",
     );
-    expect(screen.getByText("Bloc 1 · Haut du corps")).toBeTruthy();
-    expect(screen.getByText("0 exercice")).toBeTruthy();
+    expect(screen.getByText("Bloc 1")).toBeTruthy();
+    expect(screen.getByText(/Choisis-les dans le catalogue/)).toBeTruthy();
+    // An empty block has no count and no dashed button: its one orange
+    // button opens the catalog (handoff 2.2).
+    expect(screen.queryByText("0 exercice")).toBeNull();
     expect(
-      screen.getByText("Choisis tes exercices dans le catalogue."),
-    ).toBeTruthy();
+      screen.queryByRole("button", { name: "Ajouter un exercice" }),
+    ).toBeNull();
 
     await user.type(screen.getByLabelText(/^Intitulé/), "Mise en route");
     await user.click(
-      screen.getByRole("button", { name: "Enregistrer le bloc" }),
+      screen.getByRole("button", { name: "Retour à la séance" }),
     );
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
@@ -258,7 +261,7 @@ describe("SessionEditorPage", () => {
     const user = renderEditor();
     await addBlock(user, "Classique");
     await user.click(
-      screen.getByRole("button", { name: "Enregistrer le bloc" }),
+      screen.getByRole("button", { name: "Retour à la séance" }),
     );
     expect(
       screen.getByRole("button", {
@@ -292,7 +295,7 @@ describe("SessionEditorPage", () => {
     const user = renderEditor();
     await addBlock(user, "Classique");
     await user.click(
-      screen.getByRole("button", { name: "Enregistrer le bloc" }),
+      screen.getByRole("button", { name: "Retour à la séance" }),
     );
     await user.click(
       screen.getByRole("button", {
@@ -360,24 +363,17 @@ describe("SessionEditorPage", () => {
     const rows = screen.getByRole("list", { name: "Exercices du bloc" });
     expect(rows.textContent).toContain("Développé couché");
     expect(rows.textContent).toContain("Tractions");
-    expect(screen.getAllByText("1 série · 10 rép.")).toHaveLength(2);
+    expect(screen.getAllByText("10 rép.")).toHaveLength(2);
     // Taken once: a reload must not add them again.
     expect(sessionStorage.getItem("session-editor:pending-exercises")).toBe(
       null,
     );
 
-    // Remove, then undo
-    await user.click(
-      screen.getByRole("button", { name: "Options de Développé couché" }),
-    );
-    await user.click(screen.getByRole("button", { name: "Retirer" }));
-    expect(screen.getByText("1 exercice")).toBeTruthy();
-    expect(screen.getByText("Exercice retiré")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Annuler" }));
-    expect(screen.getByText("2 exercices")).toBeTruthy();
+    // The numbered badge of each card is also its grip (US-16)
     expect(
-      screen.getByRole("list", { name: "Exercices du bloc" }).textContent,
-    ).toMatch(/Développé couché.*Tractions/);
+      screen.getByRole("button", { name: "Déplacer Développé couché" })
+        .textContent,
+    ).toBe("1");
 
     // Back to the session: the card sums the block up, no more warning
     await user.click(
@@ -601,7 +597,7 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
     );
     expect(
       screen.getByRole("button", { name: /^Développé couché/ }).textContent,
-    ).toContain("2 séries · 11 rép. · 40 kg");
+    ).toContain("2 × 11 rép. · 40 kg");
   });
 
   it("blocks « Valider » while a value is out of its limits", async () => {
@@ -646,7 +642,7 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
 
     expect(
       screen.getByRole("button", { name: /^Anges au mur/ }).textContent,
-    ).toContain("1 série · 10 rép. · 5 kg lest");
+    ).toContain("10 rép. · 5 kg lest");
   });
 
   it("handles durations in min:s, adds and removes a set, and a set's own rest", async () => {
@@ -750,7 +746,7 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
 
     expect(
       screen.getByRole("button", { name: /^Tapis de course/ }).textContent,
-    ).toContain("1 étape · 10 min · 2,5 km · 0,5 km/h");
+    ).toContain("10 min · 2,5 km · 0,5 km/h");
     expect(loadDraft()?.draft.blocks[0]?.exercises[3]?.sets[0]).toMatchObject({
       duration_seconds: 600,
       distance_meters: 2500,

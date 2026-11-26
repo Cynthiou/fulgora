@@ -1,81 +1,58 @@
 import type { ReactNode } from "react";
-import { type DraftExercise, formatSetSummary } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import { type DraftExercise, formatExerciseSummary } from "shared";
+import chevronRightIcon from "../../../assets/icons/ui/v3/chevron-right.svg";
 import Icon from "../../../components/Icon";
-import RowMenu from "../../../components/RowMenu";
 
 type Props = {
   exercise: DraftExercise;
-  // Touching the line opens the planned sets (A7)
+  // Touching the card opens the planned sets (step 4 of the handoff)
   onOpen: () => void;
-  onRemove: () => void;
-  // "Monter" and "Descendre" of the menu, when the move is possible (US-16)
-  onMoveUp: (() => void) | null;
-  onMoveDown: (() => void) | null;
-  // The grip of the sortable list
+  // The numbered badge of the handoff, which is also the grip (US-16)
   handle: ReactNode;
-  // The first row of the card carries no line above it
-  isFirst: boolean;
   // Timed block: this exercise has no objective yet (C4, US-43)
   missingGoal?: boolean;
 };
 
-// Screen A6: one exercise of a block, with the summary of its planned sets
-// ("1 série · 10 rép. · 40 kg"). The grip moves it, the "⋯" moves it
-// without dragging and removes it (US-16).
+// Screen 3.2: one exercise of the open block. Its number in a badge, its
+// name, the one line of detail of the handoff, then the chevron that opens
+// its sets. The badge is the grip: it moves the exercise with the finger or
+// with the keyboard (US-16), without adding anything to the card.
 function BlockExerciseRow({
   exercise,
   onOpen,
-  onRemove,
-  onMoveUp,
-  onMoveDown,
   handle,
-  isFirst,
   missingGoal = false,
 }: Props) {
   return (
-    <div
-      className={`flex min-h-[54px] items-center gap-1 pr-1 pl-0.5 ${
-        isFirst ? "" : "border-t border-base-300"
-      }`}
-    >
+    <div className="flex items-center gap-3 rounded-[12px] border border-base-300 bg-base-100 p-3 shadow-card">
       {handle}
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-center gap-2 py-2 text-left"
+        className="flex min-w-0 flex-1 items-center gap-3 text-left"
       >
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm font-bold">{exercise.name}</span>
           <span
-            className={`truncate text-xs font-medium leading-[1.45] ${
-              missingGoal ? "text-status-missed-text" : "text-muted"
+            className={`mt-0.5 truncate text-[11px] font-semibold tabular-nums ${
+              missingGoal ? "text-status-missed-text" : "text-card-sub"
             }`}
           >
-            {missingGoal ? "objectif à régler" : formatSetSummary(exercise)}
+            {missingGoal
+              ? "objectif à régler"
+              : formatExerciseSummary(
+                  exercise.sets,
+                  exercise.measure_codes,
+                  exercise.is_bodyweight,
+                  exercise.is_per_side,
+                )}
           </span>
         </span>
         <Icon
           src={chevronRightIcon}
-          className="size-[18px] shrink-0 text-faint"
+          className="size-[18px] shrink-0 text-muted"
         />
       </button>
-      <RowMenu
-        label={`Options de ${exercise.name}`}
-        actions={[
-          {
-            label: "Monter",
-            onClick: () => onMoveUp?.(),
-            disabled: onMoveUp === null,
-          },
-          {
-            label: "Descendre",
-            onClick: () => onMoveDown?.(),
-            disabled: onMoveDown === null,
-          },
-          { label: "Retirer", onClick: onRemove, isDanger: true },
-        ]}
-      />
     </div>
   );
 }

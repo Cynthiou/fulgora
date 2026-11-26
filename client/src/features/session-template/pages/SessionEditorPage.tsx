@@ -160,9 +160,6 @@ function readInitialState(
   };
 }
 
-// Which panel is open: none, "add" a block, or "change" the open block's type.
-type PickerMode = "closed" | "add" | "change";
-
 // The last removal, kept 5 seconds for "Annuler".
 type Removed =
   | { kind: "block"; block: DraftBlock; index: number }
@@ -255,7 +252,8 @@ function SessionEditorPage({ edit }: Props) {
   const [openBlockKey, setOpenBlockKey] = useState<string | null>(
     initial.current.openBlockKey,
   );
-  const [picker, setPicker] = useState<PickerMode>("closed");
+  // True while the "Type de bloc" panel is open (handoff 2.1)
+  const [isPickingType, setIsPickingType] = useState(false);
   // The exercise whose sets are being configured (A7), inside the open block
   const [openExerciseKey, setOpenExerciseKey] = useState<string | null>(null);
   const [removed, setRemoved] = useState<Removed | null>(null);
@@ -439,15 +437,12 @@ function SessionEditorPage({ edit }: Props) {
     }
   }
 
+  // The chosen type creates the block and opens it right away (2.1 -> 2.2).
   function pickBlockType(blockType: BlockType) {
-    if (picker === "add") {
-      const key = nextKey();
-      dispatch({ type: "addBlock", blockType, key });
-      setOpenBlockKey(key);
-    } else if (picker === "change" && openBlockKey !== null) {
-      dispatch({ type: "setBlockType", key: openBlockKey, blockType });
-    }
-    setPicker("closed");
+    const key = nextKey();
+    dispatch({ type: "addBlock", blockType, key });
+    setOpenBlockKey(key);
+    setIsPickingType(false);
   }
 
   function removeBlock(key: string) {
@@ -601,7 +596,6 @@ function SessionEditorPage({ edit }: Props) {
         <BlockEditor
           block={openBlock}
           index={openBlockIndex}
-          sessionName={draft.name}
           onChangeName={(name) =>
             dispatch({ type: "setBlockName", key: openBlockKey, name })
           }
@@ -618,12 +612,8 @@ function SessionEditorPage({ edit }: Props) {
           onChangeTimeLimit={(seconds) =>
             dispatch({ type: "setBlockTimeLimit", key: openBlockKey, seconds })
           }
-          onRequestTypeChange={() => setPicker("change")}
           onAddExercises={() => addExercises(openBlockKey)}
           onOpenExercise={setOpenExerciseKey}
-          onRemoveExercise={(exerciseKey) =>
-            removeExercise(openBlockKey, exerciseKey)
-          }
           onMoveExercise={(from, to) =>
             dispatch({ type: "moveExercise", blockKey: openBlockKey, from, to })
           }
@@ -633,12 +623,6 @@ function SessionEditorPage({ edit }: Props) {
             removeBlock(openBlockKey);
           }}
         />
-        {picker === "change" && (
-          <BlockTypePicker
-            onPick={pickBlockType}
-            onClose={() => setPicker("closed")}
-          />
-        )}
         {undoToast}
         {exitDialog}
       </>
@@ -812,7 +796,7 @@ function SessionEditorPage({ edit }: Props) {
 
             <button
               type="button"
-              onClick={() => setPicker("add")}
+              onClick={() => setIsPickingType(true)}
               disabled={blockCount >= MAX_BLOCKS}
               aria-describedby={
                 blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
@@ -903,10 +887,10 @@ function SessionEditorPage({ edit }: Props) {
         />
       )}
 
-      {picker === "add" && (
+      {isPickingType && (
         <BlockTypePicker
           onPick={pickBlockType}
-          onClose={() => setPicker("closed")}
+          onClose={() => setIsPickingType(false)}
         />
       )}
 

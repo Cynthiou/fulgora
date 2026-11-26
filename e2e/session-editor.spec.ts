@@ -63,7 +63,9 @@ test("adds a block through the type panel, names it, removes it and undoes", asy
   await expect(page.getByText("Bloc 1 · Haut du corps")).toBeVisible();
   await expectNoA11yViolation(page);
   await page.getByLabel(/^Intitulé/).fill("Force");
-  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
+  // An empty block has no "Enregistrer le bloc": its orange button opens
+  // the catalog, and the back arrow comes back to the session (handoff 2.2)
+  await page.getByRole("button", { name: "Retour à la séance" }).click();
 
   // Back on the session: the card, then remove and undo
   await expect(page.getByText("1 bloc")).toBeVisible();
@@ -132,7 +134,7 @@ test("picks three exercises from the catalog for a block, in the touched order",
   await expect(rows).toHaveCount(3);
   for (const [index, name] of names.entries()) {
     await expect(rows.nth(index)).toContainText(name);
-    await expect(rows.nth(index)).toContainText(/^.*1 (série|étape)/);
+    await expect(rows.nth(index)).toContainText(/10 (rép\.|min)/);
   }
   await expectNoA11yViolation(page);
 
@@ -224,7 +226,7 @@ test("configures the planned sets of one exercise of each profile", async ({
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Développé poitrine à la machine/ }),
-  ).toContainText("2 séries · 10 rép. · 40 kg");
+  ).toContainText("2 × 10 rép. · 40 kg");
 
   // A7b: bodyweight with an added weight
   await page.getByRole("button", { name: /^Anges au mur/ }).click();
@@ -235,7 +237,7 @@ test("configures the planned sets of one exercise of each profile", async ({
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Anges au mur/ }),
-  ).toContainText("1 série · 10 rép. · 5 kg lest");
+  ).toContainText("10 rép. · 5 kg lest");
 
   // A7c: duration
   await page.getByRole("button", { name: /^Gainage \(planche\)/ }).click();
@@ -250,7 +252,7 @@ test("configures the planned sets of one exercise of each profile", async ({
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Gainage \(planche\)/ }),
-  ).toContainText("1 série · 1 min 15");
+  ).toContainText("1 min 15");
 
   // A7d: cardio stages, with a value out of range first
   await page.getByRole("button", { name: /^Tapis de course/ }).click();
@@ -267,7 +269,7 @@ test("configures the planned sets of one exercise of each profile", async ({
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Tapis de course/ }),
-  ).toContainText("2 étapes");
+  ).toContainText("2 × …");
 });
 
 test("plans a free session from the home page and finds it there (A1 to A9)", async ({
@@ -354,6 +356,6 @@ test("a body weight exercise follows the lest layout (A7b)", async ({
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
 
   await expect(page.getByRole("button", { name: /^Tractions/ })).toContainText(
-    "1 série · 10 rép. · 10 kg lest",
+    "10 rép. · 10 kg lest",
   );
 });

@@ -105,11 +105,11 @@ test("moves a block with « Monter » of the ⋯ menu", async ({ page }) => {
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Échauffement/ }).click();
   await page.getByLabel(/^Intitulé/).fill("Mise en route");
-  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
+  await page.getByRole("button", { name: "Retour à la séance" }).click();
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Étirements/ }).click();
   await page.getByLabel(/^Intitulé/).fill("Consignes");
-  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
+  await page.getByRole("button", { name: "Retour à la séance" }).click();
 
   const blocks = page
     .getByRole("list", { name: "Blocs de la séance" })

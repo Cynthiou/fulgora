@@ -37,10 +37,12 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
     page.getByRole("heading", { name: "Réglages du bloc" }),
   ).toBeVisible();
   const save = page.getByRole("button", { name: "Enregistrer le bloc" });
-  await expect(save).toBeDisabled();
+  // An empty block says what is missing; its orange button opens the
+  // catalog, so there is nothing to save yet (handoff 2.2)
   await expect(page.getByText("Règle le nombre de tours.")).toBeVisible();
+  await expect(save).toHaveCount(0);
   await page.getByRole("textbox", { name: "Nombre de tours" }).fill("3");
-  await expect(save).toBeEnabled();
+  await expect(page.getByText("Règle le nombre de tours.")).toHaveCount(0);
 
   // Two exercises, with no objective yet
   await page.getByRole("button", { name: "Ajouter des exercices" }).click();
@@ -50,7 +52,7 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
     .getByRole("button", { name: "Ajouter au bloc, 2 sélectionnés" })
     .click();
   // Each exercise arrives with its default objective, kept for every round
-  await expect(page.getByText("1 étape · 10 min")).toHaveCount(2);
+  await expect(page.getByText("10 min")).toHaveCount(2);
   await expect(save).toBeEnabled();
 
   // One objective per round: no way to add a second set
@@ -92,17 +94,17 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
   await expect(page.getByText("objectif à régler")).toHaveCount(0);
   await expect(save).toBeEnabled();
   await save.click();
-  await expect(page.getByText("3 tours · 2 exercices")).toBeVisible();
+  await expect(page.getByText(/Bloc 1 · 3 tours · 2 exercices/)).toBeVisible();
 
   // An AMRAP of 12 minutes, with no exercise yet
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^AMRAP/ }).click();
-  await expect(
-    page.getByRole("button", { name: "Enregistrer le bloc" }),
-  ).toBeDisabled();
+  await expect(page.getByText("Règle la durée de l'AMRAP.")).toBeVisible();
   await page.getByRole("textbox", { name: /^Durée/ }).fill("12:00");
-  await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
-  await expect(page.getByText("12 min")).toBeVisible();
+  await expect(page.getByText("Règle la durée de l'AMRAP.")).toHaveCount(0);
+  await page.getByRole("button", { name: "Retour à la séance" }).click();
+  // The card of the block says its duration (US-43)
+  await expect(page.getByText(/Bloc 2 · 12 min/)).toBeVisible();
 
   // The session is saved with its two timed blocks
   await page.getByRole("button", { name: "Enregistrer la séance" }).click();
