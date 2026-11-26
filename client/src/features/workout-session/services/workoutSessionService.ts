@@ -3,6 +3,8 @@ import type {
   CurrentWorkoutSession,
   DeclarationPlan,
   DeclareDoneInput,
+  SideCode,
+  SideSetValues,
   WorkoutSessionTree,
   WorkoutSetRow,
   WorkoutStarted,
@@ -135,5 +137,18 @@ export function declareSessionDone(
   return apiFetch(`/appointments/${appointmentId}/declare-done`, {
     method: "POST",
     body: JSON.stringify(input),
+  });
+}
+
+// PUT /api/workout-sets/:id/sides/:side: one side of a per-side set
+// (US-51). The answer carries the set, validated once both sides are in.
+export function validateSetSide(
+  setId: number,
+  side: SideCode,
+  values: SideSetValues,
+): Promise<WorkoutSetRow> {
+  return apiFetch<WorkoutSetRow>(`/workout-sets/${setId}/sides/${side}`, {
+    method: "PUT",
+    body: JSON.stringify(values),
   });
 }

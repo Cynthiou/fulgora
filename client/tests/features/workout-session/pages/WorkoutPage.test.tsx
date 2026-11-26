@@ -45,8 +45,11 @@ function set(position: number, validated: boolean): WorkoutSetRow {
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: validated ? "2026-11-26T07:05:00.000Z" : null,
+    weight_left_planned_kg: null,
+    weight_right_planned_kg: null,
     updated_at: null,
     is_added: false,
+    sides: [],
   };
 }
 
@@ -77,6 +80,7 @@ const tree: WorkoutSessionTree = {
           meta: "Pectoraux · Barre",
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
+          is_per_side: false,
           default_rest_seconds: 90,
           is_added: false,
           sets: [set(1, true), set(2, false), set(3, false)],

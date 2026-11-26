@@ -538,6 +538,12 @@ function SessionEditorPage({ edit }: Props) {
           onMoveSet={(from, to) =>
             dispatch({ type: "moveSet", ...target, from, to })
           }
+          onChangePerSide={(isPerSide) =>
+            dispatch({ type: "setPerSide", ...target, isPerSide })
+          }
+          onChangeSameLoad={(isSame) =>
+            dispatch({ type: "setSameLoad", ...target, isSame })
+          }
           onChangeRest={(seconds) =>
             dispatch({ type: "updateExerciseRest", ...target, seconds })
           }

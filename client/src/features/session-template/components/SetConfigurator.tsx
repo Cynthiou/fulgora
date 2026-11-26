@@ -35,6 +35,9 @@ type Props = {
   onRemoveSet: (index: number) => void;
   // The order of the sets of the exercise (US-16)
   onMoveSet: (from: number, to: number) => void;
+  // "Chaque côté" and "Même charge des deux côtés" of A7e (US-51)
+  onChangePerSide: (isPerSide: boolean) => void;
+  onChangeSameLoad: (isSame: boolean) => void;
   onChangeRest: (seconds: number | null) => void;
   // "Valider l'exercice" and the back arrow both return to the block
   onDone: () => void;
@@ -44,6 +47,8 @@ type Props = {
 const STEPPER: Record<SetValueField, { step: number; decimal: boolean }> = {
   reps: { step: 1, decimal: false },
   weight_kg: { step: 2.5, decimal: true },
+  weight_left_kg: { step: 2.5, decimal: true },
+  weight_right_kg: { step: 2.5, decimal: true },
   duration_seconds: { step: 15, decimal: false },
   distance_meters: { step: 100, decimal: true },
   speed_kmh: { step: 0.5, decimal: true },
@@ -64,6 +69,8 @@ function SetConfigurator({
   onDuplicateLastSet,
   onRemoveSet,
   onMoveSet,
+  onChangePerSide,
+  onChangeSameLoad,
   onChangeRest,
   onDone,
 }: Props) {
@@ -74,6 +81,15 @@ function SetConfigurator({
   const allFields = getSetFields(
     exercise.measure_codes,
     exercise.is_bodyweight,
+    exercise.is_per_side ?? false,
+  );
+  const isPerSide = exercise.is_per_side ?? false;
+  // One load for both sides, or one per side (A7e). The switch is kept
+  // here: two empty fields look the same as none in the draft.
+  const [hasTwoLoads, setHasTwoLoads] = useState(() =>
+    exercise.sets.some(
+      (set) => set.weight_left_kg !== null || set.weight_right_kg !== null,
+    ),
   );
   const [openIndex, setOpenIndex] = useState(0);
   const [menuIndex, setMenuIndex] = useState<number | null>(null);
@@ -90,10 +106,18 @@ function SetConfigurator({
     ),
   );
 
-  const fields =
+  let fields =
     profile === "bodyweight" && !showWeight
       ? allFields.filter((field) => field !== "weight_kg")
       : allFields;
+  // Per side: one load, or one per side, never both (A7e).
+  fields = fields.filter((field) =>
+    field === "weight_kg"
+      ? !(isPerSide && hasTwoLoads)
+      : field === "weight_left_kg" || field === "weight_right_kg"
+        ? isPerSide && hasTwoLoads
+        : true,
+  );
   const isFull = exercise.sets.length >= MAX_SETS_PER_EXERCISE;
   const hasError = Object.keys(errors).length > 0;
   const setNoun = profile === "cardio" ? "Étape" : "Série";
@@ -172,7 +196,7 @@ function SetConfigurator({
     set: PlannedSetValues,
   ) {
     const id = `set-${index}-${field}`;
-    const label = getSetFieldLabel(field, profile);
+    const label = getSetFieldLabel(field, profile, isPerSide);
     const key = `${index}:${field}`;
     if (field === "duration_seconds") {
       return (
@@ -252,6 +276,85 @@ function SetConfigurator({
             </p>
           )}
         </div>
+
+        {/* A7e: the exercise is done left then right (US-51). */}
+        {profile !== "none" && profile !== "cardio" && (
+          <div className="flex flex-col gap-2.5 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col">
+                <span id="side-toggle-label" className="font-semibold">
+                  Chaque côté
+                </span>
+                <span id="side-toggle-help" className="text-sm text-muted">
+                  Gauche puis droite, même objectif pour chaque côté
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isPerSide}
+                aria-labelledby="side-toggle-label"
+                aria-describedby="side-toggle-help"
+                onClick={() => onChangePerSide(!isPerSide)}
+                className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${
+                  isPerSide
+                    ? "border-primary bg-primary"
+                    : "border-base-300 bg-soft"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-1 size-6 rounded-full bg-base-100 shadow-card transition-all ${
+                    isPerSide ? "left-7" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {isPerSide && allFields.includes("weight_kg") && (
+              <div className="flex items-center justify-between gap-3 border-t border-base-300 pt-2.5">
+                <div className="flex flex-col">
+                  <span id="same-load-label" className="font-semibold">
+                    Même charge des deux côtés
+                  </span>
+                  <span id="same-load-help" className="text-sm text-muted">
+                    Désactive pour une charge par côté (blessure, déséquilibre)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={!hasTwoLoads}
+                  aria-labelledby="same-load-label"
+                  aria-describedby="same-load-help"
+                  onClick={() => {
+                    setHasTwoLoads(!hasTwoLoads);
+                    onChangeSameLoad(hasTwoLoads);
+                  }}
+                  className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${
+                    hasTwoLoads
+                      ? "border-base-300 bg-soft"
+                      : "border-primary bg-primary"
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`absolute top-1 size-6 rounded-full bg-base-100 shadow-card transition-all ${
+                      hasTwoLoads ? "left-1" : "left-7"
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+
+            {isPerSide && profile === "duration" && (
+              <p className="border-t border-base-300 pt-2.5 text-sm text-muted">
+                Pendant la séance : minuteur gauche, puis droite. Vaut aussi
+                pour les étirements.
+              </p>
+            )}
+          </div>
+        )}
 
         {profile === "bodyweight" && (
           <div className="flex items-center justify-between gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">

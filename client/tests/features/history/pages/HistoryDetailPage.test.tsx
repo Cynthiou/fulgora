@@ -37,8 +37,11 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: actual === null ? null : "2026-11-19T06:10:00.000Z",
+    weight_left_planned_kg: null,
+    weight_right_planned_kg: null,
     updated_at: null,
     is_added: false,
+    sides: [],
   };
 }
 
@@ -79,6 +82,7 @@ const done: HistoryDetail = {
             meta: "Jambes · Barre",
             measure_codes: ["reps", "weight"],
             is_bodyweight: false,
+            is_per_side: false,
             default_rest_seconds: 90,
             is_added: false,
             sets: [
@@ -123,11 +127,14 @@ const missed: HistoryDetail = {
             "calories",
           ],
           is_bodyweight: false,
+          is_per_side: false,
           default_rest_seconds: null,
           sets: [
             {
               reps: null,
               weight_kg: null,
+              weight_left_kg: null,
+              weight_right_kg: null,
               duration_seconds: 1800,
               distance_meters: null,
               speed_kmh: 9,

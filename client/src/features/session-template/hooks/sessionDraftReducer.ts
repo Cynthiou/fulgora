@@ -61,6 +61,20 @@ export type SessionDraftAction =
       exerciseKey: string;
       seconds: number | null;
     }
+  | {
+      // "Chaque côté" of A7e (US-51)
+      type: "setPerSide";
+      blockKey: string;
+      exerciseKey: string;
+      isPerSide: boolean;
+    }
+  | {
+      // "Même charge des deux côtés" of A7e (US-51)
+      type: "setSameLoad";
+      blockKey: string;
+      exerciseKey: string;
+      isSame: boolean;
+    }
   | { type: "addSet"; blockKey: string; exerciseKey: string }
   | { type: "duplicateLastSet"; blockKey: string; exerciseKey: string }
   | {
@@ -281,6 +295,56 @@ export function sessionDraftReducer(
           exercise.default_rest_seconds === action.seconds
             ? exercise
             : { ...exercise, default_rest_seconds: action.seconds },
+      );
+
+    case "setPerSide":
+      return updateExercise(
+        draft,
+        action.blockKey,
+        action.exerciseKey,
+        (exercise) =>
+          (exercise.is_per_side ?? false) === action.isPerSide
+            ? exercise
+            : {
+                ...exercise,
+                is_per_side: action.isPerSide,
+                // Leaving the per-side mode drops the two loads (US-51).
+                sets: action.isPerSide
+                  ? exercise.sets
+                  : exercise.sets.map((set) => ({
+                      ...set,
+                      weight_kg: set.weight_kg ?? set.weight_left_kg,
+                      weight_left_kg: null,
+                      weight_right_kg: null,
+                    })),
+              },
+      );
+
+    case "setSameLoad":
+      return updateExercise(
+        draft,
+        action.blockKey,
+        action.exerciseKey,
+        (exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) =>
+            action.isSame
+              ? {
+                  // One load again: the left one is kept (A7e).
+                  ...set,
+                  weight_kg: set.weight_kg ?? set.weight_left_kg,
+                  weight_left_kg: null,
+                  weight_right_kg: null,
+                }
+              : {
+                  // One load per side: both start from the single one.
+                  ...set,
+                  weight_kg: null,
+                  weight_left_kg: set.weight_left_kg ?? set.weight_kg,
+                  weight_right_kg: set.weight_right_kg ?? set.weight_kg,
+                },
+          ),
+        }),
       );
 
     case "addSet":

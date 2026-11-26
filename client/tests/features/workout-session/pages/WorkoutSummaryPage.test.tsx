@@ -39,8 +39,11 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: reps === null ? null : "2026-11-26T07:10:00.000Z",
+    weight_left_planned_kg: null,
+    weight_right_planned_kg: null,
     updated_at: null,
     is_added: false,
+    sides: [],
   };
 }
 
@@ -71,6 +74,7 @@ const completed: WorkoutSessionTree = {
           meta: null,
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
+          is_per_side: false,
           default_rest_seconds: 90,
           is_added: false,
           sets: [set(1, 10, 40), set(2, 8, 40), set(3, 10, 40)],
@@ -83,6 +87,7 @@ const completed: WorkoutSessionTree = {
           meta: null,
           measure_codes: ["reps"],
           is_bodyweight: false,
+          is_per_side: false,
           default_rest_seconds: 90,
           is_added: false,
           sets: [set(4, 8, null), set(5, null, null)],

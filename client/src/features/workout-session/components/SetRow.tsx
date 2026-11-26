@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   describeSet,
   formatActualValues,
+  formatBothSides,
   formatSetValues,
   getSetLabel,
   type MeasureCode,
@@ -35,6 +36,8 @@ type Props = {
   // The time measured by the app (US-49): the set is validated with it for
   // an exercise in time, and it opens the machine reading for a cardio one.
   onTimed: (seconds: number) => void;
+  // A per-side exercise says what each side did (US-51)
+  isPerSide?: boolean;
 };
 
 // Screen B3a: one set of the exercise.
@@ -55,6 +58,7 @@ function SetRow({
   onPick,
   onRemove,
   onTimed,
+  isPerSide = false,
 }: Props) {
   const label = getSetLabel(profile, index);
   const isCardio = profile === "cardio";
@@ -81,7 +85,9 @@ function SetRow({
             <span className="sr-only">validée, corriger</span>
           </b>
           <span className="shrink-0 text-[12.5px] font-medium leading-[1.45] text-muted">
-            {formatActualValues(set, measureCodes, isBodyweight)}
+            {isPerSide
+              ? formatBothSides(set, measureCodes, isBodyweight)
+              : formatActualValues(set, measureCodes, isBodyweight)}
           </span>
         </button>
       </li>

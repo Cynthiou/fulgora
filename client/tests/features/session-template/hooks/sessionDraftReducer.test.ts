@@ -185,6 +185,8 @@ describe("sessionDraftReducer", () => {
     expect(filled.blocks[0]?.exercises[0]?.sets[0]).toMatchObject({
       reps: 10,
       weight_kg: 40,
+      weight_left_kg: null,
+      weight_right_kg: null,
     });
 
     const duplicated = sessionDraftReducer(filled, {
@@ -195,6 +197,8 @@ describe("sessionDraftReducer", () => {
     expect(duplicated.blocks[0]?.exercises[0]?.sets[1]).toMatchObject({
       reps: 10,
       weight_kg: 40,
+      weight_left_kg: null,
+      weight_right_kg: null,
     });
 
     const added = sessionDraftReducer(duplicated, {

@@ -450,6 +450,8 @@ function saveBlockWithProfiles() {
   const set = {
     reps: null,
     weight_kg: null,
+    weight_left_kg: null,
+    weight_right_kg: null,
     duration_seconds: null,
     distance_meters: null,
     speed_kmh: null,
@@ -870,6 +872,8 @@ describe("SessionEditorPage · saving (US-23)", () => {
                   {
                     reps: 10,
                     weight_kg: null,
+                    weight_left_kg: null,
+                    weight_right_kg: null,
                     duration_seconds: null,
                     distance_meters: null,
                     speed_kmh: null,

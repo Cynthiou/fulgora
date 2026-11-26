@@ -1,6 +1,7 @@
 import {
   countReachedObjectives,
   formatActualSide,
+  formatBothSides,
   formatPlannedSide,
   getMeasureProfile,
   getSetGap,
@@ -79,13 +80,20 @@ function SetComparisonTable({ exercise }: Props) {
                   </span>
                 </th>
                 <td className="w-full py-1.5 pr-2.5 text-[13px] font-bold">
-                  {isDone
-                    ? formatActualSide(
+                  {/* A per-side set says both sides (US-51, SUI-06). */}
+                  {set.sides.length > 0
+                    ? formatBothSides(
                         set,
                         exercise.measure_codes,
                         exercise.is_bodyweight,
                       )
-                    : "Non faite"}
+                    : isDone
+                      ? formatActualSide(
+                          set,
+                          exercise.measure_codes,
+                          exercise.is_bodyweight,
+                        )
+                      : "Non faite"}
                 </td>
                 <td className="whitespace-nowrap py-1.5 pr-2.5 text-[11.5px] font-medium leading-[1.45] text-muted">
                   prévu{" "}

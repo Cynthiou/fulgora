@@ -7,7 +7,10 @@ import {
   getMeasureProfile,
   getRestDuration,
   getSetLabel,
+  getSide,
   plannedAsActual,
+  type SideCode,
+  type SideSetValues,
   toPlannedValues,
   type WorkoutExerciseTree,
   type WorkoutSetRow,
@@ -20,7 +23,9 @@ import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
+import { ApiError } from "../../../services/apiError";
 import ActualSetSheet from "../components/ActualSetSheet";
+import PerSideSetEntry from "../components/PerSideSetEntry";
 import RestTimer from "../components/RestTimer";
 import SetRow from "../components/SetRow";
 import { useValidateSet } from "../hooks/useValidateSet";
@@ -28,6 +33,7 @@ import { useWorkoutSession } from "../hooks/useWorkoutSession";
 import {
   addWorkoutSet,
   removeWorkoutSet,
+  validateSetSide,
 } from "../services/workoutSessionService";
 
 const PRIMARY_LINK =
@@ -76,6 +82,22 @@ function describeNext(
   return "dernière série de la séance faite";
 }
 
+// The set seen from one side: its planned load and what it already holds,
+// so the sheet opens on the right numbers (US-51).
+function toSideSet(set: WorkoutSetRow, side: SideCode): WorkoutSetRow {
+  const planned =
+    side === "left" ? set.weight_left_planned_kg : set.weight_right_planned_kg;
+  const done = getSide(set, side);
+  return {
+    ...set,
+    weight_planned_kg: planned ?? set.weight_planned_kg,
+    validated_at: done === null ? null : done.validated_at,
+    reps_actual: done?.reps_actual ?? null,
+    weight_actual_kg: done?.weight_actual_kg ?? null,
+    duration_actual_seconds: done?.duration_actual_seconds ?? null,
+  };
+}
+
 // Screen B3: one exercise of the session in progress, set by set. One tap
 // when done as planned, "Modifier" otherwise; the order is free (RM-024).
 // Every validated set starts the rest timer (US-30).
@@ -105,6 +127,13 @@ function WorkoutExercisePage() {
     index: number;
   } | null>(null);
   const [rest, setRest] = useState<Rest | null>(null);
+  // The side being filled in by hand, on a per-side exercise (US-51)
+  const [editingSide, setEditingSide] = useState<{
+    set: WorkoutSetRow;
+    index: number;
+    side: SideCode;
+  } | null>(null);
+  const [sideError, setSideError] = useState<string | null>(null);
 
   const exercises: WorkoutExerciseTree[] =
     session?.blocks.flatMap((block) => block.exercises) ?? [];
@@ -163,6 +192,37 @@ function WorkoutExercisePage() {
       return;
     }
     startRest(set, index);
+  }
+
+  // US-51: one side at a time. The set is validated by the server once
+  // both sides are there, and only then does the rest start.
+  async function recordSide(
+    set: WorkoutSetRow,
+    index: number,
+    side: SideCode,
+    values: SideSetValues,
+  ) {
+    if (isChanging) {
+      return;
+    }
+    setIsChanging(true);
+    setSideError(null);
+    try {
+      const saved = await validateSetSide(set.id, side, values);
+      replaceSet(saved);
+      setEditingSide(null);
+      if (saved.validated_at !== null) {
+        afterValidation(saved, index, Promise.resolve());
+      }
+    } catch (caught) {
+      setSideError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Ce côté n'a pas été enregistré. Réessaie.",
+      );
+    } finally {
+      setIsChanging(false);
+    }
   }
 
   function validateAsPlanned(set: WorkoutSetRow, index: number) {
@@ -346,41 +406,70 @@ function WorkoutExercisePage() {
                 />
               )}
 
+              {sideError !== null && (
+                <p role="alert" className="text-sm font-semibold">
+                  {sideError}
+                </p>
+              )}
+
               <ul aria-label="Séries" className="flex flex-col gap-2.5">
-                {exercise.sets.map((set, index) => (
-                  <SetRow
-                    key={set.id}
-                    set={set}
-                    index={index}
-                    total={exercise.sets.length}
-                    profile={getMeasureProfile(
-                      exercise.measure_codes,
-                      exercise.is_bodyweight,
-                    )}
-                    isBodyweight={exercise.is_bodyweight}
-                    measureCodes={exercise.measure_codes}
-                    state={
-                      set.validated_at !== null && index !== pickedIndex
-                        ? "done"
-                        : index === activeIndex
-                          ? "active"
-                          : "upcoming"
-                    }
-                    isPending={validation.pendingId === set.id || isChanging}
-                    onValidate={() => validateAsPlanned(set, index)}
-                    onEdit={() => setEditing({ set, index })}
-                    onPick={() => setPickedIndex(index)}
-                    onRemove={
-                      // Only what the user added goes away (RM-048); while
-                      // correcting, even once it is filled in (US-37).
-                      set.is_added &&
-                      (set.validated_at === null || isCorrecting)
-                        ? () => removeSet(set.id)
-                        : null
-                    }
-                    onTimed={(seconds) => finishTimed(set, index, seconds)}
-                  />
-                ))}
+                {exercise.sets.map((set, index) =>
+                  exercise.is_per_side && index === activeIndex ? (
+                    <PerSideSetEntry
+                      key={set.id}
+                      set={set}
+                      index={index}
+                      total={exercise.sets.length}
+                      profile={getMeasureProfile(
+                        exercise.measure_codes,
+                        exercise.is_bodyweight,
+                      )}
+                      measureCodes={exercise.measure_codes}
+                      isBodyweight={exercise.is_bodyweight}
+                      isPending={isChanging}
+                      onValidateSide={(side, values) =>
+                        recordSide(set, index, side, values)
+                      }
+                      onEditSide={(side) =>
+                        setEditingSide({ set, index, side })
+                      }
+                    />
+                  ) : (
+                    <SetRow
+                      key={set.id}
+                      set={set}
+                      index={index}
+                      total={exercise.sets.length}
+                      profile={getMeasureProfile(
+                        exercise.measure_codes,
+                        exercise.is_bodyweight,
+                      )}
+                      isBodyweight={exercise.is_bodyweight}
+                      measureCodes={exercise.measure_codes}
+                      state={
+                        set.validated_at !== null && index !== pickedIndex
+                          ? "done"
+                          : index === activeIndex
+                            ? "active"
+                            : "upcoming"
+                      }
+                      isPending={validation.pendingId === set.id || isChanging}
+                      onValidate={() => validateAsPlanned(set, index)}
+                      onEdit={() => setEditing({ set, index })}
+                      onPick={() => setPickedIndex(index)}
+                      onRemove={
+                        // Only what the user added goes away (RM-048); while
+                        // correcting, even once it is filled in (US-37).
+                        set.is_added &&
+                        (set.validated_at === null || isCorrecting)
+                          ? () => removeSet(set.id)
+                          : null
+                      }
+                      onTimed={(seconds) => finishTimed(set, index, seconds)}
+                      isPerSide={exercise.is_per_side}
+                    />
+                  ),
+                )}
               </ul>
 
               {(session.status === "in_progress" || isCorrecting) && (
@@ -420,6 +509,23 @@ function WorkoutExercisePage() {
             )}
           </div>
         </div>
+      )}
+
+      {editingSide !== null && exercise !== undefined && exercise !== null && (
+        <ActualSetSheet
+          set={toSideSet(editingSide.set, editingSide.side)}
+          index={editingSide.index}
+          measureCodes={exercise.measure_codes}
+          isBodyweight={exercise.is_bodyweight}
+          onConfirm={(values) =>
+            recordSide(editingSide.set, editingSide.index, editingSide.side, {
+              reps: values.reps,
+              weight_kg: values.weight_kg,
+              duration_seconds: values.duration_seconds,
+            })
+          }
+          onCancel={() => setEditingSide(null)}
+        />
       )}
 
       {editing !== null && exercise !== undefined && exercise !== null && (

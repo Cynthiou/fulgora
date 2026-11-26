@@ -35,6 +35,8 @@ type Props = {
 const STEPPER: Record<SetValueField, { step: number; decimal: boolean }> = {
   reps: { step: 1, decimal: false },
   weight_kg: { step: 2.5, decimal: true },
+  weight_left_kg: { step: 2.5, decimal: true },
+  weight_right_kg: { step: 2.5, decimal: true },
   duration_seconds: { step: 15, decimal: false },
   distance_meters: { step: 100, decimal: true },
   speed_kmh: { step: 0.5, decimal: true },
@@ -96,6 +98,8 @@ function ActualSetSheet({
         : {
             reps: set.reps_actual,
             weight_kg: set.weight_actual_kg,
+            weight_left_kg: null,
+            weight_right_kg: null,
             duration_seconds: set.duration_actual_seconds,
             distance_meters: set.distance_actual_meters,
             speed_kmh: set.speed_actual_kmh,
