@@ -330,6 +330,166 @@ describe("PATCH /api/users/me/preferences", () => {
   });
 });
 
+// US-47: the password changes, the session stays open (RM-001, DT-07).
+describe("PUT /api/users/me/password", () => {
+  beforeEach(async () => {
+    await authLimiterStore.resetAll();
+  });
+
+  afterEach(async () => {
+    await client.execute("DELETE FROM `user` WHERE username LIKE ?", [
+      `${PREFIX}%`,
+    ]);
+  });
+
+  async function account() {
+    const body = uniqueSignup();
+    const response = await signup(body);
+    expect(response.status).toBe(201);
+    return { ...body, cookie: readSetCookie(response.headers) };
+  }
+
+  function change(cookie: string, payload: object) {
+    return request(app)
+      .put("/api/users/me/password")
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(payload);
+  }
+
+  function login(payload: object) {
+    return request(app)
+      .post("/api/auth/login")
+      .set("Origin", ORIGIN)
+      .send(payload);
+  }
+
+  it("changes the password; the old one does not work any more", async () => {
+    const user = await account();
+
+    const response = await change(user.cookie, {
+      current_password: user.password,
+      new_password: "nouveau-2027",
+      confirm_password: "nouveau-2027",
+    });
+
+    expect(response.status).toBe(204);
+    expect(response.text).toBe("");
+
+    // The session stays open
+    const me = await request(app)
+      .get("/api/auth/me")
+      .set("Cookie", user.cookie);
+    expect(me.status).toBe(200);
+
+    await authLimiterStore.resetAll();
+    const withOld = await login({
+      identifier: user.username,
+      password: user.password,
+    });
+    expect(withOld.status).toBe(401);
+
+    const withNew = await login({
+      identifier: user.username,
+      password: "nouveau-2027",
+    });
+    expect(withNew.status).toBe(200);
+  });
+
+  it("refuses a wrong current password with a 422", async () => {
+    const user = await account();
+
+    const response = await change(user.cookie, {
+      current_password: "pas-le-bon-1",
+      new_password: "nouveau-2027",
+      confirm_password: "nouveau-2027",
+    });
+
+    expect(response.status).toBe(422);
+    expect(response.body.error.code).toBe("WRONG_CURRENT_PASSWORD");
+    expect(response.body.error.field).toBe("current_password");
+  });
+
+  it("refuses a different confirmation and a weak password", async () => {
+    const user = await account();
+
+    const mismatch = await change(user.cookie, {
+      current_password: user.password,
+      new_password: "nouveau-2027",
+      confirm_password: "nouveau-2028",
+    });
+    expect(mismatch.status).toBe(400);
+
+    const weak = await change(user.cookie, {
+      current_password: user.password,
+      new_password: "court",
+      confirm_password: "court",
+    });
+    expect(weak.status).toBe(400);
+
+    // Neither try moved the password
+    await authLimiterStore.resetAll();
+    const stillWorks = await login({
+      identifier: user.username,
+      password: user.password,
+    });
+    expect(stillWorks.status).toBe(200);
+  });
+
+  it("stops the sixth try in fifteen minutes with a 429", async () => {
+    const user = await account();
+
+    // The signup of the account already used one try of the limiter
+    for (let index = 0; index < 4; index += 1) {
+      const response = await change(user.cookie, {
+        current_password: "pas-le-bon-1",
+        new_password: "nouveau-2027",
+        confirm_password: "nouveau-2027",
+      });
+      expect(response.status).toBe(422);
+    }
+
+    const blocked = await change(user.cookie, {
+      current_password: user.password,
+      new_password: "nouveau-2027",
+      confirm_password: "nouveau-2027",
+    });
+    expect(blocked.status).toBe(429);
+  });
+
+  it("never writes the password anywhere it could be read", async () => {
+    const user = await account();
+
+    const response = await change(user.cookie, {
+      current_password: user.password,
+      new_password: "nouveau-2027",
+      confirm_password: "nouveau-2027",
+    });
+
+    expect(response.status).toBe(204);
+    const [rows] = await client.execute<RowDataPacket[]>(
+      "SELECT password_hash FROM `user` WHERE username = ?",
+      [user.username],
+    );
+    const hash = String(rows[0]?.password_hash);
+    expect(hash).toContain("argon2");
+    expect(hash).not.toContain("nouveau-2027");
+  });
+
+  it("refuses an anonymous visitor", async () => {
+    const response = await request(app)
+      .put("/api/users/me/password")
+      .set("Origin", ORIGIN)
+      .send({
+        current_password: "secret-2026",
+        new_password: "nouveau-2027",
+        confirm_password: "nouveau-2027",
+      });
+
+    expect(response.status).toBe(401);
+  });
+});
+
 // The pool is shared by the whole file: it closes once, at the very end.
 afterAll(async () => {
   await client.end();
