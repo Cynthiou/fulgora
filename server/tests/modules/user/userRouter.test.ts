@@ -42,10 +42,6 @@ describe("POST /api/users", () => {
     ]);
   });
 
-  afterAll(async () => {
-    await client.end();
-  });
-
   it("creates the account, opens the session and never returns the hash", async () => {
     const body = uniqueSignup();
 
@@ -149,4 +145,91 @@ describe("POST /api/users", () => {
     expect(response.status).toBe(429);
     expect(response.body.error.code).toBe("TOO_MANY_REQUESTS");
   });
+});
+
+// US-04: the profile changes, the e-mail never does (RM-003).
+describe("PATCH /api/users/me", () => {
+  beforeEach(async () => {
+    await authLimiterStore.resetAll();
+  });
+
+  afterEach(async () => {
+    await client.execute("DELETE FROM `user` WHERE username LIKE ?", [
+      `${PREFIX}%`,
+    ]);
+  });
+
+  // An account, with the cookie of its session.
+  async function account() {
+    const body = uniqueSignup();
+    const response = await signup(body);
+    expect(response.status).toBe(201);
+    return { ...body, cookie: readSetCookie(response.headers) };
+  }
+
+  function patch(cookie: string, payload: object) {
+    return request(app)
+      .patch("/api/users/me")
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(payload);
+  }
+
+  it("changes the pseudo and the illustrations", async () => {
+    const user = await account();
+
+    const response = await patch(user.cookie, {
+      username: `${user.username}x`,
+      sex: "male",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      username: `${user.username}x`,
+      sex: "male",
+      email: user.email,
+    });
+  });
+
+  it("refuses a pseudo already taken, an e-mail and an empty pseudo", async () => {
+    const lea = await account();
+    const other = await account();
+
+    const taken = await patch(lea.cookie, {
+      username: other.username,
+      sex: null,
+    });
+    expect(taken.status).toBe(409);
+    expect(taken.body.error.code).toBe("USERNAME_TAKEN");
+
+    // The e-mail is not part of the schema (RM-003)
+    const withEmail = await patch(lea.cookie, {
+      username: lea.username,
+      sex: null,
+      email: "autre@exemple.fr",
+    });
+    expect(withEmail.status).toBe(400);
+
+    const empty = await patch(lea.cookie, { username: "", sex: null });
+    expect(empty.status).toBe(400);
+
+    // Nothing moved
+    const me = await request(app).get("/api/auth/me").set("Cookie", lea.cookie);
+    expect(me.body.username).toBe(lea.username);
+    expect(me.body.email).toBe(lea.email);
+  });
+
+  it("refuses an anonymous visitor", async () => {
+    const response = await request(app)
+      .patch("/api/users/me")
+      .set("Origin", ORIGIN)
+      .send({ username: "quelquun", sex: null });
+
+    expect(response.status).toBe(401);
+  });
+});
+
+// The pool is shared by the whole file: it closes once, at the very end.
+afterAll(async () => {
+  await client.end();
 });

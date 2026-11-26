@@ -52,6 +52,25 @@ export const signupSchema = z.object({
   terms_accepted: z.literal(true, { error: TERMS_MESSAGE }),
 });
 
+// US-04: the profile changes, nothing else. The e-mail never moves
+// (RM-003): sending it is refused by strict().
+export const SEXES = ["female", "male"] as const;
+
+export const SEX_LABELS: Record<Sex, string> = {
+  female: "Femme",
+  male: "Homme",
+};
+
+export const updateProfileSchema = z
+  .object({
+    username: usernameSchema,
+    // The illustrations only (RM-004); null means "not chosen yet"
+    sex: z.enum(SEXES).nullable(),
+  })
+  .strict();
+
+export type UpdateProfileInput = z.output<typeof updateProfileSchema>;
+
 // What the form sends: the box may still be unchecked at that point.
 export type SignupPayload = {
   username: string;

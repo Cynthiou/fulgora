@@ -48,3 +48,17 @@ export async function readUserByIdentifier(
   );
   return (rows[0] as UserWithHash | undefined) ?? null;
 }
+
+// US-04: the profile of the user. The e-mail is never touched (RM-003).
+export async function updateUserProfile(
+  id: number,
+  username: string,
+  sex: "female" | "male" | null,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("UPDATE `user` SET username = ?, sex = ? WHERE id = ?", [
+    username,
+    sex,
+    id,
+  ]);
+}
