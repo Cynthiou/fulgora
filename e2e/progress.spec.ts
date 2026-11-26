@@ -119,3 +119,43 @@ test("follows the progress of an exercise over two sessions", async ({
   );
   await expect(page.getByRole("list", { name: "Records" })).toBeVisible();
 });
+
+// US-40: beating a maximum writes a notification that opens the progress.
+test("writes a record notification at the end of a session", async ({
+  page,
+}) => {
+  test.slow();
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+
+  // Two sessions of the same exercise: the second one does more
+  for (const reps of [8, 12]) {
+    const session = await doSessionOn(page, todayInParis(), reps);
+    await page.goto(`/seances/${session.appointmentId}`);
+    await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+    await page
+      .getByRole("list", { name: "Exercices du bloc" })
+      .getByRole("link")
+      .first()
+      .click();
+    await page.getByRole("button", { name: "Valider la série 1" }).click();
+    await page.getByRole("button", { name: "Terminer la séance" }).click();
+    await page.getByRole("button", { name: "Terminer", exact: true }).click();
+    await expect(page.getByText("Terminée")).toBeVisible();
+  }
+
+  // NOT-06: the record of the second session
+  await page.goto("/notifications");
+  const record = page.getByRole("link", { name: /répétitions max/ });
+  await expect(record).toBeVisible();
+  await shoot(page, "not-06-record-personnel");
+  await expectNoA11yViolation(page);
+
+  // It opens the progress of the exercise, with its banner
+  await record.click();
+  await expect(page.getByText(/^Nouveau record ·/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "Records" })).toContainText(
+    "12 rép.",
+  );
+});
