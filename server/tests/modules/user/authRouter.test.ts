@@ -1,3 +1,4 @@
+import { DEFAULT_PREFERENCES } from "shared";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
@@ -63,6 +64,7 @@ describe("POST /api/auth/login", () => {
       username: account.username,
       email: account.email,
       sex: null,
+      preferences: DEFAULT_PREFERENCES,
     });
     expect(JSON.stringify(response.body)).not.toContain("argon2");
     expect(readSetCookie(response.headers)).toContain("fulgora_token=");

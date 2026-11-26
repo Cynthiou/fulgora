@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { CurrentWorkoutSession, PublicUser } from "shared";
+import { DEFAULT_PREFERENCES } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AuthContext,
@@ -32,6 +33,7 @@ const lucas: PublicUser = {
   username: "lucas_m",
   email: "lucas.martin@exemple.fr",
   sex: null,
+  preferences: DEFAULT_PREFERENCES,
 };
 
 // 17:34 UTC in November is 18:34 in Paris (PRF-09).

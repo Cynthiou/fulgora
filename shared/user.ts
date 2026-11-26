@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { UserPreferences } from "./preferences.js";
 
 // The user as the client sees it. Never the password hash.
 export type Sex = "female" | "male";
@@ -8,6 +9,8 @@ export type PublicUser = {
   username: string;
   email: string;
   sex: Sex | null;
+  // The units, the alerts and the home indicator (US-05, RM-005)
+  preferences: UserPreferences;
 };
 
 // Messages shown under the fields, as written in the US-01 card.

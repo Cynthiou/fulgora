@@ -1,9 +1,9 @@
 import express from "express";
-import { signupSchema, updateProfileSchema } from "shared";
+import { preferencesSchema, signupSchema, updateProfileSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { authLimiter } from "../../middlewares/rateLimiters.js";
 import { validate } from "../../middlewares/validate.js";
-import { create, updateProfile } from "./userActions.js";
+import { create, updatePreferences, updateProfile } from "./userActions.js";
 
 const userRouter = express.Router();
 
@@ -17,6 +17,14 @@ userRouter.patch(
   authenticate,
   validate({ body: updateProfileSchema }),
   updateProfile,
+);
+
+// PATCH /api/users/me/preferences: one preference or several (US-05).
+userRouter.patch(
+  "/me/preferences",
+  authenticate,
+  validate({ body: preferencesSchema }),
+  updatePreferences,
 );
 
 export default userRouter;

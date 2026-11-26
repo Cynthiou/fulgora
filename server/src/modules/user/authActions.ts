@@ -38,13 +38,8 @@ export const login: RequestHandler = async (req, res) => {
 
   setAuthCookie(res, signToken(found.id));
 
-  const user: PublicUser = {
-    id: found.id,
-    username: found.username,
-    email: found.email,
-    sex: found.sex,
-  };
-  res.json(user);
+  const { password_hash, ...user } = found;
+  res.json(user satisfies PublicUser);
 };
 
 // GET /api/auth/me: who owns the cookie. The id comes from the token only.

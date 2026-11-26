@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import type { ExerciseListItem, PublicUser } from "shared";
+import { DEFAULT_PREFERENCES } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AuthContext,
@@ -39,6 +40,7 @@ const lea: PublicUser = {
   username: "lea.m",
   email: "lea@exemple.fr",
   sex: "female",
+  preferences: DEFAULT_PREFERENCES,
 };
 
 function exercise(id: number, name: string): ExerciseListItem {

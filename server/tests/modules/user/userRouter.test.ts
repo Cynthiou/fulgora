@@ -1,4 +1,5 @@
 import type { RowDataPacket } from "mysql2/promise";
+import { DEFAULT_PREFERENCES } from "shared";
 import request from "supertest";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
@@ -53,6 +54,7 @@ describe("POST /api/users", () => {
       username: body.username,
       email: body.email,
       sex: null,
+      preferences: DEFAULT_PREFERENCES,
     });
     expect(JSON.stringify(response.body)).not.toContain("argon2");
 
@@ -224,6 +226,104 @@ describe("PATCH /api/users/me", () => {
       .patch("/api/users/me")
       .set("Origin", ORIGIN)
       .send({ username: "quelquun", sex: null });
+
+    expect(response.status).toBe(401);
+  });
+});
+
+// US-05: the preferences, one at a time or several (RM-005, DT-11).
+describe("PATCH /api/users/me/preferences", () => {
+  beforeEach(async () => {
+    await authLimiterStore.resetAll();
+  });
+
+  afterEach(async () => {
+    await client.execute("DELETE FROM `user` WHERE username LIKE ?", [
+      `${PREFIX}%`,
+    ]);
+  });
+
+  async function account() {
+    const body = uniqueSignup();
+    const response = await signup(body);
+    expect(response.status).toBe(201);
+    return { ...body, cookie: readSetCookie(response.headers) };
+  }
+
+  function patch(cookie: string, payload: object) {
+    return request(app)
+      .patch("/api/users/me/preferences")
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(payload);
+  }
+
+  it("writes one preference and leaves the others alone", async () => {
+    const user = await account();
+
+    const response = await patch(user.cookie, { weight_unit: "lb" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.preferences).toEqual({
+      ...DEFAULT_PREFERENCES,
+      weight_unit: "lb",
+    });
+  });
+
+  it("writes several preferences at once", async () => {
+    const user = await account();
+
+    const response = await patch(user.cookie, {
+      distance_unit: "mi",
+      home_metric: "none",
+      sound_enabled: false,
+      timer_notification_enabled: true,
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.preferences).toEqual({
+      weight_unit: "kg",
+      distance_unit: "mi",
+      home_metric: "none",
+      sound_enabled: false,
+      vibration_enabled: true,
+      timer_notification_enabled: true,
+    });
+
+    // The next read gives the same thing back
+    const me = await request(app)
+      .get("/api/auth/me")
+      .set("Cookie", user.cookie);
+    expect(me.body.preferences.distance_unit).toBe("mi");
+    expect(me.body.preferences.sound_enabled).toBe(false);
+  });
+
+  it("refuses an unknown column, an unknown value and an empty body", async () => {
+    const user = await account();
+
+    const unknownColumn = await patch(user.cookie, { password_hash: "x" });
+    expect(unknownColumn.status).toBe(400);
+
+    const unknownValue = await patch(user.cookie, { weight_unit: "stone" });
+    expect(unknownValue.status).toBe(400);
+
+    const empty = await patch(user.cookie, {});
+    expect(empty.status).toBe(400);
+
+    // The hash is untouched, and so are the preferences
+    const [rows] = await client.execute<RowDataPacket[]>(
+      "SELECT password_hash, weight_unit FROM `user` WHERE username = ?",
+      [user.username],
+    );
+    expect(String(rows[0]?.password_hash)).toContain("argon2");
+    expect(rows[0]?.weight_unit).toBe("kg");
+  });
+
+  it("refuses an anonymous visitor", async () => {
+    const response = await request(app)
+      .patch("/api/users/me/preferences")
+      .set("Origin", ORIGIN)
+      .send({ weight_unit: "lb" });
 
     expect(response.status).toBe(401);
   });

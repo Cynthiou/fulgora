@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { PublicUser } from "shared";
+import { DEFAULT_PREFERENCES } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   AuthContext,
@@ -23,6 +24,7 @@ const lea: PublicUser = {
   username: "lea.m",
   email: "lea.martin@mail.fr",
   sex: null,
+  preferences: DEFAULT_PREFERENCES,
 };
 
 type Entry = { pathname: string; search?: string; state?: unknown };

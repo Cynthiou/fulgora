@@ -1,12 +1,23 @@
 import type { RequestHandler } from "express";
-import type { PublicUser, SignupInput, UpdateProfileInput } from "shared";
+import {
+  DEFAULT_PREFERENCES,
+  type PublicUser,
+  type SignupInput,
+  type UpdatePreferencesInput,
+  type UpdateProfileInput,
+} from "shared";
 import { readDuplicateKeyName } from "../../database/errors.js";
 import { setAuthCookie } from "../../utils/authCookie.js";
 import { HttpError } from "../../utils/httpError.js";
 import { hashPassword } from "../../utils/password.js";
 import { readUserId } from "../../utils/requestUser.js";
 import { signToken } from "../../utils/token.js";
-import { createUser, readUser, updateUserProfile } from "./userRepository.js";
+import {
+  createUser,
+  readUser,
+  updateUserPreferences,
+  updateUserProfile,
+} from "./userRepository.js";
 
 // Which unique key refused the INSERT tells which field is taken (RM-001).
 function toTakenError(error: unknown): HttpError | null {
@@ -47,7 +58,14 @@ export const create: RequestHandler = async (req, res) => {
 
   setAuthCookie(res, signToken(id));
 
-  const user: PublicUser = { id, username, email, sex: null };
+  // A new account carries the default preferences, like its columns.
+  const user: PublicUser = {
+    id,
+    username,
+    email,
+    sex: null,
+    preferences: DEFAULT_PREFERENCES,
+  };
   res.status(201).json(user);
 };
 
@@ -63,6 +81,19 @@ export const updateProfile: RequestHandler = async (req, res) => {
   } catch (error) {
     throw toTakenError(error) ?? error;
   }
+
+  const user = await readUser(userId);
+  if (user === null) {
+    throw new HttpError(404, "USER_NOT_FOUND", "Ce compte n'existe pas.");
+  }
+  res.json(user);
+};
+
+// PATCH /api/users/me/preferences: the units, the alerts and the home
+// indicator (US-05). Only the fields received are written (RM-005).
+export const updatePreferences: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  await updateUserPreferences(userId, req.body as UpdatePreferencesInput);
 
   const user = await readUser(userId);
   if (user === null) {

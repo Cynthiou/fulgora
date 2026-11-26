@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
+import { DEFAULT_PREFERENCES } from "shared";
 import { describe, expect, it } from "vitest";
 import ProtectedRoute from "../../src/components/ProtectedRoute";
 import {
@@ -43,7 +44,13 @@ function renderAt(path: string, auth: Partial<AuthContextValue>) {
 describe("ProtectedRoute", () => {
   it("shows the private page to a connected user", () => {
     renderAt("/planning?semaine=48", {
-      user: { id: 1, username: "lea.m", email: "lea@exemple.fr", sex: null },
+      user: {
+        id: 1,
+        username: "lea.m",
+        email: "lea@exemple.fr",
+        sex: null,
+        preferences: DEFAULT_PREFERENCES,
+      },
     });
 
     expect(screen.getByText("Page privée")).toBeTruthy();

@@ -4,6 +4,7 @@ import { createMemoryRouter, RouterProvider } from "react-router";
 import {
   type AppointmentListItem,
   type CurrentWorkoutSession,
+  DEFAULT_PREFERENCES,
   formatLongDate,
   type PublicUser,
   todayInParis,
@@ -67,6 +68,7 @@ const lea: PublicUser = {
   username: "lea.m",
   email: "lea@exemple.fr",
   sex: "female",
+  preferences: DEFAULT_PREFERENCES,
 };
 
 function renderHome() {
