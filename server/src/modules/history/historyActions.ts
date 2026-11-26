@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import {
+  getPeriodRange,
   HISTORY_PAGE_SIZE,
   type HistoryAppointment,
   type HistoryDetail,
@@ -19,6 +20,7 @@ import {
   readVersionExercises,
   readVersionSets,
 } from "../appointment/appointmentRepository.js";
+import { readProgram } from "../program/programRepository.js";
 import { buildTree } from "../workout-session/workoutSessionActions.js";
 import { type HistoryRow, readHistory } from "./historyRepository.js";
 
@@ -50,13 +52,33 @@ function toItem(row: HistoryRow): HistoryItem {
 // asked for, to know whether more remain (has_more) without a second query.
 export const browse: RequestHandler = async (req, res) => {
   const userId = readUserId(req);
-  const { offset } = req.query as unknown as HistoryQuery;
+  const query = req.query as unknown as HistoryQuery;
+  const today = todayInParis();
+
+  // A program of somebody else is not a filter, it is a 404 (US-52).
+  if (typeof query.program === "number") {
+    const program = await readProgram(query.program, userId);
+    if (program === null) {
+      throw new HttpError(
+        404,
+        "PROGRAM_NOT_FOUND",
+        "Ce programme n'existe pas.",
+      );
+    }
+  }
+  const range = getPeriodRange(query.period, query.date ?? today);
 
   const rows = await readHistory(
     userId,
-    todayInParis(),
+    today,
     HISTORY_PAGE_SIZE + 1,
-    offset,
+    query.offset,
+    {
+      from: range?.from ?? null,
+      to: range?.to ?? null,
+      program: query.program ?? null,
+      statuses: query.statuses,
+    },
   );
   const page: HistoryPage = {
     items: rows.slice(0, HISTORY_PAGE_SIZE).map(toItem),

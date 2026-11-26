@@ -2,7 +2,9 @@ import { addDays, todayInParis } from "shared";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../../../src/app.js";
-import client from "../../../src/database/client.js";
+import client, {
+  type Result as ResultSetHeader,
+} from "../../../src/database/client.js";
 import {
   createTestAppointment,
   createTestUser,
@@ -200,5 +202,76 @@ describe("GET /api/history/:id", () => {
       404,
     );
     expect((await read("abc", lea.cookie)).status).toBe(400);
+  });
+});
+
+// US-52: the filters of SUI-05f, combined, on the same list.
+describe("GET /api/history avec des filtres", () => {
+  it("keeps only the chosen statuses", async () => {
+    const missed = await browse("?statuses=missed", lea.cookie);
+
+    expect(missed.status).toBe(200);
+    expect(
+      missed.body.items.map((item: { session_name: string }) =>
+        String(item.session_name),
+      ),
+    ).toEqual(["Course"]);
+
+    // Several statuses at once (SUI-05g)
+    const both = await browse("?statuses=missed,unfinished", lea.cookie);
+    expect(
+      both.body.items.map((item: { session_name: string }) =>
+        String(item.session_name),
+      ),
+    ).toEqual(["Dos", "Course"]);
+  });
+
+  it("keeps only the chosen period", async () => {
+    // The week holding the session of three days ago
+    const week = await browse(
+      `?period=week&date=${addDays(today, -3)}`,
+      lea.cookie,
+    );
+
+    expect(
+      week.body.items.every(
+        (item: { history_date: string }) =>
+          item.history_date >= addDays(today, -9),
+      ),
+    ).toBe(true);
+    expect(
+      week.body.items.some(
+        (item: { session_name: string }) => item.session_name === "Dos",
+      ),
+    ).toBe(true);
+
+    // A month far away holds nothing
+    const empty = await browse("?period=month&date=2020-01-15", lea.cookie);
+    expect(empty.body.items).toEqual([]);
+  });
+
+  it("keeps the free sessions, and refuses a program of somebody else", async () => {
+    const free = await browse("?program=free", lea.cookie);
+
+    // Every session of the fixture is free (no program)
+    expect(free.body.items).toHaveLength(3);
+
+    const [created] = await client.execute<ResultSetHeader>(
+      `INSERT INTO program (owner_user_id, name, start_date, end_date, status)
+       VALUES (?, 'Pas le mien', '2026-11-02', '2026-12-13', 'programmed')`,
+      [someoneElse.id],
+    );
+    const programId = created.insertId;
+
+    const response = await browse(`?program=${programId}`, lea.cookie);
+    expect(response.status).toBe(404);
+
+    await client.execute("DELETE FROM program WHERE id = ?", [programId]);
+  });
+
+  it("refuses a status that does not exist", async () => {
+    const response = await browse("?statuses=nimporte", lea.cookie);
+
+    expect(response.status).toBe(400);
   });
 });

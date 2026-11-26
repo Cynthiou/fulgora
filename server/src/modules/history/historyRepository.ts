@@ -22,14 +22,62 @@ export type HistoryRow = {
 // real day), or to confirm, missed, cancelled before today (filed under the
 // planned day). Newest first (RM-050, RM-082). LIMIT and OFFSET travel as
 // text (common rule 8).
+// What the filter panel asks for (US-52). Every piece of SQL below is a
+// constant: only the values travel as parameters.
+export type HistoryFilterSql = {
+  from: string | null;
+  to: string | null;
+  program: "free" | number | null;
+  statuses: string[];
+};
+
+// One line per chosen status, as the list shows it (RM-059).
+const STATUS_SQL: Record<string, string> = {
+  completed: "ws.status = 'completed'",
+  unfinished: "ws.status = 'unfinished'",
+  to_confirm: "(ws.id IS NULL AND a.status = 'to_confirm')",
+  missed: "(ws.id IS NULL AND a.status = 'missed')",
+  cancelled: "(ws.id IS NULL AND a.status = 'cancelled')",
+};
+
 export async function readHistory(
   userId: number,
   today: string,
   limit: number,
   offset: number,
+  filters: HistoryFilterSql = {
+    from: null,
+    to: null,
+    program: null,
+    statuses: [],
+  },
   db: Queryable = client,
 ): Promise<HistoryRow[]> {
-  const [rows] = await db.execute<Rows[]>(
+  const where: string[] = [];
+  const params: unknown[] = [userId, today];
+
+  if (filters.from !== null && filters.to !== null) {
+    where.push(
+      "AND COALESCE(DATE(ws.started_at), a.planned_date) BETWEEN ? AND ?",
+    );
+    params.push(filters.from, filters.to);
+  }
+  if (filters.program === "free") {
+    where.push("AND a.program_id IS NULL");
+  } else if (typeof filters.program === "number") {
+    where.push("AND a.program_id = ?");
+    params.push(filters.program);
+  }
+  const chosen = filters.statuses
+    .map((status) => STATUS_SQL[status])
+    .filter((piece) => piece !== undefined);
+  if (chosen.length > 0) {
+    where.push(`AND (${chosen.join(" OR ")})`);
+  }
+  // query, not execute (the pieces above change): LIMIT takes numbers.
+  params.push(limit, offset);
+
+  const [rows] = await db.query<Rows[]>(
     `SELECT a.id AS appointment_id,
             COALESCE(DATE(ws.started_at), a.planned_date) AS history_date,
             a.planned_date, a.planned_time, a.initial_date, a.moved_manually,
@@ -46,9 +94,10 @@ export async function readHistory(
              OR (ws.id IS NULL
                  AND a.status IN ('to_confirm', 'missed', 'cancelled')
                  AND a.planned_date < ?))
+        ${where.join(" ")}
       ORDER BY history_date DESC, a.id DESC
       LIMIT ? OFFSET ?`,
-    [userId, today, String(limit), String(offset)],
+    params,
   );
   return rows as HistoryRow[];
 }
