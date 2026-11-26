@@ -105,12 +105,14 @@ export async function createTemplateBlockExercise(
   exerciseId: number,
   position: number,
   defaultRestSeconds: number | null,
+  isPerSide = false,
   db: Queryable = client,
 ): Promise<number> {
   const [result] = await db.execute<Result>(
-    `INSERT INTO template_block_exercise (template_block_id, exercise_id, position, default_rest_seconds)
-     VALUES (?, ?, ?, ?)`,
-    [templateBlockId, exerciseId, position, defaultRestSeconds],
+    `INSERT INTO template_block_exercise (template_block_id, exercise_id, position,
+        default_rest_seconds, is_per_side)
+     VALUES (?, ?, ?, ?, ?)`,
+    [templateBlockId, exerciseId, position, defaultRestSeconds, isPerSide],
   );
   return result.insertId;
 }
@@ -124,14 +126,17 @@ export async function createPlannedSet(
 ): Promise<number> {
   const [result] = await db.execute<Result>(
     `INSERT INTO planned_set (template_block_exercise_id, position, reps, weight_kg,
+        weight_left_kg, weight_right_kg,
         duration_seconds, distance_meters, speed_kmh, resistance, incline_percent,
         calories, rest_after_seconds)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       templateBlockExerciseId,
       position,
       set.reps,
       set.weight_kg,
+      set.weight_left_kg,
+      set.weight_right_kg,
       set.duration_seconds,
       set.distance_meters,
       set.speed_kmh,

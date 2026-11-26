@@ -32,8 +32,10 @@ import {
   readWorkoutBlocks,
   readWorkoutExercises,
   readWorkoutSession,
+  readWorkoutSetSides,
   readWorkoutSets,
   type WorkoutSetDbRow,
+  type WorkoutSetSideRow,
 } from "./workoutSessionRepository.js";
 
 // One session at a time (RM-040): the refusal names the one in progress; the
@@ -149,7 +151,10 @@ function toNumber(value: string | number | null): number | null {
   return value === null ? null : Number(value);
 }
 
-export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
+export function toSetRow(
+  row: WorkoutSetDbRow,
+  sides: WorkoutSetSideRow[] = [],
+): WorkoutSetRow {
   return {
     id: row.id,
     position: row.position,
@@ -157,6 +162,8 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
     reps_actual: row.reps_actual,
     weight_planned_kg: toNumber(row.weight_planned_kg),
     weight_actual_kg: toNumber(row.weight_actual_kg),
+    weight_left_planned_kg: toNumber(row.weight_left_planned_kg),
+    weight_right_planned_kg: toNumber(row.weight_right_planned_kg),
     duration_planned_seconds: row.duration_planned_seconds,
     duration_actual_seconds: row.duration_actual_seconds,
     distance_planned_meters: toNumber(row.distance_planned_meters),
@@ -175,6 +182,16 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
     updated_at: row.updated_at === null ? null : row.updated_at.toISOString(),
     // Nothing behind it in the plan: it was added during the session (D-18)
     is_added: row.source_planned_set_id === null,
+    // One row per side filled in (US-51)
+    sides: sides
+      .filter((side) => side.workout_set_id === row.id)
+      .map((side) => ({
+        side: side.side,
+        reps_actual: side.reps_actual,
+        weight_actual_kg: toNumber(side.weight_actual_kg),
+        duration_actual_seconds: side.duration_actual_seconds,
+        validated_at: side.validated_at.toISOString(),
+      })),
   };
 }
 
@@ -190,6 +207,7 @@ export async function buildTree(
   const blocks = await readWorkoutBlocks(id);
   const exercises = await readWorkoutExercises(id);
   const sets = await readWorkoutSets(id);
+  const sides = await readWorkoutSetSides(id);
 
   const exerciseTrees: WorkoutExerciseTree[] = exercises.map((exercise) => ({
     id: exercise.id,
@@ -205,11 +223,12 @@ export async function buildTree(
         ? []
         : (exercise.measure_codes.split(",") as MeasureCode[]),
     is_bodyweight: exercise.is_bodyweight === 1,
+    is_per_side: Number(exercise.is_per_side) === 1,
     default_rest_seconds: exercise.default_rest_seconds,
     is_added: exercise.source_template_block_exercise_id === null,
     sets: sets
       .filter((set) => set.workout_exercise_id === exercise.id)
-      .map(toSetRow),
+      .map((set) => toSetRow(set, sides)),
   }));
 
   const blockTrees: WorkoutBlockTree[] = blocks.map((block) => ({

@@ -151,12 +151,15 @@ export const read: RequestHandler = async (req, res) => {
             ? []
             : (exercise.measure_codes.split(",") as MeasureCode[]),
         is_bodyweight: exercise.is_bodyweight === 1,
+        is_per_side: Number(exercise.is_per_side) === 1,
         default_rest_seconds: exercise.default_rest_seconds,
         sets: sets
           .filter((set) => set.template_block_exercise_id === exercise.id)
           .map((set) => ({
             reps: set.reps,
             weight_kg: toNumber(set.weight_kg),
+            weight_left_kg: toNumber(set.weight_left_kg),
+            weight_right_kg: toNumber(set.weight_right_kg),
             duration_seconds: set.duration_seconds,
             distance_meters: toNumber(set.distance_meters),
             speed_kmh: toNumber(set.speed_kmh),

@@ -68,6 +68,8 @@ function toPlannedSet(row: VersionSetRow): PlannedSetValues {
     ...createEmptySet(),
     reps: row.reps,
     weight_kg: toNumber(row.weight_kg),
+    weight_left_kg: toNumber(row.weight_left_kg),
+    weight_right_kg: toNumber(row.weight_right_kg),
     duration_seconds: row.duration_seconds,
     distance_meters: toNumber(row.distance_meters),
     speed_kmh: toNumber(row.speed_kmh),
@@ -102,6 +104,7 @@ function toDraftExercise(
         ? []
         : (row.measure_codes.split(",") as MeasureCode[]),
     is_bodyweight: row.is_bodyweight === 1,
+    is_per_side: Number(row.is_per_side) === 1,
     default_rest_seconds: row.default_rest_seconds,
     sets: sets.map(toPlannedSet),
   };

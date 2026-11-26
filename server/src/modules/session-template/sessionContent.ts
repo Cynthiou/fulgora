@@ -64,7 +64,13 @@ export async function assertSessionContentValid(
     block.exercises.forEach((exercise, exerciseIndex) => {
       const codes = codesByExercise.get(exercise.exercise_id) ?? [];
       exercise.sets.forEach((set, setIndex) => {
-        const [field] = getDisallowedSetFields(set, codes);
+        // A per-side exercise may carry one load per side (US-51).
+        const [field] = getDisallowedSetFields(
+          set,
+          codes,
+          false,
+          exercise.is_per_side ?? false,
+        );
         if (field !== undefined) {
           throw new HttpError(
             422,
@@ -98,6 +104,7 @@ export async function writeSessionTree(
         exercise.exercise_id,
         exerciseIndex + 1,
         exercise.default_rest_seconds,
+        exercise.is_per_side ?? false,
         db,
       );
       for (const [setIndex, set] of exercise.sets.entries()) {

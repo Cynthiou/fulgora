@@ -217,6 +217,8 @@ export type VersionExerciseRow = {
   // "reps,weight" or null
   measure_codes: string | null;
   is_bodyweight: number;
+  // Done side by side (US-51)
+  is_per_side: number;
 };
 
 // The exercises of a session version with their names, group, equipment and
@@ -238,7 +240,8 @@ export async function readVersionExercises(
               WHERE em.exercise_id = e.id) AS measure_codes,
             EXISTS (SELECT 1 FROM exercise_equipment ee2
                       JOIN equipment eq2 ON eq2.id = ee2.equipment_id
-                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight
+                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight,
+            tbe.is_per_side
        FROM template_block_exercise tbe
        JOIN template_block tb ON tb.id = tbe.template_block_id
        JOIN exercise e ON e.id = tbe.exercise_id
@@ -256,6 +259,9 @@ export type VersionSetRow = {
   position: number;
   reps: number | null;
   weight_kg: string | null;
+  // The two loads of a per-side set (US-51)
+  weight_left_kg: string | null;
+  weight_right_kg: string | null;
   duration_seconds: number | null;
   distance_meters: string | null;
   speed_kmh: string | null;
@@ -273,6 +279,7 @@ export async function readVersionSets(
 ): Promise<VersionSetRow[]> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT ps.id, ps.template_block_exercise_id, ps.position, ps.reps, ps.weight_kg,
+            ps.weight_left_kg, ps.weight_right_kg,
             ps.duration_seconds, ps.distance_meters, ps.speed_kmh, ps.resistance,
             ps.incline_percent, ps.calories, ps.rest_after_seconds
        FROM planned_set ps

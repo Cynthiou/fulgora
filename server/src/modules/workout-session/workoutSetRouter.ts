@@ -1,9 +1,14 @@
 import express from "express";
-import { actualSetSchema, idParamSchema } from "shared";
+import {
+  actualSetSchema,
+  idParamSchema,
+  sideParamsSchema,
+  sideSetSchema,
+} from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
 import { removeSet } from "./workoutAddActions.js";
-import { correctSet, validateSet } from "./workoutSetActions.js";
+import { correctSet, validateSet, validateSide } from "./workoutSetActions.js";
 
 const workoutSetRouter = express.Router();
 
@@ -22,6 +27,15 @@ workoutSetRouter.put(
   authenticate,
   validate({ params: idParamSchema, body: actualSetSchema }),
   correctSet,
+);
+
+// PUT /api/workout-sets/:id/sides/:side: what was done on one side of a
+// per-side set (US-51, B5g).
+workoutSetRouter.put(
+  "/:id/sides/:side",
+  authenticate,
+  validate({ params: sideParamsSchema, body: sideSetSchema }),
+  validateSide,
 );
 
 // DELETE /api/workout-sets/:id: removes a set added during the session

@@ -81,6 +81,7 @@ export const readDeclaration: RequestHandler = async (req, res) => {
     position: block.position,
     instructions: block.instructions,
     is_added: false,
+    sides: [],
     exercises: exerciseRows
       .filter((exercise) => exercise.template_block_id === block.id)
       .map((exercise) => ({
@@ -99,8 +100,10 @@ export const readDeclaration: RequestHandler = async (req, res) => {
             ? []
             : (exercise.measure_codes.split(",") as MeasureCode[]),
         is_bodyweight: exercise.is_bodyweight === 1,
+        is_per_side: Number(exercise.is_per_side) === 1,
         default_rest_seconds: exercise.default_rest_seconds,
         is_added: false,
+        sides: [],
         sets: setRows
           .filter((set) => set.template_block_exercise_id === exercise.id)
           .map((set) => ({
@@ -111,6 +114,8 @@ export const readDeclaration: RequestHandler = async (req, res) => {
             reps_actual: null,
             weight_planned_kg: toNumber(set.weight_kg),
             weight_actual_kg: null,
+            weight_left_planned_kg: toNumber(set.weight_left_kg),
+            weight_right_planned_kg: toNumber(set.weight_right_kg),
             duration_planned_seconds: set.duration_seconds,
             duration_actual_seconds: null,
             distance_planned_meters: toNumber(set.distance_meters),
@@ -127,6 +132,7 @@ export const readDeclaration: RequestHandler = async (req, res) => {
             validated_at: null,
             updated_at: null,
             is_added: false,
+            sides: [],
           })),
       })),
   }));

@@ -47,8 +47,9 @@ export async function copyTemplateExercises(
 ): Promise<void> {
   await db.execute(
     `INSERT INTO workout_exercise (workout_block_id, exercise_id, source_template_block_exercise_id,
-        position, instructions, default_rest_seconds)
-     SELECT wb.id, tbe.exercise_id, tbe.id, tbe.position, tbe.instructions, tbe.default_rest_seconds
+        position, instructions, default_rest_seconds, is_per_side)
+     SELECT wb.id, tbe.exercise_id, tbe.id, tbe.position, tbe.instructions,
+            tbe.default_rest_seconds, tbe.is_per_side
        FROM workout_block wb
        JOIN template_block_exercise tbe ON tbe.template_block_id = wb.source_template_block_id
       WHERE wb.workout_session_id = ?`,
@@ -62,10 +63,12 @@ export async function copyPlannedSets(
 ): Promise<void> {
   await db.execute(
     `INSERT INTO workout_set (workout_exercise_id, source_planned_set_id, position,
-        reps_planned, weight_planned_kg, duration_planned_seconds, distance_planned_meters,
+        reps_planned, weight_planned_kg, weight_left_planned_kg, weight_right_planned_kg,
+        duration_planned_seconds, distance_planned_meters,
         speed_planned_kmh, resistance_planned, incline_planned_percent, calories_planned,
         planned_rest_seconds)
-     SELECT we.id, ps.id, ps.position, ps.reps, ps.weight_kg, ps.duration_seconds,
+     SELECT we.id, ps.id, ps.position, ps.reps, ps.weight_kg,
+            ps.weight_left_kg, ps.weight_right_kg, ps.duration_seconds,
             ps.distance_meters, ps.speed_kmh, ps.resistance, ps.incline_percent, ps.calories,
             ps.rest_after_seconds
        FROM workout_exercise we
@@ -194,6 +197,8 @@ export type WorkoutExerciseRow = {
   // "reps,weight" or null
   measure_codes: string | null;
   is_bodyweight: number;
+  // Done side by side (US-51)
+  is_per_side: number;
   // null when the exercise was added during the session (D-18, RM-043)
   source_template_block_exercise_id: number | null;
 };
@@ -217,7 +222,8 @@ export async function readWorkoutExercises(
               WHERE em.exercise_id = e.id) AS measure_codes,
             EXISTS (SELECT 1 FROM exercise_equipment ee2
                       JOIN equipment eq2 ON eq2.id = ee2.equipment_id
-                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight
+                     WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight,
+            we.is_per_side
        FROM workout_exercise we
        JOIN workout_block wb ON wb.id = we.workout_block_id
        JOIN exercise e ON e.id = we.exercise_id
@@ -237,6 +243,9 @@ export type WorkoutSetDbRow = {
   reps_actual: number | null;
   weight_planned_kg: string | null;
   weight_actual_kg: string | null;
+  // The two planned loads of a per-side set (US-51)
+  weight_left_planned_kg: string | null;
+  weight_right_planned_kg: string | null;
   duration_planned_seconds: number | null;
   duration_actual_seconds: number | null;
   distance_planned_meters: string | null;
@@ -278,6 +287,8 @@ export type WorkoutSetContextRow = {
   workout_session_id: number;
   exercise_id: number;
   status: WorkoutStatus;
+  // The exercise is done side by side (US-51)
+  is_per_side: number;
 };
 
 // One set with what the action must know: whose session, its status and the
@@ -288,7 +299,8 @@ export async function readWorkoutSetContext(
   db: Queryable = client,
 ): Promise<WorkoutSetContextRow | null> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT wset.id, ws.id AS workout_session_id, we.exercise_id, ws.status
+    `SELECT wset.id, ws.id AS workout_session_id, we.exercise_id, ws.status,
+            we.is_per_side
        FROM workout_set wset
        JOIN workout_exercise we ON we.id = wset.workout_exercise_id
        JOIN workout_block wb ON wb.id = we.workout_block_id
@@ -667,4 +679,102 @@ export async function setWorkoutSessionStatus(
     status,
     id,
   ]);
+}
+
+// --- Per-side exercises (US-51) -------------------------------------------
+
+export type WorkoutSetSideRow = {
+  workout_set_id: number;
+  side: "left" | "right";
+  reps_actual: number | null;
+  weight_actual_kg: string | null;
+  duration_actual_seconds: number | null;
+  validated_at: Date;
+};
+
+// What was done on each side, for the whole session (B5g, B6).
+export async function readWorkoutSetSides(
+  workoutSessionId: number,
+  db: Queryable = client,
+): Promise<WorkoutSetSideRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT wss.workout_set_id, wss.side, wss.reps_actual, wss.weight_actual_kg,
+            wss.duration_actual_seconds, wss.validated_at
+       FROM workout_set_side wss
+       JOIN workout_set wset ON wset.id = wss.workout_set_id
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+      WHERE wb.workout_session_id = ?
+      ORDER BY wss.workout_set_id, wss.side`,
+    [workoutSessionId],
+  );
+  return rows as WorkoutSetSideRow[];
+}
+
+// One side recorded, or recorded again (RM-044): the row is written once
+// and updated afterwards.
+export async function upsertWorkoutSetSide(
+  setId: number,
+  side: "left" | "right",
+  values: {
+    reps: number | null;
+    weight_kg: number | null;
+    duration_seconds: number | null;
+  },
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `INSERT INTO workout_set_side (workout_set_id, side, reps_actual,
+        weight_actual_kg, duration_actual_seconds)
+     VALUES (?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE reps_actual = VALUES(reps_actual),
+        weight_actual_kg = VALUES(weight_actual_kg),
+        duration_actual_seconds = VALUES(duration_actual_seconds),
+        updated_at = NOW(3)`,
+    [setId, side, values.reps, values.weight_kg, values.duration_seconds],
+  );
+}
+
+// How many sides of a set are filled in: the set is validated at two.
+export async function countWorkoutSetSides(
+  setId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT COUNT(*) AS total FROM workout_set_side WHERE workout_set_id = ?",
+    [setId],
+  );
+  return Number((rows[0] as { total: number } | undefined)?.total ?? 0);
+}
+
+// A per-side set is validated once both sides are there, and only then
+// (RM-044). The actual columns of the set itself stay empty: each side
+// keeps its own values.
+export async function setWorkoutSetValidated(
+  setId: number,
+  isValidated: boolean,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE workout_set
+        SET validated_at = ${isValidated ? "COALESCE(validated_at, NOW(3))" : "NULL"}
+      WHERE id = ?`,
+    [setId],
+  );
+}
+
+// The sides of one set (after writing one of them).
+export async function readWorkoutSetSidesOfSet(
+  setId: number,
+  db: Queryable = client,
+): Promise<WorkoutSetSideRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT workout_set_id, side, reps_actual, weight_actual_kg,
+            duration_actual_seconds, validated_at
+       FROM workout_set_side
+      WHERE workout_set_id = ?
+      ORDER BY side`,
+    [setId],
+  );
+  return rows as WorkoutSetSideRow[];
 }
