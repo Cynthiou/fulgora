@@ -98,7 +98,7 @@ Une ligne grise en bas ; en cas d'erreur, les lignes affichées restent et « R�
 ## Tâches techniques
 
 - [x] Backend : `historyRepository.readHistory(userId, today, limit, offset)` : rendez-vous + nom de séance + programme + séance réalisée (`LEFT JOIN workout_session`) ; condition `ws.status IN ('completed','unfinished') OR (ws.id IS NULL AND a.status IN ('to_confirm','missed','cancelled') AND a.planned_date < ?)` ; colonne calculée `COALESCE(DATE(ws.started_at), a.planned_date) AS history_date` ; `ORDER BY history_date DESC, a.id DESC LIMIT ? OFFSET ?` (en chaînes)
-- [ ] Backend : vérifier avec `EXPLAIN` que l'index `ix_appointment_calendar` est utilisé
+- [x] Backend : vérifier avec `EXPLAIN` que l'index `ix_appointment_calendar` est utilisé (vérifié le 27/11 : `type: ref`, `key: ix_appointment_calendar`)
 - [x] Backend : `historyActions.browse` (demande 21 lignes pour savoir s'il en reste : `has_more`)
 - [x] Backend : `historyRouter.ts` : `GET /api/history?offset=` → `authenticate` → `validate` → action
 - [x] Shared : `shared/history.ts` : `getHistoryStatus(row)` (`completed`, `unfinished`, `to_confirm`, `missed`, `cancelled`), `groupByWeek(rows)` (lundi → dimanche), `formatWeekLabel` (« SEMAINE DU 23 NOV. »), `formatDayBadge` (« JEU 26 »)

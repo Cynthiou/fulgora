@@ -75,7 +75,7 @@ Message, saisies conservées.
 
 - [x] Backend : `correctWorkoutSet` : `_actual`, `validated_at = COALESCE(validated_at, NOW(3))`, `updated_at = NOW(3)` ; contexte : séance `completed` ou `unfinished` de l'utilisateur
 - [x] Backend : ajout et suppression réutilisent US-32 avec le statut de séance terminé autorisé
-- [ ] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus (US-40 pas encore construite)
+- [x] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus (fait avec l'US-40)
 - [x] Frontend : `WorkoutPage` en mode `correction` ; bandeau ; retour au détail
 - [x] Tests : back : correction, `validated_at` conservé, `updated_at` rempli, prévu inchangé, séance en cours → 409, record corrigé à la baisse retiré
 

@@ -80,7 +80,7 @@ Le côté fait reste ; la série compte comme non faite dans « séries réalis�
 - [x] BDD : table `workout_set_side (workout_set_id, side ENUM('left','right'), reps_actual, weight_actual_kg, duration_actual_seconds, validated_at, PRIMARY KEY (workout_set_id, side))`, clé étrangère vers `workout_set` en `RESTRICT`
 - [x] Shared : `sessionDraftSchema` : `is_per_side`, charges gauche / droite (seulement si `is_per_side`) ; `computeTonnage` et `formatSetSummary` gèrent les deux côtés
 - [x] Backend : copie au démarrage (US-28) étendue aux nouvelles colonnes ; `upsertWorkoutSetSide` (`INSERT … ON DUPLICATE KEY UPDATE`) ; la série passe `validated_at` quand les deux côtés existent
-- [ ] Backend : suppression d'un compte (US-06) étendue à `workout_set_side` (US-06 pas encore construite)
+- [x] Backend : suppression d'un compte (US-06) étendue à `workout_set_side` (fait avec l'US-06)
 - [x] Frontend : `PerSideFields.tsx` (A7e, A7f), `PerSideSetEntry.tsx` (B5g), `PerSideDurationTimer.tsx` (B5h)
 - [x] Tests : back : un côté → série non validée ; deux côtés → validée ; tonnage G / D ; abandon après le côté gauche ; unitaires `computeTonnage` côté par côté
 - [x] Tests : E2E curl à charge différente G / D
