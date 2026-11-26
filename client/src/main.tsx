@@ -31,6 +31,7 @@ import SessionEditorPage from "./features/session-template/pages/SessionEditorPa
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
+import DeclareAfterwardsPage from "./features/workout-session/pages/DeclareAfterwardsPage";
 import WorkoutExercisePage from "./features/workout-session/pages/WorkoutExercisePage";
 import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
 import WorkoutSummaryPage from "./features/workout-session/pages/WorkoutSummaryPage";
@@ -104,6 +105,10 @@ const router = createBrowserRouter([
                 element: <PlannedSessionPage />,
               },
               // Changing a planned session (US-17)
+              {
+                path: "/seances/:appointmentId/declarer",
+                element: <DeclareAfterwardsPage />,
+              },
               {
                 path: "/seances/:appointmentId/modifier",
                 element: <EditSessionPage />,

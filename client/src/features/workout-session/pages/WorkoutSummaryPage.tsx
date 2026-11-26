@@ -102,6 +102,12 @@ function WorkoutSummaryPage() {
               >
                 {session.status === "completed" ? "✓ Terminée" : "Inachevée"}
               </span>
+              {/* Written after the fact, not lived in the app (US-38) */}
+              {session.declared_afterwards && (
+                <span className="rounded-chip bg-neutral/[0.06] px-2 py-[3px] text-[11px] font-bold text-muted">
+                  Déclarée après coup
+                </span>
+              )}
               <p className="font-display text-display-lg font-extrabold uppercase italic">
                 {session.status === "completed"
                   ? "Bien joué"

@@ -53,6 +53,7 @@ const completed: WorkoutSessionTree = {
   started_at: "2026-11-26T07:00:00.000Z",
   ended_at: "2026-11-26T07:48:00.000Z",
   auto_closed: false,
+  declared_afterwards: false,
   blocks: [
     {
       id: 1,

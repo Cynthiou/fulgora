@@ -1,6 +1,8 @@
 import type {
   ActualSetValues,
   CurrentWorkoutSession,
+  DeclarationPlan,
+  DeclareDoneInput,
   WorkoutSessionTree,
   WorkoutSetRow,
   WorkoutStarted,
@@ -110,5 +112,28 @@ export function addWorkoutBlock(
   return apiFetch(`/workout-sessions/${sessionId}/blocks`, {
     method: "POST",
     body: JSON.stringify({ name, exercise_ids: exerciseIds }),
+  });
+}
+
+// GET /api/appointments/:id/declaration: the plan of a past session, to
+// confirm set by set (US-38).
+export function readDeclaration(
+  appointmentId: number,
+  signal?: AbortSignal,
+): Promise<DeclarationPlan> {
+  return apiFetch<DeclarationPlan>(
+    `/appointments/${appointmentId}/declaration`,
+    { signal },
+  );
+}
+
+// POST /api/appointments/:id/declare-done: the session written after coup.
+export function declareSessionDone(
+  appointmentId: number,
+  input: DeclareDoneInput,
+): Promise<{ id: number }> {
+  return apiFetch(`/appointments/${appointmentId}/declare-done`, {
+    method: "POST",
+    body: JSON.stringify(input),
   });
 }

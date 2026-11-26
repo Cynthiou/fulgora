@@ -61,6 +61,7 @@ const done: HistoryDetail = {
     started_at: "2026-11-19T06:02:00.000Z",
     ended_at: "2026-11-19T06:54:00.000Z",
     auto_closed: false,
+    declared_afterwards: false,
     blocks: [
       {
         id: 1,

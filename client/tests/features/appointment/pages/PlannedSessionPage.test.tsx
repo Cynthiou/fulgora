@@ -83,6 +83,10 @@ function renderPage() {
         path: "/seances/:appointmentId/modifier",
         element: <p>Page modifier</p>,
       },
+      {
+        path: "/seances/:appointmentId/declarer",
+        element: <p>Page déclarer</p>,
+      },
       { path: "/entrainement/:id", element: <WorkoutStub /> },
     ],
     { initialEntries: ["/", "/seances/12"], initialIndex: 1 },
@@ -443,14 +447,14 @@ describe("PlannedSessionPage · confirmer une séance passée (US-27)", () => {
         /Sans réponse, elle passera « Manquée » le samedi 28 novembre à 00 h\./,
       ),
     ).toBeTruthy();
-    // Writing the results after the fact is US-38
+    // "Je l'ai faite" opens the declaration screen (US-38)
     expect(
       (
         screen.getByRole("button", {
           name: "Je l'ai faite",
         }) as HTMLButtonElement
       ).disabled,
-    ).toBe(true);
+    ).toBe(false);
 
     readAppointmentMock.mockResolvedValue({ ...toConfirm, status: "missed" });
     await user.click(screen.getByRole("button", { name: "Pas faite" }));

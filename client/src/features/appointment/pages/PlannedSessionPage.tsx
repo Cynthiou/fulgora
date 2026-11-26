@@ -307,6 +307,7 @@ function PlannedSessionPage() {
                   setMoveError(null);
                   setIsMoving(true);
                 }}
+                onDeclare={() => navigate(`/seances/${id}/declarer`)}
               />
             )}
 
@@ -402,6 +403,14 @@ function PlannedSessionPage() {
               <p className="text-center font-semibold text-muted">
                 Dis-nous si tu l'as faite.
               </p>
+            ) : appointment.status === "missed" ? (
+              // A missed session is declared done whenever (RM-054, US-38)
+              <Link
+                to={`/seances/${appointment.id}/declarer`}
+                className={PRIMARY_BUTTON}
+              >
+                Je l'ai faite
+              </Link>
             ) : isCancelled ? (
               <p className="text-center font-semibold text-muted">
                 Ce rendez-vous est annulé.

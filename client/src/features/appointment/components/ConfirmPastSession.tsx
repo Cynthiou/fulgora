@@ -13,6 +13,8 @@ type Props = {
   error: string | null;
   onNotDone: () => void;
   onMove: () => void;
+  // Opens CAL-08b, where the results are written after the fact (US-38)
+  onDeclare: () => void;
 };
 
 // Screen CAL-08: a session whose day is past and which was never started.
@@ -20,12 +22,14 @@ type Props = {
 // here come the question and the three answers. "Je l'ai faite" writes the
 // results after the fact (US-38), so it waits; "Pas faite" marks it missed
 // right away, and it can still be declared done later (RM-054, RM-067).
+// "Je l'ai faite" opens CAL-08b (US-38).
 function ConfirmPastSession({
   plannedDate,
   isSending,
   error,
   onNotDone,
   onMove,
+  onDeclare,
 }: Props) {
   return (
     <section
@@ -67,19 +71,15 @@ function ConfirmPastSession({
         </button>
       </div>
 
-      {/* Writing the results after the fact is US-38. */}
       <button
         type="button"
-        disabled
-        aria-describedby="declare-later"
+        onClick={onDeclare}
+        disabled={isSending}
         className="flex h-btn items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
       >
         <Icon src={checkIcon} className="size-[18px]" />
         Je l'ai faite
       </button>
-      <p id="declare-later" className="text-center text-xs text-muted">
-        Saisir les résultats après coup arrive bientôt.
-      </p>
     </section>
   );
 }
