@@ -70,14 +70,14 @@ Elle n'est jamais déplacée.
 
 ## Tâches techniques
 
-- [ ] Shared : `planScheduleChange(program, schedules, appointments, changes, today)` : fonction pure qui renvoie les rendez-vous à déplacer, à créer, à annuler et inchangés (utilisée pour l'aperçu et l'application)
-- [ ] Backend : `deactivateWeeklySchedule(id, at)`, `createWeeklySchedule`, `readFutureAppointmentsForUpdate(programId, today)` (`FOR UPDATE`), `moveAppointmentsToSchedule`, `createAppointments`, `cancelAppointments`, `createProgramChange(programId, type, old, new)`
-- [ ] Backend : `programActions.previewSchedule` et `programActions.updateSchedule` dans `withTransaction`
-- [ ] Frontend : `EditProgramPage.tsx` (PRO-08) avec aperçu recalculé à chaque changement (`useDebouncedValue`)
-- [ ] Tests : unitaires `planScheduleChange` (déplacé à la main conservé, passé intact, séance en cours intacte, fin reculée, fin avancée) ; back : application = aperçu, trace `program_change`
-- [ ] Tests : E2E samedi → dimanche
+- [x] Shared : `planScheduleChange(program, schedules, appointments, changes, today)` : fonction pure qui renvoie les rendez-vous à déplacer, à créer, à annuler et inchangés (utilisée pour l'aperçu et l'application)
+- [x] Backend : `deactivateWeeklySchedule(id, at)`, `createWeeklySchedule`, `readFutureAppointmentsForUpdate(programId, today)` (`FOR UPDATE`), `moveAppointmentsToSchedule`, `createAppointments`, `cancelAppointments`, `createProgramChange(programId, type, old, new)`
+- [x] Backend : `programActions.previewSchedule` et `programActions.updateSchedule` dans `withTransaction`
+- [x] Frontend : `EditProgramPage.tsx` (PRO-08) avec aperçu recalculé à chaque changement (`useDebouncedValue`)
+- [x] Tests : unitaires `planScheduleChange` (déplacé à la main conservé, passé intact, séance en cours intacte, fin reculée, fin avancée) ; back : application = aperçu, trace `program_change`
+- [x] Tests : E2E samedi → dimanche
 
 ## Definition of Done
 
-- [ ] L'aperçu et l'application donnent exactement le même résultat (test)
+- [x] L'aperçu et l'application donnent exactement le même résultat (test)
 - [ ] Code relu et fusionné via pull request
