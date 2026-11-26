@@ -7,9 +7,12 @@ import {
   computeProgramStatus,
   countProgramAppointments,
   countProgramWeeks,
+  describeAbandon,
   describeAddedSessions,
   describeDayAfterAdding,
+  describeProgramDeletion,
   describeRemovedDay,
+  formatDateList,
   formatPeriod,
   formatPeriodShort,
   formatProgramProgress,
@@ -263,15 +266,25 @@ describe("seeing a program (US-48)", () => {
       canDelete: true,
       canReuse: false,
     });
+    // Nothing started yet: the program is thrown away, not given up
     expect(getAvailableProgramActions({ status: "in_progress" })).toEqual({
+      canEdit: true,
+      canAbandon: false,
+      canDelete: true,
+      canReuse: false,
+    });
+    // One session started: the other way round (US-21)
+    expect(
+      getAvailableProgramActions({ status: "in_progress" }, false, 1),
+    ).toEqual({
       canEdit: true,
       canAbandon: true,
       canDelete: false,
       canReuse: false,
     });
-    // A session in progress holds the program (RM-045)
+    // A session in progress holds the program (RM-034)
     expect(
-      getAvailableProgramActions({ status: "in_progress" }, true).canAbandon,
+      getAvailableProgramActions({ status: "in_progress" }, true, 1).canAbandon,
     ).toBe(false);
     expect(getAvailableProgramActions({ status: "finished" })).toEqual({
       canEdit: false,
@@ -323,5 +336,43 @@ describe("several sessions on the same day (US-19)", () => {
       "Le lundi aura 2 séances : « Haut du corps » à 18:30 et celle-ci.",
     );
     expect(describeDayAfterAdding(week, 2)).toBeNull();
+  });
+});
+
+// US-21: what the two dialogs say before stopping a program.
+describe("stopping a program (US-21)", () => {
+  it("writes the dates of the sessions to cancel, month by month", () => {
+    expect(
+      formatDateList([
+        "2026-11-26",
+        "2026-12-03",
+        "2026-12-10",
+        "2026-12-17",
+        "2026-12-25",
+      ]),
+    ).toBe("26 nov., 3, 10, 17 et 25 déc.");
+    expect(formatDateList(["2026-12-03"])).toBe("3 déc.");
+    expect(formatDateList([])).toBe("");
+  });
+
+  it("says what the abandon cancels and what it keeps (PRO-11)", () => {
+    expect(describeAbandon(["2026-11-26", "2026-12-03"], 3)).toBe(
+      "Les 2 séances à venir (26 nov. et 3 déc.) seront annulées. Tes 3 séances passées et leurs résultats sont conservés.",
+    );
+    expect(describeAbandon(["2026-11-26"], 1)).toBe(
+      "La séance à venir (26 nov.) sera annulée. Ta séance passée et ses résultats sont conservés.",
+    );
+    expect(describeAbandon([], 0)).toBe(
+      "Aucune séance à venir ne sera annulée. Rien de ce qui est passé ne change.",
+    );
+  });
+
+  it("says what the deletion removes (PRO-11c)", () => {
+    expect(describeProgramDeletion(24)).toBe(
+      "Aucune séance n'a été démarrée. Les 24 séances prévues seront retirées du Planning.",
+    );
+    expect(describeProgramDeletion(1)).toBe(
+      "Aucune séance n'a été démarrée. La séance prévue sera retirée du Planning.",
+    );
   });
 });

@@ -456,32 +456,90 @@ export function getProgramWeekIndex(
 }
 
 export type ProgramActions = {
-  // Change the period, the days or a session (US-19, US-21)
+  // Change the period, the days or a session (US-19, US-20)
   canEdit: boolean;
-  // Give up the rest of the program (US-20)
+  // Give up the rest of the program (US-21)
   canAbandon: boolean;
-  // Throw away a draft (US-18)
+  // Throw the program away, with everything it holds (US-21)
   canDelete: boolean;
   // Build a new program from this one (US-22)
   canReuse: boolean;
 };
 
-// What the "⋯" menu offers, state by state (PRO-07b). A program with a
-// session in progress cannot be given up before it ends (RM-045).
+// What the "⋯" menu offers, state by state (PRO-07b). The menu shows
+// "Abandonner" or "Supprimer", never both: a program nobody has started
+// disappears whole, one already lived is given up and kept (US-21). A
+// session in progress holds the program until it ends (RM-034).
 export function getAvailableProgramActions(
   program: { status: ProgramStatus },
   hasInProgressSession = false,
+  startedCount = 0,
 ): ProgramActions {
   const { status } = program;
+  const isRunning = status === "programmed" || status === "in_progress";
   return {
-    canEdit:
-      status === "draft" || status === "programmed" || status === "in_progress",
-    canAbandon:
-      (status === "programmed" || status === "in_progress") &&
-      !hasInProgressSession,
-    canDelete: status === "draft",
+    canEdit: status === "draft" || isRunning,
+    canAbandon: isRunning && startedCount > 0 && !hasInProgressSession,
+    canDelete: status === "draft" || (isRunning && startedCount === 0),
     canReuse: status === "finished" || status === "abandoned",
   };
+}
+
+// --- Stopping a program (US-21) --------------------------------------------
+
+// "26 nov., 3, 10, 17 et 25 déc.": the month is written only when it
+// changes, and the last date comes after "et" (PRO-11).
+export function formatDateList(dates: string[]): string {
+  const month = (date: string) =>
+    new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "UTC",
+      month: "short",
+    }).format(new Date(`${date}T00:00:00Z`));
+  const written = dates.map((date, index) => {
+    const next = dates[index + 1];
+    const day = Number(date.slice(8, 10));
+    return next !== undefined && month(next) === month(date)
+      ? `${day}`
+      : `${day} ${month(date)}`;
+  });
+  if (written.length <= 1) {
+    return written.join("");
+  }
+  return `${written.slice(0, -1).join(", ")} et ${written.at(-1)}`;
+}
+
+// "Les 5 séances à venir (26 nov., 3, 10, 17 et 25 déc.) seront annulées.
+// Tes 3 séances passées et leurs résultats sont conservés." (PRO-11)
+export function describeAbandon(
+  futureDates: string[],
+  pastCount: number,
+): string {
+  const future =
+    futureDates.length === 0
+      ? "Aucune séance à venir ne sera annulée."
+      : futureDates.length === 1
+        ? `La séance à venir (${formatDateList(futureDates)}) sera annulée.`
+        : `Les ${futureDates.length} séances à venir (${formatDateList(
+            futureDates,
+          )}) seront annulées.`;
+  const past =
+    pastCount === 0
+      ? "Rien de ce qui est passé ne change."
+      : pastCount === 1
+        ? "Ta séance passée et ses résultats sont conservés."
+        : `Tes ${pastCount} séances passées et leurs résultats sont conservés.`;
+  return `${future} ${past}`;
+}
+
+// "Aucune séance n'a été démarrée. Les 24 séances prévues seront retirées
+// du Planning." (PRO-11c)
+export function describeProgramDeletion(count: number): string {
+  if (count === 0) {
+    return "Aucune séance n'a été démarrée. Ce programme n'a rien mis dans le Planning.";
+  }
+  return count === 1
+    ? "Aucune séance n'a été démarrée. La séance prévue sera retirée du Planning."
+    : `Aucune séance n'a été démarrée. Les ${count} séances prévues seront retirées du Planning.`;
 }
 
 // "16 séances prévues · 88 % réalisées" (PRO-13).
