@@ -66,14 +66,19 @@ test("adds a block through the type panel, names it, removes it and undoes", asy
 
   // Back on the session: the card, then remove and undo
   await expect(page.getByText("1 bloc")).toBeVisible();
-  await expect(page.getByText("Classique · Force")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Ouvrir le bloc Classique · Force" }),
+  ).toBeVisible();
   await page
-    .getByRole("button", { name: "Retirer le bloc Classique · Force" })
+    .getByRole("button", { name: "Options du bloc Classique · Force" })
     .click();
+  await page.getByRole("button", { name: "Retirer", exact: true }).click();
   await expect(page.getByText("0 bloc")).toBeVisible();
   await expect(page.getByText("Bloc retiré")).toBeVisible();
   await page.getByRole("button", { name: "Annuler" }).click();
-  await expect(page.getByText("Classique · Force")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Ouvrir le bloc Classique · Force" }),
+  ).toBeVisible();
   await expect(page.getByText("1 bloc")).toBeVisible();
 });
 
@@ -165,7 +170,9 @@ test("starts a session from the catalog with « Sélectionner » and « Ajouter 
     "Nouvelle séance",
   );
   await expect(page.getByText("1 bloc")).toBeVisible();
-  await expect(page.getByText("Classique · Bloc 1")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Ouvrir le bloc Classique · Bloc 1" }),
+  ).toBeVisible();
   await expect(page.getByText(/n'a pas encore d'exercice/)).toHaveCount(0);
 });
 

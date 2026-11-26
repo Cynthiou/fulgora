@@ -132,10 +132,13 @@ test("captures the screens of the MVP", async ({ page }) => {
     .click();
   await expect(page.getByText("2 exercices")).toBeVisible();
   await shoot(page, "a6-bloc-avec-exercices");
+  // Each row holds three buttons: the handle, the row itself, then the "⋯".
   await page
     .getByRole("list", { name: "Exercices du bloc" })
-    .getByRole("button")
+    .getByRole("listitem")
     .first()
+    .getByRole("button")
+    .nth(1)
     .click();
   await expect(page.getByText("Préparation · Objectifs prévus")).toBeVisible();
   await shoot(page, "a7-configurer-les-series");
