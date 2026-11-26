@@ -68,7 +68,8 @@ export function activateProgram(id: number): Promise<ProgramCreated> {
   });
 }
 
-// DELETE /api/programs/:id: a draft thrown away.
+// DELETE /api/programs/:id: a program nobody has started, thrown away with
+// its appointments, its rules and its prepared sessions (US-21, DT-25).
 export function deleteProgramDraft(id: number): Promise<void> {
   return apiFetch(`/programs/${id}`, { method: "DELETE" });
 }
@@ -156,5 +157,13 @@ export function updateProgramSchedule(
   return apiFetch<ProgramDetailFull>(`/programs/${id}/schedule`, {
     method: "PUT",
     body: JSON.stringify(input),
+  });
+}
+
+// POST /api/programs/:id/abandon: the rest of the program is given up,
+// the past is kept (US-21, PRO-11).
+export function abandonProgram(id: number): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(`/programs/${id}/abandon`, {
+    method: "POST",
   });
 }

@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
   computeProgramProgress,
+  describeAbandon,
+  describeProgramDeletion,
   formatLongDate,
   formatPeriodShort,
   formatProgramProgress,
   formatProgramReview,
+  formatTimeOfDay,
   formatWeekdays,
   getAppointmentStatus,
   getAvailableProgramActions,
@@ -18,9 +21,13 @@ import {
   type ProgramStatus,
   todayInParis,
 } from "shared";
+import alertIcon from "../../../assets/icons/ui/app/alert.svg";
 import checkIcon from "../../../assets/icons/ui/app/check.svg";
 import dotsIcon from "../../../assets/icons/ui/app/dots.svg";
 import playIcon from "../../../assets/icons/ui/app/play.svg";
+import stopIcon from "../../../assets/icons/ui/app/stop.svg";
+import trashIcon from "../../../assets/icons/ui/app/trash.svg";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
@@ -32,7 +39,11 @@ import { useStartWorkout } from "../../workout-session/hooks/useStartWorkout";
 import ProgramActionsSheet from "../components/ProgramActionsSheet";
 import ProgramSessionRow from "../components/ProgramSessionRow";
 import ProgramWeekGrid from "../components/ProgramWeekGrid";
-import { readProgram } from "../services/programService";
+import {
+  abandonProgram,
+  deleteProgramDraft,
+  readProgram,
+} from "../services/programService";
 
 const PRIMARY_BUTTON =
   "flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60";
@@ -78,6 +89,11 @@ function ProgramDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // The dialogs that stop a program (PRO-11, PRO-11b, PRO-11c)
+  const [isStopping, setIsStopping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [stopError, setStopError] = useState<string | null>(null);
+  const [stopped, setStopped] = useState<string | null>(null);
   const start = useStartWorkout();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is listed on purpose, it re-runs the load
@@ -116,10 +132,55 @@ function ProgramDetailPage() {
       item.workout_session !== null &&
       item.workout_session.status === "in_progress",
   );
+  // Sessions that were really started: they decide between giving up the
+  // program and throwing it away (US-21).
+  const startedCount = appointments.filter(
+    (item) => item.workout_session !== null,
+  ).length;
   const actions = getAvailableProgramActions(
     { status: program?.status ?? "draft" },
     running !== undefined,
+    startedCount,
   );
+  // What an abandon would cancel: from today on, nothing started yet.
+  const toCancel = appointments
+    .filter(
+      (item) =>
+        item.planned_date >= today &&
+        item.status === "planned" &&
+        item.workout_session === null,
+    )
+    .map((item) => item.planned_date);
+
+  async function stop() {
+    if (program === null || isSending) {
+      return;
+    }
+    setIsSending(true);
+    setStopError(null);
+    try {
+      if (startedCount > 0) {
+        const updated = await abandonProgram(id);
+        setProgram(updated);
+        setStopped("Programme abandonné.");
+        setIsStopping(false);
+      } else {
+        await deleteProgramDraft(id);
+        navigate("/programmes", {
+          replace: true,
+          state: { flash: "Programme supprimé." },
+        });
+      }
+    } catch (caught: unknown) {
+      setStopError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible d'arrêter ce programme.",
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }
 
   // The session of the day that can still be started (RM-069).
   const todaySession = appointments.find(
@@ -206,6 +267,23 @@ function ProgramDetailPage() {
 
         {!isLoading && program !== null && error === null && !notFound && (
           <>
+            {stopError !== null && (
+              <p role="alert" className="text-sm font-semibold">
+                {stopError}
+              </p>
+            )}
+            {stopped !== null && (
+              <p
+                role="status"
+                className="flex items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+              >
+                <Icon
+                  src={checkIcon}
+                  className="size-[18px] shrink-0 text-status-done"
+                />
+                {stopped}
+              </p>
+            )}
             {flash !== null && (
               <p
                 role="status"
@@ -451,9 +529,59 @@ function ProgramDetailPage() {
         )}
       </div>
 
+      {isStopping && program !== null && running !== undefined && (
+        <ConfirmDialog
+          icon={alertIcon}
+          title="Abandon impossible"
+          message={`La séance « ${running.session_name} » de ce programme est en cours depuis ${formatTimeOfDay(
+            new Date(running.workout_session?.started_at ?? ""),
+          )}. Termine-la ou abandonne-la d'abord.`}
+          confirmLabel="Reprendre la séance"
+          cancelLabel="Fermer"
+          onConfirm={() => navigate(`/entrainement/${running.id}`)}
+          onCancel={() => setIsStopping(false)}
+        />
+      )}
+
+      {isStopping && program !== null && running === undefined && (
+        <ConfirmDialog
+          tone="danger"
+          icon={startedCount > 0 ? stopIcon : trashIcon}
+          title={
+            startedCount > 0
+              ? `Abandonner « ${program.name} » ?`
+              : `Supprimer « ${program.name} » ?`
+          }
+          message={
+            startedCount > 0
+              ? describeAbandon(toCancel, startedCount)
+              : describeProgramDeletion(appointments.length)
+          }
+          confirmLabel={
+            startedCount > 0
+              ? "Abandonner le programme"
+              : "Supprimer le programme"
+          }
+          cancelLabel="Garder le programme"
+          isSending={isSending}
+          onConfirm={stop}
+          onCancel={() => setIsStopping(false)}
+        />
+      )}
+
       {isMenuOpen && (
         <ProgramActionsSheet
           actions={actions}
+          hasStarted={startedCount > 0}
+          onStop={
+            actions.canAbandon || actions.canDelete || running !== undefined
+              ? () => {
+                  setIsMenuOpen(false);
+                  setStopError(null);
+                  setIsStopping(true);
+                }
+              : null
+          }
           onEdit={
             program?.status === "programmed" ||
             program?.status === "in_progress"

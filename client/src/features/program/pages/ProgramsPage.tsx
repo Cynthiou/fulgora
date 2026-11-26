@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import {
   computeProgramStatus,
   formatPeriodShort,
@@ -66,6 +66,9 @@ function describeList(items: ProgramListItem[], today: string): string {
 // ready (RM-071).
 function ProgramsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // "Programme supprimé.", handed over by PRO-11c (US-21)
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   const today = todayInParis();
   const [items, setItems] = useState<ProgramListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -127,6 +130,14 @@ function ProgramsPage() {
       />
 
       <div className="flex flex-1 flex-col gap-2.5 px-[18px] pt-1 pb-24">
+        {flash !== null && (
+          <p
+            role="status"
+            className="rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+          >
+            {flash}
+          </p>
+        )}
         {isLoading && <LoadingState label="Chargement des programmes…" />}
 
         {!isLoading && error !== null && (
