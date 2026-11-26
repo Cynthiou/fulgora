@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   describeHistoryDates,
+  describeHistoryFilters,
   formatDayBadge,
+  formatPeriodLabel,
   formatWeekLabel,
   getHistoryStatus,
+  getPeriodRange,
   groupByWeek,
   type HistoryItem,
   historyQuerySchema,
+  shiftPeriod,
   startOfWeek,
 } from "../history.js";
 
@@ -93,9 +97,84 @@ describe("history helpers (US-35)", () => {
     expect(describeHistoryDates(item({}))).toEqual([]);
   });
 
-  it("reads the offset of the query", () => {
-    expect(historyQuerySchema.parse({})).toEqual({ offset: 0 });
-    expect(historyQuerySchema.parse({ offset: "20" })).toEqual({ offset: 20 });
+  it("reads the offset and the filters of the query", () => {
+    // Nothing asked: the first page, no filter (US-35, US-52)
+    expect(historyQuerySchema.parse({})).toEqual({
+      offset: 0,
+      period: "all",
+      statuses: [],
+    });
+    expect(historyQuerySchema.parse({ offset: "20" })).toMatchObject({
+      offset: 20,
+    });
     expect(historyQuerySchema.safeParse({ offset: "-1" }).success).toBe(false);
+
+    expect(
+      historyQuerySchema.parse({
+        period: "month",
+        date: "2026-11-15",
+        program: "free",
+        statuses: "missed,cancelled",
+      }),
+    ).toEqual({
+      offset: 0,
+      period: "month",
+      date: "2026-11-15",
+      program: "free",
+      statuses: ["missed", "cancelled"],
+    });
+    expect(historyQuerySchema.parse({ program: "12" }).program).toBe(12);
+    expect(historyQuerySchema.safeParse({ statuses: "nimporte" }).success).toBe(
+      false,
+    );
+    expect(historyQuerySchema.safeParse({ period: "année" }).success).toBe(
+      false,
+    );
+  });
+
+  it("gives the first and the last day of a period (US-52)", () => {
+    expect(getPeriodRange("all", "2026-11-26")).toBeNull();
+    expect(getPeriodRange("week", "2026-11-26")).toEqual({
+      from: "2026-11-23",
+      to: "2026-11-29",
+    });
+    expect(getPeriodRange("month", "2026-11-26")).toEqual({
+      from: "2026-11-01",
+      to: "2026-11-30",
+    });
+    expect(getPeriodRange("month", "2026-02-10")).toEqual({
+      from: "2026-02-01",
+      to: "2026-02-28",
+    });
+  });
+
+  it("moves the period with the arrows and names it (US-52)", () => {
+    expect(shiftPeriod("week", "2026-11-26", -1)).toBe("2026-11-19");
+    expect(shiftPeriod("month", "2026-11-26", 1)).toBe("2026-12-01");
+    expect(shiftPeriod("all", "2026-11-26", 1)).toBe("2026-11-26");
+    expect(formatPeriodLabel("week", "2026-11-26")).toBe(
+      "Semaine du 23 novembre",
+    );
+    expect(formatPeriodLabel("month", "2026-11-26")).toBe("Novembre 2026");
+  });
+
+  it("names the active filters, one chip each (SUI-05g)", () => {
+    expect(
+      describeHistoryFilters(
+        {
+          period: "month",
+          date: "2026-11-15",
+          program: "free",
+          statuses: ["missed", "cancelled"],
+        },
+        null,
+      ).map((chip) => chip.label),
+    ).toEqual(["Novembre 2026", "Séance libre", "Manquées", "Annulées"]);
+    expect(
+      describeHistoryFilters(
+        { period: "all", date: "2026-11-15", program: 7, statuses: [] },
+        "Force 8 semaines",
+      ),
+    ).toEqual([{ key: "program", label: "Force 8 semaines" }]);
   });
 });

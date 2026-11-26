@@ -1,20 +1,157 @@
 import * as z from "zod";
 import type { AppointmentStatus, WorkoutStatus } from "./appointment.js";
+import {
+  addDays,
+  formatDayMonth,
+  formatMonthTitle,
+  shiftMonth,
+} from "./dates.js";
 import type { StatusCode } from "./status.js";
+import { dateSchema } from "./validation.js";
 
 // The history (US-35): past sessions, done or not, newest first.
 
 export const HISTORY_PAGE_SIZE = 20;
 
-// GET /api/history?offset=
+// --- Filters (US-52) -------------------------------------------------------
+
+// The statuses a line can carry, as the filter panel lists them (SUI-05f).
+export const HISTORY_STATUSES = [
+  "completed",
+  "unfinished",
+  "to_confirm",
+  "missed",
+  "cancelled",
+] as const;
+
+export type HistoryStatusFilter = (typeof HISTORY_STATUSES)[number];
+
+export const HISTORY_STATUS_LABELS: Record<HistoryStatusFilter, string> = {
+  completed: "Faites",
+  unfinished: "Inachevées",
+  to_confirm: "À confirmer",
+  missed: "Manquées",
+  cancelled: "Annulées",
+};
+
+export const HISTORY_PERIODS = ["all", "week", "month"] as const;
+export type HistoryPeriod = (typeof HISTORY_PERIODS)[number];
+
+export const HISTORY_PERIOD_LABELS: Record<HistoryPeriod, string> = {
+  all: "Tout",
+  week: "Semaine",
+  month: "Mois",
+};
+
+// GET /api/history?offset=&period=&date=&program=&statuses=
 export const historyQuerySchema = z.object({
   offset: z.coerce
     .number()
     .int()
     .min(0, { error: "Décalage invalide." })
     .default(0),
+  period: z.enum(HISTORY_PERIODS).default("all"),
+  // The day the period turns around; today when it is missing
+  date: dateSchema.optional(),
+  // A program id, or "free" for the sessions outside any program
+  program: z
+    .union([z.literal("free"), z.coerce.number().int().positive()])
+    .optional(),
+  // "missed,cancelled"
+  statuses: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value === undefined || value === ""
+        ? []
+        : value.split(",").map((part) => part.trim()),
+    )
+    .pipe(z.array(z.enum(HISTORY_STATUSES)).max(HISTORY_STATUSES.length)),
 });
 export type HistoryQuery = z.output<typeof historyQuerySchema>;
+
+// The first and the last day of the chosen period; null for "Tout"
+// (US-41 reuses it for the summary).
+export function getPeriodRange(
+  period: HistoryPeriod,
+  date: string,
+): { from: string; to: string } | null {
+  if (period === "all") {
+    return null;
+  }
+  if (period === "week") {
+    const monday = startOfWeek(date);
+    return { from: monday, to: addDays(monday, 6) };
+  }
+  const month = date.slice(0, 7);
+  const last = new Date(
+    Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)), 0),
+  )
+    .toISOString()
+    .slice(0, 10);
+  return { from: `${month}-01`, to: last };
+}
+
+// The day the arrows ‹ › land on, one period before or after.
+export function shiftPeriod(
+  period: HistoryPeriod,
+  date: string,
+  direction: -1 | 1,
+): string {
+  if (period === "week") {
+    return addDays(date, direction * 7);
+  }
+  if (period === "month") {
+    return `${shiftMonth(date.slice(0, 7), direction)}-01`;
+  }
+  return date;
+}
+
+// "Semaine du 23 nov.", "Novembre 2026": the title between the arrows.
+export function formatPeriodLabel(period: HistoryPeriod, date: string): string {
+  if (period === "week") {
+    return `Semaine du ${formatDayMonth(startOfWeek(date))}`;
+  }
+  if (period === "month") {
+    return formatMonthTitle(date.slice(0, 7));
+  }
+  return "Tout";
+}
+
+export type HistoryFilters = {
+  period: HistoryPeriod;
+  date: string;
+  program: "free" | number | null;
+  statuses: HistoryStatusFilter[];
+};
+
+// One chip per active filter, with what removing it gives back (SUI-05g).
+export type FilterChip = { key: string; label: string };
+
+export function describeHistoryFilters(
+  filters: HistoryFilters,
+  programName: string | null,
+): FilterChip[] {
+  const chips: FilterChip[] = [];
+  if (filters.period !== "all") {
+    chips.push({
+      key: "period",
+      label: formatPeriodLabel(filters.period, filters.date),
+    });
+  }
+  if (filters.program === "free") {
+    chips.push({ key: "program", label: "Séance libre" });
+  } else if (filters.program !== null) {
+    chips.push({ key: "program", label: programName ?? "Programme" });
+  }
+  for (const status of filters.statuses) {
+    chips.push({
+      key: `status:${status}`,
+      label: HISTORY_STATUS_LABELS[status],
+    });
+  }
+  return chips;
+}
 
 export type HistoryItem = {
   appointment_id: number;
