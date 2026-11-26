@@ -89,7 +89,12 @@ function ActualSetSheet({
 }: Props) {
   const profile = getMeasureProfile(measureCodes, isBodyweight);
   const isCardio = profile === "cardio";
-  const fields = getSetFields(measureCodes, isBodyweight);
+  // Only the fields a result can hold: the two per-side loads are
+  // planned, never recorded (US-51).
+  const fields = getSetFields(measureCodes, isBodyweight).filter(
+    (field): field is keyof ActualSetValues =>
+      field !== "weight_left_kg" && field !== "weight_right_kg",
+  );
   const planned = plannedAsActual(set);
   const [values, setValues] = useState<ActualSetValues>(() => {
     const start =

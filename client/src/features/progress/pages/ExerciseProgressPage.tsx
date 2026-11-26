@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import {
   buildProgressSeries,
   computeExerciseRecords,
@@ -32,6 +32,9 @@ function ExerciseProgressPage() {
   const params = useParams();
   const id = Number(params.exerciseId);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Arriving from the notification of a record (NOT-06)
+  const fromRecord = searchParams.get("record") === "1";
   const [progress, setProgress] = useState<ExerciseProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -160,6 +163,17 @@ function ExerciseProgressPage() {
       />
 
       <div className="flex flex-1 flex-col gap-3 px-[18px] pt-1 pb-6">
+        {fromRecord && points.length > 0 && (
+          <p
+            role="status"
+            className="flex items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+          >
+            {`Nouveau record · ${formatDayMonth(
+              points[points.length - 1]?.date ?? "",
+            )}`}
+          </p>
+        )}
+
         {progress.sets.length === 0 ? (
           <p className="rounded-card border border-base-300 bg-base-100 p-4 text-sm text-muted shadow-card">
             Cet exercice n'a pas encore été fait. Sa progression apparaîtra

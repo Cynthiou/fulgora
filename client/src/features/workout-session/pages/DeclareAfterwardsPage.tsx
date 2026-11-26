@@ -266,7 +266,12 @@ function DeclareAfterwardsPage() {
                                     exercise.is_bodyweight,
                                   )}`
                                 : formatSetValues(
-                                    { ...values, rest_after_seconds: null },
+                                    {
+                                      ...values,
+                                      weight_left_kg: null,
+                                      weight_right_kg: null,
+                                      rest_after_seconds: null,
+                                    },
                                     exercise.measure_codes,
                                     exercise.is_bodyweight,
                                   )}
