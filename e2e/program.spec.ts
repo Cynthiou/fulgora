@@ -55,7 +55,7 @@ test("creates a program, fills its sessions and plans the whole period", async (
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     `${weekdayName(weekday)} · séance`,
   );
-  await expect(page.getByText("chaque semaine")).toBeVisible();
+  await expect(page.getByText("chaque sem.")).toBeVisible();
   await page.getByLabel(/^Nom de la séance/).fill("Haut du corps");
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Classique/ }).click();

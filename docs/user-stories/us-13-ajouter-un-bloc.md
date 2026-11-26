@@ -11,6 +11,14 @@ EPIC 3 · Séances modèles
 **Maquettes :** A3, A4, A8
 **Règles :** RM-019, RM-020, RM-024
 
+> **Mise à jour du 27/11/2026 (handoff des blocs).** Les écrans de cette
+> fiche sont refaits d'après `design/handoff-blocs/`, qui fait foi quand il
+> la contredit : le panneau « Type de bloc » ne propose plus que 7 types
+> (la Note n'est plus créable, RM-019 / RM-020), le bloc n'a plus de lien
+> « Changer » (le type se choisit à la création) et, dans la séance, la
+> carte du bloc se replie et son menu « ⋯ » porte Modifier, Dupliquer,
+> Monter / Descendre et Supprimer.
+
 ## User story
 
 En tant qu'utilisateur, je veux organiser ma séance en blocs afin de séparer l'échauffement, le travail et le retour au calme.

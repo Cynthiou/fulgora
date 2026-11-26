@@ -95,7 +95,9 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
   await expect(page.getByText("objectif à régler")).toHaveCount(0);
   await expect(save).toBeEnabled();
   await save.click();
-  await expect(page.getByText(/Bloc 1 · 3 tours · 2 exercices/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Circuit · Bloc 1/ }),
+  ).toContainText("Bloc 1 · 3 tours · 2 exercices");
 
   // An AMRAP of 12 minutes, with no exercise yet
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
@@ -105,7 +107,9 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
   await expect(page.getByText("Règle la durée de l'AMRAP.")).toHaveCount(0);
   await page.getByRole("button", { name: "Retour à la séance" }).click();
   // The card of the block says its duration (US-43)
-  await expect(page.getByText(/Bloc 2 · 12 min/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^AMRAP · Bloc 2/ }),
+  ).toContainText("Bloc 2 · 12 min · 0 exercice");
 
   // The session is saved with its two timed blocks
   await page.getByRole("button", { name: "Enregistrer la séance" }).click();

@@ -714,10 +714,8 @@ function SessionEditorPage({ edit }: Props) {
                     src={calendarIcon}
                     className="size-[15px] shrink-0 text-muted"
                   />
-                  <span className="min-w-0 flex-1 truncate">
-                    {edit.dayLabel}
-                  </span>
-                  <span className="text-[10px] font-semibold text-muted">
+                  <span className="shrink-0">{edit.dayLabel}</span>
+                  <span className="min-w-0 flex-1 truncate text-right text-[10px] font-semibold text-muted">
                     chaque sem.
                   </span>
                 </p>

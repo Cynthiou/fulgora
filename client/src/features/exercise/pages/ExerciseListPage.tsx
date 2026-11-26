@@ -680,14 +680,9 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
               }
               className={CTA}
             >
-              {count === 0 ? (
-                "Sélectionne des exercices"
-              ) : (
-                <>
-                  {actionLabel}
-                  <span aria-hidden="true">· {count}</span>
-                </>
-              )}
+              {count === 0
+                ? "Sélectionne des exercices"
+                : `${actionLabel} · ${count}`}
             </button>
           </div>
         </div>

@@ -499,8 +499,9 @@ describe("SessionEditorPage", () => {
 
     // The numbered badge of each card is also its grip (US-16)
     expect(
-      screen.getByRole("button", { name: "Déplacer Développé couché" })
-        .textContent,
+      screen.getByRole("button", {
+        name: "Déplacer Développé couché, exercice 1",
+      }).textContent,
     ).toBe("1");
 
     // Back to the session: the card sums the block up, no more warning

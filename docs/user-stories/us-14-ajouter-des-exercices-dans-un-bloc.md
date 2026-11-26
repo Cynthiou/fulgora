@@ -11,6 +11,13 @@ EPIC 3 · Séances modèles
 **Maquettes :** A5, A5b, A6, écran 04 états 5 et 5b, écran 05 bouton « Ajouter à une séance »
 **Règles :** RM-007, RM-021, RM-024
 
+> **Mise à jour du 27/11/2026 (handoff des blocs).** L'écran du catalogue
+> en sélection est refait d'après `design/handoff-blocs/` (2.3), qui fait
+> foi quand il contredit cette fiche : une carte sélectionnée porte une
+> pastille ✓ à la place de l'œil, donc son numéro d'ordre n'est plus écrit
+> à l'écran (il reste dit aux lecteurs d'écran) et sa fiche s'ouvre depuis
+> l'onglet Catalogue.
+
 ## User story
 
 En tant qu'utilisateur, je veux choisir des exercices dans le catalogue pour les mettre dans un bloc afin de composer ma séance.

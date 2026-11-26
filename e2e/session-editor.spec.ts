@@ -60,7 +60,7 @@ test("adds a block through the type panel, names it, removes it and undoes", asy
 
   // The block screen
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Classique");
-  await expect(page.getByText("Bloc 1 · Haut du corps")).toBeVisible();
+  await expect(page.getByText("Bloc 1")).toBeVisible();
   await expectNoA11yViolation(page);
   await page.getByLabel(/^Intitulé/).fill("Force");
   // An empty block has no "Enregistrer le bloc": its orange button opens

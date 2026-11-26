@@ -69,7 +69,9 @@ test("moves an exercise with the keyboard and saves the new order", async ({
   await expect(rows.nth(1)).toContainText(second);
 
   // Space takes the handle, the arrow moves, Space drops
-  await page.getByRole("button", { name: `Déplacer ${first}` }).focus();
+  await page
+    .getByRole("button", { name: `Déplacer ${first}, exercice 1` })
+    .focus();
   await page.keyboard.press("Space");
   const liveRegion = page.locator('[id^="DndLiveRegion"]');
   // The list measures its rows just after the handle is taken, so the first
@@ -126,7 +128,8 @@ test("moves a block with « Monter » of the ⋯ menu", async ({ page }) => {
   await page
     .getByRole("button", { name: "Actions du bloc Étirements · Consignes" })
     .click();
-  await expect(page.getByRole("button", { name: "Descendre" })).toBeDisabled();
+  // The last block has nowhere to go down: the handoff leaves the item out
+  await expect(page.getByRole("button", { name: "Descendre" })).toHaveCount(0);
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: "Monter" }).click();
 

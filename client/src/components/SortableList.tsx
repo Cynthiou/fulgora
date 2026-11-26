@@ -41,6 +41,9 @@ type Props = {
   // grip instead (handoff 3.2), so nothing is added to the card.
   renderHandleContent?: (position: number) => ReactNode;
   handleClass?: string;
+  // What the grip says. A grip that shows something must say it too, or
+  // its name does not hold its visible text (RM-064, WCAG "Label in Name").
+  handleLabel?: (label: string, position: number) => string;
   // "f" for a feminine item (une série), so the announcements agree
   gender?: "m" | "f";
 };
@@ -58,6 +61,7 @@ function SortableList({
   gender = "m",
   renderHandleContent,
   handleClass,
+  handleLabel,
 }: Props) {
   // "saisi" or "saisie", "le déplacer" or "la déplacer"
   const end = gender === "f" ? "e" : "";
@@ -135,6 +139,7 @@ function SortableList({
               renderRow={renderRow}
               renderHandleContent={renderHandleContent}
               handleClass={handleClass}
+              handleLabel={handleLabel}
             />
           ))}
         </ul>
@@ -158,6 +163,7 @@ type RowProps = {
   renderRow: Props["renderRow"];
   renderHandleContent: Props["renderHandleContent"];
   handleClass: Props["handleClass"];
+  handleLabel: Props["handleLabel"];
 };
 
 function SortableRow({
@@ -166,6 +172,7 @@ function SortableRow({
   renderRow,
   renderHandleContent,
   handleClass,
+  handleLabel,
 }: RowProps) {
   const {
     attributes,
@@ -181,7 +188,11 @@ function SortableRow({
       type="button"
       {...attributes}
       {...listeners}
-      aria-label={`Déplacer ${item.label}`}
+      aria-label={
+        handleLabel === undefined
+          ? `Déplacer ${item.label}`
+          : handleLabel(item.label, position)
+      }
       className={
         handleClass ??
         "grid size-tap shrink-0 cursor-grab touch-none place-items-center text-faint"

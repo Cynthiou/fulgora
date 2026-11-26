@@ -11,6 +11,12 @@ EPIC 3 · Séances modèles
 **Maquettes :** A6, A8, PRO-03 (poignée ⋮⋮)
 **Règles :** RM-024
 
+> **Mise à jour du 27/11/2026 (handoff des blocs).** Dans la séance, la
+> carte d'un bloc n'a plus de poignée : l'ordre des blocs se change avec
+> « Monter » et « Descendre » du menu « ⋯ » (handoff 3.1). La poignée des
+> exercices reste, portée par le badge numéroté de leur carte (handoff
+> 3.2).
+
 ## User story
 
 En tant qu'utilisateur, je veux changer l'ordre des blocs, des exercices et des séries afin d'ajuster ma séance.
