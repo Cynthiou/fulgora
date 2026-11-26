@@ -57,11 +57,11 @@ On a tendance à toujours travailler les mêmes muscles : la carte le rend visib
 
 ## Tâches techniques
 
-- [ ] Backend : `readMuscleSets(userId, from, to)` : `SUM(CASE em.role WHEN 'primary' THEN 1 ELSE 0.5 END)` par muscle, sur les séries validées des séances `completed` / `unfinished`, en excluant les groupes cardio et étirements
-- [ ] Frontend : `MuscleMapCard.tsx` (SVG face / dos, zones par code de muscle, intensité + liste texte)
-- [ ] Tests : back : exemple SUI-02 reproduit ; série non validée ignorée
+- [x] Backend : `readMuscleSets(userId, from, to)` : `SUM(CASE em.role WHEN 'primary' THEN 1 ELSE 0.5 END)` par muscle, sur les séries validées des séances `completed` / `unfinished`, en excluant les groupes cardio et étirements
+- [x] Frontend : `MuscleSetsCard.tsx` (la liste de la maquette, avec barres d'intensité ; pas de silhouette, voir le journal)
+- [x] Tests : back : exemple SUI-02 reproduit ; série non validée ignorée
 
 ## Definition of Done
 
-- [ ] Exemple SUI-02 vérifié
+- [x] Exemple SUI-02 vérifié
 - [ ] Code relu et fusionné via pull request
