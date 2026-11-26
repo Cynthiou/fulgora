@@ -175,10 +175,14 @@ function AccountSettingsPage() {
           </p>
         )}
 
-        {/* The deletion of the account arrives with US-06. */}
-        <p className="py-1.5 text-center text-sm font-semibold text-muted">
-          Supprimer mon compte : bientôt.
-        </p>
+        {/* PRF-07: the deletion, in red, away from the other actions. */}
+        <button
+          type="button"
+          onClick={() => navigate("/profil/supprimer")}
+          className="py-1.5 text-center text-sm font-semibold text-status-missed-text"
+        >
+          Supprimer mon compte
+        </button>
 
         <button
           type="submit"

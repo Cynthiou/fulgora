@@ -31,7 +31,9 @@ import ExerciseProgressPage from "./features/progress/pages/ExerciseProgressPage
 import TrackingSummaryPage from "./features/progress/pages/TrackingSummaryPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
+import AccountDeletedPage from "./features/user/pages/AccountDeletedPage";
 import AccountSettingsPage from "./features/user/pages/AccountSettingsPage";
+import DeleteAccountPage from "./features/user/pages/DeleteAccountPage";
 import EditProfilePage from "./features/user/pages/EditProfilePage";
 import IllustrationSettingsPage from "./features/user/pages/IllustrationSettingsPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -56,6 +58,8 @@ const router = createBrowserRouter([
         children: [
           { path: "/inscription", element: <SignupPage /> },
           { path: "/connexion", element: <LoginPage /> },
+          // After a deletion: the account does not exist any more (US-06)
+          { path: "/compte-supprime", element: <AccountDeletedPage /> },
         ],
       },
       // Private pages: never shown without a connected user
@@ -97,6 +101,7 @@ const router = createBrowserRouter([
               { path: "/profil/sons", element: <SoundSettingsPage /> },
               // The account: password today, deletion with US-06
               { path: "/profil/compte", element: <AccountSettingsPage /> },
+              { path: "/profil/supprimer", element: <DeleteAccountPage /> },
               { path: "/notifications", element: <NotificationsPage /> },
               // The programs of the user (US-48) and their creation (US-18)
               { path: "/programmes", element: <ProgramsPage /> },

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   changePasswordSchema,
+  deleteAccountSchema,
   preferencesSchema,
   signupSchema,
   updateProfileSchema,
@@ -11,6 +12,7 @@ import { validate } from "../../middlewares/validate.js";
 import {
   changePassword,
   create,
+  deleteAccount,
   updatePreferences,
   updateProfile,
 } from "./userActions.js";
@@ -45,6 +47,16 @@ userRouter.put(
   authenticate,
   validate({ body: changePasswordSchema }),
   changePassword,
+);
+
+// DELETE /api/users/me: the account and all its data (US-06). The
+// password is asked again, so the limiter of the login applies (DT-07).
+userRouter.delete(
+  "/me",
+  authLimiter,
+  authenticate,
+  validate({ body: deleteAccountSchema }),
+  deleteAccount,
 );
 
 export default userRouter;

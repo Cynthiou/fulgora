@@ -1,18 +1,47 @@
 import type { RequestHandler } from "express";
 import {
   type ChangePasswordInput,
+  type DeleteAccountInput,
   type PublicUser,
   type SignupInput,
   type UpdatePreferencesInput,
   type UpdateProfileInput,
+  WRONG_DELETE_PASSWORD_MESSAGE,
   WRONG_PASSWORD_MESSAGE,
 } from "shared";
 import { readDuplicateKeyName } from "../../database/errors.js";
-import { setAuthCookie } from "../../utils/authCookie.js";
+import { withTransaction } from "../../database/withTransaction.js";
+import { clearAuthCookie, setAuthCookie } from "../../utils/authCookie.js";
 import { HttpError } from "../../utils/httpError.js";
 import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { readUserId } from "../../utils/requestUser.js";
 import { signToken } from "../../utils/token.js";
+import {
+  clearExerciseSources,
+  clearProgramSources,
+  deleteUserAppointments,
+  deleteUserExerciseCategories,
+  deleteUserExerciseEquipment,
+  deleteUserExerciseMeasures,
+  deleteUserExerciseMuscles,
+  deleteUserExercises,
+  deleteUserExerciseTexts,
+  deleteUserNotifications,
+  deleteUserPlannedSets,
+  deleteUserProgramChanges,
+  deleteUserPrograms,
+  deleteUserRow,
+  deleteUserSessionTemplates,
+  deleteUserSessionVersions,
+  deleteUserTemplateBlockExercises,
+  deleteUserTemplateBlocks,
+  deleteUserWeeklySchedules,
+  deleteUserWorkoutBlocks,
+  deleteUserWorkoutExercises,
+  deleteUserWorkoutSessions,
+  deleteUserWorkoutSetSides,
+  deleteUserWorkoutSets,
+} from "./accountRepository.js";
 import {
   createUser,
   readUser,
@@ -125,5 +154,64 @@ export const changePassword: RequestHandler = async (req, res) => {
   }
 
   await updateUserPassword(userId, await hashPassword(new_password));
+  res.status(204).end();
+};
+
+// DELETE /api/users/me: the account and everything it owns disappear
+// (US-06, RM-006). Every table is emptied in the order of its dependencies,
+// inside one transaction: if one step fails, nothing is deleted (DT-17).
+export const deleteAccount: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { password } = req.body as DeleteAccountInput;
+
+  const hash = await readUserPasswordHash(userId);
+  if (hash === null) {
+    throw new HttpError(404, "USER_NOT_FOUND", "Ce compte n'existe pas.");
+  }
+  if (!(await verifyPassword(hash, password))) {
+    throw new HttpError(
+      422,
+      "WRONG_PASSWORD",
+      WRONG_DELETE_PASSWORD_MESSAGE,
+      "password",
+    );
+  }
+
+  await withTransaction(async (connection) => {
+    // The realized sessions, from the smallest piece to the appointment
+    await deleteUserNotifications(userId, connection);
+    await deleteUserWorkoutSetSides(userId, connection);
+    await deleteUserWorkoutSets(userId, connection);
+    await deleteUserWorkoutExercises(userId, connection);
+    await deleteUserWorkoutBlocks(userId, connection);
+    await deleteUserWorkoutSessions(userId, connection);
+    await deleteUserAppointments(userId, connection);
+
+    // The programs, their weeks and their history
+    await deleteUserWeeklySchedules(userId, connection);
+    await deleteUserProgramChanges(userId, connection);
+    await clearProgramSources(userId, connection);
+    await deleteUserPrograms(userId, connection);
+
+    // The session templates and their versions
+    await deleteUserPlannedSets(userId, connection);
+    await deleteUserTemplateBlockExercises(userId, connection);
+    await deleteUserTemplateBlocks(userId, connection);
+    await deleteUserSessionVersions(userId, connection);
+    await deleteUserSessionTemplates(userId, connection);
+
+    // The personal exercises; the catalog is never touched
+    await clearExerciseSources(userId, connection);
+    await deleteUserExerciseTexts(userId, connection);
+    await deleteUserExerciseCategories(userId, connection);
+    await deleteUserExerciseMuscles(userId, connection);
+    await deleteUserExerciseEquipment(userId, connection);
+    await deleteUserExerciseMeasures(userId, connection);
+    await deleteUserExercises(userId, connection);
+
+    await deleteUserRow(userId, connection);
+  });
+
+  clearAuthCookie(res);
   res.status(204).end();
 };

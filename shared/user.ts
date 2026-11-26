@@ -149,3 +149,13 @@ export type ChangePasswordPayload = {
 };
 
 export type ChangePasswordInput = z.output<typeof changePasswordSchema>;
+
+// US-06: the account is deleted for good. The password is typed again, it
+// is the last confirmation (D-05, RM-006).
+export const WRONG_DELETE_PASSWORD_MESSAGE = "Mot de passe incorrect.";
+
+export const deleteAccountSchema = z
+  .object({ password: requiredString.pipe(z.string().max(128)) })
+  .strict();
+
+export type DeleteAccountInput = z.output<typeof deleteAccountSchema>;

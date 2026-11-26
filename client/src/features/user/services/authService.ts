@@ -1,5 +1,6 @@
 import type {
   ChangePasswordInput,
+  DeleteAccountInput,
   LoginPayload,
   PublicUser,
   UpdatePreferencesInput,
@@ -48,6 +49,15 @@ export function updatePreferences(
 export function changePassword(input: ChangePasswordInput): Promise<void> {
   return apiFetch<void>("/users/me/password", {
     method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
+// DELETE /api/users/me: the account and all its data (US-06). The cookie
+// is cleared by the server (204).
+export function deleteAccount(input: DeleteAccountInput): Promise<void> {
+  return apiFetch<void>("/users/me", {
+    method: "DELETE",
     body: JSON.stringify(input),
   });
 }
