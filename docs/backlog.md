@@ -5,11 +5,11 @@ Version finale du 24 novembre 2026 · 60 cartes : 8 tâches de socle (T-01 à T-
 ## Comment utiliser ce backlog
 
 - **Une carte = une branche = une pull request vers `dev`.** On prend les cartes dans l'ordre des sprints, et dans l'ordre de la liste à l'intérieur d'un sprint.
-- **Chaque carte est autonome** : pour développer une US, Claude Code lit la carte, `docs/business-rules.md`, `docs/naming-conventions.md` et `server/database/schema.sql`.
+- **Chaque carte est autonome** : pour développer une US, il suffit de lire la carte, `docs/business-rules.md`, `docs/naming-conventions.md` et `server/database/schema.sql`.
 - **Ordre des couches dans une US** : BDD → Shared → Backend (repository, actions, router) → tests back → Service → Hooks → Composants → Page → Routing → tests front → E2E.
 - **Rien hors périmètre** : ce qui n'est pas dans la carte n'est pas codé ; un manque se signale, il ne s'invente pas.
 - **Fini** = la checklist « Tâches techniques » cochée, la « Definition of Done » de la carte et la Definition of Done commune (en bas) vérifiées.
-- **Git** : commits `feat(famille): …` en anglais, sous l'identité de Cynthia, sans aucune mention de Claude (ni Co-Authored-By, ni lien de session).
+- **Git** : commits `feat(famille): …` en anglais, sous l'identité de Cynthia, sans aucune mention de l'outil qui a aidé à les écrire (ni Co-Authored-By, ni lien de session).
 - **Les décisions** D-01 à D-19 ont été prises par défaut pour terminer le backlog. Chacune peut être changée : il suffit de modifier la carte concernée avant son sprint.
 
 ## Règles techniques communes
@@ -62,25 +62,26 @@ Version finale du 24 novembre 2026 · 60 cartes : 8 tâches de socle (T-01 à T-
 
 ## Plan des sprints
 
-| Sprint                                                 | Cartes                                         | Points |
-| ------------------------------------------------------ | ---------------------------------------------- | ------ |
-| Sprint 0 · Socle technique                             | T-01, T-02, T-03, T-04, T-05, T-06, T-07, T-08 | 21     |
-| Sprint 01 · Compte et navigation                       | US-01, US-02, US-03, US-44                     | 13     |
-| Sprint 02 · Catalogue                                  | US-07, US-08, US-09                            | 9      |
-| Sprint 03 · Préparer une séance libre                  | US-12, US-13, US-14, US-15, US-23              | 18     |
-| Sprint 04 · Faire sa séance                            | US-28, US-29, US-30, US-33, US-34              | 19     |
-| Sprint 05 · Historique (fin du MVP)                    | US-35, US-36                                   | 6      |
-| Sprint 06 · Planning et notifications                  | US-24, US-26, US-27, US-25, US-46              | 25     |
-| Sprint 07 · Créer un programme                         | US-48, US-18, US-19                            | 16     |
-| Sprint 08 · Faire évoluer séances et programmes        | US-16, US-17, US-20, US-21                     | 24     |
-| Sprint 09 · Historique complet                         | US-37, US-38, US-52                            | 13     |
-| Sprint 10 · Entraînement avancé                        | US-32, US-49, US-51                            | 16     |
-| Sprint 11 · Progression et Suivi                       | US-39, US-40, US-41, US-50                     | 22     |
-| Sprint 12 · Profil et installation                     | US-04, US-05, US-47, US-06, US-45              | 16     |
-| Sprint 13 · Blocs chronométrés et exercices personnels | US-43, US-31, US-10, US-11                     | 20     |
-| Plus tard                                              | US-22, US-42                                   | 5      |
+| Sprint                                          | Cartes                                         | Points |
+| ----------------------------------------------- | ---------------------------------------------- | ------ |
+| Sprint 0 · Socle technique                      | T-01, T-02, T-03, T-04, T-05, T-06, T-07, T-08 | 21     |
+| Sprint 01 · Compte et navigation                | US-01, US-02, US-03, US-44                     | 13     |
+| Sprint 02 · Catalogue                           | US-07, US-08, US-09                            | 9      |
+| Sprint 03 · Préparer une séance libre           | US-12, US-13, US-14, US-15, US-23              | 18     |
+| Sprint 04 · Faire sa séance                     | US-28, US-29, US-30, US-33, US-34              | 19     |
+| Sprint 05 · Historique (fin du MVP)             | US-35, US-36                                   | 6      |
+| Sprint 06 · Planning et notifications           | US-24, US-26, US-27, US-25, US-46              | 25     |
+| Sprint 07 · Créer un programme                  | US-48, US-18, US-19                            | 16     |
+| Sprint 08 · Faire évoluer séances et programmes | US-16, US-17, US-20, US-21                     | 24     |
+| Sprint 09 · Historique complet                  | US-37, US-38, US-52                            | 13     |
+| Sprint 10 · Entraînement avancé                 | US-32, US-49, US-51                            | 16     |
+| Sprint 11 · Progression et Suivi                | US-39, US-40, US-41, US-50                     | 22     |
+| Sprint 12 · Profil et installation              | US-04, US-05, US-47, US-06, US-45              | 16     |
+| Sprint 13 · Blocs chronométrés                  | US-43, US-31                                   | 10     |
+| V2                                              | US-10, US-11                                   | 10     |
+| Plus tard                                       | US-22, US-42                                   | 5      |
 
-**Total :** 243 points. MVP = Sprint 0 à Sprint 05 (19 US) ; V1 = Sprint 06 à Sprint 13 (31 US) ; Plus tard : 2 US.
+**Total :** 243 points. MVP = Sprint 0 à Sprint 05 (19 US) ; V1 = Sprint 06 à Sprint 13 (29 US) ; V2 : 2 US (US-10, US-11) ; Plus tard : 2 US.
 
 ## Sommaire
 
@@ -177,10 +178,13 @@ Version finale du 24 novembre 2026 · 60 cartes : 8 tâches de socle (T-01 à T-
 - US-06 · Supprimer mon compte
 - US-45 · Installer l'appli sur mon téléphone
 
-**Sprint 13 · Blocs chronométrés et exercices personnels**
+**Sprint 13 · Blocs chronométrés**
 
 - US-43 · Ajouter un bloc chronométré (Circuit, AMRAP, For Time)
 - US-31 · Minuteur de bloc (Circuit, AMRAP, For Time)
+
+**V2**
+
 - US-10 · Créer un exercice personnel
 - US-11 · Personnaliser ou archiver un exercice
 
@@ -251,7 +255,7 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 
 - [ ] Les 4 scripts fonctionnent en local
 - [ ] Une PR de test volontairement cassée est bien refusée par la CI
-- [ ] Aucune trace de Claude dans les commits ni dans la PR
+- [ ] Aucune trace de l'outil d'assistance dans les commits ni dans la PR
 
 ## T-02 · Sécurité HTTP
 
@@ -4979,7 +4983,7 @@ En tant qu'utilisateur, je veux installer Fulgora sur l'écran d'accueil de mon 
 - [ ] Installation vérifiée sur Android et iPhone
 - [ ] Code relu et fusionné via pull request
 
-# Sprint 13 · Blocs chronométrés et exercices personnels
+# Sprint 13 · Blocs chronométrés
 
 ## US-43 · Ajouter un bloc chronométré (Circuit, AMRAP, For Time)
 
@@ -5113,7 +5117,7 @@ Les autres blocs restent accessibles.
 
 ### Tâches techniques
 
-- [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
+- [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
 - [ ] Backend : `updateWorkoutBlockResult(blockId, rounds, extraReps, duration)` (contexte vérifié comme pour une série, `touchWorkoutSession`)
 - [ ] Frontend : `BlockTimer.tsx` selon le type ; réutilisation de `useCountdown` / `useStopwatch`
 - [ ] Tests : back : résultat enregistré, séance terminée → 409 ; unitaires du compteur de tours
@@ -5123,13 +5127,15 @@ Les autres blocs restent accessibles.
 - [ ] Écrans maquettés et validés avant le développement
 - [ ] Code relu et fusionné via pull request
 
+# V2
+
 ## US-10 · Créer un exercice personnel
 
 EPIC 2 · Catalogue
 
 **Taille :** L (5 Story Points)
-**Priorité :** Should Have (V1)
-**Sprint :** Sprint 13
+**Priorité :** V2
+**Sprint :** V2
 **Dépendance principale :** US-09
 **Intégration future :** US-11, US-14 (sélection), US-39 (progression)
 **Branche :** `feat/us-10-personal-exercise`
@@ -5188,7 +5194,7 @@ Message + saisie conservée.
 
 ### Décisions
 
-- **D-15** : le formulaire n'est pas maquetté : la première tâche est de le faire dessiner (Claude Design) avec les champs listés, puis de le faire valider.
+- **D-15** : le formulaire n'est pas maquetté : la première tâche est de le faire dessiner (outil de maquettage) avec les champs listés, puis de le faire valider.
 - Pas de photo personnelle dans cette US.
 
 ### Hors périmètre
@@ -5198,7 +5204,7 @@ Message + saisie conservée.
 
 ### Tâches techniques
 
-- [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
+- [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
 - [ ] Shared : `createExerciseSchema` ; `slugify(name)`
 - [ ] Backend : `exerciseRepository.createExercise`, `createExerciseCategories`, `createExerciseMuscles`, `createExerciseEquipments`, `createExerciseMeasures`, `createExerciseTexts` (une fonction = une requête, insertion multiple avec `VALUES ?`)
 - [ ] Backend : `readMuscles`, `readMeasures` (listes du formulaire) ; vérification que les identifiants existent
@@ -5217,8 +5223,8 @@ Message + saisie conservée.
 EPIC 2 · Catalogue
 
 **Taille :** L (5 Story Points)
-**Priorité :** Should Have (V1)
-**Sprint :** Sprint 13
+**Priorité :** V2
+**Sprint :** V2
 **Dépendance principale :** US-10
 **Intégration future :** US-39 (progression sur l'exercice d'origine ou sa copie)
 **Branche :** `feat/us-11-customize-archive-exercise`
@@ -5282,7 +5288,7 @@ Badge « Archivé » sur la fiche.
 
 ### Tâches techniques
 
-- [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
+- [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
 - [ ] Backend : `countExerciseUsage(exerciseId)` : séries réalisées (`workout_exercise` lié à une séance `completed` ou `unfinished`)
 - [ ] Backend : `copyExercise` (exercice + liaisons + textes, dans `withTransaction`), `updateExercise`, `archiveExercise`, `unarchiveExercise`
 - [ ] Backend : routes : `POST /api/exercises/:id/customize`, `PUT /api/exercises/:id`, `PATCH /api/exercises/:id/archive`, `PATCH /api/exercises/:id/unarchive`

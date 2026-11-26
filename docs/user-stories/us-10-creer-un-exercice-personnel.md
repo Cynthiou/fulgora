@@ -3,8 +3,8 @@
 EPIC 2 · Catalogue
 
 **Taille :** L (5 Story Points)
-**Priorité :** Should Have (V1)
-**Sprint :** Sprint 13
+**Priorité :** V2
+**Sprint :** V2
 **Dépendance principale :** US-09
 **Intégration future :** US-11, US-14 (sélection), US-39 (progression)
 **Branche :** `feat/us-10-personal-exercise`
@@ -63,7 +63,7 @@ Message + saisie conservée.
 
 ## Décisions
 
-- **D-15** : le formulaire n'est pas maquetté : la première tâche est de le faire dessiner (Claude Design) avec les champs listés, puis de le faire valider.
+- **D-15** : le formulaire n'est pas maquetté : la première tâche est de le faire dessiner (outil de maquettage) avec les champs listés, puis de le faire valider.
 - Pas de photo personnelle dans cette US.
 
 ## Hors périmètre
@@ -73,7 +73,7 @@ Message + saisie conservée.
 
 ## Tâches techniques
 
-- [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
+- [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
 - [ ] Shared : `createExerciseSchema` ; `slugify(name)`
 - [ ] Backend : `exerciseRepository.createExercise`, `createExerciseCategories`, `createExerciseMuscles`, `createExerciseEquipments`, `createExerciseMeasures`, `createExerciseTexts` (une fonction = une requête, insertion multiple avec `VALUES ?`)
 - [ ] Backend : `readMuscles`, `readMeasures` (listes du formulaire) ; vérification que les identifiants existent

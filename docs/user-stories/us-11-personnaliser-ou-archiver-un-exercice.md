@@ -3,8 +3,8 @@
 EPIC 2 · Catalogue
 
 **Taille :** L (5 Story Points)
-**Priorité :** Should Have (V1)
-**Sprint :** Sprint 13
+**Priorité :** V2
+**Sprint :** V2
 **Dépendance principale :** US-10
 **Intégration future :** US-39 (progression sur l'exercice d'origine ou sa copie)
 **Branche :** `feat/us-11-customize-archive-exercise`
@@ -68,7 +68,7 @@ Badge « Archivé » sur la fiche.
 
 ## Tâches techniques
 
-- [ ] Design : faire maquetter les écrans de cette US (Claude Design) et les faire valider avant tout code
+- [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
 - [ ] Backend : `countExerciseUsage(exerciseId)` : séries réalisées (`workout_exercise` lié à une séance `completed` ou `unfinished`)
 - [ ] Backend : `copyExercise` (exercice + liaisons + textes, dans `withTransaction`), `updateExercise`, `archiveExercise`, `unarchiveExercise`
 - [ ] Backend : routes : `POST /api/exercises/:id/customize`, `PUT /api/exercises/:id`, `PATCH /api/exercises/:id/archive`, `PATCH /api/exercises/:id/unarchive`
