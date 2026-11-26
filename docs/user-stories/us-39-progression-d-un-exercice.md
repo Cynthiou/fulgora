@@ -68,15 +68,15 @@ Comme les autres écrans du Suivi.
 
 ## Tâches techniques
 
-- [ ] Backend : `progressRepository.readDoneExercises(userId, search)` (dernière date, groupé par exercice) ; `readExerciseSets(userId, exerciseId)` : séries validées des séances `completed` / `unfinished`, avec date réelle et statut de séance
-- [ ] Shared : `estimateOneRepMax(weight, reps)` (Epley, `null` au-delà de 10 rép.), `buildProgressSeries(sets, metric)` (un point par séance, `isPartial` si inachevée), `computeExerciseRecords(sets, profile)`, `getAvailableMetrics(sets)`
-- [ ] Outillage : bibliothèque de graphiques (proposition : Recharts, `--ignore-scripts`) avec texte alternatif
-- [ ] Frontend : `ExerciseProgressListPage.tsx` (SUI-08), `ExerciseProgressPage.tsx` (SUI-09 à SUI-11), `ProgressChart.tsx`, `RecordGrid.tsx`
-- [ ] Tests : unitaires Epley (62,5 × 8 = 79,2), séries > 10 rép. ignorées, série unique, point inachevé ; back : séances d'un autre exclues
-- [ ] Tests : E2E fiche → « Ma progression »
+- [x] Backend : `progressRepository.readDoneExercises(userId, search)` (dernière date, groupé par exercice) ; `readExerciseSets(userId, exerciseId)` : séries validées des séances `completed` / `unfinished`, avec date réelle et statut de séance
+- [x] Shared : `estimateOneRepMax(weight, reps)` (Epley, `null` au-delà de 10 rép.), `buildProgressSeries(sets, metric)` (un point par séance, `isPartial` si inachevée), `computeExerciseRecords(sets, profile)`, `getAvailableMetrics(sets)`
+- [x] Outillage : courbe dessinée à la main en SVG (pas de bibliothèque) avec son équivalent texte
+- [x] Frontend : `ExerciseProgressListPage.tsx` (SUI-08), `ExerciseProgressPage.tsx` (SUI-09 à SUI-11), `ProgressChart.tsx`, `RecordGrid.tsx`
+- [x] Tests : unitaires Epley (62,5 × 8 = 79,2), séries > 10 rép. ignorées, série unique, point inachevé ; back : séances d'un autre exclues
+- [x] Tests : E2E fiche → « Ma progression »
 
 ## Definition of Done
 
-- [ ] Chiffres de SUI-09 retrouvés sur les données d'exemple
-- [ ] Graphique doublé d'un équivalent texte
+- [x] Chiffres de SUI-09 retrouvés sur les données d'exemple
+- [x] Graphique doublé d'un équivalent texte
 - [ ] Code relu et fusionné via pull request
