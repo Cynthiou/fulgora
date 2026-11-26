@@ -156,6 +156,7 @@ CREATE TABLE template_block_exercise (
   position SMALLINT UNSIGNED NOT NULL,
   instructions TEXT NULL,
   default_rest_seconds INT UNSIGNED NULL,
+  is_per_side BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Done left then right (US-51)',
   PRIMARY KEY (id), UNIQUE KEY uq_template_block_exercise_position (template_block_id,position),
   CONSTRAINT fk_tbe_block FOREIGN KEY (template_block_id) REFERENCES template_block(id) ON DELETE RESTRICT,
   CONSTRAINT fk_tbe_exercise FOREIGN KEY (exercise_id) REFERENCES exercise(id) ON DELETE RESTRICT
@@ -167,6 +168,8 @@ CREATE TABLE planned_set (
   position SMALLINT UNSIGNED NOT NULL,
   reps INT UNSIGNED NULL,
   weight_kg DECIMAL(9,3) NULL,
+  weight_left_kg DECIMAL(9,3) NULL COMMENT 'Per side (US-51)',
+  weight_right_kg DECIMAL(9,3) NULL COMMENT 'Per side (US-51)',
   duration_seconds INT UNSIGNED NULL,
   distance_meters DECIMAL(12,3) NULL,
   speed_kmh DECIMAL(8,3) NULL,
@@ -294,6 +297,7 @@ CREATE TABLE workout_exercise (
   position SMALLINT UNSIGNED NOT NULL,
   instructions TEXT NULL,
   default_rest_seconds INT UNSIGNED NULL,
+  is_per_side BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Done left then right (US-51)',
   comment TEXT NULL,
   PRIMARY KEY (id), UNIQUE KEY uq_workout_exercise_position (workout_block_id,position),
   CONSTRAINT fk_workout_exercise_block FOREIGN KEY (workout_block_id) REFERENCES workout_block(id) ON DELETE RESTRICT,
@@ -308,6 +312,7 @@ CREATE TABLE workout_set (
   position SMALLINT UNSIGNED NOT NULL,
   reps_planned INT UNSIGNED NULL, reps_actual INT UNSIGNED NULL,
   weight_planned_kg DECIMAL(9,3) NULL, weight_actual_kg DECIMAL(9,3) NULL,
+  weight_left_planned_kg DECIMAL(9,3) NULL, weight_right_planned_kg DECIMAL(9,3) NULL,
   duration_planned_seconds INT UNSIGNED NULL, duration_actual_seconds INT UNSIGNED NULL,
   distance_planned_meters DECIMAL(12,3) NULL, distance_actual_meters DECIMAL(12,3) NULL,
   speed_planned_kmh DECIMAL(8,3) NULL, speed_actual_kmh DECIMAL(8,3) NULL,
@@ -321,6 +326,20 @@ CREATE TABLE workout_set (
   CONSTRAINT fk_workout_set_exercise FOREIGN KEY (workout_exercise_id) REFERENCES workout_exercise(id) ON DELETE RESTRICT,
   CONSTRAINT fk_workout_set_source FOREIGN KEY (source_planned_set_id) REFERENCES planned_set(id) ON DELETE RESTRICT,
   CONSTRAINT ck_workout_set_nonnegative CHECK ((weight_actual_kg IS NULL OR weight_actual_kg >= 0) AND (distance_actual_meters IS NULL OR distance_actual_meters >= 0) AND (calories_actual IS NULL OR calories_actual >= 0))
+) ENGINE=InnoDB;
+
+-- What was really done on each side of a per-side set (US-51, RM-044).
+CREATE TABLE workout_set_side (
+  workout_set_id BIGINT UNSIGNED NOT NULL,
+  side ENUM('left','right') NOT NULL,
+  reps_actual INT UNSIGNED NULL,
+  weight_actual_kg DECIMAL(9,3) NULL,
+  duration_actual_seconds INT UNSIGNED NULL,
+  validated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NULL COMMENT 'Set when the side is corrected (US-37, RM-049)',
+  PRIMARY KEY (workout_set_id, side),
+  CONSTRAINT fk_workout_set_side_set FOREIGN KEY (workout_set_id) REFERENCES workout_set(id) ON DELETE RESTRICT,
+  CONSTRAINT ck_workout_set_side_nonnegative CHECK (weight_actual_kg IS NULL OR weight_actual_kg >= 0)
 ) ENGINE=InnoDB;
 
 CREATE TABLE notification (
