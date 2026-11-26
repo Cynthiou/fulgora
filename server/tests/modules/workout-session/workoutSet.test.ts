@@ -228,3 +228,103 @@ describe("PUT /api/workout-sets/:id", () => {
     expect(over.body.error.code).toBe("WORKOUT_NOT_IN_PROGRESS");
   });
 });
+
+// US-37: a session already over is corrected, never refilled (RM-047).
+describe("PUT /api/workout-sets/:id/correction", () => {
+  function correct(setId: number, body: object, cookie: string) {
+    return request(app)
+      .put(`/api/workout-sets/${setId}/correction`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(body);
+  }
+
+  async function setStatus(status: string) {
+    await client.execute("UPDATE workout_session SET status = ? WHERE id = ?", [
+      status,
+      workoutId,
+    ]);
+  }
+
+  it("fixes a validated set, keeps the plan and the first date", async () => {
+    await setStatus("completed");
+    const [before] = await client.execute<Rows[]>(
+      "SELECT validated_at, updated_at FROM workout_set WHERE id = ?",
+      [firstSetId],
+    );
+    expect(before[0]?.updated_at).toBeNull();
+
+    const response = await correct(
+      firstSetId,
+      { ...emptyValues, reps: 6, weight_kg: 60 },
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      reps_planned: 10,
+      weight_planned_kg: 40,
+      reps_actual: 6,
+      weight_actual_kg: 60,
+    });
+    // The first validation date never moves (RM-049)
+    expect(new Date(response.body.validated_at).getTime()).toBe(
+      new Date(before[0]?.validated_at as string).getTime(),
+    );
+    const [after] = await client.execute<Rows[]>(
+      "SELECT updated_at FROM workout_set WHERE id = ?",
+      [firstSetId],
+    );
+    expect(after[0]?.updated_at).not.toBeNull();
+  });
+
+  it("fills a set that was never done, and validates it", async () => {
+    await setStatus("unfinished");
+
+    const response = await correct(
+      secondSetId,
+      { ...emptyValues, reps: 8, weight_kg: 45 },
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.validated_at).toEqual(expect.any(String));
+    expect(response.body.reps_actual).toBe(8);
+  });
+
+  it("refuses an empty correction and a measure the exercise has not", async () => {
+    await setStatus("completed");
+
+    const empty = await correct(firstSetId, emptyValues, lea.cookie);
+    expect(empty.status).toBe(422);
+    expect(empty.body.error.code).toBe("EMPTY_SET");
+
+    const wrong = await correct(
+      firstSetId,
+      { ...emptyValues, calories: 300 },
+      lea.cookie,
+    );
+    expect(wrong.status).toBe(422);
+    expect(wrong.body.error.code).toBe("MEASURE_NOT_ALLOWED");
+  });
+
+  it("answers 404 for somebody else and 409 while the session runs", async () => {
+    await setStatus("completed");
+    const theirs = await correct(
+      firstSetId,
+      { ...emptyValues, reps: 10 },
+      someoneElse.cookie,
+    );
+    expect(theirs.status).toBe(404);
+
+    await setStatus("in_progress");
+    const running = await correct(
+      firstSetId,
+      { ...emptyValues, reps: 10 },
+      lea.cookie,
+    );
+    expect(running.status).toBe(409);
+    expect(running.body.error.code).toBe("WORKOUT_IN_PROGRESS");
+    await setStatus("completed");
+  });
+});

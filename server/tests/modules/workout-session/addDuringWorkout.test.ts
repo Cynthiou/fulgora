@@ -193,7 +193,9 @@ describe("POST /api/workout-sessions/:id/blocks", () => {
 
   // Léa already has a session running (only one at a time, RM-040), so the
   // finished one belongs to the other user.
-  it("refuses to add to a session which is over", async () => {
+  // US-37 changed this rule: a session which is over accepts an addition,
+  // that is how an exercise forgotten on the day is caught up (D-18).
+  it("accepts a block on a session which is over, for a correction", async () => {
     const { appointmentId, versionId } = await createTestAppointment(
       someoneElse,
       { name: "Finie", date: "2026-11-27", blocks: [1] },
@@ -217,7 +219,10 @@ describe("POST /api/workout-sessions/:id/blocks", () => {
       .set("Cookie", someoneElse.cookie)
       .send({ name: null, exercise_ids: [catalogExerciseId] });
 
-    expect(response.status).toBe(409);
-    expect(response.body.error.code).toBe("WORKOUT_NOT_IN_PROGRESS");
+    expect(response.status).toBe(201);
+    const tree = await readTree(someoneElse, otherId);
+    const last = tree.blocks[tree.blocks.length - 1];
+    expect(last.id).toBe(response.body.id);
+    expect(last.exercises[0]?.is_added).toBe(true);
   });
 });
