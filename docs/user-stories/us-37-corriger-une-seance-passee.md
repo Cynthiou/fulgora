@@ -73,11 +73,11 @@ Message, saisies conservées.
 
 ## Tâches techniques
 
-- [ ] Backend : `correctWorkoutSet` : `_actual`, `validated_at = COALESCE(validated_at, NOW(3))`, `updated_at = NOW(3)` ; contexte : séance `completed` ou `unfinished` de l'utilisateur
-- [ ] Backend : ajout et suppression réutilisent US-32 avec le statut de séance terminé autorisé
-- [ ] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus
-- [ ] Frontend : `WorkoutPage` en mode `correction` ; bandeau ; retour au détail
-- [ ] Tests : back : correction, `validated_at` conservé, `updated_at` rempli, prévu inchangé, séance en cours → 409, record corrigé à la baisse retiré
+- [x] Backend : `correctWorkoutSet` : `_actual`, `validated_at = COALESCE(validated_at, NOW(3))`, `updated_at = NOW(3)` ; contexte : séance `completed` ou `unfinished` de l'utilisateur
+- [x] Backend : ajout et suppression réutilisent US-32 avec le statut de séance terminé autorisé
+- [ ] Backend : après correction, recalcul des records (US-40) : notification de record supprimée si le record n'existe plus (US-40 pas encore construite)
+- [x] Frontend : `WorkoutPage` en mode `correction` ; bandeau ; retour au détail
+- [x] Tests : back : correction, `validated_at` conservé, `updated_at` rempli, prévu inchangé, séance en cours → 409, record corrigé à la baisse retiré
 
 ## Definition of Done
 
