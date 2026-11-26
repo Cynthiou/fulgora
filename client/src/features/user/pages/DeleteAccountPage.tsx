@@ -75,9 +75,10 @@ function DeleteAccountPage() {
           >
             <Icon src={trashIcon} className="size-7" />
           </span>
-          <h1 className="font-display text-[36px] font-extrabold uppercase italic leading-none">
+          {/* The header already carries the h1 of the screen. */}
+          <h2 className="font-display text-[36px] font-extrabold uppercase italic leading-none">
             Supprimer ton compte ?
-          </h1>
+          </h2>
           <p className="text-sm font-semibold">
             La suppression efface définitivement :
           </p>
@@ -121,9 +122,9 @@ function DeleteAccountPage() {
           }}
           className="flex flex-1 flex-col gap-3.5 px-[18px] pt-1 pb-3.5"
         >
-          <h1 className="font-display text-[34px] font-extrabold uppercase italic leading-none">
+          <h2 className="font-display text-[34px] font-extrabold uppercase italic leading-none">
             Confirme la suppression
-          </h1>
+          </h2>
           <p className="text-sm text-muted">
             {"Saisis ton mot de passe pour supprimer définitivement le compte "}
             <b className="text-base-content">{user.username}</b>.

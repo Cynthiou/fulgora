@@ -73,14 +73,14 @@ Message, compte intact.
 
 ## Tâches techniques
 
-- [ ] Backend : `accountRepository` : une fonction `DELETE` par table, dans l'ordre : `notification` → `workout_set` → `workout_exercise` → `workout_block` → `workout_session` → `appointment` → `weekly_schedule` → `program_change` → `program` (enfants avant parents, `source_program_id` remis à `NULL` avant) → `planned_set` → `template_block_exercise` → `template_block` → `session_version` → `session_template` → exercices personnels (`exercise_text`, `exercise_category`, `exercise_muscle`, `exercise_equipment`, `exercise_measure`, puis `exercise`, après avoir remis à `NULL` les `source_exercise_id` qui pointent vers eux) → `user`
-- [ ] Backend : chaque `DELETE` filtré par l'utilisateur (jointures jusqu'à `owner_user_id`)
-- [ ] Backend : `DELETE /api/users/me` (corps : mot de passe) → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action dans `withTransaction`, puis `clearAuthCookie`
-- [ ] Frontend : `DeleteAccountPage.tsx` (PRF-07, PRF-08, PRF-08s) ; `AuthContext.logout` sans retour possible (`replace`)
-- [ ] Tests : back : utilisateur avec séances, programmes, notifications et exercices personnels → plus aucune ligne ; un autre utilisateur intact ; mot de passe faux → rien supprimé ; erreur forcée au milieu → rien supprimé
-- [ ] Tests : E2E : suppression complète puis tentative de connexion
+- [x] Backend : `accountRepository` : une fonction `DELETE` par table, dans l'ordre : `notification` → `workout_set` → `workout_exercise` → `workout_block` → `workout_session` → `appointment` → `weekly_schedule` → `program_change` → `program` (enfants avant parents, `source_program_id` remis à `NULL` avant) → `planned_set` → `template_block_exercise` → `template_block` → `session_version` → `session_template` → exercices personnels (`exercise_text`, `exercise_category`, `exercise_muscle`, `exercise_equipment`, `exercise_measure`, puis `exercise`, après avoir remis à `NULL` les `source_exercise_id` qui pointent vers eux) → `user`
+- [x] Backend : chaque `DELETE` filtré par l'utilisateur (jointures jusqu'à `owner_user_id`)
+- [x] Backend : `DELETE /api/users/me` (corps : mot de passe) → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action dans `withTransaction`, puis `clearAuthCookie`
+- [x] Frontend : `DeleteAccountPage.tsx` (PRF-07, PRF-08, PRF-08s) ; `AuthContext.logout` sans retour possible (`replace`)
+- [x] Tests : back : utilisateur avec séances, programmes, notifications et exercices personnels → plus aucune ligne ; un autre utilisateur intact ; mot de passe faux → rien supprimé ; erreur forcée au milieu → rien supprimé
+- [x] Tests : E2E : suppression complète puis tentative de connexion
 
 ## Definition of Done
 
-- [ ] Test « aucune ligne restante » couvrant toutes les tables
+- [x] Test « aucune ligne restante » couvrant toutes les tables
 - [ ] Code relu et fusionné via pull request

@@ -45,12 +45,14 @@ async function createAccount() {
   };
 }
 
-async function insert(sql: string, values: unknown[]): Promise<number> {
+type Values = (string | number | null)[];
+
+async function insert(sql: string, values: Values): Promise<number> {
   const [result] = await client.execute<ResultSetHeader>(sql, values);
   return result.insertId;
 }
 
-async function count(sql: string, values: unknown[]): Promise<number> {
+async function count(sql: string, values: Values): Promise<number> {
   const [rows] = await client.execute<RowDataPacket[]>(sql, values);
   return Number(rows[0]?.total ?? -1);
 }
@@ -202,7 +204,7 @@ describe("DELETE /api/users/me", () => {
     expect(readSetCookie(response.headers)).toContain("fulgora_token=;");
 
     // Table by table, nothing is left (Definition of Done of the card)
-    const checks: [string, unknown[]][] = [
+    const checks: [string, Values][] = [
       ["SELECT COUNT(*) AS total FROM `user` WHERE id = ?", [user.id]],
       [
         "SELECT COUNT(*) AS total FROM notification WHERE user_id = ?",
@@ -398,6 +400,59 @@ describe("DELETE /api/users/me", () => {
         [user.id],
       ),
     ).toBe(1);
+  });
+
+  it("puts everything back when one step fails", async () => {
+    const lea = await createAccount();
+    const other = await createAccount();
+    const data = await fillAccount(lea);
+
+    // A row of another user points at an appointment of Lea: the DELETE of
+    // the appointments is refused (RESTRICT), so the whole transaction is
+    // undone (DT-17).
+    await client.execute(
+      "INSERT INTO notification (user_id, `type`, title, appointment_id) VALUES (?, 'session_missed', 'Séance manquée', ?)",
+      [other.id, data.appointmentId],
+    );
+
+    await authLimiterStore.resetAll();
+    const response = await request(app)
+      .delete("/api/users/me")
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie)
+      .send({ password: PASSWORD });
+
+    expect(response.status).toBe(500);
+
+    // Nothing of Lea disappeared, not even what came before the failure
+    for (const [sql, values] of [
+      ["SELECT COUNT(*) AS total FROM `user` WHERE id = ?", [lea.id]],
+      [
+        "SELECT COUNT(*) AS total FROM notification WHERE user_id = ?",
+        [lea.id],
+      ],
+      ["SELECT COUNT(*) AS total FROM workout_set WHERE id = ?", [data.setId]],
+      [
+        "SELECT COUNT(*) AS total FROM workout_session WHERE owner_user_id = ?",
+        [lea.id],
+      ],
+    ] as [string, Values][]) {
+      expect({ sql, total: await count(sql, values) }).toEqual({
+        sql,
+        total: 1,
+      });
+    }
+    // The two sides of the set are still there as well
+    expect(
+      await count(
+        "SELECT COUNT(*) AS total FROM workout_set_side WHERE workout_set_id = ?",
+        [data.setId],
+      ),
+    ).toBe(2);
+
+    // The session is still open: the account is intact
+    const me = await request(app).get("/api/auth/me").set("Cookie", lea.cookie);
+    expect(me.status).toBe(200);
   });
 
   it("refuses an anonymous visitor and an empty password", async () => {
