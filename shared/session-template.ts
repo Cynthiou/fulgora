@@ -43,20 +43,41 @@ export const BLOCK_TYPE_CODES = [
 
 export type BlockType = (typeof BLOCK_TYPE_CODES)[number];
 
-// The MVP types (RM-019). Circuit, AMRAP and For Time arrive with US-43.
+// Every type can be chosen since US-43 (RM-019).
 export const AVAILABLE_BLOCK_TYPES = [
   "classic",
+  "circuit",
+  "amrap",
+  "for_time",
   "warm_up",
   "stretching",
   "challenge",
   "note",
 ] as const satisfies readonly BlockType[];
 
+// A timed block: its exercises are chained, not done set by set (RM-042).
+export const TIMED_BLOCK_TYPES = [
+  "circuit",
+  "amrap",
+  "for_time",
+] as const satisfies readonly BlockType[];
+
+export function isTimedBlock(type: BlockType): boolean {
+  return (TIMED_BLOCK_TYPES as readonly BlockType[]).includes(type);
+}
+
+// 1 to 50 rounds; a time limit from 1 minute to 2 hours (US-43).
+export const ROUNDS_LIMIT = { min: 1, max: 50 };
+export const TIME_LIMIT_SECONDS = { min: 60, max: 2 * 60 * 60 };
+
+export const ROUNDS_MESSAGE = `Entre un nombre de tours entre ${ROUNDS_LIMIT.min} et ${ROUNDS_LIMIT.max}.`;
+export const TIME_LIMIT_MESSAGE = "Entre une durée entre 1 min et 2 h.";
+
 export type BlockTypeInfo = {
   code: BlockType;
   label: string;
   description: string;
-  // False for the timed blocks until US-43: shown as "Bientôt".
+  // Kept for a type that would not be ready yet: shown as "Bientôt".
   isAvailable: boolean;
 };
 
@@ -72,19 +93,19 @@ export const BLOCK_TYPES: BlockTypeInfo[] = [
     code: "circuit",
     label: "Circuit",
     description: "Exercices enchaînés, nombre de tours",
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     code: "amrap",
     label: "AMRAP",
     description: "Maximum de tours dans une durée fixe",
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     code: "for_time",
     label: "For Time",
     description: "Travail fixe, le plus vite possible",
-    isAvailable: false,
+    isAvailable: true,
   },
   {
     code: "warm_up",
@@ -221,6 +242,10 @@ export type DraftBlock = {
   block_type: BlockType;
   name: string | null;
   instructions: string | null;
+  // Circuit: how many rounds. AMRAP and For Time: the time limit in
+  // seconds. Null everywhere else (US-43, RM-042).
+  planned_rounds: number | null;
+  time_limit_seconds: number | null;
   exercises: DraftExercise[];
 };
 
@@ -273,6 +298,19 @@ export const draftBlockSchema = z
       .string()
       .max(2000, { error: "2 000 caractères au maximum." })
       .nullable(),
+    // Only a timed block uses these two (US-43)
+    planned_rounds: z
+      .number()
+      .int({ error: "Entre un nombre entier." })
+      .min(ROUNDS_LIMIT.min, { error: ROUNDS_MESSAGE })
+      .max(ROUNDS_LIMIT.max, { error: ROUNDS_MESSAGE })
+      .nullable(),
+    time_limit_seconds: z
+      .number()
+      .int({ error: "Entre un nombre entier." })
+      .min(TIME_LIMIT_SECONDS.min, { error: TIME_LIMIT_MESSAGE })
+      .max(TIME_LIMIT_SECONDS.max, { error: TIME_LIMIT_MESSAGE })
+      .nullable(),
     exercises: z.array(draftExerciseSchema).max(MAX_EXERCISES_PER_BLOCK, {
       error: `${MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc.`,
     }),
@@ -281,7 +319,61 @@ export const draftBlockSchema = z
   .refine(
     (block) => block.block_type !== "note" || block.exercises.length === 0,
     { error: "Un bloc Note ne contient pas d'exercice.", path: ["exercises"] },
-  );
+  )
+  // What each timed type needs, and what the others must not carry
+  // (US-43, RM-042).
+  .superRefine((block, context) => {
+    const timed = isTimedBlock(block.block_type);
+    if (block.block_type === "circuit" && block.planned_rounds === null) {
+      context.addIssue({
+        code: "custom",
+        message: ROUNDS_MESSAGE,
+        path: ["planned_rounds"],
+      });
+    }
+    if (block.block_type === "amrap" && block.time_limit_seconds === null) {
+      context.addIssue({
+        code: "custom",
+        message: TIME_LIMIT_MESSAGE,
+        path: ["time_limit_seconds"],
+      });
+    }
+    if (block.block_type !== "circuit" && block.planned_rounds !== null) {
+      context.addIssue({
+        code: "custom",
+        message: "Seul un circuit a un nombre de tours.",
+        path: ["planned_rounds"],
+      });
+    }
+    if (!timed && block.time_limit_seconds !== null) {
+      context.addIssue({
+        code: "custom",
+        message: "Seul un bloc chronométré a une durée limite.",
+        path: ["time_limit_seconds"],
+      });
+    }
+    if (!timed) {
+      return;
+    }
+    // One objective per round: one planned set per exercise, and no rest
+    // between sets (the rest of a timed block is between the rounds).
+    for (const [index, exercise] of block.exercises.entries()) {
+      if (exercise.sets.length !== 1) {
+        context.addIssue({
+          code: "custom",
+          message: "Un seul objectif par exercice dans un bloc chronométré.",
+          path: ["exercises", index, "sets"],
+        });
+      }
+      if (exercise.sets.some((set) => set.rest_after_seconds !== null)) {
+        context.addIssue({
+          code: "custom",
+          message: "Pas de repos par série dans un bloc chronométré.",
+          path: ["exercises", index, "sets"],
+        });
+      }
+    }
+  });
 
 export const sessionDraftSchema = z.object({
   name: z
@@ -342,6 +434,74 @@ export function getBlockLabel(
       ? block.name.trim()
       : `Bloc ${index + 1}`;
   return `${BLOCK_TYPE_LABELS[block.block_type]} · ${title}`;
+}
+
+// A planned set with nothing in it: the exercise has no objective yet
+// ("objectif à régler" of C4). The rest alone is not an objective.
+export function isGoalMissing(set: PlannedSetValues): boolean {
+  return (Object.keys(set) as (keyof PlannedSetValues)[]).every(
+    (field) => field === "rest_after_seconds" || set[field] === null,
+  );
+}
+
+// "3 tours", "12 min", or "" when the block has no setting of its own
+// (US-43). The duration is read in minutes and seconds.
+export function formatBlockSettings(
+  block: Pick<
+    DraftBlock,
+    "block_type" | "planned_rounds" | "time_limit_seconds"
+  >,
+): string {
+  if (block.block_type === "circuit" && block.planned_rounds !== null) {
+    return `${block.planned_rounds} ${
+      block.planned_rounds > 1 ? "tours" : "tour"
+    }`;
+  }
+  if (isTimedBlock(block.block_type) && block.time_limit_seconds !== null) {
+    return formatDuration(block.time_limit_seconds);
+  }
+  return "";
+}
+
+// A block as these two functions read it: the draft of the editor as well
+// as the blocks sent to the server.
+export type BlockSummaryInput = {
+  block_type: BlockType;
+  planned_rounds: number | null;
+  time_limit_seconds: number | null;
+  exercises: { sets: PlannedSetValues[] }[];
+};
+
+// "Circuit · 3 tours · 4 exercices", "AMRAP · 12 min", "For Time": the one
+// line summary of a block (US-43).
+export function formatBlockSummary(block: BlockSummaryInput): string {
+  const parts = [BLOCK_TYPE_LABELS[block.block_type]];
+  const settings = formatBlockSettings(block);
+  if (settings !== "") {
+    parts.push(settings);
+  }
+  if (block.exercises.length > 0) {
+    parts.push(formatExerciseCountShort(block.exercises.length));
+  }
+  return parts.join(" · ");
+}
+
+// What a timed block still needs before it can be saved: null when it is
+// ready (US-43). Used to keep "Enregistrer le bloc" disabled.
+export function findTimedBlockProblem(block: BlockSummaryInput): string | null {
+  if (!isTimedBlock(block.block_type)) {
+    return null;
+  }
+  if (block.block_type === "circuit" && block.planned_rounds === null) {
+    return "Règle le nombre de tours.";
+  }
+  if (block.block_type === "amrap" && block.time_limit_seconds === null) {
+    return "Règle la durée de l'AMRAP.";
+  }
+  if (block.exercises.some((exercise) => exercise.sets.every(isGoalMissing))) {
+    return "Un objectif est à régler.";
+  }
+  return null;
 }
 
 // "0 bloc", "1 bloc", "2 blocs".

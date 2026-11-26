@@ -15,6 +15,7 @@ import {
   diffSessionDrafts,
   formatBlockCount,
   formatLongDate,
+  isTimedBlock,
   MAX_BLOCKS,
   type SelectedExercise,
   type SessionDraft,
@@ -525,6 +526,7 @@ function SessionEditorPage({ edit }: Props) {
       <>
         <SetConfigurator
           exercise={openExercise}
+          isTimed={isTimedBlock(openBlock.block_type)}
           onUpdateSet={(index, values) =>
             dispatch({ type: "updateSet", ...target, index, values })
           }
@@ -574,6 +576,12 @@ function SessionEditorPage({ edit }: Props) {
               key: openBlockKey,
               instructions,
             })
+          }
+          onChangeRounds={(rounds) =>
+            dispatch({ type: "setBlockRounds", key: openBlockKey, rounds })
+          }
+          onChangeTimeLimit={(seconds) =>
+            dispatch({ type: "setBlockTimeLimit", key: openBlockKey, seconds })
           }
           onRequestTypeChange={() => setPicker("change")}
           onAddExercises={() => addExercises(openBlockKey)}

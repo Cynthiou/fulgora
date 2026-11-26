@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import {
   BLOCK_TYPE_LABELS,
   type DraftBlock,
+  formatBlockSettings,
   formatExerciseCountShort,
   getBlockLabel,
 } from "shared";
@@ -66,7 +67,13 @@ function BlockCard({
           </span>
           {block.block_type !== "note" && (
             <span className="shrink-0 text-xs font-medium text-muted">
-              {formatExerciseCountShort(block.exercises.length)}
+              {/* "3 tours · 4 exercices" for a timed block (US-43) */}
+              {[
+                formatBlockSettings(block),
+                formatExerciseCountShort(block.exercises.length),
+              ]
+                .filter((part) => part !== "")
+                .join(" · ")}
             </span>
           )}
         </span>

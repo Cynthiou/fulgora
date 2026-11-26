@@ -484,6 +484,8 @@ describe("ExerciseListPage · selection (US-14)", () => {
             block_type: "warm_up",
             name: null,
             instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
             exercises: [],
           },
           {
@@ -491,6 +493,8 @@ describe("ExerciseListPage · selection (US-14)", () => {
             block_type: "classic",
             name: "Force",
             instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
             exercises: [],
           },
         ],

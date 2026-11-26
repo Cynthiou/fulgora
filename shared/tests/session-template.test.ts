@@ -11,7 +11,9 @@ import {
   createEmptySet,
   type DraftBlock,
   draftBlockSchema,
+  findTimedBlockProblem,
   formatBlockCount,
+  formatBlockSummary,
   formatDuration,
   formatMinSec,
   formatRangeMessage,
@@ -46,6 +48,8 @@ function validBlock(): DraftBlock {
     block_type: "classic",
     name: "Force",
     instructions: null,
+    planned_rounds: null,
+    time_limit_seconds: null,
     exercises: [
       {
         key: "e1",
@@ -463,5 +467,142 @@ describe("a load typed in pounds", () => {
     } finally {
       setDisplayUnits({ weight: "kg", distance: "km" });
     }
+  });
+});
+
+// US-43: a timed block carries its own settings (RM-042).
+describe("les blocs chronométrés", () => {
+  function timedBlock(
+    type: "circuit" | "amrap" | "for_time",
+    extra: Partial<{
+      planned_rounds: number | null;
+      time_limit_seconds: number | null;
+      sets: number;
+      rest: number | null;
+    }> = {},
+  ) {
+    const count = extra.sets ?? 1;
+    return {
+      block_type: type,
+      name: null,
+      instructions: null,
+      planned_rounds: extra.planned_rounds ?? null,
+      time_limit_seconds: extra.time_limit_seconds ?? null,
+      exercises: [
+        {
+          exercise_id: 1,
+          default_rest_seconds: null,
+          sets: Array.from({ length: count }, () => ({
+            ...createEmptySet(),
+            reps: 10,
+            rest_after_seconds: extra.rest ?? null,
+          })),
+        },
+      ],
+    };
+  }
+
+  it("accepts a circuit with its rounds", () => {
+    const result = draftBlockSchema.safeParse(
+      timedBlock("circuit", { planned_rounds: 3 }),
+    );
+    expect(result.success).toBe(true);
+  });
+
+  it("refuses a circuit without rounds", () => {
+    const result = draftBlockSchema.safeParse(timedBlock("circuit"));
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["planned_rounds"]);
+  });
+
+  it("refuses an AMRAP without a duration, accepts it with one", () => {
+    expect(draftBlockSchema.safeParse(timedBlock("amrap")).success).toBe(false);
+    expect(
+      draftBlockSchema.safeParse(
+        timedBlock("amrap", { time_limit_seconds: 12 * 60 }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it("accepts a For Time with or without a time limit", () => {
+    expect(draftBlockSchema.safeParse(timedBlock("for_time")).success).toBe(
+      true,
+    );
+    expect(
+      draftBlockSchema.safeParse(
+        timedBlock("for_time", { time_limit_seconds: 20 * 60 }),
+      ).success,
+    ).toBe(true);
+  });
+
+  it("refuses a duration out of its limits", () => {
+    expect(
+      draftBlockSchema.safeParse(
+        timedBlock("amrap", { time_limit_seconds: 30 }),
+      ).success,
+    ).toBe(false);
+    expect(
+      draftBlockSchema.safeParse(timedBlock("circuit", { planned_rounds: 51 }))
+        .success,
+    ).toBe(false);
+  });
+
+  it("refuses several objectives and a rest per set", () => {
+    expect(
+      draftBlockSchema.safeParse(
+        timedBlock("circuit", { planned_rounds: 3, sets: 2 }),
+      ).success,
+    ).toBe(false);
+    expect(
+      draftBlockSchema.safeParse(
+        timedBlock("circuit", { planned_rounds: 3, rest: 60 }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it("refuses settings on a block that is not timed", () => {
+    const classic = {
+      ...timedBlock("circuit", { planned_rounds: 3 }),
+      block_type: "classic" as const,
+    };
+    expect(draftBlockSchema.safeParse(classic).success).toBe(false);
+  });
+
+  it("writes the summary of each type", () => {
+    expect(
+      formatBlockSummary(timedBlock("circuit", { planned_rounds: 3 })),
+    ).toBe("Circuit · 3 tours · 1 exercice");
+    expect(
+      formatBlockSummary({
+        ...timedBlock("amrap", { time_limit_seconds: 12 * 60 }),
+        exercises: [],
+      }),
+    ).toBe("AMRAP · 12 min");
+    expect(
+      formatBlockSummary({ ...timedBlock("for_time"), exercises: [] }),
+    ).toBe("For Time");
+  });
+
+  it("says what a timed block still needs", () => {
+    expect(findTimedBlockProblem(timedBlock("circuit"))).toBe(
+      "Règle le nombre de tours.",
+    );
+    expect(findTimedBlockProblem(timedBlock("amrap"))).toBe(
+      "Règle la durée de l'AMRAP.",
+    );
+    const empty = {
+      ...timedBlock("circuit", { planned_rounds: 3 }),
+      exercises: [
+        {
+          exercise_id: 1,
+          default_rest_seconds: null,
+          sets: [createEmptySet()],
+        },
+      ],
+    };
+    expect(findTimedBlockProblem(empty)).toBe("Un objectif est à régler.");
+    expect(
+      findTimedBlockProblem(timedBlock("circuit", { planned_rounds: 3 })),
+    ).toBeNull();
   });
 });

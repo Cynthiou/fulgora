@@ -134,6 +134,8 @@ export async function buildSessionDraft(
       block_type: block.block_type,
       name: block.name,
       instructions: block.instructions,
+      planned_rounds: block.planned_rounds,
+      time_limit_seconds: block.time_limit_seconds,
       exercises: exercises
         .filter((exercise) => exercise.template_block_id === block.id)
         .map((exercise) =>

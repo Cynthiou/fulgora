@@ -87,6 +87,8 @@ function validSession(date = todayInParis()): FreeSessionInput {
         block_type: "classic",
         name: "Force",
         instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
         exercises: [
           {
             exercise_id: benchId,
@@ -107,6 +109,8 @@ function validSession(date = todayInParis()): FreeSessionInput {
         block_type: "note",
         name: null,
         instructions: "Penser à respirer.",
+        planned_rounds: null,
+        time_limit_seconds: null,
         exercises: [],
       },
     ],
@@ -236,6 +240,8 @@ describe("POST /api/appointments", () => {
       block_type: "classic",
       name: null,
       instructions: null,
+      planned_rounds: null,
+      time_limit_seconds: null,
       exercises: [
         {
           exercise_id: othersExerciseId,
@@ -309,6 +315,78 @@ describe("POST /api/appointments", () => {
     ).toEqual(
       expect.arrayContaining(["name", "blocks.0.exercises.0.sets.0.weight_kg"]),
     );
+  });
+
+  // US-43: a timed block keeps its rounds or its duration (RM-042).
+  it("saves a circuit with its rounds, and reads them back", async () => {
+    const body = validSession();
+    body.name = "Circuit du jeudi";
+    body.blocks = [
+      {
+        block_type: "circuit",
+        name: "Tour complet",
+        instructions: null,
+        planned_rounds: 3,
+        time_limit_seconds: null,
+        exercises: [
+          {
+            exercise_id: benchId,
+            default_rest_seconds: null,
+            sets: [set({ reps: 10, weight_kg: 40 })],
+          },
+        ],
+      },
+    ];
+
+    const response = await post(body, lea.cookie);
+    expect(response.status).toBe(201);
+
+    const [rows] = await client.execute<Rows[]>(
+      `SELECT tb.block_type, tb.planned_rounds, tb.time_limit_seconds
+         FROM template_block tb
+         JOIN session_version sv ON sv.id = tb.session_version_id
+         JOIN session_template st ON st.id = sv.session_template_id
+        WHERE st.owner_user_id = ? AND st.name = ?`,
+      [lea.id, "Circuit du jeudi"],
+    );
+    expect(rows[0]).toMatchObject({
+      block_type: "circuit",
+      planned_rounds: 3,
+      time_limit_seconds: null,
+    });
+  });
+
+  it("refuses a circuit without rounds and an AMRAP without duration", async () => {
+    const before = await countUserRows(lea.id);
+
+    const circuit = validSession();
+    circuit.blocks = [
+      {
+        block_type: "circuit",
+        name: null,
+        instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
+        exercises: [],
+      },
+    ];
+    expect((await post(circuit, lea.cookie)).status).toBe(400);
+
+    const amrap = validSession();
+    amrap.blocks = [
+      {
+        block_type: "amrap",
+        name: null,
+        instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
+        exercises: [],
+      },
+    ];
+    expect((await post(amrap, lea.cookie)).status).toBe(400);
+
+    // Nothing was written
+    expect(await countUserRows(lea.id)).toEqual(before);
   });
 
   it("answers 401 without a cookie and 403 without an allowed origin", async () => {

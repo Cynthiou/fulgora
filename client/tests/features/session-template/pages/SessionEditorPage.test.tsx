@@ -146,7 +146,9 @@ describe("SessionEditorPage", () => {
     );
     expect(loadDraft()?.draft.planned_date).toBe("2026-11-28");
   });
-  it("shows the 8 types, 3 of them unavailable, and closes the panel", async () => {
+  // US-43: the three timed types are available too, so the eight tiles
+  // can all be chosen.
+  it("shows the 8 types, all available, and closes the panel", async () => {
     const user = renderEditor();
 
     await user.click(screen.getByRole("button", { name: "Ajouter un bloc" }));
@@ -155,24 +157,23 @@ describe("SessionEditorPage", () => {
     expect(
       screen.getByText("Exercices et séries, avec objectifs et repos"),
     ).toBeTruthy();
-    const amrap = screen.getByRole("button", {
-      name: /^AMRAP/,
-    }) as HTMLButtonElement;
-    expect(amrap.disabled).toBe(true);
-    expect(amrap.textContent).toContain("Bientôt");
-    expect(amrap.textContent).toContain("indisponible");
-    expect(
-      (screen.getByRole("button", { name: /^Circuit/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    expect(
-      (screen.getByRole("button", { name: /^For Time/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    expect(
-      (screen.getByRole("button", { name: /^Classique/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(false);
+    for (const name of [
+      /^Classique/,
+      /^Circuit/,
+      /^AMRAP/,
+      /^For Time/,
+      /^Échauffement/,
+      /^Étirements/,
+      /^Défi/,
+      /^Note/,
+    ]) {
+      const tile = screen.getByRole("button", { name }) as HTMLButtonElement;
+      expect({ name: String(name), disabled: tile.disabled }).toEqual({
+        name: String(name),
+        disabled: false,
+      });
+    }
+    expect(screen.queryByText("Bientôt")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Fermer" }));
 
@@ -331,6 +332,8 @@ describe("SessionEditorPage", () => {
             block_type: "classic",
             name: "Force",
             instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
             exercises: [],
           },
         ],
@@ -471,6 +474,8 @@ function saveBlockWithProfiles() {
           block_type: "classic",
           name: null,
           instructions: null,
+          planned_rounds: null,
+          time_limit_seconds: null,
           exercises: [
             {
               key: "e1",
@@ -861,6 +866,8 @@ describe("SessionEditorPage · saving (US-23)", () => {
             block_type: "classic",
             name: null,
             instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
             exercises: [
               {
                 key: "e1",

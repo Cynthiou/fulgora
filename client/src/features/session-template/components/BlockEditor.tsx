@@ -1,7 +1,10 @@
 import {
   BLOCK_TYPE_LABELS,
   type DraftBlock,
+  findTimedBlockProblem,
   formatExerciseCountShort,
+  isGoalMissing,
+  isTimedBlock,
   MAX_EXERCISES_PER_BLOCK,
 } from "shared";
 import checkIcon from "../../../assets/icons/ui/app/check.svg";
@@ -12,6 +15,7 @@ import PageHeader from "../../../components/PageHeader";
 import SortableList from "../../../components/SortableList";
 import TextField from "../../../components/TextField";
 import BlockExerciseRow from "./BlockExerciseRow";
+import TimedBlockSettings from "./TimedBlockSettings";
 
 const NOTE_MAX_LENGTH = 2000;
 
@@ -22,6 +26,9 @@ type Props = {
   sessionName: string;
   onChangeName: (name: string | null) => void;
   onChangeInstructions: (instructions: string | null) => void;
+  // The settings of a timed block (US-43)
+  onChangeRounds: (rounds: number | null) => void;
+  onChangeTimeLimit: (seconds: number | null) => void;
   // "Changer": reopens the type panel; only offered on an empty block (D-03)
   onRequestTypeChange: () => void;
   // "Ajouter des exercices": opens the catalog in selection mode (A5)
@@ -44,6 +51,8 @@ function BlockEditor({
   sessionName,
   onChangeName,
   onChangeInstructions,
+  onChangeRounds,
+  onChangeTimeLimit,
   onRequestTypeChange,
   onAddExercises,
   onOpenExercise,
@@ -54,13 +63,16 @@ function BlockEditor({
 }: Props) {
   const typeLabel = BLOCK_TYPE_LABELS[block.block_type];
   const isNote = block.block_type === "note";
+  const isTimed = isTimedBlock(block.block_type);
+  // What a timed block still needs before it can be saved (C4)
+  const problem = findTimedBlockProblem(block);
   const canChangeType = block.exercises.length === 0;
   const isFull = block.exercises.length >= MAX_EXERCISES_PER_BLOCK;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
       <PageHeader
-        onBack={onDone}
+        onBack={problem === null ? onDone : undefined}
         backLabel="Retour à la séance"
         title={typeLabel}
         subtitle={`Bloc ${index + 1} · ${
@@ -113,6 +125,16 @@ function BlockEditor({
           <p id="change-type-soon" className="-mt-1 text-xs text-muted">
             Changer le type d'un bloc qui a des exercices arrive bientôt.
           </p>
+        )}
+
+        {isTimed && (
+          <TimedBlockSettings
+            blockType={block.block_type}
+            plannedRounds={block.planned_rounds}
+            timeLimitSeconds={block.time_limit_seconds}
+            onChangeRounds={onChangeRounds}
+            onChangeTimeLimit={onChangeTimeLimit}
+          />
         )}
 
         {isNote ? (
@@ -180,6 +202,11 @@ function BlockEditor({
                       <BlockExerciseRow
                         exercise={exercise}
                         handle={handle}
+                        // In a timed block, one objective per round: an
+                        // empty one is called out (C4)
+                        missingGoal={
+                          isTimed && exercise.sets.every(isGoalMissing)
+                        }
                         isFirst={position === 0}
                         onOpen={() => onOpenExercise(exercise.key)}
                         onRemove={() => onRemoveExercise(exercise.key)}
@@ -219,11 +246,23 @@ function BlockEditor({
       </div>
 
       <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
-        <div className="mx-auto max-w-md">
+        <div className="mx-auto flex max-w-md flex-col gap-1.5">
+          {problem !== null && (
+            <p
+              id="timed-block-problem"
+              className="text-center text-xs font-semibold text-muted"
+            >
+              {problem}
+            </p>
+          )}
           <button
             type="button"
             onClick={onDone}
-            className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action"
+            disabled={problem !== null}
+            aria-describedby={
+              problem === null ? undefined : "timed-block-problem"
+            }
+            className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
           >
             <Icon src={checkIcon} className="size-[18px]" />
             Enregistrer le bloc

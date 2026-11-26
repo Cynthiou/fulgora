@@ -296,6 +296,8 @@ describe("les séances d'un jour du programme", () => {
           block_type: "classic",
           name: null,
           instructions: null,
+          planned_rounds: null,
+          time_limit_seconds: null,
           exercises: [
             {
               key: "e1",

@@ -35,6 +35,9 @@ export type SessionDraftAction =
   | { type: "addBlock"; blockType: BlockType; key?: string }
   | { type: "setBlockName"; key: string; name: string | null }
   | { type: "setBlockInstructions"; key: string; instructions: string | null }
+  // The settings of a timed block (US-43)
+  | { type: "setBlockRounds"; key: string; rounds: number | null }
+  | { type: "setBlockTimeLimit"; key: string; seconds: number | null }
   | { type: "setBlockType"; key: string; blockType: BlockType }
   | { type: "removeBlock"; key: string }
   | { type: "restoreBlock"; block: DraftBlock; index: number }
@@ -175,6 +178,8 @@ export function sessionDraftReducer(
         block_type: action.blockType,
         name: null,
         instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
         exercises: [],
       };
       return { ...draft, blocks: [...draft.blocks, block] };
@@ -183,6 +188,22 @@ export function sessionDraftReducer(
     case "setBlockName":
       return updateBlock(draft, action.key, (block) =>
         block.name === action.name ? block : { ...block, name: action.name },
+      );
+
+    // US-43: the rounds of a circuit, the duration of an AMRAP or the
+    // limit of a For Time.
+    case "setBlockRounds":
+      return updateBlock(draft, action.key, (block) =>
+        block.planned_rounds === action.rounds
+          ? block
+          : { ...block, planned_rounds: action.rounds },
+      );
+
+    case "setBlockTimeLimit":
+      return updateBlock(draft, action.key, (block) =>
+        block.time_limit_seconds === action.seconds
+          ? block
+          : { ...block, time_limit_seconds: action.seconds },
       );
 
     case "setBlockInstructions":

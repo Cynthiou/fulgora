@@ -41,6 +41,8 @@ type Props = {
   onChangePerSide: (isPerSide: boolean) => void;
   onChangeSameLoad: (isSame: boolean) => void;
   onChangeRest: (seconds: number | null) => void;
+  // Timed block: one objective per round, and no rest per set (US-43)
+  isTimed?: boolean;
   // "Valider l'exercice" and the back arrow both return to the block
   onDone: () => void;
 };
@@ -61,6 +63,7 @@ function SetConfigurator({
   onChangeSameLoad,
   onChangeRest,
   onDone,
+  isTimed = false,
 }: Props) {
   const profile = getMeasureProfile(
     exercise.measure_codes,
@@ -379,12 +382,19 @@ function SetConfigurator({
           </div>
         )}
 
-        <RestInput
-          id="default-rest"
-          label="Repos par défaut"
-          value={exercise.default_rest_seconds}
-          onChange={onChangeRest}
-        />
+        {isTimed ? (
+          <p className="rounded-card border border-base-300 bg-base-100 p-4 text-sm leading-[1.45] text-muted shadow-card">
+            Un seul objectif, répété à chaque tour. Le repos d'un bloc
+            chronométré se prend entre les tours, pas entre les séries.
+          </p>
+        ) : (
+          <RestInput
+            id="default-rest"
+            label="Repos par défaut"
+            value={exercise.default_rest_seconds}
+            onChange={onChangeRest}
+          />
+        )}
 
         {profile !== "none" && (
           <SortableList
@@ -450,15 +460,17 @@ function SetConfigurator({
                       </button>
                       {menuIndex === index && (
                         <div className="absolute right-0 z-10 flex w-48 flex-col rounded-card border border-base-300 bg-base-100 p-1 shadow-card">
-                          <button
-                            type="button"
-                            onClick={() => toggleOwnRest(index)}
-                            className="min-h-tap rounded-btn px-3 text-left font-semibold"
-                          >
-                            {ownRest.includes(index)
-                              ? "Même repos que l'exercice"
-                              : "Repos différent"}
-                          </button>
+                          {!isTimed && (
+                            <button
+                              type="button"
+                              onClick={() => toggleOwnRest(index)}
+                              className="min-h-tap rounded-btn px-3 text-left font-semibold"
+                            >
+                              {ownRest.includes(index)
+                                ? "Même repos que l'exercice"
+                                : "Repos différent"}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => moveSet(index, index - 1)}
@@ -509,7 +521,7 @@ function SetConfigurator({
           />
         )}
 
-        {profile !== "none" && (
+        {profile !== "none" && !isTimed && (
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <button

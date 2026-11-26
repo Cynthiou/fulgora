@@ -16,6 +16,8 @@ type Props = {
   handle: ReactNode;
   // The first row of the card carries no line above it
   isFirst: boolean;
+  // Timed block: this exercise has no objective yet (C4, US-43)
+  missingGoal?: boolean;
 };
 
 // Screen A6: one exercise of a block, with the summary of its planned sets
@@ -29,6 +31,7 @@ function BlockExerciseRow({
   onMoveDown,
   handle,
   isFirst,
+  missingGoal = false,
 }: Props) {
   return (
     <div
@@ -44,8 +47,12 @@ function BlockExerciseRow({
       >
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate text-sm font-bold">{exercise.name}</span>
-          <span className="truncate text-xs font-medium leading-[1.45] text-muted">
-            {formatSetSummary(exercise)}
+          <span
+            className={`truncate text-xs font-medium leading-[1.45] ${
+              missingGoal ? "text-status-missed-text" : "text-muted"
+            }`}
+          >
+            {missingGoal ? "objectif à régler" : formatSetSummary(exercise)}
           </span>
         </span>
         <Icon

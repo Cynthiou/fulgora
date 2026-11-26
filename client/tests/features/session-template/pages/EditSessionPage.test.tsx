@@ -44,6 +44,8 @@ const saved: EditableSession = {
         block_type: "classic",
         name: "Force",
         instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
         exercises: [
           {
             key: "ex-1",

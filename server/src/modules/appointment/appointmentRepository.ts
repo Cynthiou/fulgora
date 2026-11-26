@@ -188,6 +188,9 @@ export type VersionBlockRow = {
   name: string | null;
   position: number;
   instructions: string | null;
+  // The settings of a timed block (US-43), null for the other types
+  planned_rounds: number | null;
+  time_limit_seconds: number | null;
 };
 
 // The blocks of a session version, in order (B1, and the editor of US-17).
@@ -196,7 +199,7 @@ export async function readVersionBlocks(
   db: Queryable = client,
 ): Promise<VersionBlockRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT id, block_type, name, position, instructions
+    `SELECT id, block_type, name, position, instructions, planned_rounds, time_limit_seconds
        FROM template_block
       WHERE session_version_id = ?
       ORDER BY position`,

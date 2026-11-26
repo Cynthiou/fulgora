@@ -38,6 +38,8 @@ function block(key: string, exercises: DraftExercise[]): DraftBlock {
     block_type: "classic",
     name: "Force",
     instructions: null,
+    planned_rounds: null,
+    time_limit_seconds: null,
     exercises,
   };
 }
@@ -150,6 +152,8 @@ describe("diffSessionDrafts", () => {
       block_type: "warm_up",
       name: null,
       instructions: null,
+      planned_rounds: null,
+      time_limit_seconds: null,
       exercises: [exercise("e3", "Rameur", [set({ duration_seconds: 300 })])],
     };
     const before = draft([block("b1", [squat])]);
@@ -178,6 +182,8 @@ describe("diffSessionDrafts", () => {
         block_type: "circuit",
         name: "Jambes",
         instructions: null,
+        planned_rounds: null,
+        time_limit_seconds: null,
         exercises: [],
       },
     ]);

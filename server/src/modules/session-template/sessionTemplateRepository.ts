@@ -86,14 +86,17 @@ export async function createTemplateBlock(
   db: Queryable = client,
 ): Promise<number> {
   const [result] = await db.execute<Result>(
-    `INSERT INTO template_block (session_version_id, block_type, name, position, instructions)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO template_block (session_version_id, block_type, name, position, instructions, planned_rounds, time_limit_seconds)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       sessionVersionId,
       block.block_type,
       block.name,
       position,
       block.instructions,
+      // Only a timed block fills these two (US-43)
+      block.planned_rounds,
+      block.time_limit_seconds,
     ],
   );
   return result.insertId;
