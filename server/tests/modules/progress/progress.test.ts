@@ -88,6 +88,75 @@ async function doSession(
   );
 }
 
+// A session started through the API, with its sets filled in: the end of
+// the session is what looks for records (US-40).
+async function startSessionWith(
+  user: TestUser,
+  exerciseId: number,
+  date: string,
+  sets: { reps: number; weight: number }[],
+) {
+  const { appointmentId, versionId } = await createTestAppointment(user, {
+    name: `Record ${date}`,
+    date,
+    blocks: [0],
+  });
+  const [block] = await client.execute<Rows[] & { insertId: number }[]>(
+    "INSERT INTO template_block (session_version_id, block_type, position) VALUES (?, 'classic', 2)",
+    [versionId],
+  );
+  const blockId = (block as unknown as { insertId: number }).insertId;
+  const [tbe] = await client.execute<Rows[] & { insertId: number }[]>(
+    "INSERT INTO template_block_exercise (template_block_id, exercise_id, position) VALUES (?, ?, 1)",
+    [blockId, exerciseId],
+  );
+  const tbeId = (tbe as unknown as { insertId: number }).insertId;
+  for (const [index, set] of sets.entries()) {
+    await client.execute(
+      "INSERT INTO planned_set (template_block_exercise_id, position, reps, weight_kg) VALUES (?, ?, ?, ?)",
+      [tbeId, index + 1, set.reps, set.weight],
+    );
+  }
+
+  const started = await request(app)
+    .post("/api/workout-sessions")
+    .set("Origin", "http://localhost:3000")
+    .set("Cookie", user.cookie)
+    .send({ appointment_id: appointmentId });
+  expect(started.status).toBe(201);
+  const workoutId = Number(started.body.id);
+
+  const tree = await request(app)
+    .get(`/api/workout-sessions/${workoutId}`)
+    .set("Cookie", user.cookie);
+  const copied = tree.body.blocks
+    .flatMap(
+      (block: { exercises: { exercise_id: number; sets: unknown[] }[] }) =>
+        block.exercises,
+    )
+    .find(
+      (one: { exercise_id: number }) => one.exercise_id === exerciseId,
+    ).sets;
+  for (const [index, set] of sets.entries()) {
+    const written = await request(app)
+      .put(`/api/workout-sets/${copied[index].id}`)
+      .set("Origin", "http://localhost:3000")
+      .set("Cookie", user.cookie)
+      .send({
+        reps: set.reps,
+        weight_kg: set.weight,
+        duration_seconds: null,
+        distance_meters: null,
+        speed_kmh: null,
+        resistance: null,
+        incline_percent: null,
+        calories: null,
+      });
+    expect(written.status).toBe(200);
+  }
+  return { workoutId, appointmentId };
+}
+
 beforeAll(async () => {
   lea = await createTestUser(PREFIX);
   someoneElse = await createTestUser(PREFIX);
@@ -119,6 +188,10 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(async () => {
+  await client.query(
+    "DELETE n FROM notification n JOIN `user` u ON u.id = n.user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
   await client.query(
     "DELETE em FROM exercise_measure em JOIN exercise e ON e.id = em.exercise_id JOIN `user` u ON u.id = e.owner_user_id WHERE u.username LIKE ?",
     [`${PREFIX}%`],
@@ -213,5 +286,77 @@ describe("GET /api/progress/exercises/:id", () => {
       .set("Cookie", someoneElse.cookie);
 
     expect(response.status).toBe(404);
+  });
+});
+
+// US-40: a new maximum writes a notification; a correction downwards
+// takes it back (RM-055, RM-080).
+describe("records personnels", () => {
+  async function readRecordNotifications() {
+    const [rows] = await client.execute<Rows[]>(
+      `SELECT n.message, n.exercise_id
+         FROM notification n
+        WHERE n.user_id = ? AND n.type = 'personal_record'
+        ORDER BY n.id`,
+      [lea.id],
+    );
+    return rows as { message: string; exercise_id: number }[];
+  }
+
+  it("writes one notification when a session beats everything before", async () => {
+    const { workoutId, appointmentId } = await startSessionWith(
+      lea,
+      benchId,
+      "2026-11-26",
+      [{ reps: 8, weight: 70 }],
+    );
+
+    const finished = await request(app)
+      .post(`/api/workout-sessions/${workoutId}/complete`)
+      .set("Origin", "http://localhost:3000")
+      .set("Cookie", lea.cookie);
+    expect(finished.status).toBe(200);
+
+    const notifications = await readRecordNotifications();
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0]?.message).toBe(
+      "Développé couché · charge max : 70 kg × 8",
+    );
+    expect(Number(notifications[0]?.exercise_id)).toBe(benchId);
+
+    // A second call changes nothing (RM-055)
+    await request(app)
+      .post(`/api/workout-sessions/${workoutId}/complete`)
+      .set("Origin", "http://localhost:3000")
+      .set("Cookie", lea.cookie);
+    expect(await readRecordNotifications()).toHaveLength(1);
+
+    // Corrected downwards: the record is not one any more (RM-080)
+    const [sets] = await client.execute<Rows[]>(
+      `SELECT wset.id FROM workout_set wset
+         JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+         JOIN workout_block wb ON wb.id = we.workout_block_id
+        WHERE wb.workout_session_id = ?`,
+      [workoutId],
+    );
+    const setId = Number((sets[0] as { id: number }).id);
+    const corrected = await request(app)
+      .put(`/api/workout-sets/${setId}/correction`)
+      .set("Origin", "http://localhost:3000")
+      .set("Cookie", lea.cookie)
+      .send({
+        reps: 8,
+        weight_kg: 40,
+        duration_seconds: null,
+        distance_meters: null,
+        speed_kmh: null,
+        resistance: null,
+        incline_percent: null,
+        calories: null,
+      });
+
+    expect(corrected.status).toBe(200);
+    expect(await readRecordNotifications()).toHaveLength(0);
+    expect(appointmentId).toEqual(expect.any(Number));
   });
 });

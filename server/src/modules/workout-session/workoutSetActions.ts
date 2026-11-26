@@ -7,11 +7,13 @@ import {
   type MeasureCode,
   type SideCode,
   type SideSetValues,
+  toPlannedShape,
 } from "shared";
 import { withTransaction } from "../../database/withTransaction.js";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
 import { readExerciseMeasureCodes } from "../exercise/exerciseRepository.js";
+import { updateRecordsForSession } from "../progress/recordActions.js";
 import { toSetRow } from "./workoutSessionActions.js";
 import {
   correctWorkoutSetActual,
@@ -53,10 +55,7 @@ export const validateSet: RequestHandler = async (req, res) => {
     const codes: MeasureCode[] = (
       await readExerciseMeasureCodes([context.exercise_id], connection)
     ).map((row) => row.code);
-    const [field] = getDisallowedSetFields(
-      { ...values, rest_after_seconds: null },
-      codes,
-    );
+    const [field] = getDisallowedSetFields(toPlannedShape(values), codes);
     if (field !== undefined) {
       throw new HttpError(
         422,
@@ -117,10 +116,7 @@ export const correctSet: RequestHandler = async (req, res) => {
     const codes: MeasureCode[] = (
       await readExerciseMeasureCodes([context.exercise_id], connection)
     ).map((row) => row.code);
-    const [field] = getDisallowedSetFields(
-      { ...values, rest_after_seconds: null },
-      codes,
-    );
+    const [field] = getDisallowedSetFields(toPlannedShape(values), codes);
     if (field !== undefined) {
       throw new HttpError(
         422,
@@ -140,6 +136,17 @@ export const correctSet: RequestHandler = async (req, res) => {
     await correctWorkoutSetActual(id, values, connection);
     return readWorkoutSet(id, connection);
   });
+
+  // The records of the session are read again: one corrected downwards
+  // disappears with its notification (US-40, RM-080).
+  const context = await readWorkoutSetContext(id, userId);
+  if (context !== null) {
+    await updateRecordsForSession(
+      userId,
+      context.workout_session_id,
+      context.appointment_id,
+    );
+  }
 
   if (updated === null) {
     throw new HttpError(

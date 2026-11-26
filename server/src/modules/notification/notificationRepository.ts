@@ -160,3 +160,49 @@ export async function listAppointmentsWithStatus(
   );
   return rows.map((row) => Number(row.id));
 }
+
+// One record notification per exercise and per session (RM-055): the
+// appointment of the session keys it, so a second end changes nothing.
+export async function createRecordNotification(
+  userId: number,
+  exerciseId: number,
+  appointmentId: number,
+  title: string,
+  message: string,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `INSERT INTO notification (user_id, \`type\`, title, message, appointment_id, exercise_id)
+     SELECT ?, 'personal_record', ?, ?, ?, ?
+       FROM DUAL
+      WHERE NOT EXISTS (SELECT 1 FROM notification n
+                         WHERE n.user_id = ? AND n.type = 'personal_record'
+                           AND n.appointment_id = ? AND n.exercise_id = ?)`,
+    [
+      userId,
+      title,
+      message,
+      appointmentId,
+      exerciseId,
+      userId,
+      appointmentId,
+      exerciseId,
+    ],
+  );
+}
+
+// A record corrected downwards is not a record any more (RM-080): its
+// notification goes away with it.
+export async function deleteRecordNotification(
+  userId: number,
+  exerciseId: number,
+  appointmentId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `DELETE FROM notification
+      WHERE user_id = ? AND \`type\` = 'personal_record'
+        AND appointment_id = ? AND exercise_id = ?`,
+    [userId, appointmentId, exerciseId],
+  );
+}

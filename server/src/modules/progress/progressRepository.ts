@@ -144,3 +144,95 @@ export async function readExerciseHeader(
   );
   return (rows[0] as ExerciseHeaderRow | undefined) ?? null;
 }
+
+// --- Records (US-40) -------------------------------------------------------
+
+// The validated sets of one session, exercise by exercise.
+export async function readSessionSets(
+  workoutSessionId: number,
+  db: Queryable = client,
+): Promise<(ProgressSetRow & { exercise_id: number })[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT we.exercise_id, DATE(ws.started_at) AS date,
+            ws.status AS workout_status,
+            wset.reps_actual, wset.weight_actual_kg, wset.duration_actual_seconds,
+            wset.distance_actual_meters, wset.speed_actual_kmh
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE wb.workout_session_id = ? AND wset.validated_at IS NOT NULL
+      ORDER BY wset.id`,
+    [workoutSessionId],
+  );
+  return rows as (ProgressSetRow & { exercise_id: number })[];
+}
+
+// Everything done on those exercises before, outside the session being
+// looked at: what a record has to beat (RM-080).
+export async function readPreviousBestSets(
+  userId: number,
+  exerciseIds: number[],
+  excludeSessionId: number,
+  db: Queryable = client,
+): Promise<(ProgressSetRow & { exercise_id: number })[]> {
+  if (exerciseIds.length === 0) {
+    return [];
+  }
+  const [rows] = await db.query<Rows[]>(
+    `SELECT we.exercise_id, DATE(ws.started_at) AS date,
+            ws.status AS workout_status,
+            wset.reps_actual, wset.weight_actual_kg, wset.duration_actual_seconds,
+            wset.distance_actual_meters, wset.speed_actual_kmh
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+      WHERE ws.owner_user_id = ? AND we.exercise_id IN (?)
+        AND ws.id <> ? AND ws.status IN ('completed', 'unfinished')
+        AND wset.validated_at IS NOT NULL`,
+    [userId, exerciseIds, excludeSessionId],
+  );
+  return rows as (ProgressSetRow & { exercise_id: number })[];
+}
+
+// The records of a period, newest first, for the summary (SUI-02).
+export type RecentRecordRow = {
+  exercise_id: number;
+  name: string;
+  message: string | null;
+  created_at: Date;
+};
+
+export async function readRecentRecords(
+  userId: number,
+  from: string,
+  to: string,
+  db: Queryable = client,
+): Promise<RecentRecordRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT n.exercise_id, e.name, n.message, n.created_at
+       FROM notification n
+       JOIN exercise e ON e.id = n.exercise_id
+      WHERE n.user_id = ? AND n.type = 'personal_record'
+        AND DATE(n.created_at) BETWEEN ? AND ?
+      ORDER BY n.created_at DESC`,
+    [userId, from, to],
+  );
+  return rows as RecentRecordRow[];
+}
+
+// The names of a few exercises, for the message of a record (NOT-06).
+export async function readExerciseNames(
+  exerciseIds: number[],
+  db: Queryable = client,
+): Promise<{ id: number; name: string }[]> {
+  if (exerciseIds.length === 0) {
+    return [];
+  }
+  const [rows] = await db.query<Rows[]>(
+    "SELECT id, name FROM exercise WHERE id IN (?)",
+    [exerciseIds],
+  );
+  return rows as { id: number; name: string }[];
+}

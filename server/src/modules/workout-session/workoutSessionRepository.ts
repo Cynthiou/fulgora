@@ -285,6 +285,8 @@ export async function readWorkoutSets(
 export type WorkoutSetContextRow = {
   id: number;
   workout_session_id: number;
+  // The appointment of the session: a record notification points at it
+  appointment_id: number;
   exercise_id: number;
   status: WorkoutStatus;
   // The exercise is done side by side (US-51)
@@ -299,8 +301,8 @@ export async function readWorkoutSetContext(
   db: Queryable = client,
 ): Promise<WorkoutSetContextRow | null> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT wset.id, ws.id AS workout_session_id, we.exercise_id, ws.status,
-            we.is_per_side
+    `SELECT wset.id, ws.id AS workout_session_id, ws.appointment_id,
+            we.exercise_id, ws.status, we.is_per_side
        FROM workout_set wset
        JOIN workout_exercise we ON we.id = wset.workout_exercise_id
        JOIN workout_block wb ON wb.id = we.workout_block_id

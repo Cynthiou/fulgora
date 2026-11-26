@@ -18,6 +18,7 @@ import {
   readAppointmentForUpdate,
   updateAppointmentStatus,
 } from "../appointment/appointmentRepository.js";
+import { updateRecordsForSession } from "../progress/recordActions.js";
 import { countVersionExercises } from "../session-template/sessionTemplateRepository.js";
 import {
   abandonWorkoutSession,
@@ -327,5 +328,7 @@ export const complete: RequestHandler = async (req, res) => {
       "Cette séance n'est plus en cours.",
     );
   }
+  // A new maximum becomes a notification (US-40, RM-055).
+  await updateRecordsForSession(userId, id, before.appointment_id);
   res.json(await buildTree(id, userId));
 };
