@@ -75,7 +75,9 @@ test("prepares a per-side exercise and does it side by side", async ({
 
   // The left side alone: it is recorded, the set is not done yet
   await page.getByRole("button", { name: "Valider" }).first().click();
-  await expect(page.getByRole("button", { name: "Modifier" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Modifier", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Valider" })).toHaveCount(1);
 
   // The right side: the set is done and the session moves on (RM-044)
