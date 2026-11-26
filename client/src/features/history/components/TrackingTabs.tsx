@@ -1,13 +1,13 @@
 import { Link } from "react-router";
 
 type Props = {
-  current: "historique" | "exercices";
+  current: "resume" | "historique" | "exercices";
 };
 
-// The tabs of the Suivi (SUI-05, SUI-08). "Résumé" comes with US-41: only
-// the two tabs that exist are shown.
+// The three tabs of the Suivi (SUI-01, SUI-05, SUI-08).
 const TABS = [
-  { key: "historique", label: "Historique", to: "/suivi" },
+  { key: "resume", label: "Résumé", to: "/suivi" },
+  { key: "historique", label: "Historique", to: "/suivi/historique" },
   { key: "exercices", label: "Exercices", to: "/suivi/exercices" },
 ] as const;
 

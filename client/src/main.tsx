@@ -28,6 +28,7 @@ import ProgramSessionsPage from "./features/program/pages/ProgramSessionsPage";
 import ProgramsPage from "./features/program/pages/ProgramsPage";
 import ExerciseProgressListPage from "./features/progress/pages/ExerciseProgressListPage";
 import ExerciseProgressPage from "./features/progress/pages/ExerciseProgressPage";
+import TrackingSummaryPage from "./features/progress/pages/TrackingSummaryPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
 import LoginPage from "./features/user/pages/LoginPage";
@@ -62,7 +63,7 @@ const router = createBrowserRouter([
             children: [
               { path: "/", element: <HomePage /> },
               { path: "/planning", element: <PlanningPage /> },
-              { path: "/suivi", element: <TrackingPage /> },
+              { path: "/suivi", element: <TrackingSummaryPage /> },
               { path: "/suivi/historique", element: <TrackingPage /> },
               {
                 path: "/suivi/exercices",
