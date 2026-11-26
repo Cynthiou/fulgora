@@ -66,16 +66,16 @@ Message, programme inchangé.
 
 ## Tâches techniques
 
-- [ ] BDD : `appointment.cancelled_at` (migration 002)
-- [ ] Backend : `countProgramStartedSessions(programId)`, `readProgramInProgressSession(programId)`
-- [ ] Backend : `cancelFutureProgramAppointments(programId, today)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE program_id = ? AND status = 'planned' AND planned_date >= ? AND id NOT IN (SELECT appointment_id FROM workout_session)`
-- [ ] Backend : suppression DT-25 : `deleteProgramNotifications`, `deleteProgramAppointments`, `deleteProgramSchedules`, `deleteProgramChanges`, `deleteProgram`, puis séances orphelines (`planned_set` → `template_block_exercise` → `template_block` → `session_version` → `session_template`) ; vérification préalable « aucune séance réalisée » dans la même transaction
-- [ ] Backend : `POST /api/programs/:id/abandon`, `DELETE /api/programs/:id`
-- [ ] Frontend : `AbandonProgramDialog`, `DeleteProgramDialog`, `ProgramActionsMenu` (une seule des deux actions)
-- [ ] Tests : back : abandon (passé intact, futur annulé, `cancelled_at` rempli) ; abandon avec séance en cours → 409 ; suppression sans séance démarrée → plus aucune ligne liée ; suppression avec séance démarrée → 409 ; une séance préparée partagée n'est pas supprimée
-- [ ] Tests : E2E abandon et suppression
+- [x] BDD : `appointment.cancelled_at` (migration 002)
+- [x] Backend : `countProgramStartedSessions(programId)`, `readProgramInProgressSession(programId)`
+- [x] Backend : `cancelFutureProgramAppointments(programId, today)` : `UPDATE appointment SET status = 'cancelled', cancelled_at = NOW(3) WHERE program_id = ? AND status = 'planned' AND planned_date >= ? AND id NOT IN (SELECT appointment_id FROM workout_session)`
+- [x] Backend : suppression DT-25 : `deleteProgramNotifications`, `deleteProgramAppointments`, `deleteProgramSchedules`, `deleteProgramChanges`, `deleteProgram`, puis séances orphelines (`planned_set` → `template_block_exercise` → `template_block` → `session_version` → `session_template`) ; vérification préalable « aucune séance réalisée » dans la même transaction
+- [x] Backend : `POST /api/programs/:id/abandon`, `DELETE /api/programs/:id`
+- [x] Frontend : `AbandonProgramDialog`, `DeleteProgramDialog`, `ProgramActionsMenu` (une seule des deux actions)
+- [x] Tests : back : abandon (passé intact, futur annulé, `cancelled_at` rempli) ; abandon avec séance en cours → 409 ; suppression sans séance démarrée → plus aucune ligne liée ; suppression avec séance démarrée → 409 ; une séance préparée partagée n'est pas supprimée
+- [x] Tests : E2E abandon et suppression
 
 ## Definition of Done
 
-- [ ] Test « aucune ligne orpheline » après suppression
+- [x] Test « aucune ligne orpheline » après suppression
 - [ ] Code relu et fusionné via pull request
