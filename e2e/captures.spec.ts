@@ -119,7 +119,7 @@ test("captures the screens of the MVP", async ({ page }) => {
 
   // A5 Catalogue en sélection, A6 bloc rempli, A7a configuration
   await page.getByRole("button", { name: "Ajouter des exercices" }).click();
-  await expect(page.getByText("Sélection pour le bloc 1")).toBeVisible();
+  await expect(page.getByText("Ajout dans « Classique »")).toBeVisible();
   await shoot(page, "a5-catalogue-selection");
   const cards = page
     .getByRole("list", { name: "Exercices" })

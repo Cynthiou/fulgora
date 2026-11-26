@@ -1,5 +1,6 @@
 import chevronDownIcon from "../../../assets/icons/ui/app/chevron-down.svg";
 import chevronUpIcon from "../../../assets/icons/ui/app/chevron-up.svg";
+import v3ChevronDownIcon from "../../../assets/icons/ui/v3/chevron-down.svg";
 import Icon from "../../../components/Icon";
 
 type Props = {
@@ -10,10 +11,45 @@ type Props = {
   // The id of the grid this button opens.
   controls: string;
   onToggle: () => void;
+  // "form": the 34 px menu button of the catalog in selection (handoff 2.3)
+  variant?: "page" | "form";
 };
 
 // Screen 04: "Groupe ▼" with the number of active choices.
-function FilterToggle({ label, count, isOpen, controls, onToggle }: Props) {
+function FilterToggle({
+  label,
+  count,
+  isOpen,
+  controls,
+  onToggle,
+  variant = "page",
+}: Props) {
+  if (variant === "form") {
+    return (
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={controls}
+        // A filter that is on is written in blue and says how many
+        // choices it holds: the handoff only draws the resting state.
+        className={`flex h-[34px] min-w-0 items-center justify-center gap-[5px] rounded-[10px] border bg-base-100 text-xs font-bold ${
+          isOpen || count > 0
+            ? "border-brand text-secondary"
+            : "border-base-300"
+        }`}
+      >
+        {label}
+        {count > 0 && (
+          <span className="grid size-4 place-items-center rounded-full bg-brand text-[9px] font-extrabold text-primary-content">
+            {count}
+          </span>
+        )}
+        <Icon src={v3ChevronDownIcon} className="size-[13px] text-muted" />
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"

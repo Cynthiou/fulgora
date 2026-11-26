@@ -506,8 +506,10 @@ describe("ExerciseListPage · selection (US-14)", () => {
     const user = renderSelection("/seances/nouvelle/exercices?block=b2");
     await screen.findByText("3 exercices");
 
-    expect(screen.getByText("Sélection pour le bloc 2")).toBeTruthy();
+    // The form header of the handoff names the block being filled (2.3)
+    expect(screen.getByText("Ajout dans « Classique »")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Retour au bloc" })).toBeTruthy();
+    expect(screen.getByText("Sélection multiple")).toBeTruthy();
     expect(screen.queryByText("Sélectionner")).toBeNull();
 
     await user.click(screen.getByRole("button", { name: /^Exercice 002/ }));

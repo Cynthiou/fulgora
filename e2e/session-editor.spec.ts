@@ -85,7 +85,7 @@ test("adds a block through the type panel, names it, removes it and undoes", asy
   await expect(page.getByText("1 bloc")).toBeVisible();
 });
 
-test("picks three exercises from the catalog for a block, in the touched order", async ({
+test("picks exercises from the catalog for a block, in the touched order", async ({
   page,
 }) => {
   await signUp(page);
@@ -96,7 +96,7 @@ test("picks three exercises from the catalog for a block, in the touched order",
 
   // The catalog in selection mode for the block
   await page.getByRole("button", { name: "Ajouter des exercices" }).click();
-  await expect(page.getByText("Sélection pour le bloc 1")).toBeVisible();
+  await expect(page.getByText("Ajout dans « Classique »")).toBeVisible();
   await expect(page.getByText(/^\d+ exercices$/)).toBeVisible();
   const cards = page
     .getByRole("list", { name: "Exercices" })
@@ -113,25 +113,31 @@ test("picks three exercises from the catalog for a block, in the touched order",
   await expect(cards.nth(2)).toContainText("1 sur 3");
   await expectNoA11yViolation(page);
 
-  // A detour through a detail keeps the selection
-  await page.getByRole("link", { name: `Fiche de ${names[0]}` }).click();
-  await expect(
-    page.getByRole("button", { name: "Déjà dans la sélection" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Retour à la sélection" }).click();
-  await expect(cards.nth(2)).toContainText("1 sur 3");
+  // A detour through a detail keeps the selection. On a selected card the
+  // eye gives its place to the check (handoff 2.3), so the fiche is opened
+  // from a card that is not selected yet.
+  const fourth = await cards
+    .nth(3)
+    .locator("span.truncate")
+    .first()
+    .textContent();
+  const fourthName = (fourth ?? "").replace(/, (non )?sélectionné.*$/, "");
+  await page.getByRole("link", { name: `Fiche de ${fourthName}` }).click();
+  await page.getByRole("button", { name: "Ajouter à la sélection" }).click();
+  await expect(cards.nth(2)).toContainText("1 sur 4");
+  await expect(cards.nth(3)).toHaveAttribute("aria-pressed", "true");
 
   await page
-    .getByRole("button", { name: "Ajouter au bloc, 3 sélectionnés" })
+    .getByRole("button", { name: "Ajouter au bloc, 4 sélectionnés" })
     .click();
 
-  // Back in the block (A6), same order, one pre-filled set each
+  // Back in the block (3.2), same order, one pre-filled set each
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Classique");
-  await expect(page.getByText("3 exercices")).toBeVisible();
+  await expect(page.getByText("4 exercices")).toBeVisible();
   const rows = page
     .getByRole("list", { name: "Exercices du bloc" })
     .getByRole("listitem");
-  await expect(rows).toHaveCount(3);
+  await expect(rows).toHaveCount(4);
   for (const [index, name] of names.entries()) {
     await expect(rows.nth(index)).toContainText(name);
     await expect(rows.nth(index)).toContainText(/10 (rép\.|min)/);
@@ -200,7 +206,7 @@ test("configures the planned sets of one exercise of each profile", async ({
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Classique/ }).click();
   await page.getByRole("button", { name: "Ajouter des exercices" }).click();
-  await expect(page.getByText("Sélection pour le bloc 1")).toBeVisible();
+  await expect(page.getByText("Ajout dans « Classique »")).toBeVisible();
 
   await pickFromCatalog(page, "Développé poitrine à la machine");
   await pickFromCatalog(page, "Anges au mur");

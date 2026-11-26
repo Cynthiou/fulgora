@@ -334,9 +334,7 @@ test("adds a set and an exercise during the session, and removes the added set",
   await page
     .getByRole("link", { name: "Ajouter un exercice ou un bloc" })
     .click();
-  await expect(
-    page.getByText("Sélection pour la séance en cours"),
-  ).toBeVisible();
+  await expect(page.getByText("Ajout dans la séance")).toBeVisible();
   await page
     .getByRole("list", { name: "Exercices" })
     .getByRole("button")

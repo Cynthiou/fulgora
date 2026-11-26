@@ -7,6 +7,7 @@ import {
   useSearchParams,
 } from "react-router";
 import {
+  BLOCK_TYPE_LABELS,
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   type Difficulty,
@@ -19,14 +20,15 @@ import {
   MAX_EXERCISES_PER_BLOCK,
   type SelectedExercise,
 } from "shared";
-import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
 import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import ActiveFilterChips, {
   type ActiveFilter,
 } from "../../../components/ActiveFilterChips";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import { CTA, FORM_LABEL } from "../../../components/formClasses";
 import Icon from "../../../components/Icon";
+import PageHeader from "../../../components/PageHeader";
 import { useAuth } from "../../../hooks/useAuth";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 import {
@@ -369,80 +371,30 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
     return <Navigate to={editorPath} replace />;
   }
 
-  return (
-    <div
-      className={`mx-auto flex max-w-md flex-col gap-2.5 px-[18px] pt-1 ${
-        selection.isActive ? "pb-28" : "pb-3.5"
-      }`}
-    >
-      {selectionMode !== "catalog" ? (
-        <div className="-mx-2 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              selection.cancel();
-              if (selectionMode === "workout") {
-                navigate(`/entrainement/${workoutSessionId}`, {
-                  replace: true,
-                });
-              } else {
-                backToEditor();
-              }
-            }}
-            aria-label={
-              selectionMode === "workout"
-                ? "Retour à la séance"
-                : "Retour au bloc"
-            }
-            className="flex size-tap shrink-0 items-center justify-center rounded-btn text-secondary"
-          >
-            <Icon src={chevronLeftIcon} className="size-7" />
-          </button>
-          <div className="flex min-w-0 flex-col">
-            <h1 className="text-display-md">Catalogue</h1>
-            <p className="text-sm font-semibold text-muted">
-              {selectionMode === "workout"
-                ? "Sélection pour la séance en cours"
-                : `Sélection pour le bloc ${blockIndex + 1}`}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <h1 className="sr-only">Catalogue</h1>
-      )}
+  // Screen 2.3: the catalog in selection, for a block or for the session
+  // in progress. The Catalogue tab keeps its own layout, which has no
+  // handoff yet.
+  const isSelectionScreen = selectionMode !== "catalog";
+  const overline =
+    selectionMode === "workout"
+      ? "Ajout dans la séance"
+      : `Ajout dans « ${
+          block === null || block === undefined
+            ? "le bloc"
+            : BLOCK_TYPE_LABELS[block.block_type]
+        } »`;
 
-      <ExerciseSearch value={typed} onChange={setTyped} onClear={clearSearch} />
+  function leaveSelection() {
+    selection.cancel();
+    if (selectionMode === "workout") {
+      navigate(`/entrainement/${workoutSessionId}`, { replace: true });
+    } else {
+      backToEditor();
+    }
+  }
 
-      <div className="flex gap-2">
-        <FilterToggle
-          label="Groupe"
-          count={categoryIds.length}
-          isOpen={openFilter === "category"}
-          controls="filter-category"
-          onToggle={() =>
-            setOpenFilter(openFilter === "category" ? null : "category")
-          }
-        />
-        <FilterToggle
-          label="Matériel"
-          count={equipmentIds.length}
-          isOpen={openFilter === "equipment"}
-          controls="filter-equipment"
-          onToggle={() =>
-            setOpenFilter(openFilter === "equipment" ? null : "equipment")
-          }
-        />
-        <FilterToggle
-          label="Difficulté"
-          count={difficulties.length}
-          isOpen={openFilter === "difficulty"}
-          controls="filter-difficulty"
-          onToggle={() =>
-            setOpenFilter(openFilter === "difficulty" ? null : "difficulty")
-          }
-        />
-      </div>
-
+  const filterPanels = (
+    <>
       {openFilter === "category" && (
         <FilterGrid
           id="filter-category"
@@ -497,44 +449,12 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
           onClear={() => updateParams({ difficulties: null })}
         />
       )}
+    </>
+  );
 
-      <ActiveFilterChips filters={activeFilters} onClearAll={clearAllFilters} />
-
-      {selection.isActive && selectionMode === "catalog" && (
-        <div className="flex items-center justify-between gap-2 rounded-btn bg-secondary/[0.08] px-3 py-2">
-          <p
-            aria-live="polite"
-            className="text-[13px] font-semibold leading-[1.45] text-secondary"
-          >
-            {formatSelectedCount(selection.items.length)}
-          </p>
-          <div className="flex items-center gap-3">
-            {selection.items.length > 0 && (
-              <button
-                type="button"
-                onClick={selection.clear}
-                className="text-[13px] font-semibold text-secondary"
-              >
-                Tout désélectionner
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={selection.cancel}
-              className="text-[13px] font-semibold text-secondary"
-            >
-              Annuler
-            </button>
-          </div>
-        </div>
-      )}
-
-      {selection.isActive && isLimitReached && (
-        <p role="status" className="text-sm font-semibold text-muted">
-          {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
-        </p>
-      )}
-
+  // The cards, the loading and the error states: the same in both layouts.
+  const list = (
+    <>
       {isLoading && (
         <>
           <p role="status" className="text-muted">
@@ -558,24 +478,6 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
 
       {!isLoading && error === null && (
         <>
-          <div className="flex items-baseline justify-between gap-3">
-            <p
-              aria-live="polite"
-              className="font-sans text-overline uppercase not-italic text-accent"
-            >
-              {counterText}
-            </p>
-            {selectionMode === "catalog" && !selection.isActive && (
-              <button
-                type="button"
-                onClick={selection.start}
-                className="text-[13px] font-semibold text-secondary"
-              >
-                Sélectionner
-              </button>
-            )}
-          </div>
-
           {items.length === 0 && (
             <EmptyState
               title={
@@ -621,6 +523,7 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
                   isLimitReached={isLimitReached}
                   onToggle={() => selection.toggle(toSelected(exercise))}
                   detailState={detailState}
+                  variant={isSelectionScreen ? "form" : "page"}
                 />
               ) : (
                 <ExerciseCard
@@ -666,25 +569,241 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
           )}
         </>
       )}
+    </>
+  );
+
+  if (isSelectionScreen) {
+    const count = selection.items.length;
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md flex-col">
+        <PageHeader
+          variant="form"
+          onBack={leaveSelection}
+          backLabel={
+            selectionMode === "workout"
+              ? "Retour à la séance"
+              : "Retour au bloc"
+          }
+          overline={overline}
+          title="Catalogue"
+          strongBack
+        />
+
+        <div className="flex flex-1 flex-col px-[18px] pt-3.5 pb-28">
+          <div className="mb-2.5">
+            <ExerciseSearch
+              variant="form"
+              value={typed}
+              onChange={setTyped}
+              onClear={clearSearch}
+            />
+          </div>
+
+          <div className="mb-3.5 grid grid-cols-3 gap-1.5">
+            <FilterToggle
+              variant="form"
+              label="Groupe"
+              count={categoryIds.length}
+              isOpen={openFilter === "category"}
+              controls="filter-category"
+              onToggle={() =>
+                setOpenFilter(openFilter === "category" ? null : "category")
+              }
+            />
+            <FilterToggle
+              variant="form"
+              label="Matériel"
+              count={equipmentIds.length}
+              isOpen={openFilter === "equipment"}
+              controls="filter-equipment"
+              onToggle={() =>
+                setOpenFilter(openFilter === "equipment" ? null : "equipment")
+              }
+            />
+            <FilterToggle
+              variant="form"
+              label="Difficulté"
+              count={difficulties.length}
+              isOpen={openFilter === "difficulty"}
+              controls="filter-difficulty"
+              onToggle={() =>
+                setOpenFilter(openFilter === "difficulty" ? null : "difficulty")
+              }
+            />
+          </div>
+
+          {openFilter !== null && <div className="mb-3.5">{filterPanels}</div>}
+
+          {activeFilters.length > 0 && (
+            <div className="mb-3.5">
+              <ActiveFilterChips
+                filters={activeFilters}
+                onClearAll={clearAllFilters}
+              />
+            </div>
+          )}
+
+          <div className="mb-2 flex items-baseline justify-between gap-3">
+            <h1 aria-live="polite" className={FORM_LABEL}>
+              {counterText}
+            </h1>
+            {/* "Sélection multiple" says that several cards can be touched;
+                once one is picked, the same place counts them. */}
+            <p aria-live="polite" className="text-xs font-bold text-secondary">
+              {count === 0 ? "Sélection multiple" : formatSelectedCount(count)}
+            </p>
+          </div>
+
+          {isLimitReached && (
+            <p
+              role="status"
+              className="mb-2 text-[11px] font-semibold text-muted"
+            >
+              {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
+            </p>
+          )}
+
+          <div className="flex flex-col gap-2">{list}</div>
+        </div>
+
+        <div className="fixed inset-x-0 bottom-0 bg-base-200 px-[18px] pt-3 pb-[18px]">
+          <div className="mx-auto max-w-md">
+            <button
+              type="button"
+              disabled={count === 0}
+              onClick={selectionMode === "block" ? addToBlock : addToWorkout}
+              // "Ajouter au bloc · 6" on screen, "6 sélectionnés" aloud
+              aria-label={
+                count === 0
+                  ? undefined
+                  : `${actionLabel}, ${formatSelectedCount(count)}`
+              }
+              className={CTA}
+            >
+              {count === 0 ? (
+                "Sélectionne des exercices"
+              ) : (
+                <>
+                  {actionLabel}
+                  <span aria-hidden="true">· {count}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`mx-auto flex max-w-md flex-col gap-2.5 px-[18px] pt-1 ${
+        selection.isActive ? "pb-28" : "pb-3.5"
+      }`}
+    >
+      <h1 className="sr-only">Catalogue</h1>
+
+      <ExerciseSearch value={typed} onChange={setTyped} onClear={clearSearch} />
+
+      <div className="flex gap-2">
+        <FilterToggle
+          label="Groupe"
+          count={categoryIds.length}
+          isOpen={openFilter === "category"}
+          controls="filter-category"
+          onToggle={() =>
+            setOpenFilter(openFilter === "category" ? null : "category")
+          }
+        />
+        <FilterToggle
+          label="Matériel"
+          count={equipmentIds.length}
+          isOpen={openFilter === "equipment"}
+          controls="filter-equipment"
+          onToggle={() =>
+            setOpenFilter(openFilter === "equipment" ? null : "equipment")
+          }
+        />
+        <FilterToggle
+          label="Difficulté"
+          count={difficulties.length}
+          isOpen={openFilter === "difficulty"}
+          controls="filter-difficulty"
+          onToggle={() =>
+            setOpenFilter(openFilter === "difficulty" ? null : "difficulty")
+          }
+        />
+      </div>
+
+      {filterPanels}
+
+      <ActiveFilterChips filters={activeFilters} onClearAll={clearAllFilters} />
 
       {selection.isActive && (
-        <div
-          className={`fixed inset-x-0 z-10 px-3.5 pb-4 ${
-            selectionMode === "catalog" ? "bottom-nav" : "bottom-0"
-          }`}
-        >
+        <div className="flex items-center justify-between gap-2 rounded-btn bg-secondary/[0.08] px-3 py-2">
+          <p
+            aria-live="polite"
+            className="text-[13px] font-semibold leading-[1.45] text-secondary"
+          >
+            {formatSelectedCount(selection.items.length)}
+          </p>
+          <div className="flex items-center gap-3">
+            {selection.items.length > 0 && (
+              <button
+                type="button"
+                onClick={selection.clear}
+                className="text-[13px] font-semibold text-secondary"
+              >
+                Tout désélectionner
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={selection.cancel}
+              className="text-[13px] font-semibold text-secondary"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {selection.isActive && isLimitReached && (
+        <p role="status" className="text-sm font-semibold text-muted">
+          {MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc
+        </p>
+      )}
+
+      {!isLoading && error === null && (
+        <div className="flex items-baseline justify-between gap-3">
+          <p
+            aria-live="polite"
+            className="font-sans text-overline uppercase not-italic text-accent"
+          >
+            {counterText}
+          </p>
+          {!selection.isActive && (
+            <button
+              type="button"
+              onClick={selection.start}
+              className="text-[13px] font-semibold text-secondary"
+            >
+              Sélectionner
+            </button>
+          )}
+        </div>
+      )}
+
+      {list}
+
+      {selection.isActive && (
+        <div className="fixed inset-x-0 bottom-nav z-10 px-3.5 pb-4">
           <div className="mx-auto max-w-md">
             <button
               type="button"
               disabled={selection.items.length === 0}
-              onClick={
-                selectionMode === "block"
-                  ? addToBlock
-                  : selectionMode === "workout"
-                    ? addToWorkout
-                    : () => setIsChoosingDestination(true)
-              }
-              // "Ajouter au bloc · 6" on screen, "Ajouter au bloc, 6 sélectionnés" aloud
+              onClick={() => setIsChoosingDestination(true)}
+              // "Ajouter à une séance · 6" on screen, with the count aloud
               aria-label={`${actionLabel}, ${formatSelectedCount(selection.items.length)}`}
               className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
             >
