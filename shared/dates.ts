@@ -183,6 +183,18 @@ export function formatDayMonth(date: string): string {
   }).format(new Date(`${date}T00:00:00Z`));
 }
 
+// "2026-11-28" -> "Sam 28 nov.", a date of the appointments of PRO-08.
+export function formatShortDayMonth(date: string): string {
+  const text = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "UTC",
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T00:00:00Z`));
+  // "sam. 28 nov." -> "Sam 28 nov."
+  return text.charAt(0).toUpperCase() + text.slice(1).replace(". ", " ");
+}
+
 // "2026-11-23" (a Monday) -> "23 → 29 nov.", the title of the week view
 // (CAL-02). The month is shortened, as the mockup writes it.
 export function formatWeekRange(monday: string): string {
