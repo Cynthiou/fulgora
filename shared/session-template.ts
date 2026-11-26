@@ -43,7 +43,8 @@ export const BLOCK_TYPE_CODES = [
 
 export type BlockType = (typeof BLOCK_TYPE_CODES)[number];
 
-// Every type can be chosen since US-43 (RM-019).
+// What the server accepts for a block. "note" is still accepted: a
+// session saved with a note keeps it when it is edited again (RM-020).
 export const AVAILABLE_BLOCK_TYPES = [
   "classic",
   "circuit",
@@ -76,62 +77,61 @@ export const TIME_LIMIT_MESSAGE = "Entre une durée entre 1 min et 2 h.";
 export type BlockTypeInfo = {
   code: BlockType;
   label: string;
+  // The grey line under the name in the "Type de bloc" panel (handoff 2.1)
   description: string;
-  // Kept for a type that would not be ready yet: shown as "Bientôt".
-  isAvailable: boolean;
 };
 
-// The 8 types, in the order of the "Type de bloc" panel (A3).
+// The 8 types, in the order of the ENUM of the base. "note" stays here for
+// the sessions already saved, which must keep showing their note; it is no
+// longer offered when a block is created (decision of 26/11, RM-020).
 export const BLOCK_TYPES: BlockTypeInfo[] = [
   {
     code: "classic",
     label: "Classique",
-    description: "Exercices et séries, avec objectifs et repos",
-    isAvailable: true,
+    description: "Exercices avec séries et temps de repos",
   },
   {
     code: "circuit",
     label: "Circuit",
-    description: "Exercices enchaînés, nombre de tours",
-    isAvailable: true,
+    description: "Plusieurs exercices enchaînés sur plusieurs tours",
   },
   {
     code: "amrap",
     label: "AMRAP",
-    description: "Maximum de tours dans une durée fixe",
-    isAvailable: true,
+    description: "Faire le maximum de tours en un temps donné",
   },
   {
     code: "for_time",
     label: "For Time",
-    description: "Travail fixe, le plus vite possible",
-    isAvailable: true,
+    description: "Terminer les exercices le plus vite possible",
   },
   {
     code: "warm_up",
     label: "Échauffement",
-    description: "Mise en route",
-    isAvailable: true,
+    description: "Préparer le corps avant l'entraînement",
   },
   {
     code: "stretching",
     label: "Étirements",
-    description: "Retour au calme",
-    isAvailable: true,
+    description: "Exercices de souplesse et de mobilité",
   },
   {
     code: "challenge",
     label: "Défi",
-    description: "Objectif ponctuel",
-    isAvailable: true,
+    description: "Atteindre un objectif sur un exercice",
   },
   {
     code: "note",
     label: "Note",
     description: "Texte libre",
-    isAvailable: true,
   },
 ];
+
+// The 7 types the "Type de bloc" panel offers, in the order of the handoff
+// (RM-019, RM-020): the same list without the Note.
+export const CREATABLE_BLOCK_TYPES: BlockTypeInfo[] = BLOCK_TYPES.filter(
+  (info) => info.code !== "note",
+);
 
 export const BLOCK_TYPE_LABELS = Object.fromEntries(
   BLOCK_TYPES.map((info) => [info.code, info.label]),
@@ -695,6 +695,36 @@ export function formatSetSummary(
   return [`${count} ${noun}`, ...parts].join(" · ");
 }
 
+// Said when a set has no objective at all (RM-022).
+export const NO_GOAL = "Aucun objectif";
+
+// The one line of detail of an exercise, the same everywhere (handoff
+// "Format des détails d'exercice") : "[séries ×] quantité unité [· charge
+// ou réglage]". The unit is always written, "1 ×" never is, durations stay
+// in min / s and the decimals take a comma ("62,5 kg").
+// "5 × 10 min · résistance 6", "24 kg · 40 s", "2 × 45 s".
+export function formatExerciseSummary(
+  sets: PlannedSetValues[],
+  codes: MeasureCode[] = [],
+  isBodyweight = false,
+  isPerSide = false,
+): string {
+  const first = sets[0];
+  if (first === undefined) {
+    return NO_GOAL;
+  }
+  // The values are written only when every set carries the same ones.
+  if (!sets.every((set) => sameValues(set, first))) {
+    return `${sets.length} × …`;
+  }
+  const parts = describeSet(first, codes, isBodyweight, isPerSide);
+  if (parts.length === 0) {
+    return NO_GOAL;
+  }
+  const times = sets.length > 1 ? `${sets.length} × ` : "";
+  return `${times}${parts.join(" · ")}`;
+}
+
 // "4 × 8 · 60 kg", "3 × 1 min": the short line of a planned exercise, as
 // the high fidelity mockups write it (03-2, CAL-04).
 export function formatSetLine(
@@ -729,7 +759,7 @@ export function formatSetValues(
   isBodyweight = false,
 ): string {
   const parts = describeSet(set, codes, isBodyweight);
-  return parts.length === 0 ? "Aucun objectif" : parts.join(" · ");
+  return parts.length === 0 ? NO_GOAL : parts.join(" · ");
 }
 
 // --- Set fields (US-15) ------------------------------------------------------

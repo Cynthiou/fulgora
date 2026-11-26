@@ -107,7 +107,7 @@ test("moves a block with « Monter » of the ⋯ menu", async ({ page }) => {
   await page.getByLabel(/^Intitulé/).fill("Mise en route");
   await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
-  await page.getByRole("button", { name: /^Note/ }).click();
+  await page.getByRole("button", { name: /^Étirements/ }).click();
   await page.getByLabel(/^Intitulé/).fill("Consignes");
   await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
 
@@ -118,7 +118,7 @@ test("moves a block with « Monter » of the ⋯ menu", async ({ page }) => {
   await expect(blocks.nth(1)).toContainText("Consignes");
 
   await page
-    .getByRole("button", { name: "Options du bloc Note · Consignes" })
+    .getByRole("button", { name: "Options du bloc Étirements · Consignes" })
     .click();
   await expect(page.getByRole("button", { name: "Descendre" })).toBeDisabled();
   await expectNoA11yViolation(page);

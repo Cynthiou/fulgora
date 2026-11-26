@@ -50,10 +50,11 @@ test("adds a block through the type panel, names it, removes it and undoes", asy
   await page.goto("/seances/nouvelle");
   await page.getByLabel(/^Nom de la séance/).fill("Haut du corps");
 
-  // The type panel: the 8 types, all available since US-43
+  // The type panel: the 7 types of the handoff, without the Note (RM-020)
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await expect(page.getByText("Type de bloc")).toBeVisible();
   await expect(page.getByRole("button", { name: /^AMRAP/ })).toBeEnabled();
+  await expect(page.getByRole("button", { name: /^Note/ })).toHaveCount(0);
   await expectNoA11yViolation(page);
   await page.getByRole("button", { name: /^Classique/ }).click();
 

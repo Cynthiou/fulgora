@@ -63,8 +63,8 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 - **RM-016** · Une séance préparée possède une ou plusieurs versions ; chaque version conserve ses blocs, exercices et objectifs prévus.
 - **RM-017** · Une version créée n'est jamais modifiée ni supprimée automatiquement ; toute modification du prévu crée une nouvelle version.
 - **RM-018** · Une séance préparée peut être enregistrée sans bloc, mais ne peut pas démarrer sans au moins un exercice.
-- **RM-019** · Les types de blocs sont `classic`, `circuit`, `amrap`, `for_time`, `warm_up`, `stretching`, `challenge`, `note`.
-- **RM-020** · Une séance peut contenir plusieurs blocs du même type ; un bloc `note` ne contient aucun exercice.
+- **RM-019** · Les types de blocs sont `classic`, `circuit`, `amrap`, `for_time`, `warm_up`, `stretching`, `challenge`, `note`. Sept types sont proposés à la création : `note` n'est plus proposé, il reste en base pour les séances déjà enregistrées. _(Décision du 26/11/2026.)_
+- **RM-020** · Une séance peut contenir plusieurs blocs du même type ; un bloc `note` ne contient aucun exercice. Un bloc `note` déjà enregistré s'affiche et se modifie toujours, mais aucun nouveau ne peut être créé.
 - **RM-021** · Un même exercice peut apparaître plusieurs fois, dans un ou plusieurs blocs, avec des séries différentes.
 - **RM-022** · Chaque série a ses propres objectifs ; les mesures sportives sont facultatives selon l'exercice.
 - **RM-023** · Le repos d'une série, s'il est renseigné, remplace le repos par défaut de l'exercice.

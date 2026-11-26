@@ -72,7 +72,7 @@ test("changes a planned session through the ⋯ menu, after seeing the changes",
   // A new name and a second block
   await page.getByLabel(/^Nom de la séance/).fill("Bas du corps");
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
-  await page.getByRole("button", { name: /^Note/ }).click();
+  await page.getByRole("button", { name: /^Défi/ }).click();
   await page.getByLabel(/^Intitulé/).fill("Consignes");
   await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
 
@@ -84,7 +84,7 @@ test("changes a planned session through the ⋯ menu, after seeing the changes",
   await expect(
     page.getByText("Nom : « Jambes » → « Bas du corps »"),
   ).toBeVisible();
-  await expect(page.getByText("Note · Consignes")).toBeVisible();
+  await expect(page.getByText("Défi · Consignes")).toBeVisible();
   // The count sits on the right of the title (CAL-06b).
   await expect(page.getByText("Séances concernées")).toBeVisible();
   await expectNoA11yViolation(page);
@@ -96,7 +96,7 @@ test("changes a planned session through the ⋯ menu, after seeing the changes",
   await expect(
     page.getByRole("heading", { level: 2, name: "Bas du corps" }),
   ).toBeVisible();
-  await expect(page.getByText("Note · Consignes")).toBeVisible();
+  await expect(page.getByText("Défi · Consignes")).toBeVisible();
   await expect(page.getByText(/2 blocs · 1 exercice/)).toBeVisible();
 });
 

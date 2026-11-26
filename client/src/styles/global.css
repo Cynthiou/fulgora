@@ -165,6 +165,20 @@
   --fulgora-btn2-text: #ffffff;
   --fulgora-badge-border: #cdd5e1;
   --fulgora-ready: #2563eb;
+  /* The screens of the blocks (handoff v3 des blocs, 26/11/2026) */
+  --fulgora-tint: #e3ecfd;
+  --fulgora-scrim: rgba(10, 16, 32, 0.4);
+  --fulgora-sheet: #f4f6fa;
+  --fulgora-selected: #eef4ff;
+  --fulgora-stripe-a: #e8ecf2;
+  --fulgora-stripe-b: #dde3eb;
+  --fulgora-disabled: #e3e8ef;
+  --fulgora-disabled-text: #8a94a5;
+  --fulgora-danger-soft: #fef2f2;
+  --fulgora-menu: #ffffff;
+  --fulgora-toast: #0a1020;
+  --fulgora-toast-content: #ffffff;
+  --fulgora-toast-action: #60a5fa;
 }
 
 [data-theme="fulgora-dark"] {
@@ -201,6 +215,20 @@
   --fulgora-btn2-text: #ffffff;
   --fulgora-badge-border: #2c3749;
   --fulgora-ready: rgba(37, 99, 235, 0.2);
+  /* The screens of the blocks (handoff v3 des blocs, 26/11/2026) */
+  --fulgora-tint: rgba(96, 165, 250, 0.12);
+  --fulgora-scrim: rgba(4, 7, 12, 0.62);
+  --fulgora-sheet: #111827;
+  --fulgora-selected: rgba(37, 99, 235, 0.14);
+  --fulgora-stripe-a: #1c2535;
+  --fulgora-stripe-b: #222c3d;
+  --fulgora-disabled: #1e2635;
+  --fulgora-disabled-text: #6b7587;
+  --fulgora-danger-soft: rgba(220, 38, 38, 0.12);
+  --fulgora-menu: #1a2333;
+  --fulgora-toast: #f4f6fa;
+  --fulgora-toast-content: #0a1020;
+  --fulgora-toast-action: #2563eb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -238,6 +266,20 @@
     --fulgora-btn2-text: #ffffff;
     --fulgora-badge-border: #2c3749;
     --fulgora-ready: rgba(37, 99, 235, 0.2);
+    /* The screens of the blocks (handoff v3 des blocs, 26/11/2026) */
+    --fulgora-tint: rgba(96, 165, 250, 0.12);
+    --fulgora-scrim: rgba(4, 7, 12, 0.62);
+    --fulgora-sheet: #111827;
+    --fulgora-selected: rgba(37, 99, 235, 0.14);
+    --fulgora-stripe-a: #1c2535;
+    --fulgora-stripe-b: #222c3d;
+    --fulgora-disabled: #1e2635;
+    --fulgora-disabled-text: #6b7587;
+    --fulgora-danger-soft: rgba(220, 38, 38, 0.12);
+    --fulgora-menu: #1a2333;
+    --fulgora-toast: #f4f6fa;
+    --fulgora-toast-content: #0a1020;
+    --fulgora-toast-action: #2563eb;
   }
 }
 
@@ -279,6 +321,19 @@
   --color-badge-border: var(--fulgora-badge-border);
   --color-ready: var(--fulgora-ready);
   --color-ready-content: #ffffff;
+  --color-tint: var(--fulgora-tint);
+  --color-scrim: var(--fulgora-scrim);
+  --color-sheet: var(--fulgora-sheet);
+  --color-selected: var(--fulgora-selected);
+  --color-stripe-a: var(--fulgora-stripe-a);
+  --color-stripe-b: var(--fulgora-stripe-b);
+  --color-disabled: var(--fulgora-disabled);
+  --color-disabled-text: var(--fulgora-disabled-text);
+  --color-danger-soft: var(--fulgora-danger-soft);
+  --color-menu: var(--fulgora-menu);
+  --color-toast: var(--fulgora-toast);
+  --color-toast-content: var(--fulgora-toast-content);
+  --color-toast-action: var(--fulgora-toast-action);
   /* The blue of the logo, the same in both themes (handoff v3) */
   --color-brand: #2563eb;
 
@@ -341,6 +396,12 @@
   --shadow-dialog: 0 20px 50px rgba(11, 18, 32, 0.3);
   /* The card of the set being done (B3a) */
   --shadow-set: 0 10px 26px rgba(255, 122, 66, 0.14);
+  /* The bottom sheet, the "⋯" menu and the undo toast (handoff des blocs) */
+  --shadow-panel: 0 -10px 40px rgba(0, 0, 0, 0.25);
+  --shadow-menu: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-toast: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /* A selected exercise: the blue border is doubled to read as 2 px */
+  --shadow-selected: 0 0 0 1px #2563eb;
 
   --spacing-tap: 44px;
   --spacing-btn: 56px;

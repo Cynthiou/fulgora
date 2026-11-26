@@ -1,73 +1,64 @@
-import { BLOCK_TYPES, type BlockType } from "shared";
-import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
+import { type BlockType, CREATABLE_BLOCK_TYPES } from "shared";
+import chevronRightIcon from "../../../assets/icons/ui/v3/chevron-right.svg";
 import BottomSheet from "../../../components/BottomSheet";
+import { SHEET_TITLE } from "../../../components/formClasses";
 import Icon from "../../../components/Icon";
+import { BLOCK_TYPE_ICONS } from "./blockTypeIcons";
 
 type Props = {
   onPick: (blockType: BlockType) => void;
   onClose: () => void;
 };
 
-// Screen A3: the 8 block types in one column, each with its two letters in
-// a square. The timed ones (Circuit, AMRAP, For Time) are greyed with
-// "Bientôt" and cannot be chosen before US-43.
+// Screen 2.1: the panel that slides from the bottom with the 7 types of
+// block, each one with its Lucide icon in a tinted square and what it does
+// on one line. The Note is not offered anymore (RM-020). Touching a line
+// creates the block and opens it (screen 2.2).
 function BlockTypePicker({ onPick, onClose }: Props) {
   return (
-    <BottomSheet label="Type de bloc" onClose={onClose} closeLabel={null}>
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-[26px] leading-none">Type de bloc</h2>
+    <BottomSheet
+      variant="form"
+      label="Type de bloc"
+      onClose={onClose}
+      closeLabel={null}
+    >
+      <div className="mb-2.5 flex items-center justify-between gap-2 px-1">
+        <h2 className={SHEET_TITLE}>Type de bloc</h2>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-tap px-1 text-sm font-semibold text-secondary"
+          className="text-[13px] font-bold text-muted"
         >
           Fermer
         </button>
       </div>
-      <ul className="overflow-hidden rounded-card border border-base-300">
-        {BLOCK_TYPES.map((info, index) => (
+      <ul className="flex flex-col gap-1.5">
+        {CREATABLE_BLOCK_TYPES.map((info) => (
           <li key={info.code}>
             <button
               type="button"
-              disabled={!info.isAvailable}
               onClick={() => onPick(info.code)}
-              className={`flex min-h-[54px] w-full items-center gap-3 px-3.5 py-2 text-left disabled:opacity-60 ${
-                index === 0 ? "" : "border-t border-base-300"
-              } ${info.isAvailable ? "bg-secondary/[0.06]" : ""}`}
+              className="flex w-full items-center gap-2.5 rounded-[12px] border border-base-300 bg-base-100 px-2 py-[7px] text-left"
             >
               <span
                 aria-hidden="true"
-                className={`grid size-[34px] shrink-0 place-items-center rounded-btn text-xs font-extrabold ${
-                  info.isAvailable
-                    ? "bg-secondary text-secondary-content"
-                    : "bg-soft text-muted"
-                }`}
+                className="grid size-[34px] shrink-0 place-items-center rounded-[9px] bg-tint text-secondary"
               >
-                {info.label.slice(0, 2).toUpperCase()}
+                <Icon
+                  src={BLOCK_TYPE_ICONS[info.code]}
+                  className="size-[17px]"
+                />
               </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-px">
-                <b className="truncate text-sm font-bold">
-                  {info.label}
-                  {!info.isAvailable && (
-                    <>
-                      {" "}
-                      <span className="rounded-chip bg-soft px-1.5 py-0.5 text-overline uppercase text-muted">
-                        Bientôt
-                      </span>
-                      <span className="sr-only">, indisponible</span>
-                    </>
-                  )}
-                </b>
-                <span className="text-xs leading-[1.45] text-muted">
+              <span className="flex min-w-0 flex-1 flex-col">
+                <b className="text-sm font-bold">{info.label}</b>
+                <span className="mt-px truncate text-[10.5px] font-medium text-card-sub">
                   {info.description}
                 </span>
               </span>
-              {info.isAvailable && (
-                <Icon
-                  src={chevronRightIcon}
-                  className="size-[18px] shrink-0 text-faint"
-                />
-              )}
+              <Icon
+                src={chevronRightIcon}
+                className="size-4 shrink-0 text-muted"
+              />
             </button>
           </li>
         ))}

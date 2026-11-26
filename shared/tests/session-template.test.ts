@@ -5,6 +5,7 @@ import {
   BLOCK_TYPE_CODES,
   BLOCK_TYPE_LABELS,
   BLOCK_TYPES,
+  CREATABLE_BLOCK_TYPES,
   countDraftExercises,
   createDefaultSet,
   createEmptyDraft,
@@ -15,6 +16,7 @@ import {
   formatBlockCount,
   formatBlockSummary,
   formatDuration,
+  formatExerciseSummary,
   formatMinSec,
   formatRangeMessage,
   formatSelectedCount,
@@ -30,6 +32,7 @@ import {
   getSetFields,
   getSetLabel,
   isPlannedDateInRange,
+  NO_GOAL,
   parseMinSec,
   plannedSetSchema,
   SET_LIMITS,
@@ -241,12 +244,28 @@ describe("helpers", () => {
 });
 
 describe("BLOCK_TYPES", () => {
-  it("lists the 8 types, 5 of them available in the MVP", () => {
+  it("lists the 8 types of the base, in its order", () => {
     expect(BLOCK_TYPES.map((info) => info.code)).toEqual([...BLOCK_TYPE_CODES]);
-    expect(
-      BLOCK_TYPES.filter((info) => info.isAvailable).map((info) => info.code),
-    ).toEqual([...AVAILABLE_BLOCK_TYPES]);
     expect(BLOCK_TYPE_LABELS.for_time).toBe("For Time");
+  });
+
+  it("offers 7 types at creation: the Note is not one of them (RM-020)", () => {
+    expect(CREATABLE_BLOCK_TYPES.map((info) => info.code)).toEqual([
+      "classic",
+      "circuit",
+      "amrap",
+      "for_time",
+      "warm_up",
+      "stretching",
+      "challenge",
+    ]);
+    expect(CREATABLE_BLOCK_TYPES[0]?.description).toBe(
+      "Exercices avec séries et temps de repos",
+    );
+  });
+
+  it("still accepts a note from a session already saved", () => {
+    expect([...AVAILABLE_BLOCK_TYPES]).toContain("note");
   });
 });
 
@@ -333,6 +352,101 @@ describe("formatSetSummary", () => {
     expect(formatDuration(3900)).toBe("1 h 05");
     expect(formatSelectedCount(1)).toBe("1 sélectionné");
     expect(formatSelectedCount(3)).toBe("3 sélectionnés");
+  });
+});
+
+describe("formatExerciseSummary (handoff des blocs)", () => {
+  // The six examples of the handoff, in its own order.
+  it("writes the six examples of the handoff", () => {
+    const five = (values: Partial<ReturnType<typeof createEmptySet>>) =>
+      Array.from({ length: 5 }, () => ({ ...createEmptySet(), ...values }));
+    expect(
+      formatExerciseSummary(five({ duration_seconds: 600, resistance: 6 }), [
+        "duration",
+        "distance",
+      ]),
+    ).toBe("5 × 10 min · résistance 6");
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), duration_seconds: 300 }],
+        ["duration"],
+      ),
+    ).toBe("5 min");
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), duration_seconds: 600 }],
+        ["duration"],
+      ),
+    ).toBe("10 min");
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), weight_kg: 24, duration_seconds: 40 }],
+        ["weight", "duration"],
+      ),
+    ).toBe("24 kg · 40 s");
+    expect(
+      formatExerciseSummary(
+        [
+          { ...createEmptySet(), reps: 10, weight_kg: 50 },
+          { ...createEmptySet(), reps: 10, weight_kg: 50 },
+          { ...createEmptySet(), reps: 10, weight_kg: 50 },
+        ],
+        ["reps", "weight"],
+      ),
+    ).toBe("3 × 10 rép. · 50 kg");
+    expect(
+      formatExerciseSummary(
+        [
+          { ...createEmptySet(), duration_seconds: 45 },
+          { ...createEmptySet(), duration_seconds: 45 },
+        ],
+        ["duration"],
+      ),
+    ).toBe("2 × 45 s");
+  });
+
+  it("never writes « 1 × » and always writes the unit", () => {
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), reps: 10, weight_kg: 62.5 }],
+        ["reps", "weight"],
+      ),
+    ).toBe("10 rép. · 62,5 kg");
+  });
+
+  it("says nothing of values that differ from one set to the next", () => {
+    expect(
+      formatExerciseSummary(
+        [
+          { ...createEmptySet(), reps: 10 },
+          { ...createEmptySet(), reps: 8 },
+        ],
+        ["reps"],
+      ),
+    ).toBe("2 × …");
+  });
+
+  it("says « Aucun objectif » for an empty set and for no set at all", () => {
+    expect(formatExerciseSummary([], ["reps"])).toBe(NO_GOAL);
+    expect(formatExerciseSummary([createEmptySet()], ["reps"])).toBe(NO_GOAL);
+  });
+
+  it("writes the lest of a body weight exercise and the per side goals", () => {
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), reps: 8, weight_kg: 10 }],
+        ["reps"],
+        false,
+      ),
+    ).toBe("8 rép. · 10 kg lest");
+    expect(
+      formatExerciseSummary(
+        [{ ...createEmptySet(), reps: 15 }],
+        ["reps", "weight"],
+        false,
+        true,
+      ),
+    ).toBe("15 rép. / côté");
   });
 });
 

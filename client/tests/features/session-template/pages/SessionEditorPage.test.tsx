@@ -149,16 +149,15 @@ describe("SessionEditorPage", () => {
     );
     expect(loadDraft()?.draft.planned_date).toBe("2026-11-28");
   });
-  // US-43: the three timed types are available too, so the eight tiles
-  // can all be chosen.
-  it("shows the 8 types, all available, and closes the panel", async () => {
+  // Handoff 2.1: the panel offers the 7 types, the Note is not one of them.
+  it("shows the 7 types with their description, and closes the panel", async () => {
     const user = renderEditor();
 
     await user.click(screen.getByRole("button", { name: "Ajouter un bloc" }));
 
     expect(screen.getByText("Type de bloc")).toBeTruthy();
     expect(
-      screen.getByText("Exercices et séries, avec objectifs et repos"),
+      screen.getByText("Exercices avec séries et temps de repos"),
     ).toBeTruthy();
     for (const name of [
       /^Classique/,
@@ -168,7 +167,6 @@ describe("SessionEditorPage", () => {
       /^Échauffement/,
       /^Étirements/,
       /^Défi/,
-      /^Note/,
     ]) {
       const tile = screen.getByRole("button", { name }) as HTMLButtonElement;
       expect({ name: String(name), disabled: tile.disabled }).toEqual({
@@ -176,7 +174,7 @@ describe("SessionEditorPage", () => {
         disabled: false,
       });
     }
-    expect(screen.queryByText("Bientôt")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Note/ })).toBeNull();
 
     await user.click(screen.getByRole("button", { name: "Fermer" }));
 
@@ -224,27 +222,36 @@ describe("SessionEditorPage", () => {
     expect(inputValue(/^Intitulé/)).toBe("Mise en route");
   });
 
-  it("changes the type of an empty block and shows the note field for a Note", async () => {
-    const user = renderEditor();
-    await addBlock(user, "Classique");
-
-    await user.click(screen.getByRole("button", { name: "Changer" }));
-    await user.click(screen.getByRole("button", { name: /^Note/ }));
+  // RM-020: no new note can be created, but a session saved with one keeps
+  // showing it and keeps its text editable.
+  it("still edits the note of a block saved with a note", async () => {
+    saveDraft({
+      draft: {
+        name: "Haut du corps",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "note",
+            name: null,
+            instructions: "Penser à respirer.",
+            planned_rounds: null,
+            time_limit_seconds: null,
+            exercises: [],
+          },
+        ],
+      },
+      openBlockKey: "b1",
+    });
+    const user = renderEditor("/seances/nouvelle");
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Note");
     expect(screen.queryByText("Exercices")).toBeNull();
-    await user.type(screen.getByLabelText("Note"), "Penser à respirer.");
     expect(screen.getByText("18 / 2000 caractères")).toBeTruthy();
 
-    await user.click(
-      screen.getByRole("button", { name: "Retour à la séance" }),
-    );
-    expect(
-      screen.getByRole("button", {
-        name: /Ouvrir le bloc Note · Bloc 1/,
-      }),
-    ).toBeTruthy();
-    expect(screen.getByText("Penser à respirer.")).toBeTruthy();
+    await user.type(screen.getByLabelText("Note"), " Et à boire.");
+    expect(screen.getByText("30 / 2000 caractères")).toBeTruthy();
   });
 
   it("removes a block with a 5 second undo", async () => {
