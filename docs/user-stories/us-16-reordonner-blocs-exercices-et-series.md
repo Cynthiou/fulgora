@@ -54,12 +54,12 @@ Aucune route propre : l'ordre part avec l'enregistrement de la séance.
 
 ## Tâches techniques
 
-- [ ] Outillage : installer `@dnd-kit/core` et `@dnd-kit/sortable` (`--ignore-scripts`) : accessible au clavier et au toucher
-- [ ] Frontend : actions du reducer `moveBlock`, `moveExercise`, `moveSet` (fonctions pures, testées)
-- [ ] Frontend : `SortableList.tsx` générique ; annonces `aria-live` en français
-- [ ] Tests : reducer : déplacements aux bords (premier, dernier) ; E2E : glisser au clavier
+- [x] Outillage : installer `@dnd-kit/core` et `@dnd-kit/sortable` (`--ignore-scripts`) : accessible au clavier et au toucher
+- [x] Frontend : actions du reducer `moveBlock`, `moveExercise`, `moveSet` (fonctions pures, testées)
+- [x] Frontend : `SortableList.tsx` générique ; annonces `aria-live` en français
+- [x] Tests : reducer : déplacements aux bords (premier, dernier) ; E2E : glisser au clavier
 
 ## Definition of Done
 
-- [ ] Testé au toucher, à la souris et au clavier
+- [x] Testé au toucher, à la souris et au clavier
 - [ ] Code relu et fusionné via pull request
