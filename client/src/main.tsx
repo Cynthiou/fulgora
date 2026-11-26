@@ -20,6 +20,7 @@ import HistoryDetailPage from "./features/history/pages/HistoryDetailPage";
 import TrackingPage from "./features/history/pages/TrackingPage";
 import NotificationsPage from "./features/notification/pages/NotificationsPage";
 import EditProgramInfoPage from "./features/program/pages/EditProgramInfoPage";
+import EditProgramPage from "./features/program/pages/EditProgramPage";
 import NewProgramPage from "./features/program/pages/NewProgramPage";
 import ProgramDaySessionPage from "./features/program/pages/ProgramDaySessionPage";
 import ProgramDetailPage from "./features/program/pages/ProgramDetailPage";
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
               { path: "/programmes", element: <ProgramsPage /> },
               { path: "/programmes/nouveau", element: <NewProgramPage /> },
               { path: "/programmes/:id", element: <ProgramDetailPage /> },
+              {
+                path: "/programmes/:programId/modifier",
+                element: <EditProgramPage />,
+              },
               {
                 path: "/programmes/:programId/informations",
                 element: <EditProgramInfoPage />,

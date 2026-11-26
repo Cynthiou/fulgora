@@ -8,13 +8,15 @@ import SheetRow from "../../../components/SheetRow";
 
 type Props = {
   actions: ProgramActions;
+  // Opens PRO-08 (US-20); null while the program cannot be changed
+  onEdit: (() => void) | null;
   onClose: () => void;
 };
 
 // Screen PRO-07b: the "⋯" of a program. Every action of the mockup is
 // listed; the ones that are not built yet say when they arrive (US-19 to
 // US-22), so the menu never hides what exists.
-function ProgramActionsSheet({ actions, onClose }: Props) {
+function ProgramActionsSheet({ actions, onEdit, onClose }: Props) {
   return (
     <BottomSheet label="Actions du programme" onClose={onClose}>
       <div className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
@@ -23,12 +25,14 @@ function ProgramActionsSheet({ actions, onClose }: Props) {
           icon={pencilIcon}
           title="Modifier le programme"
           subtitle={
-            actions.canEdit
-              ? "Période, jours, séances · bientôt"
-              : "Un programme fini ne change plus"
+            onEdit === null
+              ? actions.canEdit
+                ? "Les séances se modifient depuis le brouillon"
+                : "Un programme fini ne change plus"
+              : "Jours, heures et fin"
           }
-          disabled
-          onClick={onClose}
+          disabled={onEdit === null}
+          onClick={onEdit ?? onClose}
         />
         <SheetRow
           icon={copyIcon}
@@ -59,8 +63,8 @@ function ProgramActionsSheet({ actions, onClose }: Props) {
         />
       </div>
       <p className="px-1 text-xs text-muted">
-        Modifier, abandonner et réutiliser un programme arrivent avec les
-        prochaines cartes.
+        Abandonner et réutiliser un programme arrivent avec les prochaines
+        cartes.
       </p>
     </BottomSheet>
   );

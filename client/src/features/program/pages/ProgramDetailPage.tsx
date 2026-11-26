@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import {
   computeProgramProgress,
   formatLongDate,
@@ -18,6 +18,7 @@ import {
   type ProgramStatus,
   todayInParis,
 } from "shared";
+import checkIcon from "../../../assets/icons/ui/app/check.svg";
 import dotsIcon from "../../../assets/icons/ui/app/dots.svg";
 import playIcon from "../../../assets/icons/ui/app/play.svg";
 import EmptyState from "../../../components/EmptyState";
@@ -67,7 +68,10 @@ function ProgramDetailPage() {
   const params = useParams();
   const id = Number(params.id);
   const navigate = useNavigate();
+  const location = useLocation();
   const today = todayInParis();
+  // "Programme modifié.", handed over by PRO-08 (US-20)
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   const [program, setProgram] = useState<ProgramDetailFull | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -202,6 +206,18 @@ function ProgramDetailPage() {
 
         {!isLoading && program !== null && error === null && !notFound && (
           <>
+            {flash !== null && (
+              <p
+                role="status"
+                className="flex items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+              >
+                <Icon
+                  src={checkIcon}
+                  className="size-[18px] shrink-0 text-status-done"
+                />
+                {flash}
+              </p>
+            )}
             <div className="flex flex-col items-start gap-1.5">
               <span
                 className={`rounded-chip px-2 py-[3px] text-[10px] font-extrabold uppercase tracking-[0.06em] ${
@@ -438,6 +454,12 @@ function ProgramDetailPage() {
       {isMenuOpen && (
         <ProgramActionsSheet
           actions={actions}
+          onEdit={
+            program?.status === "programmed" ||
+            program?.status === "in_progress"
+              ? () => navigate(`/programmes/${id}/modifier`)
+              : null
+          }
           onClose={() => setIsMenuOpen(false)}
         />
       )}

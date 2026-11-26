@@ -3,7 +3,9 @@ import type {
   ProgramDetail,
   ProgramDetailFull,
   ProgramInfoInput,
+  ProgramScheduleInput,
   ProgramSessionInput,
+  SchedulePlan,
   SessionDraft,
 } from "shared";
 import { apiFetch } from "../../../services/api";
@@ -130,4 +132,29 @@ export function restoreProgramSession(
     `/programs/${id}/sessions/${scheduleId}/restore`,
     { method: "POST" },
   );
+}
+
+// POST /api/programs/:id/schedule/preview: what a change of days, hours or
+// end date would do, before anything is written (US-20).
+export function previewProgramSchedule(
+  id: number,
+  input: ProgramScheduleInput,
+  signal?: AbortSignal,
+): Promise<SchedulePlan> {
+  return apiFetch<SchedulePlan>(`/programs/${id}/schedule/preview`, {
+    method: "POST",
+    body: JSON.stringify(input),
+    signal,
+  });
+}
+
+// PUT /api/programs/:id/schedule: the same change, applied.
+export function updateProgramSchedule(
+  id: number,
+  input: ProgramScheduleInput,
+): Promise<ProgramDetailFull> {
+  return apiFetch<ProgramDetailFull>(`/programs/${id}/schedule`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
 }
