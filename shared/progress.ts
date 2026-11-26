@@ -523,6 +523,8 @@ export type TrackingSummary = {
   } | null;
   records: SummaryRecord[];
   program: ProgramSummary | null;
+  // Sets per muscle over the period (US-50)
+  muscles: MuscleSets[];
 };
 
 // The same number of days, one month earlier, never past the last day of
@@ -593,4 +595,31 @@ export function describeRegularity(
     { label: "Annulées", value: counts.cancelled },
     { label: "À venir", value: counts.upcoming },
   ].filter((line) => line.value > 0);
+}
+
+// --- Worked muscles (US-50) ------------------------------------------------
+
+export type MuscleSets = {
+  code: string;
+  name: string;
+  // 15, 14.5: a main muscle counts one set, a secondary one a half
+  sets: number;
+};
+
+// "15", "14,5": the number of sets of a muscle, with its half.
+export function formatMuscleSets(sets: number): string {
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(
+    sets,
+  );
+}
+
+// The muscles nobody worked over the period, from the whole list.
+export function listUntouchedMuscles(
+  worked: MuscleSets[],
+  all: { code: string; name: string }[],
+): string[] {
+  const codes = new Set(worked.map((muscle) => muscle.code));
+  return all
+    .filter((muscle) => !codes.has(muscle.code))
+    .map((muscle) => muscle.name);
 }

@@ -34,6 +34,7 @@ import {
   readDoneExercises,
   readExerciseHeader,
   readExerciseSets,
+  readMuscleSets,
   readRecentRecords,
   readWorkSessions,
   readWorkTonnage,
@@ -242,6 +243,10 @@ export const summary: RequestHandler = async (req, res) => {
     date: row.created_at.toISOString().slice(0, 10),
   }));
 
+  const muscles = (await readMuscleSets(userId, from, to, programId)).map(
+    (row) => ({ code: row.code, name: row.name, sets: Number(row.sets) }),
+  );
+
   const answer: TrackingSummary = {
     period,
     from,
@@ -255,6 +260,7 @@ export const summary: RequestHandler = async (req, res) => {
     comparison,
     records,
     program,
+    muscles,
   };
   res.json(answer);
 };

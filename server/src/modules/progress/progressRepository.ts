@@ -351,3 +351,47 @@ export async function readWorkTonnage(
   const tonnage = (rows[0] as { tonnage: string | null } | undefined)?.tonnage;
   return tonnage === null || tonnage === undefined ? null : Number(tonnage);
 }
+
+// --- Worked muscles (US-50) ------------------------------------------------
+
+export type MuscleSetsRow = {
+  code: string;
+  name: string;
+  sets: string;
+};
+
+// Sets per muscle over a period: a main muscle counts one set, a
+// secondary one counts a half (RM-078). Cardio and stretching exercises
+// are left out (D-19).
+export async function readMuscleSets(
+  userId: number,
+  from: string,
+  to: string,
+  programId: number | null,
+  db: Queryable = client,
+): Promise<MuscleSetsRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT m.code, m.name,
+            SUM(CASE em.role WHEN 'primary' THEN 1 ELSE 0.5 END) AS sets
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+       JOIN appointment a ON a.id = ws.appointment_id
+       JOIN exercise_muscle em ON em.exercise_id = we.exercise_id
+       JOIN muscle m ON m.id = em.muscle_id
+      WHERE ws.owner_user_id = ?
+        AND ws.status IN ('completed', 'unfinished')
+        AND wset.validated_at IS NOT NULL
+        AND DATE(ws.started_at) BETWEEN ? AND ?
+        AND (? IS NULL OR a.program_id = ?)
+        AND NOT EXISTS (SELECT 1 FROM exercise_category ec
+                          JOIN category c ON c.id = ec.category_id
+                         WHERE ec.exercise_id = we.exercise_id
+                           AND c.code IN ('cardio', 'stretching'))
+      GROUP BY m.id, m.code, m.name
+      ORDER BY sets DESC, m.name`,
+    [userId, from, to, programId, programId],
+  );
+  return rows as MuscleSetsRow[];
+}

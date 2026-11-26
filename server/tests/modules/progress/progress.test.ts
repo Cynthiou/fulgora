@@ -421,3 +421,39 @@ describe("GET /api/progress/summary", () => {
     await client.execute("DELETE FROM program WHERE id = ?", [programId]);
   });
 });
+
+// US-50: the sets of each muscle over the period (RM-078, D-19).
+describe("les muscles travaillés", () => {
+  it("counts a main muscle once and a secondary one by half", async () => {
+    const [muscles] = await client.query<Rows[]>(
+      "SELECT id, code FROM muscle WHERE code IN ('chest', 'triceps')",
+    );
+    for (const muscle of muscles) {
+      await client.execute(
+        "INSERT INTO exercise_muscle (exercise_id, muscle_id, role) VALUES (?, ?, ?)",
+        [benchId, muscle.id, muscle.code === "chest" ? "primary" : "secondary"],
+      );
+    }
+
+    const response = await request(app)
+      .get("/api/progress/summary?period=month&date=2026-11-15")
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    const byCode = new Map(
+      response.body.muscles.map((muscle: { code: string; sets: number }) => [
+        muscle.code,
+        muscle.sets,
+      ]),
+    );
+    // Every validated set of the bench press counts once for the chest
+    // and half for the triceps (RM-078)
+    const chest = Number(byCode.get("chest"));
+    expect(chest).toBeGreaterThanOrEqual(4);
+    expect(Number(byCode.get("triceps"))).toBe(chest / 2);
+
+    await client.execute("DELETE FROM exercise_muscle WHERE exercise_id = ?", [
+      benchId,
+    ]);
+  });
+});
