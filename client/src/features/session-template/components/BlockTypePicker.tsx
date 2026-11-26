@@ -38,26 +38,23 @@ function BlockTypePicker({ onPick, onClose }: Props) {
             <button
               type="button"
               onClick={() => onPick(info.code)}
-              className="flex w-full items-center gap-2.5 rounded-[12px] border border-base-300 bg-base-100 px-2 py-[7px] text-left"
+              className="flex w-full items-center gap-2.5 rounded-[12px] border border-base-300 bg-base-100 px-2 py-2.5 text-left"
             >
               <span
                 aria-hidden="true"
-                className="grid size-[34px] shrink-0 place-items-center rounded-[9px] bg-tint text-secondary"
+                className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-tint text-secondary"
               >
-                <Icon
-                  src={BLOCK_TYPE_ICONS[info.code]}
-                  className="size-[17px]"
-                />
+                <Icon src={BLOCK_TYPE_ICONS[info.code]} className="size-5" />
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
-                <b className="text-sm font-bold">{info.label}</b>
-                <span className="mt-px truncate text-[10.5px] font-medium text-card-sub">
+                <b className="text-[15px] font-bold">{info.label}</b>
+                <span className="mt-px truncate text-[11px] font-medium text-card-sub">
                   {info.description}
                 </span>
               </span>
               <Icon
                 src={chevronRightIcon}
-                className="size-4 shrink-0 text-muted"
+                className="size-[18px] shrink-0 text-muted"
               />
             </button>
           </li>

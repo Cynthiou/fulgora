@@ -64,7 +64,7 @@ function SelectableExerciseCard({
           aria-pressed={isSelected}
           disabled={!isSelected && isLimitReached}
           onClick={onToggle}
-          className={`flex w-full items-center gap-3 rounded-[12px] border py-[7px] pr-11 pl-[7px] text-left disabled:opacity-60 ${
+          className={`flex w-full items-center gap-3.5 rounded-[12px] border py-[9px] pr-12 pl-[9px] text-left disabled:opacity-60 ${
             isSelected
               ? "border-brand bg-selected shadow-selected"
               : "border-base-300 bg-base-100 shadow-card"
@@ -72,17 +72,17 @@ function SelectableExerciseCard({
         >
           <ExerciseThumbnail src={image} variant="form" />
           <span className="flex min-w-0 flex-1 flex-col items-start">
-            <span className="w-full truncate text-sm font-extrabold">
+            <span className="w-full truncate text-[15px] font-extrabold">
               <HighlightedText text={exercise.name} term={searchTerm} />
               <span className="sr-only">{state}</span>
             </span>
-            <span className="mt-0.5 mb-1 w-full truncate text-[11px] font-semibold text-card-sub">
+            <span className="mt-0.5 mb-1 w-full truncate text-xs font-semibold text-card-sub">
               {formatExerciseOrigin(
                 exercise.category_name,
                 exercise.equipment_names,
               )}
             </span>
-            <span className="rounded-[4px] bg-soft px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.08em] text-muted">
+            <span className="rounded-[4px] bg-soft px-[7px] py-[3px] text-[10px] font-extrabold uppercase tracking-[0.08em] text-muted">
               {DIFFICULTY_LABELS[exercise.difficulty]}
             </span>
           </span>
@@ -90,18 +90,18 @@ function SelectableExerciseCard({
         {isSelected ? (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 right-3 grid size-[26px] -translate-y-1/2 place-items-center rounded-full bg-brand text-primary-content"
+            className="pointer-events-none absolute top-1/2 right-3.5 grid size-[30px] -translate-y-1/2 place-items-center rounded-full bg-brand text-primary-content"
           >
-            <Icon src={checkIcon} className="size-[14px]" />
+            <Icon src={checkIcon} className="size-4" />
           </span>
         ) : (
           <Link
             to={`/catalogue/${exercise.id}`}
             state={{ name: exercise.name, ...detailState }}
             aria-label={`Fiche de ${exercise.name}`}
-            className="absolute inset-y-0 right-0 grid w-11 place-items-center text-muted"
+            className="absolute inset-y-0 right-0 grid w-12 place-items-center text-muted"
           >
-            <Icon src={v3EyeIcon} className="size-[18px]" />
+            <Icon src={v3EyeIcon} className="size-5" />
           </Link>
         )}
       </li>

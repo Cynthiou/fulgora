@@ -15,7 +15,7 @@ type Props = {
 function ExerciseThumbnail({ src, variant = "page" }: Props) {
   const isForm = variant === "form";
   const size = isForm
-    ? "h-[52px] w-[70px] rounded-[6px]"
+    ? "h-[58px] w-[78px] rounded-[7px]"
     : "h-[62px] w-21 rounded-ctl";
 
   if (src === null) {
@@ -37,8 +37,8 @@ function ExerciseThumbnail({ src, variant = "page" }: Props) {
     <img
       src={src}
       alt=""
-      width={isForm ? 70 : 84}
-      height={isForm ? 52 : 62}
+      width={isForm ? 78 : 84}
+      height={isForm ? 58 : 62}
       loading="lazy"
       className={`shrink-0 bg-white object-contain ${size} ${
         isForm ? "" : "border border-base-300"

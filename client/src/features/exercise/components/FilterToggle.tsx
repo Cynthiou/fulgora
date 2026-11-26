@@ -33,7 +33,7 @@ function FilterToggle({
         aria-controls={controls}
         // A filter that is on is written in blue and says how many
         // choices it holds: the handoff only draws the resting state.
-        className={`flex h-[34px] min-w-0 items-center justify-center gap-[5px] rounded-[10px] border bg-base-100 text-xs font-bold ${
+        className={`flex h-[38px] min-w-0 items-center justify-center gap-[5px] rounded-[10px] border bg-base-100 text-[13px] font-bold ${
           isOpen || count > 0
             ? "border-brand text-secondary"
             : "border-base-300"
@@ -41,11 +41,11 @@ function FilterToggle({
       >
         {label}
         {count > 0 && (
-          <span className="grid size-4 place-items-center rounded-full bg-brand text-[9px] font-extrabold text-primary-content">
+          <span className="grid size-[18px] place-items-center rounded-full bg-brand text-[10px] font-extrabold text-primary-content">
             {count}
           </span>
         )}
-        <Icon src={v3ChevronDownIcon} className="size-[13px] text-muted" />
+        <Icon src={v3ChevronDownIcon} className="size-[14px] text-muted" />
       </button>
     );
   }

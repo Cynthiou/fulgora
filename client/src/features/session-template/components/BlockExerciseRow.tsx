@@ -24,17 +24,19 @@ function BlockExerciseRow({
   missingGoal = false,
 }: Props) {
   return (
-    <div className="flex items-center gap-3 rounded-[12px] border border-base-300 bg-base-100 p-3 shadow-card">
+    <div className="flex items-center gap-3.5 rounded-[12px] border border-base-300 bg-base-100 p-3.5 shadow-card">
       {handle}
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        className="flex min-w-0 flex-1 items-center gap-3.5 text-left"
       >
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-sm font-bold">{exercise.name}</span>
+          <span className="truncate text-[15px] font-bold">
+            {exercise.name}
+          </span>
           <span
-            className={`mt-0.5 truncate text-[11px] font-semibold tabular-nums ${
+            className={`mt-0.5 truncate text-xs font-semibold tabular-nums ${
               missingGoal ? "text-status-missed-text" : "text-card-sub"
             }`}
           >
@@ -48,10 +50,7 @@ function BlockExerciseRow({
                 )}
           </span>
         </span>
-        <Icon
-          src={chevronRightIcon}
-          className="size-[18px] shrink-0 text-muted"
-        />
+        <Icon src={chevronRightIcon} className="size-5 shrink-0 text-muted" />
       </button>
     </div>
   );

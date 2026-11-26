@@ -183,7 +183,7 @@ function BlockEditor({
                     label="Exercices du bloc"
                     gapClass="gap-2"
                     // The numbered badge of the handoff is the grip
-                    handleClass="grid size-6 shrink-0 cursor-grab touch-none place-items-center rounded-[7px] bg-soft text-[11px] font-extrabold tabular-nums text-muted"
+                    handleClass="grid size-7 shrink-0 cursor-grab touch-none place-items-center rounded-[8px] bg-soft text-xs font-extrabold tabular-nums text-muted"
                     renderHandleContent={(position) => position + 1}
                     handleLabel={(name, position) =>
                       `Déplacer ${name}, exercice ${position + 1}`

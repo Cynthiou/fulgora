@@ -649,7 +649,10 @@ function ExerciseListPage({ selectionMode = "catalog" }: Props) {
             </h1>
             {/* "Sélection multiple" says that several cards can be touched;
                 once one is picked, the same place counts them. */}
-            <p aria-live="polite" className="text-xs font-bold text-secondary">
+            <p
+              aria-live="polite"
+              className="text-[13px] font-bold text-secondary"
+            >
               {count === 0 ? "Sélection multiple" : formatSelectedCount(count)}
             </p>
           </div>

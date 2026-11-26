@@ -28,7 +28,7 @@ function ExerciseSearch({ value, onChange, onClear, variant = "page" }: Props) {
       >
         <Icon
           src={isForm ? v3SearchIcon : searchIcon}
-          className={isForm ? "size-[15px]" : "size-[18px]"}
+          className={isForm ? "size-4" : "size-[18px]"}
         />
       </span>
       <input
@@ -41,7 +41,7 @@ function ExerciseSearch({ value, onChange, onClear, variant = "page" }: Props) {
         maxLength={60}
         className={`w-full border border-base-300 bg-base-100 placeholder:text-faint ${
           isForm
-            ? "h-[42px] rounded-[12px] pr-10 pl-[37px] text-sm font-medium focus:border-accent focus:outline-none"
+            ? "h-[46px] rounded-[12px] pr-10 pl-[38px] text-[15px] font-medium focus:border-accent focus:outline-none"
             : "h-[50px] rounded-btn pr-12 pl-[42px] text-[15px] shadow-card"
         }`}
       />
@@ -54,10 +54,7 @@ function ExerciseSearch({ value, onChange, onClear, variant = "page" }: Props) {
             isForm ? "right-0 w-10" : "right-1 size-tap"
           }`}
         >
-          <Icon
-            src={xIcon}
-            className={isForm ? "size-[15px]" : "size-[18px]"}
-          />
+          <Icon src={xIcon} className={isForm ? "size-4" : "size-[18px]"} />
         </button>
       )}
     </div>

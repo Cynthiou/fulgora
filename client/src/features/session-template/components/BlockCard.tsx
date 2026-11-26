@@ -21,7 +21,7 @@ import { useCloseOnOutside } from "../../../hooks/useCloseOnOutside";
 import { BLOCK_TYPE_ICONS } from "./blockTypeIcons";
 
 const MENU_ITEM =
-  "flex h-10 w-full items-center gap-2.5 rounded-[8px] px-2.5 text-left text-[13px] font-semibold hover:bg-back-strong";
+  "flex h-11 w-full items-center gap-3 rounded-[8px] px-3 text-left text-sm font-semibold hover:bg-back-strong";
 
 type Props = {
   block: DraftBlock;
@@ -67,21 +67,18 @@ function BlockCard({
 
   return (
     <div className="relative mb-2.5 rounded-[14px] border border-base-300 bg-base-100 shadow-card">
-      <div className="flex items-center gap-3 p-3">
+      <div className="flex items-center gap-3.5 p-3.5">
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           aria-expanded={isExpanded}
-          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+          className="flex min-w-0 flex-1 items-center gap-3.5 text-left"
         >
           <span
             aria-hidden="true"
-            className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-tint text-secondary"
+            className="grid size-10 shrink-0 place-items-center rounded-[11px] bg-tint text-secondary"
           >
-            <Icon
-              src={BLOCK_TYPE_ICONS[block.block_type]}
-              className="size-[18px]"
-            />
+            <Icon src={BLOCK_TYPE_ICONS[block.block_type]} className="size-5" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             {/* The whole sentence goes in the hidden text and the visible
@@ -89,7 +86,7 @@ function BlockCard({
                 came out glued ("ClassiqueBloc 1 · 4 exercices"). */}
             <span
               aria-hidden="true"
-              className="truncate text-sm font-extrabold"
+              className="truncate text-[15px] font-extrabold"
             >
               {BLOCK_TYPE_LABELS[block.block_type]}
             </span>
@@ -100,14 +97,14 @@ function BlockCard({
             </span>
             <span
               aria-hidden="true"
-              className={`mt-0.5 flex items-center gap-1 text-[11px] font-semibold ${
+              className={`mt-0.5 flex items-center gap-1 text-xs font-semibold ${
                 problem === null ? "text-card-sub" : "text-status-missed-text"
               }`}
             >
               {problem ?? formatBlockCardLine(block, index)}
               <Icon
                 src={isExpanded ? chevronDownSmallIcon : chevronRightSmallIcon}
-                className="size-[13px]"
+                className="size-[14px]"
               />
             </span>
           </span>
@@ -121,18 +118,18 @@ function BlockCard({
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label={`Actions du bloc ${label}`}
             aria-expanded={isMenuOpen}
-            className="grid size-8 place-items-center rounded-full text-muted"
+            className="grid size-9 place-items-center rounded-full text-muted"
           >
-            <Icon src={dotsIcon} className="size-[18px]" />
+            <Icon src={dotsIcon} className="size-5" />
           </button>
           {isMenuOpen && (
-            <div className="absolute top-[50px] right-2.5 z-10 w-[190px] rounded-[12px] border border-base-300 bg-menu p-1 shadow-menu">
+            <div className="absolute top-[56px] right-3 z-10 w-[205px] rounded-[12px] border border-base-300 bg-menu p-1 shadow-menu">
               <button
                 type="button"
                 onClick={() => run(onEdit)}
                 className={MENU_ITEM}
               >
-                <Icon src={pencilIcon} className="size-[15px] text-muted" />
+                <Icon src={pencilIcon} className="size-[17px] text-muted" />
                 Modifier le bloc
               </button>
               <button
@@ -140,7 +137,7 @@ function BlockCard({
                 onClick={() => run(onDuplicate)}
                 className={MENU_ITEM}
               >
-                <Icon src={copyIcon} className="size-[15px] text-muted" />
+                <Icon src={copyIcon} className="size-[17px] text-muted" />
                 Dupliquer
               </button>
               {onMoveUp !== null && (
@@ -149,7 +146,7 @@ function BlockCard({
                   onClick={() => run(onMoveUp)}
                   className={MENU_ITEM}
                 >
-                  <Icon src={arrowUpIcon} className="size-[15px] text-muted" />
+                  <Icon src={arrowUpIcon} className="size-[17px] text-muted" />
                   Monter
                 </button>
               )}
@@ -161,7 +158,7 @@ function BlockCard({
                 >
                   <Icon
                     src={arrowDownIcon}
-                    className="size-[15px] text-muted"
+                    className="size-[17px] text-muted"
                   />
                   Descendre
                 </button>
@@ -175,7 +172,7 @@ function BlockCard({
                 onClick={() => run(onRemove)}
                 className={`${MENU_ITEM} font-bold text-status-missed-text hover:bg-danger-soft`}
               >
-                <Icon src={trashIcon} className="size-[15px]" />
+                <Icon src={trashIcon} className="size-[17px]" />
                 Supprimer
               </button>
             </div>
@@ -185,7 +182,7 @@ function BlockCard({
 
       {isExpanded && block.block_type === "note" && (
         <>
-          <p className="border-t border-base-300 px-3 py-[7px] text-[13px] font-medium text-card-sub">
+          <p className="border-t border-base-300 px-3.5 py-2.5 text-sm font-medium text-card-sub">
             {block.instructions?.trim() === undefined ||
             block.instructions.trim() === ""
               ? "Note vide"
@@ -197,21 +194,21 @@ function BlockCard({
 
       {isExpanded && block.block_type !== "note" && (
         <>
-          <ul aria-label={`Exercices du bloc ${index + 1}`} className="px-3">
+          <ul aria-label={`Exercices du bloc ${index + 1}`} className="px-3.5">
             {block.exercises.map((exercise, position) => (
               <li
                 key={exercise.key}
-                className="flex items-center gap-2.5 border-t border-base-300 py-[7px]"
+                className="flex items-center gap-3 border-t border-base-300 py-2.5"
               >
                 <span
                   aria-hidden="true"
-                  className="w-[14px] shrink-0 text-[11px] font-extrabold tabular-nums text-muted"
+                  className="w-4 shrink-0 text-xs font-extrabold tabular-nums text-muted"
                 >
                   {position + 1}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[13px] font-bold">{exercise.name}</span>
-                  <span className="mt-0.5 text-[11px] font-semibold tabular-nums text-card-sub">
+                  <span className="text-sm font-bold">{exercise.name}</span>
+                  <span className="mt-0.5 text-xs font-semibold tabular-nums text-card-sub">
                     {formatExerciseSummary(
                       exercise.sets,
                       exercise.measure_codes,
@@ -224,9 +221,9 @@ function BlockCard({
                   type="button"
                   onClick={() => onRemoveExercise(exercise.key)}
                   aria-label={`Retirer ${exercise.name}`}
-                  className="grid size-7 shrink-0 place-items-center rounded-full text-faint"
+                  className="grid size-8 shrink-0 place-items-center rounded-full text-faint"
                 >
-                  <Icon src={xIcon} className="size-[15px]" />
+                  <Icon src={xIcon} className="size-[17px]" />
                 </button>
               </li>
             ))}
