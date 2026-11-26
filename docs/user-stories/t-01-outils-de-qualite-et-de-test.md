@@ -58,4 +58,4 @@ Le projet vise beaucoup de tests (unitaires, intégration, bout en bout) et une 
 
 - [x] Les 4 scripts fonctionnent en local
 - [ ] Une PR de test volontairement cassée est bien refusée par la CI
-- [x] Aucune trace de Claude dans les commits ni dans la PR
+- [x] Aucune trace de l'outil d'assistance dans les commits ni dans la PR

@@ -3,7 +3,7 @@
 Le schéma exact (types, clés, index, contraintes) est dans `server/database/schema.sql`. Ce document en donne la lecture : ce que contient chaque table, comment elles sont reliées, et les règles que la base ne peut pas garantir seule.
 
 - MySQL 8.0.16 ou plus, moteur InnoDB, encodage `utf8mb4`.
-- 25 tables, noms en anglais, au singulier, en snake_case.
+- 26 tables, noms en anglais, au singulier, en snake_case.
 - Identifiants `BIGINT UNSIGNED AUTO_INCREMENT`, dates `DATE`, heures `TIME`, horodatages `DATETIME(3)`.
 - Les règles RM-xxx et DT-xx renvoient à `docs/business-rules.md`.
 
@@ -49,15 +49,16 @@ erDiagram
     template_block_exercise |o--o{ workout_exercise : "copied from"
     workout_exercise ||--o{ workout_set : contains
     planned_set |o--o{ workout_set : "copied from"
+    workout_set ||--o{ workout_set_side : "left and right"
 ```
 
 ## 2. Les tables par domaine
 
 ### Compte
 
-| Table  | Contenu                                                                                                                              | Points clés                                                           |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| `user` | Pseudo, e-mail, hachage du mot de passe, sexe, préférences (unités, son, vibration, notifications de minuteur, indicateur d'accueil) | `username` et `email` uniques (RM-001). Unités par défaut : kg et km. |
+| Table  | Contenu                                                                                                                                                                                 | Points clés                                                                                                                                                                       |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user` | Pseudo, e-mail, hachage du mot de passe, sexe, fuseau horaire, date d'acceptation des conditions, préférences (unités, son, vibration, notifications de minuteur, indicateur d'accueil) | `username` et `email` uniques (RM-001). Unités par défaut : kg et km (DT-11). `terms_accepted_at` obligatoire (RM-001, migration 004), `timezone` par défaut Europe/Paris (D-12). |
 
 ### Catalogue
 
@@ -72,31 +73,32 @@ erDiagram
 
 ### Séances préparées (le prévu)
 
-| Table                     | Contenu                                                             | Points clés                                                                                       |
-| ------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `session_template`        | La séance préparée (nom, propriétaire)                              |                                                                                                   |
-| `session_version`         | Une version figée de son contenu                                    | Unique sur (`session_template_id`, `version_number`). Jamais modifiée une fois utilisée (RM-017). |
-| `template_block`          | Un bloc : type, nom, position, tours prévus, temps limite, consigne | Position unique dans la version (RM-024).                                                         |
-| `template_block_exercise` | Un exercice dans un bloc, avec son repos par défaut                 | Position unique dans le bloc.                                                                     |
-| `planned_set`             | Une série prévue et ses objectifs (une colonne par mesure)          | Position unique dans l'exercice. `rest_after_seconds` remplace le repos par défaut (RM-023).      |
+| Table                     | Contenu                                                                                       | Points clés                                                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `session_template`        | La séance préparée (nom, propriétaire)                                                        |                                                                                                                                                             |
+| `session_version`         | Une version figée de son contenu                                                              | Unique sur (`session_template_id`, `version_number`). Jamais modifiée une fois utilisée (RM-017).                                                           |
+| `template_block`          | Un bloc : type, nom, position, tours prévus, temps limite, consigne                           | Position unique dans la version (RM-024).                                                                                                                   |
+| `template_block_exercise` | Un exercice dans un bloc, son repos par défaut, et s'il se fait côté par côté (`is_per_side`) | Position unique dans le bloc. `is_per_side` depuis la migration 005 (US-51, D-02).                                                                          |
+| `planned_set`             | Une série prévue et ses objectifs (une colonne par mesure), charge gauche et droite comprises | Position unique dans l'exercice. `rest_after_seconds` remplace le repos par défaut (RM-023). `weight_left_kg` et `weight_right_kg` depuis la migration 005. |
 
 ### Programmes
 
-| Table             | Contenu                                                 | Points clés                                                              |
-| ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `program`         | Nom, période, statut                                    | Fin ≥ début. `source_program_id` pour un programme réutilisé (RM-036).   |
-| `weekly_schedule` | « Telle séance, tel jour de la semaine, à telle heure » | Jour ISO 1 (lundi) à 7. `deactivated_at` quand la règle change (RM-031). |
-| `program_change`  | Historique des changements                              | Ancienne et nouvelle valeur en JSON (RM-037).                            |
+| Table             | Contenu                                                 | Points clés                                                                                                                                                             |
+| ----------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `program`         | Nom, période, statut                                    | Fin ≥ début. Statuts : `draft`, `programmed`, `in_progress`, `finished`, `abandoned` (migration 003, RM-071). `source_program_id` pour un programme réutilisé (RM-036). |
+| `weekly_schedule` | « Telle séance, tel jour de la semaine, à telle heure » | Jour ISO 1 (lundi) à 7. `deactivated_at` quand la règle change (RM-031).                                                                                                |
+| `program_change`  | Historique des changements                              | Ancienne et nouvelle valeur en JSON (RM-037).                                                                                                                           |
 
 ### Agenda et réalisation (le réalisé)
 
-| Table              | Contenu                                                                 | Points clés                                                                                                                                       |
-| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appointment`      | Une séance planifiée à une date                                         | Pointe vers une **version** de séance. `initial_date` et `moved_manually` pour les déplacements (RM-032). Sans programme = séance libre (RM-015). |
-| `workout_session`  | La séance réellement faite                                              | Un seul par rendez-vous (RM-038). `last_activity_at` pour la clôture à 4 h (RM-065). Une seule `in_progress` par utilisateur (DT-15).             |
-| `workout_block`    | Copie du bloc prévu, plus les résultats (tours, durée réelle)           | `source_template_block_id` vide = bloc ajouté pendant la séance (RM-043).                                                                         |
-| `workout_exercise` | Copie de l'exercice prévu, plus un commentaire                          | Même logique d'origine.                                                                                                                           |
-| `workout_set`      | Chaque mesure en double : `_planned` (copié, figé) et `_actual` (saisi) | `validated_at` = première validation, `updated_at` vide jusqu'à une correction (RM-049, DT-14).                                                   |
+| Table              | Contenu                                                                     | Points clés                                                                                                                                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appointment`      | Une séance planifiée à une date                                             | Pointe vers une **version** de séance. `initial_date` et `moved_manually` pour les déplacements (RM-032). Sans programme = séance libre (RM-015). `cancelled_at` rempli exactement quand le statut est `cancelled` (migration 002, RM-035). |
+| `workout_session`  | La séance réellement faite                                                  | Un seul par rendez-vous (RM-038). `last_activity_at` pour la clôture à 4 h (RM-065). Une seule `in_progress` par utilisateur (DT-15). `auto_closed` et `declared_afterwards` depuis la migration 004 (US-33, US-38).                        |
+| `workout_block`    | Copie du bloc prévu, plus les résultats (tours, durée réelle)               | `source_template_block_id` vide = bloc ajouté pendant la séance (RM-043).                                                                                                                                                                   |
+| `workout_exercise` | Copie de l'exercice prévu, plus un commentaire et `is_per_side`             | Même logique d'origine. `is_per_side` copié du prévu (migration 005).                                                                                                                                                                       |
+| `workout_set`      | Chaque mesure en double : `_planned` (copié, figé) et `_actual` (saisi)     | `validated_at` = première validation, `updated_at` vide jusqu'à une correction (RM-049, DT-14). Charges gauche et droite prévues depuis la migration 005.                                                                                   |
+| `workout_set_side` | Ce qui a été fait de chaque côté d'une série côté par côté (gauche, droite) | Clé primaire (`workout_set_id`, `side`). La série n'est validée qu'une fois les deux côtés saisis (migration 005, RM-044).                                                                                                                  |
 
 ### Alertes
 

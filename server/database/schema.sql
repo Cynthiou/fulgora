@@ -1,9 +1,9 @@
 -- Fulgora database schema (MySQL 8.0.16+)
--- Source: MLD proposed on 2026-11-23, tested on MySQL 8.0 (25 tables).
+-- Source: MLD proposed on 2026-11-23, tested on MySQL 8.0 (26 tables).
 -- Change from the proposal: workout_set.updated_at is NULL until a correction (RM-049).
 -- This file documents the current state of the database. The database itself is
 -- built by the numbered files in database/migrations/ (npm run db:migrate).
--- Reflects migrations 001 to 004.
+-- Reflects migrations 001 to 005.
 
 
 CREATE TABLE `user` (
