@@ -248,6 +248,8 @@ export type WorkoutSetDbRow = {
   calories_actual: string | null;
   planned_rest_seconds: number | null;
   validated_at: Date | null;
+  // Filled by a correction made after the session (US-37, RM-049)
+  updated_at: Date | null;
   // null when the set was added during the session (D-18, RM-043)
   source_planned_set_id: number | null;
 };
@@ -307,6 +309,36 @@ export async function updateWorkoutSetActual(
             distance_actual_meters = ?, speed_actual_kmh = ?, resistance_actual = ?,
             incline_actual_percent = ?, calories_actual = ?,
             validated_at = COALESCE(validated_at, NOW(3))
+      WHERE id = ?`,
+    [
+      values.reps,
+      values.weight_kg,
+      values.duration_seconds,
+      values.distance_meters,
+      values.speed_kmh,
+      values.resistance,
+      values.incline_percent,
+      values.calories,
+      setId,
+    ],
+  );
+}
+
+// Correcting a past session (US-37): the same values, plus the date of
+// the correction. The first validation date never moves, and a set that
+// was never done is validated now (RM-049).
+export async function correctWorkoutSetActual(
+  setId: number,
+  values: ActualSetValues,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE workout_set
+        SET reps_actual = ?, weight_actual_kg = ?, duration_actual_seconds = ?,
+            distance_actual_meters = ?, speed_actual_kmh = ?, resistance_actual = ?,
+            incline_actual_percent = ?, calories_actual = ?,
+            validated_at = COALESCE(validated_at, NOW(3)),
+            updated_at = NOW(3)
       WHERE id = ?`,
     [
       values.reps,

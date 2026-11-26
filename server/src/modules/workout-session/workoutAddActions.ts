@@ -19,16 +19,10 @@ import {
   touchWorkoutSession,
 } from "./workoutSessionRepository.js";
 
-// Adding to a session while it runs (US-32). What is added has no planned
-// values and no provenance: the plan itself never changes (RM-043).
-
-function notInProgress(): HttpError {
-  return new HttpError(
-    409,
-    "WORKOUT_NOT_IN_PROGRESS",
-    "Cette séance n'est plus en cours.",
-  );
-}
+// Adding to a session while it runs (US-32), or while correcting it
+// afterwards (US-37). What is added has no planned values and no
+// provenance: the plan itself never changes (RM-043, D-18). The three
+// states of a session all accept it, so no state is refused here.
 
 // Every exercise must be visible to this user and not archived (RM-007).
 async function assertExercisesAvailable(
@@ -79,9 +73,6 @@ export const addSet: RequestHandler = async (req, res) => {
         "Cet exercice n'existe pas.",
       );
     }
-    if (context.status !== "in_progress") {
-      throw notInProgress();
-    }
     const position = await readNextSetPosition(id, connection);
     const created = await createWorkoutSet(id, position, connection);
     await touchWorkoutSession(context.workout_session_id, connection);
@@ -105,9 +96,6 @@ export const removeSet: RequestHandler = async (req, res) => {
         "WORKOUT_SET_NOT_FOUND",
         "Cette série n'existe pas.",
       );
-    }
-    if (set.status !== "in_progress") {
-      throw notInProgress();
     }
     if (set.source_planned_set_id !== null) {
       throw new HttpError(
@@ -139,9 +127,6 @@ export const addExercisesToBlock: RequestHandler = async (req, res) => {
         "Ce bloc n'existe pas.",
       );
     }
-    if (context.status !== "in_progress") {
-      throw notInProgress();
-    }
     await assertExercisesAvailable(exercise_ids, userId, connection);
     const created = await addExercises(id, exercise_ids, connection);
     await touchWorkoutSession(context.workout_session_id, connection);
@@ -166,9 +151,6 @@ export const addBlock: RequestHandler = async (req, res) => {
         "WORKOUT_SESSION_NOT_FOUND",
         "Cette séance n'existe pas.",
       );
-    }
-    if (session.status !== "in_progress") {
-      throw notInProgress();
     }
     await assertExercisesAvailable(exercise_ids, userId, connection);
     const position = await readNextBlockPosition(id, connection);

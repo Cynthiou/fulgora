@@ -172,6 +172,7 @@ export function toSetRow(row: WorkoutSetDbRow): WorkoutSetRow {
     planned_rest_seconds: row.planned_rest_seconds,
     validated_at:
       row.validated_at === null ? null : row.validated_at.toISOString(),
+    updated_at: row.updated_at === null ? null : row.updated_at.toISOString(),
     // Nothing behind it in the plan: it was added during the session (D-18)
     is_added: row.source_planned_set_id === null,
   };

@@ -3,7 +3,7 @@ import { actualSetSchema, idParamSchema } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
 import { removeSet } from "./workoutAddActions.js";
-import { validateSet } from "./workoutSetActions.js";
+import { correctSet, validateSet } from "./workoutSetActions.js";
 
 const workoutSetRouter = express.Router();
 
@@ -13,6 +13,15 @@ workoutSetRouter.put(
   authenticate,
   validate({ params: idParamSchema, body: actualSetSchema }),
   validateSet,
+);
+
+// PUT /api/workout-sets/:id/correction: fixes a set of a session already
+// over (US-37).
+workoutSetRouter.put(
+  "/:id/correction",
+  authenticate,
+  validate({ params: idParamSchema, body: actualSetSchema }),
+  correctSet,
 );
 
 // DELETE /api/workout-sets/:id: removes a set added during the session

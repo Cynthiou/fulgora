@@ -91,6 +91,8 @@ export type WorkoutSetRow = {
   planned_rest_seconds: number | null;
   // ISO date-time, null while the set is not done
   validated_at: string | null;
+  // Filled the day the set was corrected after the session (US-37, RM-049)
+  updated_at: string | null;
   // Added during the session: no planned values, and it can be removed
   // (US-32, RM-043, RM-048)
   is_added: boolean;
