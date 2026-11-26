@@ -72,15 +72,15 @@ Champs vidés, messages sous les champs.
 
 ## Tâches techniques
 
-- [ ] Shared : `changePasswordSchema` : 3 champs, règles de l'inscription, `refine` sur l'égalité
-- [ ] Backend : `userRepository.readUserPasswordHash(userId)`, `updateUserPassword(userId, hash)`
-- [ ] Backend : `PUT /api/users/me/password` → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action (vérifier, hacher, enregistrer, 204)
-- [ ] Frontend : `AccountSettingsPage.tsx` (PRF-06), `ChangePasswordForm.tsx`
-- [ ] Tests : back : succès, ancien mot de passe faux → 422, confirmation différente → 400, 6ᵉ essai → 429, l'ancien ne marche plus
-- [ ] Tests : front : champs vidés après erreur, bouton inactif
+- [x] Shared : `changePasswordSchema` : 3 champs, règles de l'inscription, `refine` sur l'égalité
+- [x] Backend : `userRepository.readUserPasswordHash(userId)`, `updateUserPassword(userId, hash)`
+- [x] Backend : `PUT /api/users/me/password` → `checkOrigin` → `authLimiter` → `authenticate` → `validate` → action (vérifier, hacher, enregistrer, 204)
+- [x] Frontend : `AccountSettingsPage.tsx` (PRF-06), `ChangePasswordForm.tsx`
+- [x] Tests : back : succès, ancien mot de passe faux → 422, confirmation différente → 400, 6ᵉ essai → 429, l'ancien ne marche plus
+- [x] Tests : front : champs vidés après erreur, bouton inactif
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Aucun mot de passe dans les logs ni dans les réponses
+- [x] Aucun mot de passe dans les logs ni dans les réponses
 - [ ] Code relu et fusionné via pull request

@@ -49,7 +49,10 @@ function renderPage() {
 }
 
 function field(label: string): HTMLInputElement {
-  return screen.getByLabelText(label) as HTMLInputElement;
+  // The eye button repeats the label of its field: only the input counts.
+  return screen.getByLabelText(label, {
+    selector: "input",
+  }) as HTMLInputElement;
 }
 
 async function fill(
@@ -167,7 +170,7 @@ describe("AccountSettingsPage", () => {
 
     expect(field("Nouveau mot de passe").type).toBe("password");
     await user.click(
-      screen.getByRole("button", { name: "Afficher nouveau mot de passe" }),
+      screen.getByRole("button", { name: "Afficher le nouveau mot de passe" }),
     );
     expect(field("Nouveau mot de passe").type).toBe("text");
   });

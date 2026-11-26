@@ -56,6 +56,9 @@ function AccountSettingsPage() {
   function passwordField(
     field: PasswordField,
     label: string,
+    // What the eye button says, written in full ("Afficher le mot de
+    // passe actuel"): a label must make sense read alone.
+    toggleLabel: string,
     autoComplete: string,
     help?: string,
   ) {
@@ -87,11 +90,9 @@ function AccountSettingsPage() {
                 [field]: current[field] !== true,
               }))
             }
-            aria-label={
-              shown[field] === true
-                ? `Masquer ${label.toLocaleLowerCase("fr-FR")}`
-                : `Afficher ${label.toLocaleLowerCase("fr-FR")}`
-            }
+            aria-label={`${
+              shown[field] === true ? "Masquer" : "Afficher"
+            } ${toggleLabel}`}
             className="absolute right-1 grid size-tap place-items-center text-muted"
           >
             <Icon
@@ -145,17 +146,20 @@ function AccountSettingsPage() {
         {passwordField(
           "current_password",
           "Mot de passe actuel",
+          "le mot de passe actuel",
           "current-password",
         )}
         {passwordField(
           "new_password",
           "Nouveau mot de passe",
+          "le nouveau mot de passe",
           "new-password",
           "Mêmes règles qu'à l'inscription.",
         )}
         {passwordField(
           "confirm_password",
           "Confirmer le mot de passe",
+          "la confirmation",
           "new-password",
         )}
 
@@ -189,7 +193,7 @@ function AccountSettingsPage() {
       {isDone && (
         <p
           role="status"
-          className="fixed inset-x-[18px] bottom-10 z-10 mx-auto flex max-w-md items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+          className="fixed inset-x-[18px] bottom-[82px] z-10 mx-auto flex max-w-md items-center gap-2.5 rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
         >
           <span aria-hidden="true" className="text-status-done-text">
             ✓
