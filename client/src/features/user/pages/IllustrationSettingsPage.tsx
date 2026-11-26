@@ -70,29 +70,29 @@ function IllustrationSettingsPage() {
         <span className="font-sans text-overline uppercase not-italic text-accent">
           Afficher les illustrations
         </span>
-        <div
-          role="radiogroup"
-          aria-label="Illustrations des exercices"
-          className="grid grid-cols-2 gap-2.5"
-        >
+        <fieldset disabled={isSaving} className="grid grid-cols-2 gap-2.5">
+          <legend className="sr-only">Illustrations des exercices</legend>
           {SEXES.map((one) => (
-            <button
+            <label
               key={one}
-              type="button"
-              role="radio"
-              aria-checked={user.sex === one}
-              disabled={isSaving}
-              onClick={() => choose(one)}
-              className={`h-13 rounded-btn border text-sm font-bold disabled:opacity-60 ${
+              className={`relative flex h-13 cursor-pointer items-center justify-center rounded-btn border text-sm font-bold focus-within:ring-2 focus-within:ring-secondary ${
                 user.sex === one
                   ? "border-pick bg-pick text-pick-content"
                   : "border-base-300 bg-base-100 shadow-card"
               }`}
             >
+              <input
+                type="radio"
+                name="illustrations"
+                value={one}
+                checked={user.sex === one}
+                onChange={() => choose(one)}
+                className="absolute inset-0 cursor-pointer opacity-0"
+              />
               {SEX_LABELS[one]}
-            </button>
+            </label>
           ))}
-        </div>
+        </fieldset>
 
         {error !== null && <ErrorState title={error} />}
 

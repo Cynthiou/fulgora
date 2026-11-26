@@ -99,26 +99,28 @@ function EditProfilePage() {
             <legend className="font-sans text-overline uppercase not-italic text-accent">
               Illustrations des exercices
             </legend>
-            <div
-              role="radiogroup"
-              aria-label="Illustrations des exercices"
-              className="grid grid-cols-2 gap-2.5"
-            >
+            {/* Native radios: the group is read as one by a screen
+                reader, and the keyboard arrows work on their own. */}
+            <div className="grid grid-cols-2 gap-2.5">
               {SEXES.map((one) => (
-                <button
+                <label
                   key={one}
-                  type="button"
-                  role="radio"
-                  aria-checked={sex === one}
-                  onClick={() => setSex(one)}
-                  className={`h-13 rounded-btn border text-sm font-bold ${
+                  className={`relative flex h-13 cursor-pointer items-center justify-center rounded-btn border text-sm font-bold focus-within:ring-2 focus-within:ring-secondary ${
                     sex === one
                       ? "border-pick bg-pick text-pick-content"
                       : "border-base-300 bg-base-100 shadow-card"
                   }`}
                 >
-                  {SEX_LABELS[one]}
-                </button>
+                  <input
+                    type="radio"
+                    name="sex"
+                    value={one}
+                    checked={sex === one}
+                    onChange={() => setSex(one)}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                  />
+                  <span className="pointer-events-none">{SEX_LABELS[one]}</span>
+                </label>
               ))}
             </div>
             <p className="text-xs leading-[1.45] text-muted">

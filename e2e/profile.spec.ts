@@ -50,22 +50,13 @@ test("changes the pseudo and the illustrations of the profile", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Illustrations",
   );
-  await expect(page.getByRole("radio", { name: "Homme" })).toHaveAttribute(
-    "aria-checked",
-    "true",
-  );
+  await expect(page.getByRole("radio", { name: "Homme" })).toBeChecked();
   await page.getByRole("radio", { name: "Femme" }).click();
-  await expect(page.getByRole("radio", { name: "Femme" })).toHaveAttribute(
-    "aria-checked",
-    "true",
-  );
+  await expect(page.getByRole("radio", { name: "Femme" })).toBeChecked();
   await shoot(page, "prf-05-illustrations");
   await expectNoA11yViolation(page);
 
   // The choice is kept after a reload (it lives on the server)
   await page.reload();
-  await expect(page.getByRole("radio", { name: "Femme" })).toHaveAttribute(
-    "aria-checked",
-    "true",
-  );
+  await expect(page.getByRole("radio", { name: "Femme" })).toBeChecked();
 });
