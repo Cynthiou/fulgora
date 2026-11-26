@@ -3,7 +3,7 @@
 -- Change from the proposal: workout_set.updated_at is NULL until a correction (RM-049).
 -- This file documents the current state of the database. The database itself is
 -- built by the numbered files in database/migrations/ (npm run db:migrate).
--- Reflects migrations 001 to 005.
+-- Reflects migrations 001 to 006.
 
 
 CREATE TABLE `user` (
@@ -66,6 +66,7 @@ CREATE TABLE exercise (
   image_female_url VARCHAR(1024) NULL,
   muscle_map_male_url VARCHAR(1024) NULL,
   muscle_map_female_url VARCHAR(1024) NULL,
+  allows_per_side BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'RM-084: "Chaque côté" offered for this exercise',
   is_archived BOOLEAN NOT NULL DEFAULT FALSE,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),

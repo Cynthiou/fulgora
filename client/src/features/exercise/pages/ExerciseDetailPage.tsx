@@ -81,6 +81,7 @@ function ExerciseDetailPage() {
               .join(" · ") || null,
           measure_codes: exercise.measures.map((measure) => measure.code),
           is_bodyweight: exercise.is_bodyweight,
+          allows_per_side: exercise.allows_per_side,
         };
 
   // From the selection: the exercise joins the selection and we go back.

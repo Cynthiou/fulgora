@@ -115,6 +115,26 @@ describe("GET /api/exercises", () => {
     expect(new Set(seen).size).toBe(total);
   });
 
+  it("tells which exercises can be done side by side (RM-084)", async () => {
+    const lunges = await browse(
+      `?search=${encodeURIComponent("Fentes avec haltères")}`,
+      lea.cookie,
+    );
+    const squat = await browse(
+      `?search=${encodeURIComponent("Squat à la barre")}`,
+      lea.cookie,
+    );
+
+    expect(lunges.body.items[0]).toMatchObject({
+      name: "Fentes avec haltères",
+      allows_per_side: true,
+    });
+    expect(squat.body.items[0]).toMatchObject({
+      name: "Squat à la barre",
+      allows_per_side: false,
+    });
+  });
+
   it("answers 400 for a bad offset", async () => {
     expect((await browse("?offset=-1", lea.cookie)).status).toBe(400);
     expect((await browse("?offset=abc", lea.cookie)).status).toBe(400);

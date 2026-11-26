@@ -24,6 +24,8 @@ export type ExerciseRow = {
   measure_codes: string | null;
   // 0 or 1: the exercise uses the body weight ("Poids du corps")
   is_bodyweight: number;
+  // 0 or 1: the exercise can be done left then right (RM-084)
+  allows_per_side: number;
 };
 
 // The WHERE of the catalog: who can see what (RM-007), then the filters.
@@ -76,7 +78,7 @@ export async function readExercises(
   const where = buildWhere(userId, filters);
   const [rows] = await db.query<Rows[]>(
     `SELECT e.id, e.slug, e.name, e.difficulty, e.image_female_url, e.image_male_url,
-            (e.owner_user_id IS NOT NULL) AS is_personal,
+            (e.owner_user_id IS NOT NULL) AS is_personal, e.allows_per_side,
             (SELECT c.name
                FROM exercise_category ec
                JOIN category c ON c.id = ec.category_id

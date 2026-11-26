@@ -22,6 +22,8 @@ export type NewDraftExercise = {
   meta?: string | null;
   measure_codes: MeasureCode[];
   is_bodyweight?: boolean;
+  // "Chaque côté" is offered for this exercise (RM-084)
+  allows_per_side?: boolean;
   // Pre-filled sets (US-15); one empty set when not given.
   sets?: PlannedSetValues[];
   default_rest_seconds?: number | null;
@@ -272,6 +274,7 @@ export function sessionDraftReducer(
               meta: added.meta ?? null,
               measure_codes: added.measure_codes,
               is_bodyweight: added.is_bodyweight ?? false,
+              allows_per_side: added.allows_per_side ?? false,
               default_rest_seconds:
                 added.default_rest_seconds ?? DEFAULT_REST_SECONDS,
               // One pre-filled set by default: 10 reps, 1 min... (US-15)

@@ -33,6 +33,7 @@ const squat: ExerciseDetail = {
   difficulty: "intermediate",
   is_personal: false,
   is_bodyweight: false,
+  allows_per_side: false,
   image_female_url: "/images/squat-female.jpg",
   image_male_url: "/images/squat-male.jpg",
   muscle_map_female_url: "/maps/squat-female.svg",
@@ -208,6 +209,7 @@ describe("ExerciseDetailPage", () => {
           meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
+          allows_per_side: false,
         },
       ],
     });

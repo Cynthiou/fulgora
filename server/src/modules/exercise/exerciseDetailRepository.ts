@@ -16,6 +16,8 @@ export type ExerciseDetailRow = {
   // 0 or 1 in MySQL
   is_personal: number;
   is_bodyweight: number;
+  // 0 or 1: the exercise can be done left then right (RM-084)
+  allows_per_side: number;
 };
 
 // The exercise itself, with the same visibility as the list (RM-007):
@@ -28,7 +30,7 @@ export async function readExercise(
   const [rows] = await db.execute<Rows[]>(
     `SELECT e.id, e.slug, e.name, e.difficulty, e.image_female_url, e.image_male_url,
             e.muscle_map_female_url, e.muscle_map_male_url,
-            (e.owner_user_id IS NOT NULL) AS is_personal,
+            (e.owner_user_id IS NOT NULL) AS is_personal, e.allows_per_side,
             EXISTS (SELECT 1 FROM exercise_equipment ee2
                       JOIN equipment eq2 ON eq2.id = ee2.equipment_id
                      WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight

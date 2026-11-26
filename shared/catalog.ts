@@ -65,6 +65,8 @@ export type CatalogExercise = {
   image_female_url: string | null;
   muscle_map_male_url: string | null;
   muscle_map_female_url: string | null;
+  // "Chaque côté" is offered for this exercise (RM-084)
+  allows_per_side: boolean;
 };
 
 // --- Catalog list (US-07) -------------------------------------------------
@@ -150,6 +152,9 @@ export type ExerciseListItem = {
   // True when the exercise is done with the body weight: the load is then an
   // added weight ("lest", A7b), even though it is stored as a weight (US-15)
   is_bodyweight: boolean;
+  // The exercise can be done left then right: only then does the editor
+  // offer "Chaque côté" (RM-084)
+  allows_per_side: boolean;
 };
 
 export type ExerciseListResponse = {
@@ -217,6 +222,8 @@ export type ExerciseDetail = {
   difficulty: Difficulty;
   is_personal: boolean;
   is_bodyweight: boolean;
+  // "Chaque côté" is offered for this exercise (RM-084)
+  allows_per_side: boolean;
   image_female_url: string | null;
   image_male_url: string | null;
   muscle_map_female_url: string | null;

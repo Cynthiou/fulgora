@@ -57,6 +57,7 @@ function exercise(id: number, name: string): ExerciseListItem {
     is_personal: false,
     measure_codes: ["reps", "weight"],
     is_bodyweight: false,
+    allows_per_side: false,
   };
 }
 
@@ -529,6 +530,7 @@ describe("ExerciseListPage · selection (US-14)", () => {
           meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
+          allows_per_side: false,
         },
         {
           exercise_id: 3,
@@ -536,6 +538,7 @@ describe("ExerciseListPage · selection (US-14)", () => {
           meta: "Jambes · Barre",
           measure_codes: ["reps", "weight"],
           is_bodyweight: false,
+          allows_per_side: false,
         },
       ],
     });

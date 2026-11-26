@@ -231,6 +231,8 @@ export type DraftExercise = {
   measure_codes: MeasureCode[];
   // Body weight exercise: its load is an added weight ("lest", A7b)
   is_bodyweight?: boolean;
+  // The catalog allows "Chaque côté" for this exercise (RM-084)
+  allows_per_side?: boolean;
   // Done side by side, left then right (US-51, A7e)
   is_per_side?: boolean;
   default_rest_seconds: number | null;
@@ -526,6 +528,8 @@ export type SelectedExercise = {
   meta?: string | null;
   measure_codes: MeasureCode[];
   is_bodyweight?: boolean;
+  // "Chaque côté" is offered for this exercise (RM-084)
+  allows_per_side?: boolean;
 };
 
 // The four set layouts of US-15, decided by the measures of the exercise

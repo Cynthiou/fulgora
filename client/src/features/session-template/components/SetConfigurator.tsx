@@ -270,84 +270,90 @@ function SetConfigurator({
           )}
         </div>
 
-        {/* A7e: the exercise is done left then right (US-51). */}
-        {profile !== "none" && profile !== "cardio" && (
-          <div className="flex flex-col gap-2.5 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex flex-col">
-                <span id="side-toggle-label" className="font-semibold">
-                  Chaque côté
-                </span>
-                <span id="side-toggle-help" className="text-sm text-muted">
-                  Gauche puis droite, même objectif pour chaque côté
-                </span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isPerSide}
-                aria-labelledby="side-toggle-label"
-                aria-describedby="side-toggle-help"
-                onClick={() => onChangePerSide(!isPerSide)}
-                className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${
-                  isPerSide
-                    ? "border-primary bg-primary"
-                    : "border-base-300 bg-soft"
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`absolute top-1 size-6 rounded-full bg-base-100 shadow-card transition-all ${
-                    isPerSide ? "left-7" : "left-1"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {isPerSide && allFields.includes("weight_kg") && (
-              <div className="flex items-center justify-between gap-3 border-t border-base-300 pt-2.5">
+        {/* A7e: the exercise is done left then right (US-51). Offered only
+            when the catalog allows it; an exercise already set side by side
+            keeps the switch, so an older session stays editable (RM-084). */}
+        {profile !== "none" &&
+          profile !== "cardio" &&
+          (exercise.allows_per_side === true ||
+            exercise.is_per_side === true) && (
+            <div className="flex flex-col gap-2.5 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col">
-                  <span id="same-load-label" className="font-semibold">
-                    Même charge des deux côtés
+                  <span id="side-toggle-label" className="font-semibold">
+                    Chaque côté
                   </span>
-                  <span id="same-load-help" className="text-sm text-muted">
-                    Désactive pour une charge par côté (blessure, déséquilibre)
+                  <span id="side-toggle-help" className="text-sm text-muted">
+                    Gauche puis droite, même objectif pour chaque côté
                   </span>
                 </div>
                 <button
                   type="button"
                   role="switch"
-                  aria-checked={!hasTwoLoads}
-                  aria-labelledby="same-load-label"
-                  aria-describedby="same-load-help"
-                  onClick={() => {
-                    setHasTwoLoads(!hasTwoLoads);
-                    onChangeSameLoad(hasTwoLoads);
-                  }}
+                  aria-checked={isPerSide}
+                  aria-labelledby="side-toggle-label"
+                  aria-describedby="side-toggle-help"
+                  onClick={() => onChangePerSide(!isPerSide)}
                   className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${
-                    hasTwoLoads
-                      ? "border-base-300 bg-soft"
-                      : "border-primary bg-primary"
+                    isPerSide
+                      ? "border-primary bg-primary"
+                      : "border-base-300 bg-soft"
                   }`}
                 >
                   <span
                     aria-hidden="true"
                     className={`absolute top-1 size-6 rounded-full bg-base-100 shadow-card transition-all ${
-                      hasTwoLoads ? "left-1" : "left-7"
+                      isPerSide ? "left-7" : "left-1"
                     }`}
                   />
                 </button>
               </div>
-            )}
 
-            {isPerSide && profile === "duration" && (
-              <p className="border-t border-base-300 pt-2.5 text-sm text-muted">
-                Pendant la séance : minuteur gauche, puis droite. Vaut aussi
-                pour les étirements.
-              </p>
-            )}
-          </div>
-        )}
+              {isPerSide && allFields.includes("weight_kg") && (
+                <div className="flex items-center justify-between gap-3 border-t border-base-300 pt-2.5">
+                  <div className="flex flex-col">
+                    <span id="same-load-label" className="font-semibold">
+                      Même charge des deux côtés
+                    </span>
+                    <span id="same-load-help" className="text-sm text-muted">
+                      Désactive pour une charge par côté (blessure,
+                      déséquilibre)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={!hasTwoLoads}
+                    aria-labelledby="same-load-label"
+                    aria-describedby="same-load-help"
+                    onClick={() => {
+                      setHasTwoLoads(!hasTwoLoads);
+                      onChangeSameLoad(hasTwoLoads);
+                    }}
+                    className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${
+                      hasTwoLoads
+                        ? "border-base-300 bg-soft"
+                        : "border-primary bg-primary"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`absolute top-1 size-6 rounded-full bg-base-100 shadow-card transition-all ${
+                        hasTwoLoads ? "left-1" : "left-7"
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+
+              {isPerSide && profile === "duration" && (
+                <p className="border-t border-base-300 pt-2.5 text-sm text-muted">
+                  Pendant la séance : minuteur gauche, puis droite. Vaut aussi
+                  pour les étirements.
+                </p>
+              )}
+            </div>
+          )}
 
         {profile === "bodyweight" && (
           <div className="flex items-center justify-between gap-3 rounded-card border border-base-300 bg-base-100 p-3 shadow-card">

@@ -71,8 +71,8 @@ export async function seedCatalog(
       await connection.query(
         `INSERT INTO exercise
           (id, slug, name, difficulty, image_male_url, image_female_url,
-           muscle_map_male_url, muscle_map_female_url)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           muscle_map_male_url, muscle_map_female_url, allows_per_side)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           exercise.id,
           exercise.slug,
@@ -82,6 +82,7 @@ export async function seedCatalog(
           exercise.image_female_url,
           exercise.muscle_map_male_url,
           exercise.muscle_map_female_url,
+          exercise.allows_per_side,
         ],
       );
 

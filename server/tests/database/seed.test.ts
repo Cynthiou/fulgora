@@ -1,7 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
 import mysql, { type Connection, type RowDataPacket } from "mysql2/promise";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { readDatabaseConfig } from "../../src/database/config.js";
-import { migrateDatabase } from "../../src/database/migrations.js";
+import {
+  MIGRATIONS_DIR,
+  migrateDatabase,
+} from "../../src/database/migrations.js";
 import {
   readCatalogFile,
   seedCatalog,
@@ -58,6 +63,39 @@ describe("seedCatalog", () => {
     );
 
     expect(rows.map((row) => row.code)).toEqual(["reps", "weight"]);
+  });
+
+  it("offers « chaque côté » only for the 24 exercises done one side at a time (RM-084)", async () => {
+    const [rows] = await connection.query<RowDataPacket[]>(
+      "SELECT slug FROM exercise WHERE allows_per_side = TRUE ORDER BY slug",
+    );
+    const slugs = rows.map((row) => String(row.slug));
+
+    expect(slugs).toHaveLength(24);
+    expect(slugs).toContain("side-plank");
+    expect(slugs).toContain("bulgarian-split-squat");
+    expect(slugs).toContain("farmers-walk");
+    // Two dumbbells at once, or alternated and counted in total
+    expect(slugs).not.toContain("dumbbell-row");
+    expect(slugs).not.toContain("triceps-kickback");
+    expect(slugs).not.toContain("bird-dog");
+    expect(slugs).not.toContain("barbell-squat");
+  });
+
+  it("lists the same exercises in migration 006 and in the catalog file", () => {
+    const migration = fs.readFileSync(
+      path.join(MIGRATIONS_DIR, "006_exercise_allows_per_side.sql"),
+      "utf8",
+    );
+    const inMigration = [...migration.matchAll(/^\s+'([a-z0-9-]+)',?$/gm)]
+      .map((match) => match[1])
+      .sort();
+    const inCatalog = readCatalogFile()
+      .exercises.filter((exercise) => exercise.allows_per_side)
+      .map((exercise) => exercise.slug)
+      .sort();
+
+    expect(inMigration).toEqual(inCatalog);
   });
 
   it("does nothing when run again", async () => {

@@ -55,6 +55,7 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 - **RM-012** · Modifier un exercice personnel déjà utilisé dans une séance réalisée crée une nouvelle copie ; l'ancien est archivé. Un exercice jamais utilisé peut être modifié directement.
 - **RM-013** · Personnaliser un exercice commun produit une copie personnelle ; l'exercice commun n'est pas modifié.
 - **RM-014** · Les illustrations homme/femme sont facultatives et sont choisies selon le profil.
+- **RM-084** · L'option « Chaque côté » n'est proposée que pour les exercices qui se font réellement un côté à la fois (`exercise.allows_per_side`), choisis d'après leurs instructions et non leur nom : 24 exercices du catalogue (fentes, fente bulgare, step-up, curl concentré, gainage latéral, marche du fermier, étirements unilatéraux…). Un exercice fait avec une charge dans chaque main (rowing haltères, kickback) ou alterné à chaque répétition et compté au total (bird dog, mountain climbers) n'y a pas droit. Le choix reste fait dans la séance (`is_per_side`), pas sur la fiche. Une séance déjà réglée en « chaque côté » garde l'option et ses résultats gauche / droite, même si l'exercice ne l'autorise plus. _(Décision du 26/11/2026.)_
 
 ## Construction de séance
 

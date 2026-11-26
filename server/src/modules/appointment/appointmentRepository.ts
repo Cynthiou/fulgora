@@ -220,6 +220,8 @@ export type VersionExerciseRow = {
   // "reps,weight" or null
   measure_codes: string | null;
   is_bodyweight: number;
+  // The catalog allows "chaque côté" for this exercise (RM-084)
+  allows_per_side: number;
   // Done side by side (US-51)
   is_per_side: number;
 };
@@ -244,7 +246,7 @@ export async function readVersionExercises(
             EXISTS (SELECT 1 FROM exercise_equipment ee2
                       JOIN equipment eq2 ON eq2.id = ee2.equipment_id
                      WHERE ee2.exercise_id = e.id AND eq2.code = 'bodyweight') AS is_bodyweight,
-            tbe.is_per_side
+            e.allows_per_side, tbe.is_per_side
        FROM template_block_exercise tbe
        JOIN template_block tb ON tb.id = tbe.template_block_id
        JOIN exercise e ON e.id = tbe.exercise_id

@@ -36,6 +36,7 @@ export const read: RequestHandler = async (req, res) => {
     difficulty: exercise.difficulty,
     is_personal: exercise.is_personal === 1,
     is_bodyweight: exercise.is_bodyweight === 1,
+    allows_per_side: exercise.allows_per_side === 1,
     image_female_url: exercise.image_female_url,
     image_male_url: exercise.image_male_url,
     muscle_map_female_url: exercise.muscle_map_female_url,

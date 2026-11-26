@@ -104,6 +104,7 @@ function toDraftExercise(
         ? []
         : (row.measure_codes.split(",") as MeasureCode[]),
     is_bodyweight: row.is_bodyweight === 1,
+    allows_per_side: Number(row.allows_per_side) === 1,
     is_per_side: Number(row.is_per_side) === 1,
     default_rest_seconds: row.default_rest_seconds,
     sets: sets.map(toPlannedSet),

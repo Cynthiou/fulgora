@@ -272,7 +272,8 @@
       "image_male_url": "/images/exercises/seated-chest-press-male.jpg",
       "image_female_url": "/images/exercises/seated-chest-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-chest-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-chest-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-chest-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 2,
@@ -321,7 +322,8 @@
       "image_male_url": "/images/exercises/incline-chest-press-machine-male.jpg",
       "image_female_url": "/images/exercises/incline-chest-press-machine-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/incline-chest-press-machine-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/incline-chest-press-machine-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/incline-chest-press-machine-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 3,
@@ -366,7 +368,8 @@
       "image_male_url": "/images/exercises/butterflies-male.jpg",
       "image_female_url": "/images/exercises/butterflies-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/butterflies-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/butterflies-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/butterflies-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 4,
@@ -411,7 +414,8 @@
       "image_male_url": "/images/exercises/chest-pulldown-male.jpg",
       "image_female_url": "/images/exercises/chest-pulldown-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/chest-pulldown-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/chest-pulldown-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/chest-pulldown-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 5,
@@ -456,7 +460,8 @@
       "image_male_url": "/images/exercises/close-grip-chest-pulldown-male.jpg",
       "image_female_url": "/images/exercises/close-grip-chest-pulldown-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/close-grip-chest-pulldown-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/close-grip-chest-pulldown-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/close-grip-chest-pulldown-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 6,
@@ -505,7 +510,8 @@
       "image_male_url": "/images/exercises/seated-row-machine-male.jpg",
       "image_female_url": "/images/exercises/seated-row-machine-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-row-machine-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-row-machine-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-row-machine-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 7,
@@ -554,7 +560,8 @@
       "image_male_url": "/images/exercises/seated-cable-back-rows-male.jpg",
       "image_female_url": "/images/exercises/seated-cable-back-rows-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-cable-back-rows-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-cable-back-rows-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-cable-back-rows-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 8,
@@ -599,7 +606,8 @@
       "image_male_url": "/images/exercises/seated-dumbbell-overhead-shoulder-press-male.jpg",
       "image_female_url": "/images/exercises/seated-dumbbell-overhead-shoulder-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-dumbbell-overhead-shoulder-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-dumbbell-overhead-shoulder-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-dumbbell-overhead-shoulder-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 9,
@@ -644,7 +652,8 @@
       "image_male_url": "/images/exercises/machine-shoulder-press-male.jpg",
       "image_female_url": "/images/exercises/machine-shoulder-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/machine-shoulder-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/machine-shoulder-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/machine-shoulder-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 10,
@@ -684,7 +693,8 @@
       "image_male_url": "/images/exercises/dumbbell-lateral-raises-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-lateral-raises-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-lateral-raises-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-lateral-raises-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-lateral-raises-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 11,
@@ -733,7 +743,8 @@
       "image_male_url": "/images/exercises/face-pull-male.jpg",
       "image_female_url": "/images/exercises/face-pull-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/face-pull-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/face-pull-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/face-pull-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 12,
@@ -777,7 +788,8 @@
       "image_male_url": "/images/exercises/alternating-dumbbell-biceps-curl-male.jpg",
       "image_female_url": "/images/exercises/alternating-dumbbell-biceps-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/alternating-dumbbell-biceps-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/alternating-dumbbell-biceps-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/alternating-dumbbell-biceps-curl-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 13,
@@ -822,7 +834,8 @@
       "image_male_url": "/images/exercises/dumbbell-hammer-biceps-curl-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-hammer-biceps-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-hammer-biceps-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-hammer-biceps-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-hammer-biceps-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 14,
@@ -863,7 +876,8 @@
       "image_male_url": "/images/exercises/triceps-pushdown-male.jpg",
       "image_female_url": "/images/exercises/triceps-pushdown-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/triceps-pushdown-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/triceps-pushdown-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/triceps-pushdown-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 15,
@@ -912,7 +926,8 @@
       "image_male_url": "/images/exercises/dips-machine-male.jpg",
       "image_female_url": "/images/exercises/dips-machine-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dips-machine-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dips-machine-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dips-machine-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 16,
@@ -965,7 +980,8 @@
       "image_male_url": "/images/exercises/leg-press-male.jpg",
       "image_female_url": "/images/exercises/leg-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/leg-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/leg-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/leg-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 17,
@@ -1010,7 +1026,8 @@
       "image_male_url": "/images/exercises/seated-leg-curl-male.jpg",
       "image_female_url": "/images/exercises/seated-leg-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-leg-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-leg-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-leg-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 18,
@@ -1055,7 +1072,8 @@
       "image_male_url": "/images/exercises/lying-leg-curls-male.jpg",
       "image_female_url": "/images/exercises/lying-leg-curls-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/lying-leg-curls-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/lying-leg-curls-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/lying-leg-curls-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 19,
@@ -1096,7 +1114,8 @@
       "image_male_url": "/images/exercises/seated-leg-extensions-male.jpg",
       "image_female_url": "/images/exercises/seated-leg-extensions-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-leg-extensions-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-leg-extensions-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-leg-extensions-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 20,
@@ -1141,7 +1160,8 @@
       "image_male_url": "/images/exercises/barbell-hip-thrust-male.jpg",
       "image_female_url": "/images/exercises/barbell-hip-thrust-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-hip-thrust-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-hip-thrust-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-hip-thrust-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 21,
@@ -1190,7 +1210,8 @@
       "image_male_url": "/images/exercises/box-squat-male.jpg",
       "image_female_url": "/images/exercises/box-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/box-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/box-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/box-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 22,
@@ -1243,7 +1264,8 @@
       "image_male_url": "/images/exercises/goblet-squats-male.jpg",
       "image_female_url": "/images/exercises/goblet-squats-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/goblet-squats-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/goblet-squats-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/goblet-squats-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 23,
@@ -1284,7 +1306,8 @@
       "image_male_url": "/images/exercises/seated-calf-raises-male.jpg",
       "image_female_url": "/images/exercises/seated-calf-raises-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-calf-raises-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-calf-raises-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-calf-raises-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 24,
@@ -1331,7 +1354,8 @@
       "image_male_url": "/images/exercises/plank-male.jpg",
       "image_female_url": "/images/exercises/plank-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/plank-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/plank-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/plank-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 25,
@@ -1375,7 +1399,8 @@
       "image_male_url": "/images/exercises/side-plank-male.jpg",
       "image_female_url": "/images/exercises/side-plank-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/side-plank-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/side-plank-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/side-plank-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 26,
@@ -1420,7 +1445,8 @@
       "image_male_url": "/images/exercises/dead-bug-male.jpg",
       "image_female_url": "/images/exercises/dead-bug-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dead-bug-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dead-bug-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dead-bug-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 27,
@@ -1465,7 +1491,8 @@
       "image_male_url": "/images/exercises/neutral-grip-pulldown-male.jpg",
       "image_female_url": "/images/exercises/neutral-grip-pulldown-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/neutral-grip-pulldown-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/neutral-grip-pulldown-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/neutral-grip-pulldown-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 28,
@@ -1514,7 +1541,8 @@
       "image_male_url": "/images/exercises/upright-row-male.jpg",
       "image_female_url": "/images/exercises/upright-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/upright-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/upright-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/upright-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 29,
@@ -1566,7 +1594,8 @@
       "image_male_url": "/images/exercises/barbell-squat-male.jpg",
       "image_female_url": "/images/exercises/barbell-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 30,
@@ -1615,7 +1644,8 @@
       "image_male_url": "/images/exercises/bulgarian-split-squat-male.jpg",
       "image_female_url": "/images/exercises/bulgarian-split-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/bulgarian-split-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/bulgarian-split-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/bulgarian-split-squat-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 31,
@@ -1664,7 +1694,8 @@
       "image_male_url": "/images/exercises/barbell-bench-press-male.jpg",
       "image_female_url": "/images/exercises/barbell-bench-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-bench-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-bench-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-bench-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 32,
@@ -1713,7 +1744,8 @@
       "image_male_url": "/images/exercises/dumbbell-bench-press-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-bench-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-bench-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-bench-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-bench-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 33,
@@ -1762,7 +1794,8 @@
       "image_male_url": "/images/exercises/incline-dumbbell-press-male.jpg",
       "image_female_url": "/images/exercises/incline-dumbbell-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/incline-dumbbell-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/incline-dumbbell-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/incline-dumbbell-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 34,
@@ -1807,7 +1840,8 @@
       "image_male_url": "/images/exercises/dumbbell-flyes-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-flyes-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-flyes-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-flyes-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-flyes-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 35,
@@ -1856,7 +1890,8 @@
       "image_male_url": "/images/exercises/barbell-row-male.jpg",
       "image_female_url": "/images/exercises/barbell-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 36,
@@ -1901,7 +1936,8 @@
       "image_male_url": "/images/exercises/dumbbell-row-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 37,
@@ -1946,7 +1982,8 @@
       "image_male_url": "/images/exercises/barbell-overhead-press-male.jpg",
       "image_female_url": "/images/exercises/barbell-overhead-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-overhead-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-overhead-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-overhead-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 38,
@@ -1987,7 +2024,8 @@
       "image_male_url": "/images/exercises/cable-lateral-raises-male.jpg",
       "image_female_url": "/images/exercises/cable-lateral-raises-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-lateral-raises-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-lateral-raises-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-lateral-raises-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 39,
@@ -2032,7 +2070,8 @@
       "image_male_url": "/images/exercises/barbell-biceps-curl-male.jpg",
       "image_female_url": "/images/exercises/barbell-biceps-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-biceps-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-biceps-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-biceps-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 40,
@@ -2072,7 +2111,8 @@
       "image_male_url": "/images/exercises/overhead-triceps-extension-male.jpg",
       "image_female_url": "/images/exercises/overhead-triceps-extension-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/overhead-triceps-extension-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/overhead-triceps-extension-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/overhead-triceps-extension-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 41,
@@ -2112,7 +2152,8 @@
       "image_male_url": "/images/exercises/standing-calf-raises-male.jpg",
       "image_female_url": "/images/exercises/standing-calf-raises-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/standing-calf-raises-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/standing-calf-raises-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/standing-calf-raises-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 42,
@@ -2169,7 +2210,8 @@
       "image_male_url": "/images/exercises/bodyweight-squat-male.jpg",
       "image_female_url": "/images/exercises/bodyweight-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/bodyweight-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/bodyweight-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/bodyweight-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 43,
@@ -2217,7 +2259,8 @@
       "image_male_url": "/images/exercises/hack-squat-male.jpg",
       "image_female_url": "/images/exercises/hack-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hack-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hack-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hack-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 44,
@@ -2282,7 +2325,8 @@
       "image_male_url": "/images/exercises/deadlift-male.jpg",
       "image_female_url": "/images/exercises/deadlift-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/deadlift-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/deadlift-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/deadlift-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 45,
@@ -2330,7 +2374,8 @@
       "image_male_url": "/images/exercises/pull-ups-male.jpg",
       "image_female_url": "/images/exercises/pull-ups-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/pull-ups-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/pull-ups-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/pull-ups-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 46,
@@ -2386,7 +2431,8 @@
       "image_male_url": "/images/exercises/treadmill-male.jpg",
       "image_female_url": "/images/exercises/treadmill-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/treadmill-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/treadmill-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/treadmill-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 47,
@@ -2445,7 +2491,8 @@
       "image_male_url": "/images/exercises/elliptical-male.jpg",
       "image_female_url": "/images/exercises/elliptical-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/elliptical-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/elliptical-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/elliptical-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 48,
@@ -2499,7 +2546,8 @@
       "image_male_url": "/images/exercises/stationary-bike-male.jpg",
       "image_female_url": "/images/exercises/stationary-bike-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/stationary-bike-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/stationary-bike-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/stationary-bike-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 49,
@@ -2562,7 +2610,8 @@
       "image_male_url": "/images/exercises/rowing-machine-male.jpg",
       "image_female_url": "/images/exercises/rowing-machine-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/rowing-machine-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/rowing-machine-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/rowing-machine-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 50,
@@ -2623,7 +2672,8 @@
       "image_male_url": "/images/exercises/burpees-male.jpg",
       "image_female_url": "/images/exercises/burpees-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/burpees-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/burpees-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/burpees-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 51,
@@ -2664,7 +2714,8 @@
       "image_male_url": "/images/exercises/crunch-male.jpg",
       "image_female_url": "/images/exercises/crunch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/crunch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/crunch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/crunch-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 52,
@@ -2709,7 +2760,8 @@
       "image_male_url": "/images/exercises/legs-up-crunch-male.jpg",
       "image_female_url": "/images/exercises/legs-up-crunch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/legs-up-crunch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/legs-up-crunch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/legs-up-crunch-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 53,
@@ -2754,7 +2806,8 @@
       "image_male_url": "/images/exercises/scissor-kicks-male.jpg",
       "image_female_url": "/images/exercises/scissor-kicks-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/scissor-kicks-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/scissor-kicks-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/scissor-kicks-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 54,
@@ -2799,7 +2852,8 @@
       "image_male_url": "/images/exercises/sit-ups-male.jpg",
       "image_female_url": "/images/exercises/sit-ups-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/sit-ups-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/sit-ups-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/sit-ups-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 55,
@@ -2843,7 +2897,8 @@
       "image_male_url": "/images/exercises/russian-twist-male.jpg",
       "image_female_url": "/images/exercises/russian-twist-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/russian-twist-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/russian-twist-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/russian-twist-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 56,
@@ -2892,7 +2947,8 @@
       "image_male_url": "/images/exercises/glute-bridge-male.jpg",
       "image_female_url": "/images/exercises/glute-bridge-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/glute-bridge-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/glute-bridge-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/glute-bridge-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 57,
@@ -2941,7 +2997,8 @@
       "image_male_url": "/images/exercises/side-plank-rotation-male.jpg",
       "image_female_url": "/images/exercises/side-plank-rotation-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/side-plank-rotation-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/side-plank-rotation-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/side-plank-rotation-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 58,
@@ -2990,7 +3047,8 @@
       "image_male_url": "/images/exercises/superman-male.jpg",
       "image_female_url": "/images/exercises/superman-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/superman-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/superman-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/superman-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 59,
@@ -3039,7 +3097,8 @@
       "image_male_url": "/images/exercises/incline-barbell-bench-press-male.jpg",
       "image_female_url": "/images/exercises/incline-barbell-bench-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/incline-barbell-bench-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/incline-barbell-bench-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/incline-barbell-bench-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 60,
@@ -3091,7 +3150,8 @@
       "image_male_url": "/images/exercises/romanian-deadlift-male.jpg",
       "image_female_url": "/images/exercises/romanian-deadlift-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/romanian-deadlift-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/romanian-deadlift-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/romanian-deadlift-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 61,
@@ -3143,7 +3203,8 @@
       "image_male_url": "/images/exercises/front-squat-male.jpg",
       "image_female_url": "/images/exercises/front-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/front-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/front-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/front-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 62,
@@ -3196,7 +3257,8 @@
       "image_male_url": "/images/exercises/step-up-male.jpg",
       "image_female_url": "/images/exercises/step-up-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/step-up-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/step-up-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/step-up-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 63,
@@ -3252,7 +3314,8 @@
       "image_male_url": "/images/exercises/dumbbell-lunges-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-lunges-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-lunges-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-lunges-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-lunges-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 64,
@@ -3293,7 +3356,8 @@
       "image_male_url": "/images/exercises/hip-abduction-male.jpg",
       "image_female_url": "/images/exercises/hip-abduction-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hip-abduction-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hip-abduction-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hip-abduction-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 65,
@@ -3334,7 +3398,8 @@
       "image_male_url": "/images/exercises/hip-adduction-male.jpg",
       "image_female_url": "/images/exercises/hip-adduction-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hip-adduction-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hip-adduction-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hip-adduction-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 66,
@@ -3387,7 +3452,8 @@
       "image_male_url": "/images/exercises/t-bar-row-male.jpg",
       "image_female_url": "/images/exercises/t-bar-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/t-bar-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/t-bar-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/t-bar-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 67,
@@ -3428,7 +3494,8 @@
       "image_male_url": "/images/exercises/skull-crusher-male.jpg",
       "image_female_url": "/images/exercises/skull-crusher-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/skull-crusher-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/skull-crusher-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/skull-crusher-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 68,
@@ -3473,7 +3540,8 @@
       "image_male_url": "/images/exercises/preacher-curl-male.jpg",
       "image_female_url": "/images/exercises/preacher-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/preacher-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/preacher-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/preacher-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 69,
@@ -3532,7 +3600,8 @@
       "image_male_url": "/images/exercises/ski-erg-male.jpg",
       "image_female_url": "/images/exercises/ski-erg-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/ski-erg-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/ski-erg-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/ski-erg-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 70,
@@ -3598,7 +3667,8 @@
       "image_male_url": "/images/exercises/air-bike-male.jpg",
       "image_female_url": "/images/exercises/air-bike-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/air-bike-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/air-bike-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/air-bike-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 71,
@@ -3647,7 +3717,8 @@
       "image_male_url": "/images/exercises/machine-hip-thrust-male.jpg",
       "image_female_url": "/images/exercises/machine-hip-thrust-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/machine-hip-thrust-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/machine-hip-thrust-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/machine-hip-thrust-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 72,
@@ -3695,7 +3766,8 @@
       "image_male_url": "/images/exercises/sled-hack-squat-male.jpg",
       "image_female_url": "/images/exercises/sled-hack-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/sled-hack-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/sled-hack-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/sled-hack-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 73,
@@ -3739,7 +3811,8 @@
       "image_male_url": "/images/exercises/bicycle-crunch-male.jpg",
       "image_female_url": "/images/exercises/bicycle-crunch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/bicycle-crunch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/bicycle-crunch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/bicycle-crunch-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 74,
@@ -3787,7 +3860,8 @@
       "image_male_url": "/images/exercises/push-ups-male.jpg",
       "image_female_url": "/images/exercises/push-ups-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/push-ups-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/push-ups-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/push-ups-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 75,
@@ -3831,7 +3905,8 @@
       "image_male_url": "/images/exercises/cable-crossover-male.jpg",
       "image_female_url": "/images/exercises/cable-crossover-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-crossover-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-crossover-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-crossover-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 76,
@@ -3880,7 +3955,8 @@
       "image_male_url": "/images/exercises/chest-dips-male.jpg",
       "image_female_url": "/images/exercises/chest-dips-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/chest-dips-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/chest-dips-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/chest-dips-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 77,
@@ -3925,7 +4001,8 @@
       "image_male_url": "/images/exercises/decline-bench-press-male.jpg",
       "image_female_url": "/images/exercises/decline-bench-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/decline-bench-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/decline-bench-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/decline-bench-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 78,
@@ -3974,7 +4051,8 @@
       "image_male_url": "/images/exercises/back-extension-male.jpg",
       "image_female_url": "/images/exercises/back-extension-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/back-extension-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/back-extension-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/back-extension-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 79,
@@ -4023,7 +4101,8 @@
       "image_male_url": "/images/exercises/dumbbell-pullover-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-pullover-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-pullover-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-pullover-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-pullover-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 80,
@@ -4068,7 +4147,8 @@
       "image_male_url": "/images/exercises/straight-arm-pulldown-male.jpg",
       "image_female_url": "/images/exercises/straight-arm-pulldown-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/straight-arm-pulldown-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/straight-arm-pulldown-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/straight-arm-pulldown-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 81,
@@ -4117,7 +4197,8 @@
       "image_male_url": "/images/exercises/inverted-row-male.jpg",
       "image_female_url": "/images/exercises/inverted-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/inverted-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/inverted-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/inverted-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 82,
@@ -4162,7 +4243,8 @@
       "image_male_url": "/images/exercises/barbell-shrug-male.jpg",
       "image_female_url": "/images/exercises/barbell-shrug-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-shrug-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-shrug-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-shrug-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 83,
@@ -4211,7 +4293,8 @@
       "image_male_url": "/images/exercises/reverse-fly-male.jpg",
       "image_female_url": "/images/exercises/reverse-fly-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/reverse-fly-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/reverse-fly-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/reverse-fly-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 84,
@@ -4252,7 +4335,8 @@
       "image_male_url": "/images/exercises/front-raise-male.jpg",
       "image_female_url": "/images/exercises/front-raise-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/front-raise-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/front-raise-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/front-raise-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 85,
@@ -4296,7 +4380,8 @@
       "image_male_url": "/images/exercises/arnold-press-male.jpg",
       "image_female_url": "/images/exercises/arnold-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/arnold-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/arnold-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/arnold-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 86,
@@ -4341,7 +4426,8 @@
       "image_male_url": "/images/exercises/concentration-curl-male.jpg",
       "image_female_url": "/images/exercises/concentration-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/concentration-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/concentration-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/concentration-curl-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 87,
@@ -4386,7 +4472,8 @@
       "image_male_url": "/images/exercises/cable-curl-male.jpg",
       "image_female_url": "/images/exercises/cable-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 88,
@@ -4427,7 +4514,8 @@
       "image_male_url": "/images/exercises/triceps-kickback-male.jpg",
       "image_female_url": "/images/exercises/triceps-kickback-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/triceps-kickback-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/triceps-kickback-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/triceps-kickback-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 89,
@@ -4476,7 +4564,8 @@
       "image_male_url": "/images/exercises/close-grip-bench-press-male.jpg",
       "image_female_url": "/images/exercises/close-grip-bench-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/close-grip-bench-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/close-grip-bench-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/close-grip-bench-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 90,
@@ -4516,7 +4605,8 @@
       "image_male_url": "/images/exercises/wrist-curl-male.jpg",
       "image_female_url": "/images/exercises/wrist-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/wrist-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/wrist-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/wrist-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 91,
@@ -4565,7 +4655,8 @@
       "image_male_url": "/images/exercises/good-morning-male.jpg",
       "image_female_url": "/images/exercises/good-morning-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/good-morning-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/good-morning-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/good-morning-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 92,
@@ -4621,7 +4712,8 @@
       "image_male_url": "/images/exercises/sumo-deadlift-male.jpg",
       "image_female_url": "/images/exercises/sumo-deadlift-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/sumo-deadlift-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/sumo-deadlift-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/sumo-deadlift-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 93,
@@ -4666,7 +4758,8 @@
       "image_male_url": "/images/exercises/nordic-curl-male.jpg",
       "image_female_url": "/images/exercises/nordic-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/nordic-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/nordic-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/nordic-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 94,
@@ -4711,7 +4804,8 @@
       "image_male_url": "/images/exercises/cable-glute-kickback-male.jpg",
       "image_female_url": "/images/exercises/cable-glute-kickback-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-glute-kickback-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-glute-kickback-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-glute-kickback-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 95,
@@ -4752,7 +4846,8 @@
       "image_male_url": "/images/exercises/sissy-squat-male.jpg",
       "image_female_url": "/images/exercises/sissy-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/sissy-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/sissy-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/sissy-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 96,
@@ -4801,7 +4896,8 @@
       "image_male_url": "/images/exercises/hanging-leg-raise-male.jpg",
       "image_female_url": "/images/exercises/hanging-leg-raise-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hanging-leg-raise-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hanging-leg-raise-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hanging-leg-raise-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 97,
@@ -4842,7 +4938,8 @@
       "image_male_url": "/images/exercises/cable-crunch-male.jpg",
       "image_female_url": "/images/exercises/cable-crunch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-crunch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-crunch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-crunch-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 98,
@@ -4891,7 +4988,8 @@
       "image_male_url": "/images/exercises/mountain-climbers-male.jpg",
       "image_female_url": "/images/exercises/mountain-climbers-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/mountain-climbers-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/mountain-climbers-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/mountain-climbers-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 99,
@@ -4935,7 +5033,8 @@
       "image_male_url": "/images/exercises/ab-wheel-rollout-male.jpg",
       "image_female_url": "/images/exercises/ab-wheel-rollout-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/ab-wheel-rollout-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/ab-wheel-rollout-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/ab-wheel-rollout-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 100,
@@ -4980,7 +5079,8 @@
       "image_male_url": "/images/exercises/cable-woodchopper-male.jpg",
       "image_female_url": "/images/exercises/cable-woodchopper-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-woodchopper-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-woodchopper-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-woodchopper-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 101,
@@ -5028,7 +5128,8 @@
       "image_male_url": "/images/exercises/jump-rope-male.jpg",
       "image_female_url": "/images/exercises/jump-rope-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/jump-rope-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/jump-rope-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/jump-rope-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 102,
@@ -5081,7 +5182,8 @@
       "image_male_url": "/images/exercises/stair-climber-male.jpg",
       "image_female_url": "/images/exercises/stair-climber-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/stair-climber-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/stair-climber-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/stair-climber-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 103,
@@ -5128,7 +5230,8 @@
       "image_male_url": "/images/exercises/jumping-jacks-male.jpg",
       "image_female_url": "/images/exercises/jumping-jacks-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/jumping-jacks-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/jumping-jacks-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/jumping-jacks-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 104,
@@ -5175,7 +5278,8 @@
       "image_male_url": "/images/exercises/high-knees-male.jpg",
       "image_female_url": "/images/exercises/high-knees-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/high-knees-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/high-knees-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/high-knees-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 105,
@@ -5220,7 +5324,8 @@
       "image_male_url": "/images/exercises/cable-shoulder-press-male.jpg",
       "image_female_url": "/images/exercises/cable-shoulder-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-shoulder-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-shoulder-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-shoulder-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 106,
@@ -5269,7 +5374,8 @@
       "image_male_url": "/images/exercises/cable-upright-row-male.jpg",
       "image_female_url": "/images/exercises/cable-upright-row-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-upright-row-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-upright-row-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-upright-row-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 107,
@@ -5318,7 +5424,8 @@
       "image_male_url": "/images/exercises/cable-squat-male.jpg",
       "image_female_url": "/images/exercises/cable-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-squat-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 108,
@@ -5367,7 +5474,8 @@
       "image_male_url": "/images/exercises/bench-dips-male.jpg",
       "image_female_url": "/images/exercises/bench-dips-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/bench-dips-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/bench-dips-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/bench-dips-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 109,
@@ -5412,7 +5520,8 @@
       "image_male_url": "/images/exercises/incline-dumbbell-curl-male.jpg",
       "image_female_url": "/images/exercises/incline-dumbbell-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/incline-dumbbell-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/incline-dumbbell-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/incline-dumbbell-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 110,
@@ -5457,7 +5566,8 @@
       "image_male_url": "/images/exercises/dumbbell-shrug-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-shrug-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-shrug-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-shrug-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-shrug-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 111,
@@ -5506,7 +5616,8 @@
       "image_male_url": "/images/exercises/cable-chest-press-male.jpg",
       "image_female_url": "/images/exercises/cable-chest-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-chest-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-chest-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-chest-press-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 112,
@@ -5551,7 +5662,8 @@
       "image_male_url": "/images/exercises/low-cable-fly-male.jpg",
       "image_female_url": "/images/exercises/low-cable-fly-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/low-cable-fly-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/low-cable-fly-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/low-cable-fly-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 113,
@@ -5592,7 +5704,8 @@
       "image_male_url": "/images/exercises/cable-overhead-triceps-extension-male.jpg",
       "image_female_url": "/images/exercises/cable-overhead-triceps-extension-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-overhead-triceps-extension-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-overhead-triceps-extension-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-overhead-triceps-extension-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 114,
@@ -5633,7 +5746,8 @@
       "image_male_url": "/images/exercises/cable-front-raise-male.jpg",
       "image_female_url": "/images/exercises/cable-front-raise-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-front-raise-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-front-raise-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-front-raise-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 115,
@@ -5674,7 +5788,8 @@
       "image_male_url": "/images/exercises/cable-hip-abduction-male.jpg",
       "image_female_url": "/images/exercises/cable-hip-abduction-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-hip-abduction-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-hip-abduction-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-hip-abduction-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 116,
@@ -5723,7 +5838,8 @@
       "image_male_url": "/images/exercises/cable-pullover-male.jpg",
       "image_female_url": "/images/exercises/cable-pullover-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cable-pullover-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cable-pullover-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cable-pullover-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 117,
@@ -5771,7 +5887,8 @@
       "image_male_url": "/images/exercises/wall-angels-male.jpg",
       "image_female_url": "/images/exercises/wall-angels-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/wall-angels-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/wall-angels-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/wall-angels-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 118,
@@ -5815,7 +5932,8 @@
       "image_male_url": "/images/exercises/cobra-stretch-male.jpg",
       "image_female_url": "/images/exercises/cobra-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cobra-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cobra-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cobra-stretch-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 119,
@@ -5863,7 +5981,8 @@
       "image_male_url": "/images/exercises/dead-hang-male.jpg",
       "image_female_url": "/images/exercises/dead-hang-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dead-hang-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dead-hang-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dead-hang-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 120,
@@ -5907,7 +6026,8 @@
       "image_male_url": "/images/exercises/cat-cow-male.jpg",
       "image_female_url": "/images/exercises/cat-cow-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/cat-cow-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/cat-cow-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/cat-cow-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 121,
@@ -5955,7 +6075,8 @@
       "image_male_url": "/images/exercises/dragon-flag-male.jpg",
       "image_female_url": "/images/exercises/dragon-flag-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dragon-flag-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dragon-flag-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dragon-flag-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 122,
@@ -5996,7 +6117,8 @@
       "image_male_url": "/images/exercises/seated-barbell-wrist-curl-male.jpg",
       "image_female_url": "/images/exercises/seated-barbell-wrist-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-barbell-wrist-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-barbell-wrist-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-barbell-wrist-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 123,
@@ -6036,7 +6158,8 @@
       "image_male_url": "/images/exercises/behind-the-back-barbell-wrist-curl-male.jpg",
       "image_female_url": "/images/exercises/behind-the-back-barbell-wrist-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/behind-the-back-barbell-wrist-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/behind-the-back-barbell-wrist-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/behind-the-back-barbell-wrist-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 124,
@@ -6077,7 +6200,8 @@
       "image_male_url": "/images/exercises/dumbbell-wrist-curl-over-bench-male.jpg",
       "image_female_url": "/images/exercises/dumbbell-wrist-curl-over-bench-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/dumbbell-wrist-curl-over-bench-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/dumbbell-wrist-curl-over-bench-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/dumbbell-wrist-curl-over-bench-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 125,
@@ -6118,7 +6242,8 @@
       "image_male_url": "/images/exercises/barbell-wrist-curl-over-bench-male.jpg",
       "image_female_url": "/images/exercises/barbell-wrist-curl-over-bench-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/barbell-wrist-curl-over-bench-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/barbell-wrist-curl-over-bench-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/barbell-wrist-curl-over-bench-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 126,
@@ -6159,7 +6284,8 @@
       "image_male_url": "/images/exercises/standing-barbell-reverse-wrist-curl-male.jpg",
       "image_female_url": "/images/exercises/standing-barbell-reverse-wrist-curl-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/standing-barbell-reverse-wrist-curl-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/standing-barbell-reverse-wrist-curl-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/standing-barbell-reverse-wrist-curl-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 127,
@@ -6208,7 +6334,8 @@
       "image_male_url": "/images/exercises/bird-dog-male.jpg",
       "image_female_url": "/images/exercises/bird-dog-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/bird-dog-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/bird-dog-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/bird-dog-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 128,
@@ -6252,7 +6379,8 @@
       "image_male_url": "/images/exercises/hollow-hold-male.jpg",
       "image_female_url": "/images/exercises/hollow-hold-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hollow-hold-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hollow-hold-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hollow-hold-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 129,
@@ -6297,7 +6425,8 @@
       "image_male_url": "/images/exercises/hollow-rock-male.jpg",
       "image_female_url": "/images/exercises/hollow-rock-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hollow-rock-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hollow-rock-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hollow-rock-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 130,
@@ -6346,7 +6475,8 @@
       "image_male_url": "/images/exercises/pallof-press-male.jpg",
       "image_female_url": "/images/exercises/pallof-press-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/pallof-press-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/pallof-press-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/pallof-press-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 131,
@@ -6396,7 +6526,8 @@
       "image_male_url": "/images/exercises/farmers-walk-male.jpg",
       "image_female_url": "/images/exercises/farmers-walk-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/farmers-walk-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/farmers-walk-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/farmers-walk-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 132,
@@ -6445,7 +6576,8 @@
       "image_male_url": "/images/exercises/diamond-push-up-male.jpg",
       "image_female_url": "/images/exercises/diamond-push-up-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/diamond-push-up-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/diamond-push-up-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/diamond-push-up-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 133,
@@ -6493,7 +6625,8 @@
       "image_male_url": "/images/exercises/wall-handstand-male.jpg",
       "image_female_url": "/images/exercises/wall-handstand-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/wall-handstand-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/wall-handstand-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/wall-handstand-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 134,
@@ -6542,7 +6675,8 @@
       "image_male_url": "/images/exercises/y-t-w-raise-male.jpg",
       "image_female_url": "/images/exercises/y-t-w-raise-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/y-t-w-raise-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/y-t-w-raise-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/y-t-w-raise-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 135,
@@ -6586,7 +6720,8 @@
       "image_male_url": "/images/exercises/chin-tuck-male.jpg",
       "image_female_url": "/images/exercises/chin-tuck-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/chin-tuck-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/chin-tuck-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/chin-tuck-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 136,
@@ -6635,7 +6770,8 @@
       "image_male_url": "/images/exercises/assisted-pistol-squat-male.jpg",
       "image_female_url": "/images/exercises/assisted-pistol-squat-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/assisted-pistol-squat-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/assisted-pistol-squat-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/assisted-pistol-squat-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 137,
@@ -6683,7 +6819,8 @@
       "image_male_url": "/images/exercises/deep-squat-hold-male.jpg",
       "image_female_url": "/images/exercises/deep-squat-hold-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/deep-squat-hold-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/deep-squat-hold-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/deep-squat-hold-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 138,
@@ -6731,7 +6868,8 @@
       "image_male_url": "/images/exercises/hip-hinge-dowel-male.jpg",
       "image_female_url": "/images/exercises/hip-hinge-dowel-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hip-hinge-dowel-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hip-hinge-dowel-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hip-hinge-dowel-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 139,
@@ -6775,7 +6913,8 @@
       "image_male_url": "/images/exercises/hip-flexor-stretch-male.jpg",
       "image_female_url": "/images/exercises/hip-flexor-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hip-flexor-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hip-flexor-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hip-flexor-stretch-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 140,
@@ -6823,7 +6962,8 @@
       "image_male_url": "/images/exercises/low-lunge-rotation-male.jpg",
       "image_female_url": "/images/exercises/low-lunge-rotation-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/low-lunge-rotation-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/low-lunge-rotation-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/low-lunge-rotation-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 141,
@@ -6867,7 +7007,8 @@
       "image_male_url": "/images/exercises/figure-4-stretch-male.jpg",
       "image_female_url": "/images/exercises/figure-4-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/figure-4-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/figure-4-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/figure-4-stretch-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 142,
@@ -6911,7 +7052,8 @@
       "image_male_url": "/images/exercises/supine-hamstring-stretch-male.jpg",
       "image_female_url": "/images/exercises/supine-hamstring-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/supine-hamstring-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/supine-hamstring-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/supine-hamstring-stretch-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 143,
@@ -6955,7 +7097,8 @@
       "image_male_url": "/images/exercises/seated-forward-fold-male.jpg",
       "image_female_url": "/images/exercises/seated-forward-fold-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/seated-forward-fold-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/seated-forward-fold-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/seated-forward-fold-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 144,
@@ -6999,7 +7142,8 @@
       "image_male_url": "/images/exercises/hip-90-90-male.jpg",
       "image_female_url": "/images/exercises/hip-90-90-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/hip-90-90-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/hip-90-90-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/hip-90-90-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 145,
@@ -7039,7 +7183,8 @@
       "image_male_url": "/images/exercises/calf-stretch-wall-male.jpg",
       "image_female_url": "/images/exercises/calf-stretch-wall-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/calf-stretch-wall-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/calf-stretch-wall-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/calf-stretch-wall-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 146,
@@ -7079,7 +7224,8 @@
       "image_male_url": "/images/exercises/ankle-dorsiflexion-wall-male.jpg",
       "image_female_url": "/images/exercises/ankle-dorsiflexion-wall-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/ankle-dorsiflexion-wall-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/ankle-dorsiflexion-wall-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/ankle-dorsiflexion-wall-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 147,
@@ -7123,7 +7269,8 @@
       "image_male_url": "/images/exercises/thoracic-extension-bench-male.jpg",
       "image_female_url": "/images/exercises/thoracic-extension-bench-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/thoracic-extension-bench-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/thoracic-extension-bench-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/thoracic-extension-bench-female.svg",
+      "allows_per_side": false
     },
     {
       "id": 148,
@@ -7167,7 +7314,8 @@
       "image_male_url": "/images/exercises/quadruped-thoracic-rotation-male.jpg",
       "image_female_url": "/images/exercises/quadruped-thoracic-rotation-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/quadruped-thoracic-rotation-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/quadruped-thoracic-rotation-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/quadruped-thoracic-rotation-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 149,
@@ -7215,7 +7363,8 @@
       "image_male_url": "/images/exercises/open-book-stretch-male.jpg",
       "image_female_url": "/images/exercises/open-book-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/open-book-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/open-book-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/open-book-stretch-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 150,
@@ -7259,7 +7408,8 @@
       "image_male_url": "/images/exercises/doorway-chest-stretch-male.jpg",
       "image_female_url": "/images/exercises/doorway-chest-stretch-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/doorway-chest-stretch-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/doorway-chest-stretch-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/doorway-chest-stretch-female.svg",
+      "allows_per_side": true
     },
     {
       "id": 151,
@@ -7308,7 +7458,8 @@
       "image_male_url": "/images/exercises/lying-leg-raise-male.jpg",
       "image_female_url": "/images/exercises/lying-leg-raise-female.jpg",
       "muscle_map_male_url": "/images/muscle-maps/lying-leg-raise-male.svg",
-      "muscle_map_female_url": "/images/muscle-maps/lying-leg-raise-female.svg"
+      "muscle_map_female_url": "/images/muscle-maps/lying-leg-raise-female.svg",
+      "allows_per_side": false
     }
   ]
 }

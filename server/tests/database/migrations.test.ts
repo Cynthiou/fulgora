@@ -51,9 +51,9 @@ describe("parseMigrationVersion", () => {
 });
 
 describe("listMigrationFiles", () => {
-  it("finds the five migrations of the project, in order", () => {
+  it("finds the six migrations of the project, in order", () => {
     expect(listMigrationFiles().map((file) => file.version)).toEqual([
-      1, 2, 3, 4, 5,
+      1, 2, 3, 4, 5, 6,
     ]);
   });
 });
@@ -77,14 +77,14 @@ describe("migrateDatabase", () => {
     ).rejects.toBeInstanceOf(ResetRefusedError);
   });
 
-  it("applies the five migrations on an empty database", async () => {
+  it("applies the six migrations on an empty database", async () => {
     const applied = await migrateDatabase(config, {
       reset: true,
       nodeEnv: "test",
       log: silent,
     });
 
-    expect(applied).toEqual([1, 2, 3, 4, 5]);
+    expect(applied).toEqual([1, 2, 3, 4, 5, 6]);
     expect(await readColumnNames("appointment")).toContain("cancelled_at");
     expect(await readColumnNames("user")).toEqual(
       expect.arrayContaining(["terms_accepted_at", "timezone"]),

@@ -22,11 +22,13 @@ test("prepares a per-side exercise and does it side by side", async ({
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Classique/ }).click();
   await page.getByRole("button", { name: "Ajouter des exercices" }).click();
-  await page
+  // An exercise the catalog allows side by side (RM-084)
+  await page.getByRole("searchbox").fill("Fentes avec haltères");
+  const cards = page
     .getByRole("list", { name: "Exercices" })
-    .getByRole("button")
-    .first()
-    .click();
+    .getByRole("button");
+  await expect(cards.first()).toContainText("Fentes avec haltères");
+  await cards.first().click();
   await page.getByRole("button", { name: /^Ajouter au bloc/ }).click();
   await page
     .getByRole("list", { name: "Exercices du bloc" })
