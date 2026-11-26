@@ -22,6 +22,9 @@ type Props = {
   // Unit shown on screen when it differs from the stored one (km for meters)
   toDisplay?: (stored: number) => number;
   fromDisplay?: (shown: number) => number;
+  // Values the field may hold, in the unit shown: 0,25 for a load in
+  // kilograms, 0,5 for a load in pounds (US-15, US-05)
+  grid?: number;
 };
 
 // "40" on screen for 40, "0,5" for 0.5 (French comma, up to 3 decimals).
@@ -53,6 +56,7 @@ function NumberField({
   decimal = false,
   toDisplay = (stored) => stored,
   fromDisplay = (shown) => shown,
+  grid,
 }: Props) {
   const shown = value === null ? null : toDisplay(value);
   const [text, setText] = useState(formatNumber(shown));
@@ -96,7 +100,10 @@ function NumberField({
   // the stored one: the value is clamped once converted back (DT-11).
   function nudge(direction: 1 | -1) {
     const base = shown ?? 0;
-    const target = fromDisplay(base + direction * step);
+    const raw = base + direction * step;
+    // A load lands on a value the field accepts: 132,277 lb + 5 = 137,5.
+    const aligned = grid === undefined ? raw : Math.round(raw / grid) * grid;
+    const target = fromDisplay(aligned);
     const stored = Math.min(
       max,
       Math.max(min, Math.round(target * 1000) / 1000),

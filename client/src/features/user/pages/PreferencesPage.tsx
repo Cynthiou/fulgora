@@ -151,11 +151,6 @@ function PreferencesPage() {
             </p>
           ))}
         </section>
-
-        <p className="text-xs leading-[1.45] text-muted">
-          Seul l'affichage change. Tes séances restent enregistrées en
-          kilogrammes et en kilomètres.
-        </p>
       </div>
     </div>
   );

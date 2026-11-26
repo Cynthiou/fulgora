@@ -24,6 +24,7 @@ import {
   getDisallowedSetFields,
   getMeasureProfile,
   getSetFieldLabel,
+  getSetFieldStepper,
   getSetFields,
   getSetLabel,
   isPlannedDateInRange,
@@ -33,6 +34,7 @@ import {
   sessionDraftSchema,
   validateSetValue,
 } from "../session-template.js";
+import { setDisplayUnits } from "../units.js";
 
 function validSet() {
   return { ...createEmptySet(), reps: 10, weight_kg: 40 };
@@ -439,5 +441,27 @@ describe("freeSessionSchema (US-23)", () => {
     });
     expect(firstMessage(future)).toBe("La date ne peut pas dépasser deux ans.");
     expect(isPlannedDateInRange(addDays(today, 800), today)).toBe(false);
+  });
+});
+
+// US-05: the load of someone who reads pounds is stored in kilograms.
+describe("a load typed in pounds", () => {
+  it("accepts the converted value and names the step in pounds", () => {
+    setDisplayUnits({ weight: "lb", distance: "km" });
+    try {
+      expect(
+        plannedSetSchema.safeParse({
+          ...createEmptySet(),
+          weight_kg: 61.235,
+        }).success,
+      ).toBe(true);
+      expect(validateSetValue("weight_kg", 40.3)).toBe(
+        "Entre une valeur par pas de 0,5 lb.",
+      );
+      expect(getSetFieldLabel("weight_kg", "weighted")).toBe("Charge (lb)");
+      expect(getSetFieldStepper("weight_kg").step).toBe(5);
+    } finally {
+      setDisplayUnits({ weight: "kg", distance: "km" });
+    }
   });
 });

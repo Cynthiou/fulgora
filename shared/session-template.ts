@@ -6,14 +6,18 @@ import {
   formatDistance,
   formatSpeed,
   formatWeight,
+  formatWeightStepMessage,
   fromDisplayDistance,
   fromDisplaySpeed,
   fromDisplayWeight,
   getDisplayUnits,
   getSpeedUnitLabel,
+  isPlateWeight,
   toDisplayDistance,
   toDisplaySpeed,
   toDisplayWeight,
+  WEIGHT_STEP_KG,
+  WEIGHT_STEP_LB,
   WEIGHT_UNIT_LABELS,
 } from "./units.js";
 import { REQUIRED_MESSAGE } from "./user.js";
@@ -164,6 +168,20 @@ export function boundedValue(limit: SetLimit) {
   return schema.nullable();
 }
 
+// A load: inside its limits, and on a plate step (US-15, US-05). The
+// message stays the one of the kilogram; the screens of a user who reads
+// pounds say it in pounds (see validateSetValue).
+export function weightValue() {
+  const limit = SET_LIMITS.weight_kg;
+  const message = formatRangeMessage(limit);
+  return z
+    .number({ error: message })
+    .min(limit.min, { error: message })
+    .max(limit.max, { error: message })
+    .refine(isPlateWeight, { error: formatWeightStepMessage("kg") })
+    .nullable();
+}
+
 // --- Types ------------------------------------------------------------------
 
 export type PlannedSetValues = {
@@ -217,9 +235,9 @@ export type SessionDraft = {
 
 export const plannedSetSchema = z.object({
   reps: boundedValue(SET_LIMITS.reps),
-  weight_kg: boundedValue(SET_LIMITS.weight_kg),
-  weight_left_kg: boundedValue(SET_LIMITS.weight_left_kg),
-  weight_right_kg: boundedValue(SET_LIMITS.weight_right_kg),
+  weight_kg: weightValue(),
+  weight_left_kg: weightValue(),
+  weight_right_kg: weightValue(),
   duration_seconds: boundedValue(SET_LIMITS.duration_seconds),
   distance_meters: boundedValue(SET_LIMITS.distance_meters),
   speed_kmh: boundedValue(SET_LIMITS.speed_kmh),
@@ -680,6 +698,8 @@ export function getSetFieldLabel(
 export function getSetFieldStepper(field: SetValueField): {
   step: number;
   decimal: boolean;
+  // The values the field accepts, in the shown unit (a load only)
+  grid?: number;
 } {
   const units = getDisplayUnits();
   switch (field) {
@@ -688,7 +708,9 @@ export function getSetFieldStepper(field: SetValueField): {
     case "weight_kg":
     case "weight_left_kg":
     case "weight_right_kg":
-      return { step: units.weight === "kg" ? 2.5 : 5, decimal: true };
+      return units.weight === "kg"
+        ? { step: 2.5, decimal: true, grid: WEIGHT_STEP_KG }
+        : { step: 5, decimal: true, grid: WEIGHT_STEP_LB };
     case "duration_seconds":
       return { step: 15, decimal: false };
     case "distance_meters":
@@ -738,7 +760,16 @@ export function validateSetValue(
   value: number | null,
 ): string | null {
   const result = plannedSetSchema.shape[field].safeParse(value);
-  return result.success ? null : (result.error.issues[0]?.message ?? null);
+  if (result.success) {
+    return null;
+  }
+  const message = result.error.issues[0]?.message ?? null;
+  // The step of a load is said in the unit of the screen (US-05)
+  const isWeight = field.startsWith("weight");
+  if (isWeight && message === formatWeightStepMessage("kg")) {
+    return formatWeightStepMessage(getDisplayUnits().weight);
+  }
+  return message;
 }
 
 // "1:30" from 90 seconds, "10:00" from 600, "1:02:05" above an hour.

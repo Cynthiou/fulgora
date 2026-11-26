@@ -12,6 +12,7 @@ import {
   type PlannedSetValues,
   plannedSetSchema,
   SET_LIMITS,
+  weightValue,
 } from "./session-template.js";
 import { formatDistance, formatSpeed, formatWeight } from "./units.js";
 import { dateSchema } from "./validation.js";
@@ -616,7 +617,7 @@ export function getDeclaredExerciseState(
 // sides: only the values done change.
 export const sideSetSchema = z.object({
   reps: boundedValue(SET_LIMITS.reps),
-  weight_kg: boundedValue(SET_LIMITS.weight_kg),
+  weight_kg: weightValue(),
   duration_seconds: boundedValue(SET_LIMITS.duration_seconds),
 });
 

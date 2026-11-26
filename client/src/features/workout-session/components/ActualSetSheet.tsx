@@ -192,6 +192,7 @@ function ActualSetSheet({
               value={values[field]}
               step={stepper.step}
               decimal={stepper.decimal}
+              grid={stepper.grid}
               min={SET_LIMITS[field].min}
               max={SET_LIMITS[field].max}
               toDisplay={display?.toDisplay}

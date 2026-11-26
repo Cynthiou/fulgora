@@ -3,9 +3,11 @@ import {
   formatDistance,
   formatSpeed,
   formatWeight,
+  formatWeightStepMessage,
   fromDisplayDistance,
   fromDisplayWeight,
   getSpeedUnitLabel,
+  isPlateWeight,
   setDisplayUnits,
   toDisplayDistance,
   toDisplayWeight,
@@ -70,5 +72,32 @@ describe("the chosen units", () => {
   test("prints more decimals when the screen asks for them", () => {
     setDisplayUnits({ weight: "lb", distance: "km" });
     expect(formatWeight(60, 2)).toBe("132,28 lb");
+  });
+});
+
+// US-15 and US-05 together: a load is a multiple of 0,25 kg, or of 0,5 lb
+// for someone who works in pounds.
+describe("the step of a load", () => {
+  test("accepts a plate step in kilograms", () => {
+    expect(isPlateWeight(40)).toBe(true);
+    expect(isPlateWeight(40.25)).toBe(true);
+    expect(isPlateWeight(40.3)).toBe(false);
+  });
+
+  test("accepts a load typed in pounds", () => {
+    // 135 lb, the value of the card
+    expect(fromDisplayWeight(135, "lb")).toBe(61.235);
+    expect(isPlateWeight(61.235)).toBe(true);
+    // 132,277 lb is 60 kg, a plate step as well
+    expect(isPlateWeight(60)).toBe(true);
+  });
+
+  test("says the step in the unit of the screen", () => {
+    expect(formatWeightStepMessage("kg")).toBe(
+      "Entre une valeur par pas de 0,25.",
+    );
+    expect(formatWeightStepMessage("lb")).toBe(
+      "Entre une valeur par pas de 0,5 lb.",
+    );
   });
 });

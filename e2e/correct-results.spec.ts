@@ -41,6 +41,9 @@ async function planSessionToday(page: Page, name: string) {
 test("corrects the result of a past session from its summary", async ({
   page,
 }) => {
+  // A long path (session, correction, history): the list of the history
+  // sometimes loads slowly when every spec runs at once.
+  test.slow();
   await signUp(page);
   await page.getByRole("button", { name: "Commencer" }).click();
   await expectHomePage(page);

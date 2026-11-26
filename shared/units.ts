@@ -92,6 +92,30 @@ export function getSpeedUnitLabel(
   return unit === "km" ? "km/h" : "mph";
 }
 
+// A load is made of plates: a multiple of 0,25 kg, or of 0,5 lb for
+// someone who works in pounds (US-15 and US-05 together). The stored value
+// stays in kilograms either way (DT-11).
+export const WEIGHT_STEP_KG = 0.25;
+export const WEIGHT_STEP_LB = 0.5;
+
+function isMultiple(value: number, step: number): boolean {
+  return Number.isInteger(Math.round((value / step) * 1e6) / 1e6);
+}
+
+export function isPlateWeight(kilograms: number): boolean {
+  return (
+    isMultiple(kilograms, WEIGHT_STEP_KG) ||
+    isMultiple(toDisplayWeight(kilograms, "lb"), WEIGHT_STEP_LB)
+  );
+}
+
+// "Entre une valeur par pas de 0,25." in kilograms, "… 0,5 lb" in pounds.
+export function formatWeightStepMessage(unit: WeightUnit): string {
+  return unit === "kg"
+    ? `Entre une valeur par pas de ${WEIGHT_STEP_KG.toLocaleString("fr-FR")}.`
+    : `Entre une valeur par pas de ${WEIGHT_STEP_LB.toLocaleString("fr-FR")} lb.`;
+}
+
 // The units of the screens. The server never changes them: it answers in
 // the stored units, and the client sets them once the user is known.
 export type DisplayUnits = {

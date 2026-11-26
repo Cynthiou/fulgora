@@ -5,9 +5,11 @@ import {
   computeExerciseRecords,
   type ExerciseProgress,
   formatDayMonth,
+  formatDistance,
   formatDuration,
   formatMetricValue,
   formatProgressTrend,
+  formatWeight,
   getAvailableMetrics,
   getMeasureProfile,
   PROGRESS_METRIC_LABELS,
@@ -21,10 +23,6 @@ import { ApiError } from "../../../services/apiError";
 import ProgressChart from "../components/ProgressChart";
 import RecordGrid from "../components/RecordGrid";
 import { readExerciseProgress } from "../services/progressService";
-
-const numberFormat = new Intl.NumberFormat("fr-FR", {
-  maximumFractionDigits: 1,
-});
 
 // Screens SUI-09, SUI-10, SUI-10b and SUI-11: how one exercise has gone.
 // Everything is computed from the sets really done (RM-051).
@@ -97,7 +95,7 @@ function ExerciseProgressPage() {
   if (records.weight_max !== null) {
     blocks.push({
       label: "Charge max",
-      value: `${numberFormat.format(records.weight_max.weight_kg)} kg`,
+      value: formatWeight(records.weight_max.weight_kg),
       detail:
         records.weight_max.reps === null
           ? null
@@ -107,23 +105,23 @@ function ExerciseProgressPage() {
   if (records.one_rep_max !== null) {
     blocks.push({
       label: "1RM estimée",
-      value: `${numberFormat.format(records.one_rep_max)} kg`,
+      value: formatWeight(records.one_rep_max),
       detail: "estimation · Epley",
     });
   }
   if (records.best_set_volume !== null) {
     blocks.push({
       label: "Volume · série",
-      value: `${numberFormat.format(records.best_set_volume.volume)} kg`,
-      detail: `${records.best_set_volume.reps} × ${numberFormat.format(
+      value: formatWeight(records.best_set_volume.volume),
+      detail: `${records.best_set_volume.reps} × ${formatWeight(
         records.best_set_volume.weight_kg,
-      )} kg`,
+      )}`,
     });
   }
   if (records.best_session_volume !== null) {
     blocks.push({
       label: "Volume · séance",
-      value: `${numberFormat.format(records.best_session_volume)} kg`,
+      value: formatWeight(records.best_session_volume),
     });
   }
   if (records.max_reps !== null && records.weight_max === null) {
@@ -141,7 +139,7 @@ function ExerciseProgressPage() {
   if (records.max_distance_meters !== null) {
     blocks.push({
       label: "Distance",
-      value: `${numberFormat.format(records.max_distance_meters / 1000)} km`,
+      value: formatDistance(records.max_distance_meters),
     });
   }
   blocks.push({
