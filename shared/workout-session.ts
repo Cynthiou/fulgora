@@ -710,6 +710,26 @@ export function formatBothSides(
   }).join(" / ");
 }
 
+// Did the session hold any work at all? A validated set, or a timed block
+// that was launched and saved (US-31, D-06, D-10).
+export function hasAnyWork(
+  session: Pick<WorkoutSessionTree, "blocks">,
+): boolean {
+  const sets = session.blocks.some((block) =>
+    block.exercises.some((exercise) =>
+      exercise.sets.some((set) => set.validated_at !== null),
+    ),
+  );
+  return (
+    sets ||
+    session.blocks.some(
+      (block) =>
+        block.completed_rounds !== null ||
+        block.actual_duration_seconds !== null,
+    )
+  );
+}
+
 // --- The result of a timed block (US-31) ------------------------------------
 
 // What the block timer sends at the end: the rounds done, the repetitions

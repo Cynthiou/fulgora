@@ -3,7 +3,7 @@ import {
   type BlockResultInput,
   formatBlockResult,
   formatClock,
-  formatMinSec,
+  formatDuration,
   type WorkoutBlockTree,
 } from "shared";
 import checkIcon from "../../../assets/icons/ui/app/check.svg";
@@ -65,7 +65,7 @@ function BlockTimer({ block, isPending, error, onSave }: Props) {
           setExtraReps(null);
           setIsRunning(true);
         }}
-        className="flex h-13 items-center justify-center gap-2 rounded-btn bg-primary text-sm font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action"
+        className="flex h-13 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold text-secondary shadow-card"
       >
         <Icon src={playIcon} className="size-[18px]" />
         Lancer le bloc
@@ -157,7 +157,7 @@ function RunningBlockTimer({
       </p>
       {isAmrap && limit !== null && (
         <p className="text-center text-xs text-muted">
-          {`AMRAP de ${formatMinSec(limit)}`}
+          {`AMRAP de ${formatDuration(limit)}`}
         </p>
       )}
       <Started block={block} />
@@ -207,7 +207,7 @@ function RunningBlockTimer({
         type="button"
         disabled={isPending}
         onClick={() => onStop(watch.stop())}
-        className="flex h-13 items-center justify-center gap-2 rounded-btn bg-primary text-sm font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
+        className="flex h-13 items-center justify-center gap-2 rounded-btn bg-secondary text-sm font-extrabold uppercase tracking-[0.02em] text-secondary-content disabled:opacity-60"
       >
         <Icon src={checkIcon} className="size-[18px]" />
         {isPending ? "Enregistrement…" : "Terminer le bloc"}

@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import {
   type CurrentWorkoutSession,
-  countValidatedSets,
+  hasAnyWork,
   type MeasureCode,
   type StartWorkoutInput,
   type WorkoutBlockTree,
@@ -317,7 +317,9 @@ export const complete: RequestHandler = async (req, res) => {
       "Cette séance n'est plus en cours.",
     );
   }
-  if (countValidatedSets(before) === 0) {
+  // A session of timed blocks has no validated set, yet the work is real
+  // (US-31, D-06): what counts is that something was done.
+  if (!hasAnyWork(before)) {
     throw new HttpError(
       422,
       "NO_VALIDATED_SET",

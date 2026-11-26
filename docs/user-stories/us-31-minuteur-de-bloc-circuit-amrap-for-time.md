@@ -61,9 +61,9 @@ Les autres blocs restent accessibles.
 ## Tâches techniques
 
 - [ ] Design : faire maquetter les écrans de cette US (outil de maquettage) et les faire valider avant tout code
-- [ ] Backend : `updateWorkoutBlockResult(blockId, rounds, extraReps, duration)` (contexte vérifié comme pour une série, `touchWorkoutSession`)
-- [ ] Frontend : `BlockTimer.tsx` selon le type ; réutilisation de `useCountdown` / `useStopwatch`
-- [ ] Tests : back : résultat enregistré, séance terminée → 409 ; unitaires du compteur de tours
+- [x] Backend : `updateWorkoutBlockResult(blockId, rounds, extraReps, duration)` (contexte vérifié comme pour une série, `touchWorkoutSession`)
+- [x] Frontend : `BlockTimer.tsx` selon le type ; réutilisation de `useCountdown` / `useStopwatch`
+- [x] Tests : back : résultat enregistré, séance terminée → 409 ; unitaires du compteur de tours
 
 ## Definition of Done
 
