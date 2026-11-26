@@ -40,6 +40,8 @@ async function planSessionOn(page: Page, name: string, date: string) {
 // US-52: the history is filtered by status, and the filters live in the
 // address, so the back button undoes them.
 test("filters the history by status, and comes back", async ({ page }) => {
+  // A long walk: sign-up, two sessions, three screens and two axe runs.
+  test.slow();
   const twoDaysAgo = addDays(todayInParis(), -2);
   await signUp(page);
   await page.getByRole("button", { name: "Commencer" }).click();
