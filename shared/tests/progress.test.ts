@@ -3,12 +3,16 @@ import {
   buildProgressSeries,
   computeExerciseRecords,
   describeProgressSeries,
+  describeRegularity,
   detectNewRecords,
   estimateOneRepMax,
   formatBestResult,
+  formatDelta,
+  formatPlannedCount,
   formatProgressTrend,
   formatRecordMessage,
   getAvailableMetrics,
+  getComparisonRange,
   type NewRecord,
   type ProgressSet,
 } from "../progress.js";
@@ -212,5 +216,74 @@ describe("detectNewRecords (US-40)", () => {
     );
 
     expect(records).toEqual([{ kind: "distance_max", text: "5,2 km" }]);
+  });
+});
+
+// US-41: the summary of the tracking (RM-076, RM-077).
+describe("getComparisonRange (RM-077)", () => {
+  it("takes the same number of days, one month earlier", () => {
+    // Looked at on 20 November: 1 to 20 October
+    expect(getComparisonRange("2026-11-01", "2026-11-20")).toEqual({
+      from: "2026-10-01",
+      to: "2026-10-20",
+    });
+  });
+
+  it("stops at the last day of the month before", () => {
+    // 31 March: February has 28 days in 2026
+    expect(getComparisonRange("2026-03-01", "2026-03-31")).toEqual({
+      from: "2026-02-01",
+      to: "2026-02-28",
+    });
+    // A leap year keeps the 29th
+    expect(getComparisonRange("2028-03-01", "2028-03-31")).toEqual({
+      from: "2028-02-01",
+      to: "2028-02-29",
+    });
+  });
+
+  it("crosses the year", () => {
+    expect(getComparisonRange("2026-01-01", "2026-01-15")).toEqual({
+      from: "2025-12-01",
+      to: "2025-12-15",
+    });
+  });
+});
+
+describe("the regularity card (RM-076)", () => {
+  it("adds up to the number of planned sessions", () => {
+    const counts = {
+      planned: 21,
+      done: 9,
+      unfinished: 1,
+      to_confirm: 2,
+      missed: 2,
+      cancelled: 1,
+      upcoming: 6,
+      moved: 1,
+    };
+
+    // The example of SUI-02: 21 = 9 + 1 + 2 + 2 + 1 + 6
+    const lines = describeRegularity(counts);
+    expect(lines.reduce((sum, line) => sum + line.value, 0)).toBe(
+      counts.planned,
+    );
+    // The moved ones are not a line of their own
+    expect(lines.map((line) => line.label)).toEqual([
+      "Faites",
+      "Inachevées",
+      "À confirmer",
+      "Manquées",
+      "Annulées",
+      "À venir",
+    ]);
+    expect(formatPlannedCount(counts.planned)).toBe("21 prévues");
+    expect(formatPlannedCount(1)).toBe("1 prévue");
+  });
+
+  it("writes a gap, never a colour alone", () => {
+    expect(formatDelta(3)).toBe("+3");
+    expect(formatDelta(-2)).toBe("-2");
+    expect(formatDelta(0)).toBe("=");
   });
 });

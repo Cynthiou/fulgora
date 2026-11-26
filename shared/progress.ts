@@ -1,5 +1,5 @@
 import type { MeasureCode } from "./catalog.js";
-import { formatDayMonth } from "./dates.js";
+import { formatDayMonth, formatMonthTitle, formatWeekRange } from "./dates.js";
 import {
   formatDuration,
   getMeasureProfile,
@@ -104,7 +104,7 @@ export type ProgressPoint = {
 
 // The value one set gives for the chosen measure, or null when it says
 // nothing about it.
-function valueOf(set: ProgressSet, metric: ProgressMetric): number | null {
+function metricValue(set: ProgressSet, metric: ProgressMetric): number | null {
   switch (metric) {
     case "weight_max":
       return set.weight_kg;
@@ -132,7 +132,7 @@ export function buildProgressSeries(
 ): ProgressPoint[] {
   const byDate = new Map<string, ProgressPoint>();
   for (const set of sets) {
-    const value = valueOf(set, metric);
+    const value = metricValue(set, metric);
     if (value === null) {
       continue;
     }
@@ -455,4 +455,142 @@ export function detectNewRecords(
 // "Charge max : 62,5 kg × 8": the message of the notification (NOT-06).
 export function formatRecordMessage(record: NewRecord): string {
   return `${RECORD_LABELS[record.kind]} : ${record.text}`;
+}
+
+// --- Summary of the tracking (US-41) ---------------------------------------
+
+export const SUMMARY_PERIODS = ["week", "month", "program"] as const;
+export type SummaryPeriod = (typeof SUMMARY_PERIODS)[number];
+
+export const SUMMARY_PERIOD_LABELS: Record<SummaryPeriod, string> = {
+  week: "Semaine",
+  month: "Mois",
+  program: "Programme",
+};
+
+// Every appointment of the period, counted once (RM-076). The moved ones
+// are an indicator of their own, never added to the total.
+export type RegularityCounts = {
+  planned: number;
+  done: number;
+  unfinished: number;
+  to_confirm: number;
+  missed: number;
+  cancelled: number;
+  upcoming: number;
+  moved: number;
+};
+
+export type WorkTotals = {
+  sessions: number;
+  duration_seconds: number;
+  // Null when nothing was lifted: the mockup hides the line (SUI-01)
+  tonnage_kg: number | null;
+};
+
+export type SummaryRecord = {
+  exercise_id: number;
+  name: string;
+  message: string | null;
+  date: string;
+};
+
+export type ProgramSummary = {
+  id: number;
+  name: string;
+  // "Semaine 4 sur 8"
+  week_index: number | null;
+  week_count: number;
+  start_date: string;
+  end_date: string;
+  // "2 / 3 séances passées faites"
+  past_count: number;
+  done_count: number;
+  percent: number;
+};
+
+export type TrackingSummary = {
+  period: SummaryPeriod;
+  from: string;
+  to: string;
+  regularity: RegularityCounts;
+  work: WorkTotals;
+  // The same length of time, one month earlier (RM-077); null for a week
+  comparison: {
+    from: string;
+    to: string;
+    work: WorkTotals;
+  } | null;
+  records: SummaryRecord[];
+  program: ProgramSummary | null;
+};
+
+// The same number of days, one month earlier, never past the last day of
+// that month: the 20th of November gives 1-20 October, the 31st of March
+// gives 1-28 February (RM-077).
+export function getComparisonRange(
+  from: string,
+  consultedDate: string,
+): { from: string; to: string } {
+  const year = Number(from.slice(0, 4));
+  const month = Number(from.slice(5, 7));
+  // The month before the one of the period
+  const previous = new Date(Date.UTC(year, month - 2, 1));
+  const previousYear = previous.getUTCFullYear();
+  const previousMonth = previous.getUTCMonth() + 1;
+  const lastDay = new Date(
+    Date.UTC(previousYear, previousMonth, 0),
+  ).getUTCDate();
+  const day = Math.min(Number(consultedDate.slice(8, 10)), lastDay);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return {
+    from: `${previousYear}-${pad(previousMonth)}-01`,
+    to: `${previousYear}-${pad(previousMonth)}-${pad(day)}`,
+  };
+}
+
+// "+3", "-2", "=" : a gap, always written, never a colour alone (US-41).
+export function formatDelta(value: number): string {
+  if (value === 0) {
+    return "=";
+  }
+  return value > 0 ? `+${value}` : String(value);
+}
+
+// "23 → 29 nov.", "Novembre 2026", "Semaine 4 sur 8": the title between
+// the arrows.
+export function formatSummaryLabel(summary: TrackingSummary): string {
+  if (summary.period === "program") {
+    const program = summary.program;
+    if (program === null) {
+      return "Programme";
+    }
+    return program.week_index === null
+      ? program.name
+      : `Semaine ${program.week_index} sur ${program.week_count}`;
+  }
+  if (summary.period === "month") {
+    return formatMonthTitle(summary.from.slice(0, 7));
+  }
+  return formatWeekRange(summary.from);
+}
+
+// "9 prévues", "1 prévue".
+export function formatPlannedCount(count: number): string {
+  return `${count} ${count > 1 ? "prévues" : "prévue"}`;
+}
+
+// The lines of the regularity card, in the order of the mockup (SUI-01),
+// with the empty ones left out.
+export function describeRegularity(
+  counts: RegularityCounts,
+): { label: string; value: number }[] {
+  return [
+    { label: "Faites", value: counts.done },
+    { label: "Inachevées", value: counts.unfinished },
+    { label: "À confirmer", value: counts.to_confirm },
+    { label: "Manquées", value: counts.missed },
+    { label: "Annulées", value: counts.cancelled },
+    { label: "À venir", value: counts.upcoming },
+  ].filter((line) => line.value > 0);
 }
