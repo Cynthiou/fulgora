@@ -42,10 +42,10 @@ En tant qu'utilisateur, je veux installer Fulgora sur l'écran d'accueil de mon 
 
 ## Tâches techniques
 
-- [ ] Outillage : `vite-plugin-pwa` (`--ignore-scripts`) ou manifeste + service worker écrits à la main (proposition : le plugin)
-- [ ] Frontend : `manifest.webmanifest` (nom, icônes 192 et 512, `display: standalone`, `theme_color`, `background_color`), page hors connexion
-- [ ] Frontend : le service worker ne met jamais en cache les réponses de `/api`
-- [ ] Tests : Lighthouse PWA ; E2E mode hors connexion
+- [x] Outillage : `vite-plugin-pwa` (`--ignore-scripts`) ou manifeste + service worker écrits à la main (proposition : le plugin)
+- [x] Frontend : `manifest.webmanifest` (nom, icônes 192 et 512, `display: standalone`, `theme_color`, `background_color`), page hors connexion
+- [x] Frontend : le service worker ne met jamais en cache les réponses de `/api`
+- [ ] Tests : Lighthouse PWA (à lancer dans Chrome sur le build) ; [x] E2E mode hors connexion et manifeste
 
 ## Definition of Done
 
