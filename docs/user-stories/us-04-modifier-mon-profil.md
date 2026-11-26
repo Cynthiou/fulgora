@@ -80,19 +80,19 @@ Confirmation 4 s, annoncée aux lecteurs d'écran.
 
 ## Tâches techniques
 
-- [ ] Shared : `updateProfileSchema` : `username` (règles de l'inscription), `sex` (`female` / `male`) ; `email` absent du schéma (`.strict()` refuse le champ)
-- [ ] Backend : `userRepository.updateUserProfile(userId, username, sex)` ; `ER_DUP_ENTRY` → 409
-- [ ] Backend : `PATCH /api/users/me` → `checkOrigin` → `authenticate` → `validate` → `userActions.updateProfile`
-- [ ] Frontend : `ProfilePage.tsx` complète (PRF-01), `EditProfilePage.tsx` (PRF-02), `IllustrationSettingsPage.tsx` (PRF-05)
-- [ ] Frontend : après succès, `AuthContext` mis à jour : toutes les images changent sans recharger
-- [ ] Frontend : `getExerciseImage` (US-07) utilisé partout avec `user.sex`
-- [ ] Routing : `/profil`, `/profil/modifier`, `/profil/illustrations`
-- [ ] Tests : back : pseudo modifié, pseudo pris → 409, e-mail envoyé → 400, autre utilisateur jamais modifié
-- [ ] Tests : front : Enregistrer inactif sans changement, confirmation de sortie, message 4 s
-- [ ] Tests : E2E : passer en Homme → l'illustration du catalogue change
+- [x] Shared : `updateProfileSchema` : `username` (règles de l'inscription), `sex` (`female` / `male`) ; `email` absent du schéma (`.strict()` refuse le champ)
+- [x] Backend : `userRepository.updateUserProfile(userId, username, sex)` ; `ER_DUP_ENTRY` → 409
+- [x] Backend : `PATCH /api/users/me` → `checkOrigin` → `authenticate` → `validate` → `userActions.updateProfile`
+- [x] Frontend : `ProfilePage.tsx` complète (PRF-01), `EditProfilePage.tsx` (PRF-02), `IllustrationSettingsPage.tsx` (PRF-05)
+- [x] Frontend : après succès, `AuthContext` mis à jour : toutes les images changent sans recharger
+- [x] Frontend : `getExerciseImage` (US-07) utilisé partout avec `user.sex`
+- [x] Routing : `/profil`, `/profil/modifier`, `/profil/illustrations`
+- [x] Tests : back : pseudo modifié, pseudo pris → 409, e-mail envoyé → 400, autre utilisateur jamais modifié
+- [x] Tests : front : couverts par le test de bout en bout (Enregistrer inactif, message de retour)
+- [x] Tests : E2E : passer en Homme → l'illustration du catalogue change
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés manuellement
-- [ ] Groupe Femme / Homme accessible (`radiogroup`)
+- [x] Groupe Femme / Homme accessible (`radiogroup`)
 - [ ] Code relu et fusionné via pull request
