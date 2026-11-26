@@ -70,6 +70,11 @@ const tree: WorkoutSessionTree = {
       name: "Force",
       position: 1,
       instructions: null,
+      planned_rounds: null,
+      time_limit_seconds: null,
+      completed_rounds: null,
+      extra_reps: null,
+      actual_duration_seconds: null,
       is_added: false,
       exercises: [
         {
@@ -93,6 +98,11 @@ const tree: WorkoutSessionTree = {
       name: null,
       position: 2,
       instructions: "Penser à respirer.",
+      planned_rounds: null,
+      time_limit_seconds: null,
+      completed_rounds: null,
+      extra_reps: null,
+      actual_duration_seconds: null,
       is_added: false,
       exercises: [],
     },

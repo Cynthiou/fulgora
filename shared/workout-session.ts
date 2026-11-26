@@ -2,6 +2,7 @@ import * as z from "zod";
 import type { AppointmentStatus, WorkoutStatus } from "./appointment.js";
 import type { MeasureCode } from "./catalog.js";
 import {
+  BLOCK_TYPE_LABELS,
   type BlockType,
   boundedValue,
   DEFAULT_REST_SECONDS,
@@ -9,6 +10,7 @@ import {
   formatMinSec,
   formatSetValues,
   getMeasureProfile,
+  isTimedBlock,
   type PlannedSetValues,
   plannedSetSchema,
   SET_LIMITS,
@@ -149,6 +151,14 @@ export type WorkoutBlockTree = {
   name: string | null;
   position: number;
   instructions: string | null;
+  // What was planned for a timed block (US-43), copied at the start
+  planned_rounds: number | null;
+  time_limit_seconds: number | null;
+  // What the block timer recorded (US-31, D-06): a total, never a result
+  // round by round
+  completed_rounds: number | null;
+  extra_reps: number | null;
+  actual_duration_seconds: number | null;
   // Added during the session (US-32)
   is_added: boolean;
   exercises: WorkoutExerciseTree[];
@@ -698,4 +708,71 @@ export function formatBothSides(
     );
     return `${letter} ${values}`;
   }).join(" / ");
+}
+
+// --- The result of a timed block (US-31) ------------------------------------
+
+// What the block timer sends at the end: the rounds done, the repetitions
+// of the round that was not finished, and the time it took (D-06, RM-042).
+export const blockResultSchema = z
+  .object({
+    completed_rounds: z
+      .number()
+      .int({ error: "Entre un nombre entier." })
+      .min(0, { error: "Entre un nombre entre 0 et 500." })
+      .max(500, { error: "Entre un nombre entre 0 et 500." })
+      .nullable(),
+    extra_reps: z
+      .number()
+      .int({ error: "Entre un nombre entier." })
+      .min(0, { error: "Entre un nombre entre 0 et 1 000." })
+      .max(1000, { error: "Entre un nombre entre 0 et 1 000." })
+      .nullable(),
+    actual_duration_seconds: z
+      .number()
+      .int({ error: "Entre un nombre entier." })
+      .min(0, { error: "Entre une durée entre 0 et 24 h." })
+      .max(24 * 60 * 60, { error: "Entre une durée entre 0 et 24 h." })
+      .nullable(),
+  })
+  .strict();
+
+export type BlockResultInput = z.output<typeof blockResultSchema>;
+
+// "AMRAP · 5 tours + 8 rép.", "For Time · 14:32", "Circuit · 3 / 3 tours":
+// what a timed block gave, once it is over (US-31). Null while nothing has
+// been recorded.
+export function formatBlockResult(
+  block: Pick<
+    WorkoutBlockTree,
+    | "block_type"
+    | "planned_rounds"
+    | "completed_rounds"
+    | "extra_reps"
+    | "actual_duration_seconds"
+  >,
+): string | null {
+  if (!isTimedBlock(block.block_type)) {
+    return null;
+  }
+  const label = BLOCK_TYPE_LABELS[block.block_type];
+  if (block.block_type === "for_time") {
+    return block.actual_duration_seconds === null
+      ? null
+      : `${label} · ${formatMinSec(block.actual_duration_seconds)}`;
+  }
+  if (block.completed_rounds === null) {
+    return null;
+  }
+  const rounds =
+    block.block_type === "circuit" && block.planned_rounds !== null
+      ? `${block.completed_rounds} / ${block.planned_rounds} tours`
+      : `${block.completed_rounds} ${
+          block.completed_rounds > 1 ? "tours" : "tour"
+        }`;
+  const extra =
+    block.extra_reps === null || block.extra_reps === 0
+      ? ""
+      : ` + ${block.extra_reps} rép.`;
+  return `${label} · ${rounds}${extra}`;
 }

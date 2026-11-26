@@ -226,3 +226,89 @@ describe("POST /api/workout-sessions/:id/blocks", () => {
     expect(last.exercises[0]?.is_added).toBe(true);
   });
 });
+
+// US-31: the total of a timed block, written once the block is over.
+describe("PUT /api/workout-blocks/:id", () => {
+  it("saves the rounds, the extra reps and the time of the block", async () => {
+    const response = await request(app)
+      .put(`/api/workout-blocks/${blockId}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie)
+      .send({
+        completed_rounds: 5,
+        extra_reps: 8,
+        actual_duration_seconds: 720,
+      });
+
+    expect(response.status).toBe(200);
+    const tree = await readTree(lea, workoutId);
+    expect(tree.blocks[0]).toMatchObject({
+      completed_rounds: 5,
+      extra_reps: 8,
+      actual_duration_seconds: 720,
+    });
+  });
+
+  it("refuses a value out of its limits and the block of somebody else", async () => {
+    const tooMany = await request(app)
+      .put(`/api/workout-blocks/${blockId}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", lea.cookie)
+      .send({
+        completed_rounds: 501,
+        extra_reps: null,
+        actual_duration_seconds: null,
+      });
+    expect(tooMany.status).toBe(400);
+
+    const other = await request(app)
+      .put(`/api/workout-blocks/${blockId}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", someoneElse.cookie)
+      .send({
+        completed_rounds: 1,
+        extra_reps: null,
+        actual_duration_seconds: null,
+      });
+    expect(other.status).toBe(404);
+  });
+
+  it("answers 409 once the session is over", async () => {
+    // Its own user: Léa already has a session in progress (DT-15).
+    const marc = await createTestUser(PREFIX);
+    const { appointmentId, versionId } = await createTestAppointment(marc, {
+      name: "Séance finie",
+      date: "2026-11-25",
+      blocks: [1],
+    });
+    await prepareVersion(versionId);
+    const started = await request(app)
+      .post("/api/workout-sessions")
+      .set("Origin", ORIGIN)
+      .set("Cookie", marc.cookie)
+      .send({ appointment_id: appointmentId });
+    expect(started.status).toBe(201);
+    const finishedId = Number(started.body.id);
+    const tree = await readTree(marc, finishedId);
+    const finishedBlockId = tree.blocks[0].id;
+
+    const ended = await request(app)
+      .post(`/api/workout-sessions/${finishedId}/abandon`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", marc.cookie);
+    expect(ended.status).toBe(200);
+
+    const response = await request(app)
+      .put(`/api/workout-blocks/${finishedBlockId}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", marc.cookie)
+      .send({
+        completed_rounds: 2,
+        extra_reps: null,
+        actual_duration_seconds: 60,
+      });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("SESSION_NOT_IN_PROGRESS");
+  });
+});

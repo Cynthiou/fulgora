@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { BlockType } from "../session-template.js";
 import {
   actualSetSchema,
   computeDurationSeconds,
@@ -8,6 +9,7 @@ import {
   countValidatedSets,
   formatActualValues,
   formatAddedSets,
+  formatBlockResult,
   formatBothSides,
   formatClock,
   formatElapsed,
@@ -24,6 +26,7 @@ import {
   startWorkoutSchema,
   toActualValues,
   toPlannedValues,
+  type WorkoutBlockTree,
   type WorkoutSetRow,
 } from "../workout-session.js";
 
@@ -419,5 +422,62 @@ describe("per-side sets (US-51)", () => {
     expect(formatBothSides(one, ["reps", "weight"])).toBe(
       "G 15 rép. · 10 kg / D non faite",
     );
+  });
+});
+
+// US-31: the total of a timed block, once it is over (D-06).
+describe("formatBlockResult", () => {
+  function block(values: Partial<WorkoutBlockTree> = {}) {
+    return {
+      block_type: "amrap" as BlockType,
+      planned_rounds: null,
+      completed_rounds: null,
+      extra_reps: null,
+      actual_duration_seconds: null,
+      ...values,
+    };
+  }
+
+  it("says nothing for a block that is not timed", () => {
+    expect(
+      formatBlockResult(block({ block_type: "classic", completed_rounds: 3 })),
+    ).toBeNull();
+  });
+
+  it("says nothing while the block has not run", () => {
+    expect(formatBlockResult(block())).toBeNull();
+    expect(formatBlockResult(block({ block_type: "for_time" }))).toBeNull();
+  });
+
+  it("writes the rounds and the extra repetitions of an AMRAP", () => {
+    expect(
+      formatBlockResult(block({ completed_rounds: 5, extra_reps: 8 })),
+    ).toBe("AMRAP · 5 tours + 8 rép.");
+    expect(formatBlockResult(block({ completed_rounds: 1 }))).toBe(
+      "AMRAP · 1 tour",
+    );
+    expect(
+      formatBlockResult(block({ completed_rounds: 5, extra_reps: 0 })),
+    ).toBe("AMRAP · 5 tours");
+  });
+
+  it("writes the time of a For Time", () => {
+    expect(
+      formatBlockResult(
+        block({ block_type: "for_time", actual_duration_seconds: 872 }),
+      ),
+    ).toBe("For Time · 14:32");
+  });
+
+  it("writes the rounds done out of the rounds planned of a circuit", () => {
+    expect(
+      formatBlockResult(
+        block({
+          block_type: "circuit",
+          planned_rounds: 3,
+          completed_rounds: 3,
+        }),
+      ),
+    ).toBe("Circuit · 3 / 3 tours");
   });
 });

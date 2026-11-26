@@ -64,6 +64,11 @@ const completed: WorkoutSessionTree = {
       name: "Force",
       position: 1,
       instructions: null,
+      planned_rounds: null,
+      time_limit_seconds: null,
+      completed_rounds: null,
+      extra_reps: null,
+      actual_duration_seconds: null,
       is_added: false,
       exercises: [
         {

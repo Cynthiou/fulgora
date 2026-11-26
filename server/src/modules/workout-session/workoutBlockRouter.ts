@@ -1,8 +1,12 @@
 import express from "express";
-import { addWorkoutExercisesSchema, idParamSchema } from "shared";
+import {
+  addWorkoutExercisesSchema,
+  blockResultSchema,
+  idParamSchema,
+} from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
-import { addExercisesToBlock } from "./workoutAddActions.js";
+import { addExercisesToBlock, saveBlockResult } from "./workoutAddActions.js";
 
 const workoutBlockRouter = express.Router();
 
@@ -13,6 +17,14 @@ workoutBlockRouter.post(
   authenticate,
   validate({ params: idParamSchema, body: addWorkoutExercisesSchema }),
   addExercisesToBlock,
+);
+
+// PUT /api/workout-blocks/:id: the result of a timed block (US-31).
+workoutBlockRouter.put(
+  "/:id",
+  authenticate,
+  validate({ params: idParamSchema, body: blockResultSchema }),
+  saveBlockResult,
 );
 
 export default workoutBlockRouter;

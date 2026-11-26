@@ -238,6 +238,11 @@ export async function buildTree(
     name: block.name,
     position: block.position,
     instructions: block.instructions,
+    planned_rounds: block.planned_rounds,
+    time_limit_seconds: block.time_limit_seconds,
+    completed_rounds: block.completed_rounds,
+    extra_reps: block.extra_reps,
+    actual_duration_seconds: block.actual_duration_seconds,
     is_added: block.source_template_block_id === null,
     exercises: exerciseTrees.filter((exercise) =>
       exercises.some(

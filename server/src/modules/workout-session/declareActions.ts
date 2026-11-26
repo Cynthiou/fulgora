@@ -80,6 +80,12 @@ export const readDeclaration: RequestHandler = async (req, res) => {
     name: block.name,
     position: block.position,
     instructions: block.instructions,
+    planned_rounds: block.planned_rounds,
+    time_limit_seconds: block.time_limit_seconds,
+    // Nothing was done yet: the session is being declared after the fact
+    completed_rounds: null,
+    extra_reps: null,
+    actual_duration_seconds: null,
     is_added: false,
     sides: [],
     exercises: exerciseRows

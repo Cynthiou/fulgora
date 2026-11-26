@@ -7,9 +7,11 @@ import {
   useSearchParams,
 } from "react-router";
 import {
+  type BlockResultInput,
   countPlannedSets,
   countValidatedSets,
   getBlockLabel,
+  isTimedBlock,
   type SelectedExercise,
 } from "shared";
 import plusIcon from "../../../assets/icons/ui/app/plus.svg";
@@ -20,6 +22,7 @@ import StatusChip from "../../../components/StatusChip";
 import { ApiError } from "../../../services/apiError";
 import AbandonWorkoutDialog from "../components/AbandonWorkoutDialog";
 import AutoClosedNotice from "../components/AutoClosedNotice";
+import BlockTimer from "../components/BlockTimer";
 import CompleteWorkoutDialog from "../components/CompleteWorkoutDialog";
 import WorkoutDestinationSheet from "../components/WorkoutDestinationSheet";
 import WorkoutExerciseRow from "../components/WorkoutExerciseRow";
@@ -35,6 +38,7 @@ import {
   addWorkoutExercises,
   completeWorkoutSession,
   readWorkoutSession,
+  saveBlockResult,
 } from "../services/workoutSessionService";
 
 const PRIMARY_LINK =
@@ -70,6 +74,9 @@ function WorkoutPage() {
     `/entrainement/${id}/resume`;
   const { session, isLoading, notFound, error, reload, replaceSession } =
     useWorkoutSession(id);
+  // The timed block being saved, and what went wrong (US-31)
+  const [savingBlockId, setSavingBlockId] = useState<number | null>(null);
+  const [blockError, setBlockError] = useState<string | null>(null);
   const isInProgress = session?.status === "in_progress";
   const chrono = useSessionChrono(isInProgress ? session.started_at : null);
   const [isConfirmingAbandon, setIsConfirmingAbandon] = useState(false);
@@ -95,6 +102,37 @@ function WorkoutPage() {
     }
     clearPendingWorkoutExercises();
   }, [id]);
+
+  // A timed block already holds a result: its card shows it (US-31).
+  function hasResult(block: {
+    completed_rounds: number | null;
+    actual_duration_seconds: number | null;
+  }): boolean {
+    return (
+      block.completed_rounds !== null || block.actual_duration_seconds !== null
+    );
+  }
+
+  // "Terminer le bloc": the total of the block goes to the server (D-06).
+  async function finishBlock(blockId: number, result: BlockResultInput) {
+    if (savingBlockId !== null) {
+      return;
+    }
+    setSavingBlockId(blockId);
+    setBlockError(null);
+    try {
+      await saveBlockResult(blockId, result);
+      reload();
+    } catch (caught) {
+      setBlockError(
+        caught instanceof ApiError
+          ? caught.message
+          : "Impossible d'enregistrer ce bloc. Réessaie.",
+      );
+    } finally {
+      setSavingBlockId(null);
+    }
+  }
 
   // The destination sheet: an existing block, or a new one at the end.
   async function addToDestination(blockId: number | null) {
@@ -357,6 +395,17 @@ function WorkoutPage() {
                 >
                   {getBlockLabel(block, index)}
                 </h2>
+                {/* A timed block is launched by hand and saved as one
+                    total (US-31, RM-042). */}
+                {isTimedBlock(block.block_type) &&
+                  (isInProgress || hasResult(block)) && (
+                    <BlockTimer
+                      block={block}
+                      isPending={savingBlockId === block.id}
+                      error={savingBlockId === block.id ? blockError : null}
+                      onSave={(result) => void finishBlock(block.id, result)}
+                    />
+                  )}
                 {block.block_type === "note" ? (
                   <p className="rounded-card border border-base-300 bg-base-100 p-4 text-sm leading-[1.45] text-muted shadow-card">
                     {block.instructions ?? "Note vide"}

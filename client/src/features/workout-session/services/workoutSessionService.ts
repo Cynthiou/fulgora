@@ -1,5 +1,6 @@
 import type {
   ActualSetValues,
+  BlockResultInput,
   CurrentWorkoutSession,
   DeclarationPlan,
   DeclareDoneInput,
@@ -150,5 +151,16 @@ export function validateSetSide(
   return apiFetch<WorkoutSetRow>(`/workout-sets/${setId}/sides/${side}`, {
     method: "PUT",
     body: JSON.stringify(values),
+  });
+}
+
+// PUT /api/workout-blocks/:id: the total of a timed block (US-31).
+export function saveBlockResult(
+  blockId: number,
+  result: BlockResultInput,
+): Promise<{ id: number }> {
+  return apiFetch(`/workout-blocks/${blockId}`, {
+    method: "PUT",
+    body: JSON.stringify(result),
   });
 }

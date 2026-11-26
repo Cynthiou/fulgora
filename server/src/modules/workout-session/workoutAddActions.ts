@@ -1,5 +1,9 @@
 import type { RequestHandler } from "express";
-import type { AddWorkoutBlockInput, AddWorkoutExercisesInput } from "shared";
+import type {
+  AddWorkoutBlockInput,
+  AddWorkoutExercisesInput,
+  BlockResultInput,
+} from "shared";
 import { withTransaction } from "../../database/withTransaction.js";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
@@ -17,6 +21,7 @@ import {
   readWorkoutSession,
   readWorkoutSetOwner,
   touchWorkoutSession,
+  updateWorkoutBlockResult,
 } from "./workoutSessionRepository.js";
 
 // Adding to a session while it runs (US-32), or while correcting it
@@ -161,4 +166,42 @@ export const addBlock: RequestHandler = async (req, res) => {
   });
 
   res.status(201).json({ id: blockId });
+};
+
+// PUT /api/workout-blocks/:id: the total of a timed block once it is over
+// (US-31, D-06). Only a session in progress accepts it: a finished session
+// is corrected set by set (US-37).
+export const saveBlockResult: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const { completed_rounds, extra_reps, actual_duration_seconds } =
+    req.body as BlockResultInput;
+
+  await withTransaction(async (connection) => {
+    const context = await readWorkoutBlockContext(id, userId, connection);
+    if (context === null) {
+      throw new HttpError(
+        404,
+        "WORKOUT_BLOCK_NOT_FOUND",
+        "Ce bloc n'existe pas.",
+      );
+    }
+    if (context.status !== "in_progress") {
+      throw new HttpError(
+        409,
+        "SESSION_NOT_IN_PROGRESS",
+        "Cette séance n'est pas en cours.",
+      );
+    }
+    await updateWorkoutBlockResult(
+      id,
+      completed_rounds,
+      extra_reps,
+      actual_duration_seconds,
+      connection,
+    );
+    await touchWorkoutSession(context.workout_session_id, connection);
+  });
+
+  res.status(200).json({ id });
 };

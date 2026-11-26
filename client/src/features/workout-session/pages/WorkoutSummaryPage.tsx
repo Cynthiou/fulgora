@@ -6,6 +6,7 @@ import {
   countPlannedSets,
   countValidatedSets,
   formatAddedSets,
+  formatBlockResult,
   formatExerciseResult,
   formatLongDate,
   formatSummaryDuration,
@@ -44,6 +45,12 @@ function WorkoutSummaryPage() {
     block.exercises.flatMap((exercise) => exercise.sets),
   );
   const exercises = session?.blocks.flatMap((block) => block.exercises) ?? [];
+  // "AMRAP · 5 tours + 8 rép.", one line per timed block that ran (US-31)
+  const blockResults = (session?.blocks ?? [])
+    .map((block) => ({ id: block.id, text: formatBlockResult(block) }))
+    .filter(
+      (result): result is { id: number; text: string } => result.text !== null,
+    );
   const startDate = session?.started_at.slice(0, 10) ?? "";
 
   return (
@@ -161,6 +168,25 @@ function WorkoutSummaryPage() {
               <p className="text-xs text-muted">
                 Dont {formatAddedSets(countAddedSets(session))}.
               </p>
+            )}
+
+            {/* The totals of the timed blocks (US-31, D-06). */}
+            {blockResults.length > 0 && (
+              <ul
+                aria-label="Blocs chronométrés"
+                className="flex flex-col rounded-card border border-base-300 bg-base-100 px-4 py-1.5 shadow-card"
+              >
+                {blockResults.map((result, index) => (
+                  <li
+                    key={result.id}
+                    className={`py-2.5 text-sm font-semibold ${
+                      index === 0 ? "" : "border-t border-base-300"
+                    }`}
+                  >
+                    {result.text}
+                  </li>
+                ))}
+              </ul>
             )}
 
             <ul

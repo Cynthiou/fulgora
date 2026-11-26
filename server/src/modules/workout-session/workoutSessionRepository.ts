@@ -166,6 +166,13 @@ export type WorkoutBlockRow = {
   name: string | null;
   position: number;
   instructions: string | null;
+  // The settings of a timed block, copied at the start (US-43)
+  planned_rounds: number | null;
+  time_limit_seconds: number | null;
+  // What the block timer recorded (US-31)
+  completed_rounds: number | null;
+  extra_reps: number | null;
+  actual_duration_seconds: number | null;
   // null when the block was added during the session (D-18, RM-043)
   source_template_block_id: number | null;
 };
@@ -176,6 +183,8 @@ export async function readWorkoutBlocks(
 ): Promise<WorkoutBlockRow[]> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT id, block_type, name, position, instructions,
+            planned_rounds, time_limit_seconds,
+            completed_rounds, extra_reps, actual_duration_seconds,
             source_template_block_id
        FROM workout_block
       WHERE workout_session_id = ?
@@ -779,4 +788,21 @@ export async function readWorkoutSetSidesOfSet(
     [setId],
   );
   return rows as WorkoutSetSideRow[];
+}
+
+// US-31: the total of a timed block, written once the block is over
+// (D-06). The three values travel together, a missing one is cleared.
+export async function updateWorkoutBlockResult(
+  workoutBlockId: number,
+  completedRounds: number | null,
+  extraReps: number | null,
+  actualDurationSeconds: number | null,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE workout_block
+        SET completed_rounds = ?, extra_reps = ?, actual_duration_seconds = ?
+      WHERE id = ?`,
+    [completedRounds, extraReps, actualDurationSeconds, workoutBlockId],
+  );
 }
