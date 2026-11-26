@@ -333,3 +333,107 @@ describe("sessionDraftReducer · exercises (US-14)", () => {
     expect(draft.blocks[0]?.exercises[1]?.sets[0]?.duration_seconds).toBe(600);
   });
 });
+
+// US-16: the order of the blocks, the exercises and the sets changes in
+// the draft; the server numbers the positions from it (RM-024).
+describe("changing the order (US-16)", () => {
+  function threeBlocks() {
+    return apply(
+      base,
+      { type: "addBlock", blockType: "warm_up" },
+      { type: "addBlock", blockType: "classic" },
+      { type: "addBlock", blockType: "note" },
+    );
+  }
+
+  it("moves a block, and leaves the draft alone at the edges", () => {
+    const draft = threeBlocks();
+
+    const moved = sessionDraftReducer(draft, {
+      type: "moveBlock",
+      from: 2,
+      to: 0,
+    });
+    expect(moved.blocks.map((block) => block.block_type)).toEqual([
+      "note",
+      "warm_up",
+      "classic",
+    ]);
+
+    // Outside the list, or in place: the very same draft
+    expect(
+      sessionDraftReducer(draft, { type: "moveBlock", from: 0, to: 0 }),
+    ).toBe(draft);
+    expect(
+      sessionDraftReducer(draft, { type: "moveBlock", from: 0, to: 3 }),
+    ).toBe(draft);
+    expect(
+      sessionDraftReducer(draft, { type: "moveBlock", from: -1, to: 1 }),
+    ).toBe(draft);
+  });
+
+  it("moves an exercise inside its block", () => {
+    const { draft, blockKey } = draftWithExercises();
+
+    const moved = sessionDraftReducer(draft, {
+      type: "moveExercise",
+      blockKey,
+      from: 1,
+      to: 0,
+    });
+    expect(moved.blocks[0]?.exercises.map((exercise) => exercise.name)).toEqual(
+      ["Tractions", "Développé couché"],
+    );
+
+    // An unknown block changes nothing
+    expect(
+      sessionDraftReducer(draft, {
+        type: "moveExercise",
+        blockKey: "nope",
+        from: 0,
+        to: 1,
+      }),
+    ).toBe(draft);
+  });
+
+  it("moves a set inside its exercise", () => {
+    const { draft, blockKey, exerciseKey } = draftWithExercises();
+    const three = apply(
+      draft,
+      { type: "addSet", blockKey, exerciseKey },
+      { type: "addSet", blockKey, exerciseKey },
+      {
+        type: "updateSet",
+        blockKey,
+        exerciseKey,
+        index: 2,
+        values: { reps: 12 },
+      },
+    );
+
+    const moved = sessionDraftReducer(three, {
+      type: "moveSet",
+      blockKey,
+      exerciseKey,
+      from: 2,
+      to: 0,
+    });
+    // The third set (12 reps) becomes the first; the two others follow
+    // in their order (the first one was pre-filled with 10 reps).
+    expect(moved.blocks[0]?.exercises[0]?.sets.map((set) => set.reps)).toEqual([
+      12,
+      10,
+      null,
+    ]);
+
+    expect(
+      sessionDraftReducer(three, {
+        type: "moveSet",
+        blockKey,
+        exerciseKey,
+        from: 0,
+        to: 9,
+      }),
+    ).toBe(three);
+  });
+});

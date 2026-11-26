@@ -39,6 +39,14 @@ export type SessionDraftAction =
   | { type: "removeBlock"; key: string }
   | { type: "restoreBlock"; block: DraftBlock; index: number }
   | { type: "moveBlock"; from: number; to: number }
+  | { type: "moveExercise"; blockKey: string; from: number; to: number }
+  | {
+      type: "moveSet";
+      blockKey: string;
+      exerciseKey: string;
+      from: number;
+      to: number;
+    }
   | { type: "addExercises"; blockKey: string; exercises: NewDraftExercise[] }
   | { type: "removeExercise"; blockKey: string; exerciseKey: string }
   | {
@@ -69,6 +77,19 @@ let keyCounter = 0;
 export function nextKey(): string {
   keyCounter += 1;
   return `k${keyCounter}`;
+}
+
+// Moves one item of a list and gives a new list back; the same list when
+// the move changes nothing or falls outside (US-16).
+function moveInList<T>(items: T[], from: number, to: number): T[] {
+  const last = items.length - 1;
+  if (from === to || from < 0 || to < 0 || from > last || to > last) {
+    return items;
+  }
+  const moved = [...items];
+  const [item] = moved.splice(from, 1);
+  moved.splice(to, 0, item as T);
+  return moved;
 }
 
 function updateBlock(
@@ -182,16 +203,26 @@ export function sessionDraftReducer(
     }
 
     case "moveBlock": {
-      const { from, to } = action;
-      const last = draft.blocks.length - 1;
-      if (from === to || from < 0 || to < 0 || from > last || to > last) {
-        return draft;
-      }
-      const blocks = [...draft.blocks];
-      const [moved] = blocks.splice(from, 1);
-      blocks.splice(to, 0, moved as DraftBlock);
-      return { ...draft, blocks };
+      const blocks = moveInList(draft.blocks, action.from, action.to);
+      return blocks === draft.blocks ? draft : { ...draft, blocks };
     }
+
+    case "moveExercise":
+      return updateBlock(draft, action.blockKey, (block) => {
+        const exercises = moveInList(block.exercises, action.from, action.to);
+        return exercises === block.exercises ? block : { ...block, exercises };
+      });
+
+    case "moveSet":
+      return updateExercise(
+        draft,
+        action.blockKey,
+        action.exerciseKey,
+        (exercise) => {
+          const sets = moveInList(exercise.sets, action.from, action.to);
+          return sets === exercise.sets ? exercise : { ...exercise, sets };
+        },
+      );
 
     case "addExercises":
       return updateBlock(draft, action.blockKey, (block) => ({
