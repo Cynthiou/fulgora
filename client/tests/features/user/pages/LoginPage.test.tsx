@@ -34,6 +34,7 @@ function renderLogin(entry: Entry = { pathname: "/connexion" }) {
     isLoading: false,
     login: authLogin,
     logout: vi.fn(),
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [

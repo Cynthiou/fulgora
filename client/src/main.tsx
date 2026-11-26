@@ -31,6 +31,8 @@ import ExerciseProgressPage from "./features/progress/pages/ExerciseProgressPage
 import TrackingSummaryPage from "./features/progress/pages/TrackingSummaryPage";
 import EditSessionPage from "./features/session-template/pages/EditSessionPage";
 import SessionEditorPage from "./features/session-template/pages/SessionEditorPage";
+import EditProfilePage from "./features/user/pages/EditProfilePage";
+import IllustrationSettingsPage from "./features/user/pages/IllustrationSettingsPage";
 import LoginPage from "./features/user/pages/LoginPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
@@ -82,6 +84,11 @@ const router = createBrowserRouter([
             element: <PageLayout />,
             children: [
               { path: "/profil", element: <ProfilePage /> },
+              { path: "/profil/modifier", element: <EditProfilePage /> },
+              {
+                path: "/profil/illustrations",
+                element: <IllustrationSettingsPage />,
+              },
               { path: "/notifications", element: <NotificationsPage /> },
               // The programs of the user (US-48) and their creation (US-18)
               { path: "/programmes", element: <ProgramsPage /> },

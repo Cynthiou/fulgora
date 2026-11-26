@@ -10,6 +10,8 @@ export type AuthContextValue = {
   isLoading: boolean;
   login: (user: PublicUser) => void;
   logout: () => void;
+  // The profile changed: every screen follows at once (US-04)
+  refresh: (user: PublicUser) => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: Props) {
     isLoading,
     login: (connectedUser) => setUser(connectedUser),
     logout: () => setUser(null),
+    refresh: (updated) => setUser(updated),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

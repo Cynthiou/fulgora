@@ -77,6 +77,7 @@ function renderCatalog(search = "") {
     isLoading: false,
     login: vi.fn(),
     logout: vi.fn(),
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [
@@ -359,6 +360,7 @@ function renderSelection(path: string) {
     isLoading: false,
     login: vi.fn(),
     logout: vi.fn(),
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [

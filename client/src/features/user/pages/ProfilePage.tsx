@@ -1,19 +1,25 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { getInitials } from "shared";
+import { getInitials, SEX_LABELS } from "shared";
+import bellIcon from "../../../assets/icons/ui/app/bell.svg";
+import gridIcon from "../../../assets/icons/ui/app/grid.svg";
+import imageIcon from "../../../assets/icons/ui/app/image.svg";
 import lockIcon from "../../../assets/icons/ui/app/lock.svg";
 import logoutIcon from "../../../assets/icons/ui/app/logout.svg";
 import Icon from "../../../components/Icon";
 import PageHeader from "../../../components/PageHeader";
+import SheetRow from "../../../components/SheetRow";
 import { useAuth } from "../../../hooks/useAuth";
 import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
 import { useLogout } from "../hooks/useLogout";
 
-// PRF-01, minimal for the MVP: who is connected and the way out.
-// Preferences and account settings arrive with US-04 to US-06, so the rows
-// of the mockup are not drawn yet.
+// Screen PRF-01: who is connected, the way to the profile, the
+// preferences and the account. The rows that are not built yet say when
+// they arrive (US-05, US-06, US-47).
 function ProfilePage() {
   const { user } = useAuth();
   const location = useLocation();
+  // "Profil enregistré.", handed over by PRF-02 (US-04)
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
   const navigate = useNavigate();
   // The tab the avatar was clicked from (US-44); the home page otherwise.
   const state = location.state as { from?: string } | null;
@@ -55,6 +61,57 @@ function ProfilePage() {
           </p>
         </div>
 
+        {flash !== null && (
+          <p
+            role="status"
+            className="rounded-card bg-pick px-4 py-3.5 text-center text-sm font-semibold text-pick-content shadow-hero"
+          >
+            {`✓ ${flash}`}
+          </p>
+        )}
+
+        <Link
+          to="/profil/modifier"
+          className="flex h-13 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
+        >
+          Modifier le profil
+        </Link>
+
+        <section
+          aria-labelledby="preferences-title"
+          className="flex flex-col gap-2"
+        >
+          <h2
+            id="preferences-title"
+            className="font-sans text-overline uppercase not-italic text-muted"
+          >
+            Préférences
+          </h2>
+          <div className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+            <SheetRow
+              isFirst
+              icon={gridIcon}
+              title="Affichage"
+              subtitle="kg · km · indicateur de l'Accueil · bientôt"
+              disabled
+              onClick={() => {}}
+            />
+            <SheetRow
+              icon={bellIcon}
+              title="Sons et minuteurs"
+              subtitle="Sons, vibrations, notifications · bientôt"
+              disabled
+              onClick={() => {}}
+            />
+            <SheetRow
+              icon={imageIcon}
+              title="Illustrations d'exercice"
+              subtitle={user.sex === null ? "Femme" : SEX_LABELS[user.sex]}
+              onClick={() => navigate("/profil/illustrations")}
+            />
+          </div>
+        </section>
+
         <section
           aria-labelledby="account-title"
           className="flex flex-col gap-2"
@@ -90,10 +147,9 @@ function ProfilePage() {
             <Icon src={logoutIcon} className="size-[18px]" />
             {isLoggingOut ? "Déconnexion…" : "Se déconnecter"}
           </button>
-          {/* The preferences and the account settings arrive with US-04
-              to US-06; the mockup already draws their rows. */}
+          {/* Password and deletion arrive with US-47 and US-06. */}
           <p className="text-center text-xs text-muted">
-            Préférences et paramètres du compte : bientôt.
+            Paramètres du compte (mot de passe, suppression) : bientôt.
           </p>
         </section>
 

@@ -75,6 +75,7 @@ function renderHome() {
     isLoading: false,
     login: vi.fn(),
     logout: vi.fn(),
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [

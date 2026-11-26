@@ -20,6 +20,7 @@ function renderAt(path: string, auth: Partial<AuthContextValue>) {
     isLoading: false,
     login: () => {},
     logout: () => {},
+    refresh: () => {},
     ...auth,
   };
   const router = createMemoryRouter(

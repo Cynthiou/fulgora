@@ -14,6 +14,7 @@ import { ApiError } from "../../../../src/services/apiError";
 
 vi.mock("../../../../src/features/user/services/authService", () => ({
   logout: vi.fn(),
+  refresh: vi.fn(),
   login: vi.fn(),
   readMe: vi.fn(),
 }));
@@ -50,6 +51,7 @@ function renderProfile() {
     isLoading: false,
     login: vi.fn(),
     logout: forgetUser,
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [

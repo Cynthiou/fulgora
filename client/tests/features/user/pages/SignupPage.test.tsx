@@ -31,6 +31,7 @@ function renderSignup() {
     isLoading: false,
     login,
     logout: vi.fn(),
+    refresh: vi.fn(),
   };
   const router = createMemoryRouter(
     [
