@@ -22,6 +22,7 @@ import Icon from "../../../components/Icon";
 import MinSecField from "../../../components/MinSecField";
 import NumberField from "../../../components/NumberField";
 import PageHeader from "../../../components/PageHeader";
+import SortableList from "../../../components/SortableList";
 import RestInput from "./RestInput";
 
 type Props = {
@@ -32,6 +33,8 @@ type Props = {
   onAddSet: () => void;
   onDuplicateLastSet: () => void;
   onRemoveSet: (index: number) => void;
+  // The order of the sets of the exercise (US-16)
+  onMoveSet: (from: number, to: number) => void;
   onChangeRest: (seconds: number | null) => void;
   // "Valider l'exercice" and the back arrow both return to the block
   onDone: () => void;
@@ -60,6 +63,7 @@ function SetConfigurator({
   onAddSet,
   onDuplicateLastSet,
   onRemoveSet,
+  onMoveSet,
   onChangeRest,
   onDone,
 }: Props) {
@@ -130,6 +134,15 @@ function SetConfigurator({
     setOpenIndex((current) =>
       Math.max(0, Math.min(current, exercise.sets.length - 2)),
     );
+  }
+
+  function moveSet(from: number, to: number) {
+    setMenuIndex(null);
+    onMoveSet(from, to);
+    // The errors are kept by position, so they are dropped after a move.
+    setErrors({});
+    setOpenIndex((current) => shiftIndex(current, from, to));
+    setOwnRest((current) => current.map((i) => shiftIndex(i, from, to)));
   }
 
   function toggleOwnRest(index: number) {
@@ -281,23 +294,37 @@ function SetConfigurator({
         />
 
         {profile !== "none" && (
-          <ul aria-label={`${setNoun}s`} className="flex flex-col gap-2.5">
-            {exercise.sets.map((set, index) => {
-              const label = getSetLabel(profile, index);
+          <SortableList
+            label={`${setNoun}s`}
+            gapClass="gap-2.5"
+            gender="f"
+            onMove={moveSet}
+            items={exercise.sets.map((_set, index) => ({
+              // A set has no id of its own: its position is its identity
+              id: `set-${index}`,
+              label: getSetLabel(profile, index),
+              content: null,
+            }))}
+            renderRow={(item, handle) => {
+              const index = Number(item.id.slice("set-".length));
+              const set = exercise.sets[index];
+              if (set === undefined) {
+                return null;
+              }
+              const label = item.label;
               const isOpen = index === openIndex;
               return (
-                <li
-                  // biome-ignore lint/suspicious/noArrayIndexKey: a set has no id of its own, its position is its identity in the draft
-                  key={index}
+                <div
                   className={`flex flex-col gap-2.5 rounded-card bg-base-100 ${
                     isOpen
                       ? "border-[1.5px] border-secondary p-3.5 shadow-next"
                       : "border border-base-300 px-3.5 py-3 shadow-card"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-1">
+                    {handle}
                     {isOpen ? (
-                      <h2 className="font-sans text-sm font-extrabold normal-case not-italic">
+                      <h2 className="flex-1 font-sans text-sm font-extrabold normal-case not-italic">
                         {label}
                       </h2>
                     ) : (
@@ -341,6 +368,22 @@ function SetConfigurator({
                           </button>
                           <button
                             type="button"
+                            onClick={() => moveSet(index, index - 1)}
+                            disabled={index === 0}
+                            className="min-h-tap rounded-btn px-3 text-left font-semibold disabled:opacity-60"
+                          >
+                            Monter
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveSet(index, index + 1)}
+                            disabled={index === exercise.sets.length - 1}
+                            className="min-h-tap rounded-btn px-3 text-left font-semibold disabled:opacity-60"
+                          >
+                            Descendre
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => removeSet(index)}
                             disabled={exercise.sets.length <= 1}
                             className="min-h-tap rounded-btn px-3 text-left font-semibold disabled:opacity-60"
@@ -367,10 +410,10 @@ function SetConfigurator({
                       )}
                     </div>
                   )}
-                </li>
+                </div>
               );
-            })}
-          </ul>
+            }}
+          />
         )}
 
         {profile !== "none" && (
@@ -432,6 +475,21 @@ function SetConfigurator({
       </div>
     </div>
   );
+}
+
+// Where an index lands once the set at "from" has moved to "to": the open
+// set and the sets with their own rest follow their set.
+function shiftIndex(index: number, from: number, to: number): number {
+  if (index === from) {
+    return to;
+  }
+  if (from < to && index > from && index <= to) {
+    return index - 1;
+  }
+  if (from > to && index >= to && index < from) {
+    return index + 1;
+  }
+  return index;
 }
 
 export default SetConfigurator;

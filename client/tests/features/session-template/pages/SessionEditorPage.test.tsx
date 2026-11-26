@@ -211,7 +211,9 @@ describe("SessionEditorPage", () => {
     );
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: /Échauffement · Mise en route/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Échauffement · Mise en route/,
+      }),
     ).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: /^Ouvrir le bloc/ }));
@@ -233,7 +235,11 @@ describe("SessionEditorPage", () => {
     await user.click(
       screen.getByRole("button", { name: "Retour à la séance" }),
     );
-    expect(screen.getByRole("button", { name: /Note · Bloc 1/ })).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Note · Bloc 1/,
+      }),
+    ).toBeTruthy();
     expect(screen.getByText("Penser à respirer.")).toBeTruthy();
   });
 
@@ -244,14 +250,17 @@ describe("SessionEditorPage", () => {
       screen.getByRole("button", { name: "Enregistrer le bloc" }),
     );
     expect(
-      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Classique · Bloc 1/,
+      }),
     ).toBeTruthy();
 
     await user.click(
       screen.getByRole("button", {
-        name: "Retirer le bloc Classique · Bloc 1",
+        name: "Options du bloc Classique · Bloc 1",
       }),
     );
+    await user.click(screen.getByRole("button", { name: "Retirer" }));
 
     expect(screen.getByText("0 bloc")).toBeTruthy();
     expect(screen.getByText("Bloc retiré")).toBeTruthy();
@@ -260,7 +269,9 @@ describe("SessionEditorPage", () => {
 
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Classique · Bloc 1/,
+      }),
     ).toBeTruthy();
     expect(screen.queryByText("Bloc retiré")).toBeNull();
   });
@@ -274,9 +285,10 @@ describe("SessionEditorPage", () => {
     );
     await user.click(
       screen.getByRole("button", {
-        name: "Retirer le bloc Classique · Bloc 1",
+        name: "Options du bloc Classique · Bloc 1",
       }),
     );
+    await user.click(screen.getByRole("button", { name: "Retirer" }));
     expect(screen.getByText("Bloc retiré")).toBeTruthy();
 
     act(() => {
@@ -343,8 +355,9 @@ describe("SessionEditorPage", () => {
 
     // Remove, then undo
     await user.click(
-      screen.getByRole("button", { name: "Retirer Développé couché" }),
+      screen.getByRole("button", { name: "Options de Développé couché" }),
     );
+    await user.click(screen.getByRole("button", { name: "Retirer" }));
     expect(screen.getByText("1 exercice")).toBeTruthy();
     expect(screen.getByText("Exercice retiré")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Annuler" }));
@@ -358,7 +371,9 @@ describe("SessionEditorPage", () => {
       screen.getByRole("button", { name: "Enregistrer le bloc" }),
     );
     expect(
-      screen.getByRole("button", { name: /Classique · Force/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Classique · Force/,
+      }),
     ).toBeTruthy();
     expect(screen.getByText("Développé couché · Tractions")).toBeTruthy();
     expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
@@ -372,7 +387,9 @@ describe("SessionEditorPage", () => {
 
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Classique · Bloc 1/,
+      }),
     ).toBeTruthy();
     expect(screen.getByText("Développé couché")).toBeTruthy();
     expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
@@ -662,6 +679,39 @@ describe("SessionEditorPage · planned sets (US-15)", () => {
     ).toBe(true);
   });
 
+  it("moves a set with « Monter » of the ⋯ menu (US-16)", async () => {
+    const user = renderEditor("/seances/nouvelle");
+    await user.click(screen.getByRole("button", { name: /^Développé couché/ }));
+
+    await user.clear(field("Répétitions"));
+    await user.type(field("Répétitions"), "11");
+    await user.click(screen.getByRole("button", { name: "Ajouter une série" }));
+    await user.type(field("Répétitions"), "5");
+
+    // The first set cannot go up
+    await user.click(
+      screen.getByRole("button", { name: "Options de la série 1" }),
+    );
+    expect(
+      (screen.getByRole("button", { name: "Monter" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    await user.click(
+      screen.getByRole("button", { name: "Options de la série 1" }),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Options de la série 2" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Monter" }));
+
+    // The moved set keeps its values and takes the first place
+    expect(field("Répétitions").value).toBe("5");
+    expect(
+      screen.getByRole("button", { name: /^Série 2/ }).textContent,
+    ).toContain("11 rép.");
+  });
+
   it("calls the sets of a cardio exercise stages, shown in km", async () => {
     const user = renderEditor("/seances/nouvelle");
     await user.click(screen.getByRole("button", { name: /^Tapis de course/ }));
@@ -854,7 +904,9 @@ describe("SessionEditorPage · saving (US-23)", () => {
       "« Mon tirage élastique » n'est plus disponible. Retire-le pour enregistrer.",
     );
     expect(
-      screen.getByRole("button", { name: /Classique · Bloc 1/ }),
+      screen.getByRole("button", {
+        name: /Ouvrir le bloc Classique · Bloc 1/,
+      }),
     ).toBeTruthy();
   });
 });

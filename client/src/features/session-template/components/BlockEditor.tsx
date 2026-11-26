@@ -9,6 +9,7 @@ import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import trashIcon from "../../../assets/icons/ui/app/trash.svg";
 import Icon from "../../../components/Icon";
 import PageHeader from "../../../components/PageHeader";
+import SortableList from "../../../components/SortableList";
 import TextField from "../../../components/TextField";
 import BlockExerciseRow from "./BlockExerciseRow";
 
@@ -27,6 +28,8 @@ type Props = {
   onAddExercises: () => void;
   onOpenExercise: (exerciseKey: string) => void;
   onRemoveExercise: (exerciseKey: string) => void;
+  // The order of the exercises of the block (US-16)
+  onMoveExercise: (from: number, to: number) => void;
   // "Enregistrer le bloc" and the back arrow both return to the session
   onDone: () => void;
   // The trash can of the header (A4): removes the whole block
@@ -45,6 +48,7 @@ function BlockEditor({
   onAddExercises,
   onOpenExercise,
   onRemoveExercise,
+  onMoveExercise,
   onDone,
   onRemoveBlock,
 }: Props) {
@@ -154,20 +158,46 @@ function BlockEditor({
                 Choisis tes exercices dans le catalogue.
               </p>
             ) : (
-              <ul
-                aria-label="Exercices du bloc"
-                className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card"
-              >
-                {block.exercises.map((exercise, position) => (
-                  <BlockExerciseRow
-                    key={exercise.key}
-                    exercise={exercise}
-                    isFirst={position === 0}
-                    onOpen={() => onOpenExercise(exercise.key)}
-                    onRemove={() => onRemoveExercise(exercise.key)}
-                  />
-                ))}
-              </ul>
+              <div className="overflow-hidden rounded-card border border-base-300 bg-base-100 shadow-card">
+                <SortableList
+                  label="Exercices du bloc"
+                  gapClass="gap-0"
+                  items={block.exercises.map((exercise) => ({
+                    id: exercise.key,
+                    label: exercise.name,
+                    content: null,
+                  }))}
+                  onMove={onMoveExercise}
+                  renderRow={(item, handle) => {
+                    const position = block.exercises.findIndex(
+                      (exercise) => exercise.key === item.id,
+                    );
+                    const exercise = block.exercises[position];
+                    if (exercise === undefined) {
+                      return null;
+                    }
+                    return (
+                      <BlockExerciseRow
+                        exercise={exercise}
+                        handle={handle}
+                        isFirst={position === 0}
+                        onOpen={() => onOpenExercise(exercise.key)}
+                        onRemove={() => onRemoveExercise(exercise.key)}
+                        onMoveUp={
+                          position === 0
+                            ? null
+                            : () => onMoveExercise(position, position - 1)
+                        }
+                        onMoveDown={
+                          position === block.exercises.length - 1
+                            ? null
+                            : () => onMoveExercise(position, position + 1)
+                        }
+                      />
+                    );
+                  }}
+                />
+              </div>
             )}
             <button
               type="button"

@@ -535,6 +535,9 @@ function SessionEditorPage({ edit }: Props) {
           onRemoveSet={(index) =>
             dispatch({ type: "removeSet", ...target, index })
           }
+          onMoveSet={(from, to) =>
+            dispatch({ type: "moveSet", ...target, from, to })
+          }
           onChangeRest={(seconds) =>
             dispatch({ type: "updateExerciseRest", ...target, seconds })
           }
@@ -571,6 +574,9 @@ function SessionEditorPage({ edit }: Props) {
           onOpenExercise={setOpenExerciseKey}
           onRemoveExercise={(exerciseKey) =>
             removeExercise(openBlockKey, exerciseKey)
+          }
+          onMoveExercise={(from, to) =>
+            dispatch({ type: "moveExercise", blockKey: openBlockKey, from, to })
           }
           onDone={() => setOpenBlockKey(null)}
           onRemoveBlock={() => {
@@ -720,6 +726,7 @@ function SessionEditorPage({ edit }: Props) {
                 blocks={draft.blocks}
                 onOpen={setOpenBlockKey}
                 onRemove={removeBlock}
+                onMove={(from, to) => dispatch({ type: "moveBlock", from, to })}
               />
             )}
 

@@ -1,28 +1,42 @@
+import type { ReactNode } from "react";
 import { type DraftExercise, formatSetSummary } from "shared";
 import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
-import gripIcon from "../../../assets/icons/ui/app/grip.svg";
 import Icon from "../../../components/Icon";
+import RowMenu from "../../../components/RowMenu";
 
 type Props = {
   exercise: DraftExercise;
   // Touching the line opens the planned sets (A7)
   onOpen: () => void;
   onRemove: () => void;
+  // "Monter" and "Descendre" of the menu, when the move is possible (US-16)
+  onMoveUp: (() => void) | null;
+  onMoveDown: (() => void) | null;
+  // The grip of the sortable list
+  handle: ReactNode;
   // The first row of the card carries no line above it
   isFirst: boolean;
 };
 
 // Screen A6: one exercise of a block, with the summary of its planned sets
-// ("1 série · 10 rép. · 40 kg"). The grip announces the reordering of the
-// US-16; "Retirer" is not in the mockup but the US-14 asks for it.
-function BlockExerciseRow({ exercise, onOpen, onRemove, isFirst }: Props) {
+// ("1 série · 10 rép. · 40 kg"). The grip moves it, the "⋯" moves it
+// without dragging and removes it (US-16).
+function BlockExerciseRow({
+  exercise,
+  onOpen,
+  onRemove,
+  onMoveUp,
+  onMoveDown,
+  handle,
+  isFirst,
+}: Props) {
   return (
-    <li
-      className={`flex min-h-[54px] items-center gap-2.5 pr-3 pl-1.5 ${
+    <div
+      className={`flex min-h-[54px] items-center gap-1 pr-1 pl-0.5 ${
         isFirst ? "" : "border-t border-base-300"
       }`}
     >
-      <Icon src={gripIcon} className="size-[18px] shrink-0 text-faint" />
+      {handle}
       <button
         type="button"
         onClick={onOpen}
@@ -34,20 +48,28 @@ function BlockExerciseRow({ exercise, onOpen, onRemove, isFirst }: Props) {
             {formatSetSummary(exercise)}
           </span>
         </span>
+        <Icon
+          src={chevronRightIcon}
+          className="size-[18px] shrink-0 text-faint"
+        />
       </button>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Retirer ${exercise.name}`}
-        className="shrink-0 px-1 py-3 text-xs font-semibold text-muted"
-      >
-        Retirer
-      </button>
-      <Icon
-        src={chevronRightIcon}
-        className="size-[18px] shrink-0 text-faint"
+      <RowMenu
+        label={`Options de ${exercise.name}`}
+        actions={[
+          {
+            label: "Monter",
+            onClick: () => onMoveUp?.(),
+            disabled: onMoveUp === null,
+          },
+          {
+            label: "Descendre",
+            onClick: () => onMoveDown?.(),
+            disabled: onMoveDown === null,
+          },
+          { label: "Retirer", onClick: onRemove, isDanger: true },
+        ]}
       />
-    </li>
+    </div>
   );
 }
 
