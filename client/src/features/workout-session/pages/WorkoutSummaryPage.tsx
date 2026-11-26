@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams } from "react-router";
+import { Link, Navigate, useLocation, useParams } from "react-router";
 import {
   computeDurationSeconds,
   computeTonnage,
@@ -31,6 +31,9 @@ function WorkoutSummaryPage() {
   const params = useParams();
   const id = Number(params.id);
   const { session, isLoading, notFound, error, reload } = useWorkoutSession(id);
+  const location = useLocation();
+  // "Résultats corrigés.", handed over by the correction (US-37)
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
 
   if (session !== null && session.status === "in_progress") {
     // Still running: the summary is not for now.
@@ -55,6 +58,14 @@ function WorkoutSummaryPage() {
         />
       )}
       <div className="flex flex-1 flex-col gap-3 px-[18px] pt-1 pb-28">
+        {flash !== null && (
+          <p
+            role="status"
+            className="rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+          >
+            {flash}
+          </p>
+        )}
         {isLoading && <LoadingState label="Chargement du résumé…" />}
 
         {!isLoading && notFound && (
@@ -201,20 +212,16 @@ function WorkoutSummaryPage() {
       {!isLoading && session !== null && (
         <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
           <div className="mx-auto grid max-w-md grid-cols-[1fr_1.3fr] gap-2.5">
-            {/* Correcting the results arrives with US-37. */}
-            <button
-              type="button"
-              disabled
-              aria-describedby="fix-results-soon"
-              className="flex h-btn items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card disabled:opacity-60"
+            {/* The same screens as the session, in correction mode. */}
+            <Link
+              to={`/entrainement/${id}?correction=1`}
+              state={{ from: `/entrainement/${id}/resume` }}
+              className="flex h-btn items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
             >
               <Icon src={pencilIcon} className="size-4" />
               <span className="sr-only">Corriger les résultats</span>
               <span aria-hidden="true">Corriger</span>
-            </button>
-            <p id="fix-results-soon" className="sr-only">
-              Corriger les résultats arrive bientôt.
-            </p>
+            </Link>
             <Link to="/planning" className={PRIMARY_LINK}>
               <span className="sr-only">Retour au planning</span>
               <span aria-hidden="true">Planning</span>

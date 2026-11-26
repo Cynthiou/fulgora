@@ -1,17 +1,19 @@
 import { useRef, useState } from "react";
 import type { ActualSetValues, WorkoutSetRow } from "shared";
 import { ApiError } from "../../../services/apiError";
-import { validateSet } from "../services/workoutSessionService";
+import { correctSet, validateSet } from "../services/workoutSessionService";
 
 type Options = {
   // Replaces one set in the tree shown on screen
   onReplace: (set: WorkoutSetRow) => void;
+  // Correcting a past session instead of filling a running one (US-37)
+  isCorrection?: boolean;
 };
 
 // Validates a set with an optimistic display: the set shows as done at once,
 // the server confirms, and on failure the previous values come back with a
 // message (US-29, RM-044).
-export function useValidateSet({ onReplace }: Options) {
+export function useValidateSet({ onReplace, isCorrection = false }: Options) {
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The last failed attempt, for "Réessayer"
@@ -45,7 +47,9 @@ export function useValidateSet({ onReplace }: Options) {
     });
 
     try {
-      const saved = await validateSet(set.id, values);
+      const saved = isCorrection
+        ? await correctSet(set.id, values)
+        : await validateSet(set.id, values);
       onReplace(saved);
     } catch (caught) {
       onReplace(set);

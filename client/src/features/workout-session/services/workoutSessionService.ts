@@ -45,6 +45,18 @@ export function validateSet(
   });
 }
 
+// PUT /api/workout-sets/:id/correction: fixes a set of a past session
+// (US-37). The planned values never move.
+export function correctSet(
+  setId: number,
+  values: ActualSetValues,
+): Promise<WorkoutSetRow> {
+  return apiFetch<WorkoutSetRow>(`/workout-sets/${setId}/correction`, {
+    method: "PUT",
+    body: JSON.stringify(values),
+  });
+}
+
 // POST /api/workout-sessions/:id/abandon: stops the session for good (US-33).
 export function abandonWorkoutSession(id: number): Promise<WorkoutSessionTree> {
   return apiFetch<WorkoutSessionTree>(`/workout-sessions/${id}/abandon`, {

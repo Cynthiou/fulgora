@@ -45,6 +45,7 @@ function set(position: number, validated: boolean): WorkoutSetRow {
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: validated ? "2026-11-26T07:05:00.000Z" : null,
+    updated_at: null,
     is_added: false,
   };
 }

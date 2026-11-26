@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import {
   countPlannedSets,
   countValidatedSets,
@@ -54,6 +60,14 @@ function WorkoutPage() {
   const params = useParams();
   const id = Number(params.id);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  // "?correction=1": the same screens, on a session already over (US-37)
+  const isCorrecting = searchParams.get("correction") === "1";
+  // Where "Enregistrer les corrections" goes back to
+  const backTo =
+    (location.state as { from?: string } | null)?.from ??
+    `/entrainement/${id}/resume`;
   const { session, isLoading, notFound, error, reload, replaceSession } =
     useWorkoutSession(id);
   const isInProgress = session?.status === "in_progress";
@@ -67,6 +81,8 @@ function WorkoutPage() {
   const inFlight = useRef(false);
   // The exercises chosen in the catalog, waiting for their place (US-32)
   const [pending, setPending] = useState<SelectedExercise[] | null>(null);
+  // Something was added during this correction (US-37)
+  const [hasAdded, setHasAdded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
 
@@ -95,6 +111,7 @@ function WorkoutPage() {
         await addWorkoutExercises(blockId, ids);
       }
       setPending(null);
+      setHasAdded(true);
       reload();
     } catch (caught) {
       setAddError(
@@ -106,6 +123,17 @@ function WorkoutPage() {
       setIsAdding(false);
     }
   }
+
+  // "Enregistrer les corrections" stays grey until something changed: a
+  // set carrying a correction date, or something added in this visit.
+  const hasCorrection =
+    hasAdded ||
+    (session?.blocks.some((block) =>
+      block.exercises.some((exercise) =>
+        exercise.sets.some((set) => set.updated_at !== null),
+      ),
+    ) ??
+      false);
 
   function openSummary() {
     navigate(`/entrainement/${id}/resume`, { replace: true });
@@ -237,6 +265,17 @@ function WorkoutPage() {
 
             {session.auto_closed && <AutoClosedNotice />}
 
+            {isCorrecting && (
+              <div className="flex flex-col gap-1 rounded-card border border-secondary bg-secondary/10 px-4 py-3">
+                <p className="font-sans text-overline uppercase not-italic text-secondary">
+                  Correction
+                </p>
+                <p className="text-sm leading-[1.45]">
+                  Les objectifs prévus ne changent pas.
+                </p>
+              </div>
+            )}
+
             {endError !== null && (
               <ErrorState
                 title={endError}
@@ -332,6 +371,7 @@ function WorkoutPage() {
                         key={exercise.id}
                         sessionId={session.id}
                         exercise={exercise}
+                        isCorrecting={isCorrecting}
                       />
                     ))}
                   </ul>
@@ -339,7 +379,7 @@ function WorkoutPage() {
               </section>
             ))}
 
-            {isInProgress && (
+            {(isInProgress || isCorrecting) && (
               <div className="flex flex-col gap-2 pt-1">
                 <Link
                   to={`/entrainement/${id}/exercices`}
@@ -357,7 +397,7 @@ function WorkoutPage() {
         )}
       </div>
 
-      {!isLoading && session !== null && !isInProgress && (
+      {!isLoading && session !== null && !isInProgress && !isCorrecting && (
         <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
           <div className="mx-auto max-w-md">
             <Link
@@ -366,6 +406,34 @@ function WorkoutPage() {
             >
               Voir le résumé
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Every correction is written set by set: this button only closes
+          the correction and says so (US-37). */}
+      {!isLoading && session !== null && isCorrecting && (
+        <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
+          <div className="mx-auto grid max-w-md grid-cols-[1fr_1.6fr] gap-2.5">
+            <Link
+              to={backTo}
+              className="flex h-btn items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
+            >
+              Annuler
+            </Link>
+            <button
+              type="button"
+              disabled={!hasCorrection}
+              onClick={() =>
+                navigate(backTo, {
+                  replace: true,
+                  state: { flash: "Résultats corrigés." },
+                })
+              }
+              className="flex h-btn items-center justify-center rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
+            >
+              Enregistrer les corrections
+            </button>
           </div>
         </div>
       )}

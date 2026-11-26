@@ -13,6 +13,8 @@ import Icon from "../../../components/Icon";
 
 type Props = {
   sessionId: number;
+  // The link keeps the correction mode (US-37)
+  isCorrecting?: boolean;
   exercise: WorkoutExerciseTree;
 };
 
@@ -21,7 +23,11 @@ type Props = {
 // mark on the left says where it stands: started (orange, ringed), done
 // (green check) or still to do (empty circle). Touching it opens the
 // exercise, set by set (B3).
-function WorkoutExerciseRow({ sessionId, exercise }: Props) {
+function WorkoutExerciseRow({
+  sessionId,
+  exercise,
+  isCorrecting = false,
+}: Props) {
   const isCardio =
     getMeasureProfile(exercise.measure_codes, exercise.is_bodyweight) ===
     "cardio";
@@ -37,7 +43,9 @@ function WorkoutExerciseRow({ sessionId, exercise }: Props) {
   return (
     <li>
       <Link
-        to={`/entrainement/${sessionId}/exercices/${exercise.id}`}
+        to={`/entrainement/${sessionId}/exercices/${exercise.id}${
+          isCorrecting ? "?correction=1" : ""
+        }`}
         className={`flex items-center gap-3 rounded-card bg-base-100 p-3 shadow-card ${
           isRunning ? "border-[1.5px] border-primary" : "border border-base-300"
         }`}

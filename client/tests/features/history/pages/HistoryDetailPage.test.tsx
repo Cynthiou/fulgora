@@ -37,6 +37,7 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: actual === null ? null : "2026-11-19T06:10:00.000Z",
+    updated_at: null,
     is_added: false,
   };
 }

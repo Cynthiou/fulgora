@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import {
   type ActualSetValues,
   formatDuration,
@@ -82,6 +82,10 @@ function describeNext(
 function WorkoutExercisePage() {
   const params = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // "?correction=1": the set is corrected, not filled in (US-37)
+  const isCorrecting = searchParams.get("correction") === "1";
+  const backQuery = isCorrecting ? "?correction=1" : "";
   const sessionId = Number(params.id);
   const exerciseId = Number(params.exerciseId);
   // While a set is being added or removed, the buttons wait.
@@ -90,7 +94,10 @@ function WorkoutExercisePage() {
   const [measured, setMeasured] = useState<number | null>(null);
   const { session, isLoading, notFound, error, reload, replaceSet } =
     useWorkoutSession(sessionId);
-  const validation = useValidateSet({ onReplace: replaceSet });
+  const validation = useValidateSet({
+    onReplace: replaceSet,
+    isCorrection: isCorrecting,
+  });
   // The set chosen with "Faire"; otherwise the first one not done yet
   const [pickedIndex, setPickedIndex] = useState<number | null>(null);
   const [editing, setEditing] = useState<{
@@ -146,6 +153,11 @@ function WorkoutExercisePage() {
     saving: Promise<void>,
   ) {
     setPickedIndex(null);
+    // Correcting: no rest, no way out. The screen simply shows the new
+    // value, and the correction ends from the session screen (US-37).
+    if (isCorrecting) {
+      return;
+    }
     if (isLastSetOfSession(set)) {
       saving.then(() => navigate(`/entrainement/${sessionId}`));
       return;
@@ -207,7 +219,7 @@ function WorkoutExercisePage() {
 
   const backLink = (
     <Link
-      to={`/entrainement/${sessionId}`}
+      to={`/entrainement/${sessionId}${backQuery}`}
       aria-label="Retour"
       className="grid size-tap shrink-0 place-items-center rounded-btn"
     >
@@ -252,7 +264,7 @@ function WorkoutExercisePage() {
           <>
             <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <Link
-                to={`/entrainement/${sessionId}`}
+                to={`/entrainement/${sessionId}${backQuery}`}
                 className="self-start text-[10px] font-bold uppercase tracking-[0.14em] text-secondary"
               >
                 <span aria-hidden="true">‹ </span>Exercices
@@ -308,7 +320,17 @@ function WorkoutExercisePage() {
           exercise !== undefined &&
           exercise !== null && (
             <>
-              {session.status !== "in_progress" && (
+              {isCorrecting && (
+                <div className="flex flex-col gap-1 rounded-card border border-secondary bg-secondary/10 px-4 py-3">
+                  <p className="font-sans text-overline uppercase not-italic text-secondary">
+                    Correction
+                  </p>
+                  <p className="text-sm leading-[1.45]">
+                    Les objectifs prévus ne changent pas.
+                  </p>
+                </div>
+              )}
+              {session.status !== "in_progress" && !isCorrecting && (
                 <p
                   role="status"
                   className="rounded-card border border-base-300 bg-base-100 p-4 text-sm text-muted shadow-card"
@@ -349,7 +371,10 @@ function WorkoutExercisePage() {
                     onEdit={() => setEditing({ set, index })}
                     onPick={() => setPickedIndex(index)}
                     onRemove={
-                      set.is_added && set.validated_at === null
+                      // Only what the user added goes away (RM-048); while
+                      // correcting, even once it is filled in (US-37).
+                      set.is_added &&
+                      (set.validated_at === null || isCorrecting)
                         ? () => removeSet(set.id)
                         : null
                     }
@@ -358,7 +383,7 @@ function WorkoutExercisePage() {
                 ))}
               </ul>
 
-              {session.status === "in_progress" && (
+              {(session.status === "in_progress" || isCorrecting) && (
                 <button
                   type="button"
                   onClick={addSet}
@@ -378,7 +403,7 @@ function WorkoutExercisePage() {
           <div className="mx-auto max-w-md">
             {next !== undefined ? (
               <Link
-                to={`/entrainement/${sessionId}/exercices/${next.id}`}
+                to={`/entrainement/${sessionId}/exercices/${next.id}${backQuery}`}
                 onClick={() => setPickedIndex(null)}
                 className="flex h-12 items-center justify-center gap-1 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
               >
@@ -387,7 +412,7 @@ function WorkoutExercisePage() {
               </Link>
             ) : (
               <Link
-                to={`/entrainement/${sessionId}`}
+                to={`/entrainement/${sessionId}${backQuery}`}
                 className="flex h-12 items-center justify-center rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
               >
                 Retour aux exercices

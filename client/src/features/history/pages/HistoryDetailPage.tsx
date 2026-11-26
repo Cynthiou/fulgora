@@ -1,7 +1,9 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { formatLongDate, formatTimeOfDay, getHistoryStatus } from "shared";
+import pencilIcon from "../../../assets/icons/ui/app/pencil.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import PageHeader from "../../../components/PageHeader";
 import StatusChip from "../../../components/StatusChip";
@@ -26,6 +28,8 @@ function HistoryDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { detail, isLoading, notFound, error, reload } = useHistoryDetail(id);
+  // "Résultats corrigés.", handed over by the correction (US-37)
+  const flash = (location.state as { flash?: string } | null)?.flash ?? null;
 
   function goBack() {
     if (location.key === "default") {
@@ -95,6 +99,14 @@ function HistoryDetailPage() {
           error === null &&
           !notFound && (
             <>
+              {flash !== null && (
+                <p
+                  role="status"
+                  className="rounded-card bg-pick px-4 py-3.5 text-sm font-semibold text-pick-content shadow-hero"
+                >
+                  {flash}
+                </p>
+              )}
               <div className="flex flex-col items-start gap-1.5">
                 <StatusChip status={status} />
                 {detail.kind === "done" ? (
@@ -124,7 +136,16 @@ function HistoryDetailPage() {
                       />
                     )),
                   )}
-                  {/* "Corriger les résultats" arrives with US-37. */}
+                  {/* The same screens as the session, in correction
+                      mode (US-37). */}
+                  <Link
+                    to={`/entrainement/${detail.workout.id}?correction=1`}
+                    state={{ from: location.pathname }}
+                    className="flex h-13 items-center justify-center gap-2 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
+                  >
+                    <Icon src={pencilIcon} className="size-4" />
+                    Corriger les résultats
+                  </Link>
                 </>
               ) : (
                 <PlannedOnlyView blocks={detail.blocks} />
