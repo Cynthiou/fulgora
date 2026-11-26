@@ -1,5 +1,5 @@
-import xIcon from "../../../assets/icons/ui/app/x.svg";
-import Icon from "../../../components/Icon";
+import xIcon from "../assets/icons/ui/app/x.svg";
+import Icon from "./Icon";
 
 export type ActiveFilter = {
   key: string;
@@ -12,8 +12,8 @@ type Props = {
   onClearAll: () => void;
 };
 
-// Screen 04: the active filters as chips under the search. "×" removes one,
-// "Tout effacer" removes them all.
+// Screens 04 and SUI-05g: the active filters as chips. "×" removes one,
+// "Tout effacer" removes them all (US-08, US-52).
 function ActiveFilterChips({ filters, onClearAll }: Props) {
   if (filters.length === 0) {
     return null;

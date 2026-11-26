@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import type { HistoryItem } from "shared";
+import { type HistoryItem, todayInParis } from "shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import TrackingPage from "../../../../src/features/history/pages/TrackingPage";
 import { readHistory } from "../../../../src/features/history/services/historyService";
@@ -112,7 +112,13 @@ describe("TrackingPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Réessayer" }));
     expect(await screen.findByText("Jambes")).toBeTruthy();
-    expect(readMock).toHaveBeenLastCalledWith(1);
+    // The filters travel with every call (US-52)
+    expect(readMock).toHaveBeenLastCalledWith(1, {
+      period: "all",
+      date: todayInParis(),
+      program: null,
+      statuses: [],
+    });
     expect(screen.queryByRole("button", { name: "Charger plus" })).toBeNull();
   });
 

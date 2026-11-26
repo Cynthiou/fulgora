@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { HistoryItem } from "shared";
+import type { HistoryFilters, HistoryItem } from "shared";
 import { isAbortError } from "../../../services/api";
 import { ApiError } from "../../../services/apiError";
 import { readHistory } from "../services/historyService";
@@ -12,7 +12,7 @@ function toMessage(error: unknown): string {
 
 // The history, 20 lines at a time. The first load and "load more" keep their
 // own flags and errors, so the lines already shown stay on a failure.
-export function useHistory() {
+export function useHistory(filters: HistoryFilters) {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,13 +22,16 @@ export function useHistory() {
   const [attempt, setAttempt] = useState(0);
   const loadingMore = useRef(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt is listed on purpose, it re-runs the first load when retry() is called
+  // The filters live in the address: a change reloads the first page.
+  const asked = JSON.stringify(filters);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt and asked are listed on purpose, they re-run the first load
   useEffect(() => {
     const controller = new AbortController();
     setIsLoading(true);
     setError(null);
 
-    readHistory(0, controller.signal)
+    readHistory(0, JSON.parse(asked) as HistoryFilters, controller.signal)
       .then((page) => {
         setItems(page.items);
         setHasMore(page.has_more);
@@ -43,7 +46,7 @@ export function useHistory() {
       });
 
     return () => controller.abort();
-  }, [attempt]);
+  }, [attempt, asked]);
 
   async function loadMore() {
     if (!hasMore || loadingMore.current) {
@@ -53,7 +56,7 @@ export function useHistory() {
     setIsLoadingMore(true);
     setLoadMoreError(null);
     try {
-      const page = await readHistory(items.length);
+      const page = await readHistory(items.length, filters);
       setItems((current) => [...current, ...page.items]);
       setHasMore(page.has_more);
     } catch (caught) {

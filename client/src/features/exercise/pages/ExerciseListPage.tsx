@@ -21,6 +21,9 @@ import {
 } from "shared";
 import chevronLeftIcon from "../../../assets/icons/ui/app/chevron-left.svg";
 import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import ActiveFilterChips, {
+  type ActiveFilter,
+} from "../../../components/ActiveFilterChips";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
 import Icon from "../../../components/Icon";
@@ -31,9 +34,6 @@ import {
   savePendingExercises,
 } from "../../session-template/services/sessionDraftStorage";
 import { savePendingWorkoutExercises } from "../../workout-session/services/workoutAddStorage";
-import ActiveFilterChips, {
-  type ActiveFilter,
-} from "../components/ActiveFilterChips";
 import {
   CATEGORY_ICONS,
   DIFFICULTY_ICONS,
