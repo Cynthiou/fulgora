@@ -27,6 +27,7 @@ import {
   type ProgramListItem,
   readPrograms,
 } from "../../program/services/programService";
+import MuscleSetsCard from "../components/MuscleSetsCard";
 import { readTrackingSummary } from "../services/progressService";
 
 const SKELETON_KEYS = ["a", "b", "c"];
@@ -339,6 +340,8 @@ function TrackingSummaryPage() {
               </p>
             )}
           </section>
+
+          <MuscleSetsCard muscles={summary.muscles} />
 
           {summary.records.length > 0 && (
             <section

@@ -196,6 +196,13 @@ test("shows the summary of the week, then of the month", async ({ page }) => {
   await expect(
     page.getByText("Le tonnage n'apparaît qu'avec des charges."),
   ).toBeVisible();
+  // US-50: the muscles of the period, with their half sets
+  await expect(
+    page.getByRole("heading", { name: "Muscles · séries" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Principal = 1 série, secondaire = ½ série."),
+  ).toBeVisible();
   await shoot(page, "sui-01-resume-semaine");
   await expectNoA11yViolation(page);
 
