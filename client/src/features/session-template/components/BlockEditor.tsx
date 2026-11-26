@@ -72,7 +72,7 @@ function BlockEditor({
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
       <PageHeader
-        onBack={problem === null ? onDone : undefined}
+        onBack={onDone}
         backLabel="Retour à la séance"
         title={typeLabel}
         subtitle={`Bloc ${index + 1} · ${

@@ -59,10 +59,10 @@ Ces formats sont très utilisés en préparation physique : enchaîner les exerc
 
 ## Tâches techniques
 
-- [ ] Shared : `BLOCK_TYPES` : `isAvailable` à vrai pour les 3 types ; `sessionDraftSchema` : règles propres à chaque type (`superRefine`)
-- [ ] Backend : `createTemplateBlock` enregistre `planned_rounds` et `time_limit_seconds`
-- [ ] Frontend : `TimedBlockSettings.tsx` ; `formatBlockSummary`
-- [ ] Tests : schéma : circuit sans tours → refusé ; AMRAP sans durée → refusé ; for_time sans durée → accepté
+- [x] Shared : `BLOCK_TYPES` : `isAvailable` à vrai pour les 3 types ; `sessionDraftSchema` : règles propres à chaque type (`superRefine`)
+- [x] Backend : `createTemplateBlock` enregistre `planned_rounds` et `time_limit_seconds`
+- [x] Frontend : `TimedBlockSettings.tsx` ; `formatBlockSummary`
+- [x] Tests : schéma : circuit sans tours → refusé ; AMRAP sans durée → refusé ; for_time sans durée → accepté
 
 ## Definition of Done
 

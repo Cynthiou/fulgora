@@ -106,6 +106,9 @@ test("deletes a program nobody has started", async ({ page }) => {
 test("gives up a program already started and keeps the past", async ({
   page,
 }) => {
+  // A long path (program, session, abandon): slow when the whole suite
+  // runs at once.
+  test.slow();
   await signUp(page);
   await page.getByRole("button", { name: "Commencer" }).click();
   await expectHomePage(page);

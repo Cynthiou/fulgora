@@ -298,19 +298,22 @@ export const draftBlockSchema = z
       .string()
       .max(2000, { error: "2 000 caractères au maximum." })
       .nullable(),
-    // Only a timed block uses these two (US-43)
+    // Only a timed block uses these two; the other types may leave them
+    // out altogether (US-43).
     planned_rounds: z
       .number()
       .int({ error: "Entre un nombre entier." })
       .min(ROUNDS_LIMIT.min, { error: ROUNDS_MESSAGE })
       .max(ROUNDS_LIMIT.max, { error: ROUNDS_MESSAGE })
-      .nullable(),
+      .nullable()
+      .default(null),
     time_limit_seconds: z
       .number()
       .int({ error: "Entre un nombre entier." })
       .min(TIME_LIMIT_SECONDS.min, { error: TIME_LIMIT_MESSAGE })
       .max(TIME_LIMIT_SECONDS.max, { error: TIME_LIMIT_MESSAGE })
-      .nullable(),
+      .nullable()
+      .default(null),
     exercises: z.array(draftExerciseSchema).max(MAX_EXERCISES_PER_BLOCK, {
       error: `${MAX_EXERCISES_PER_BLOCK} exercices au maximum par bloc.`,
     }),

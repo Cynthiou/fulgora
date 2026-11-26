@@ -103,7 +103,7 @@ test("reads the loads in pounds once the unit is changed", async ({ page }) => {
     .getByRole("button", { name: /^Valider la série/ })
     .click();
   // The only set of the session: the app goes back to B2, 1 / 1 done
-  await expect(page.getByText("1 / 1")).toBeVisible();
+  await expect(page.getByText("1 / 1", { exact: true })).toBeVisible();
 
   // The session is finished, so the result counts for the progress (US-39)
   await page.getByRole("button", { name: "Terminer la séance" }).click();

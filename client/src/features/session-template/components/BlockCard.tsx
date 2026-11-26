@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import {
   BLOCK_TYPE_LABELS,
   type DraftBlock,
+  findTimedBlockProblem,
   formatBlockSettings,
   formatExerciseCountShort,
   getBlockLabel,
@@ -38,6 +39,8 @@ function BlockCard({
     block.name !== null && block.name.trim() !== ""
       ? block.name.trim()
       : `Bloc ${index + 1}`;
+  // A timed block that is not ready says so, in red (US-43)
+  const problem = findTimedBlockProblem(block);
   const summary =
     block.block_type === "note"
       ? block.instructions?.trim() || "Note vide"
@@ -56,7 +59,11 @@ function BlockCard({
         onClick={onOpen}
         className="flex min-w-0 flex-1 flex-col gap-1 py-1 text-left"
       >
-        <span className="sr-only">{`Ouvrir le bloc ${label}`}</span>
+        <span className="sr-only">
+          {problem === null
+            ? `Ouvrir le bloc ${label}`
+            : `Ouvrir le bloc ${label}, ${problem}`}
+        </span>
         <span
           aria-hidden="true"
           className="flex items-baseline justify-between gap-2"
@@ -79,9 +86,11 @@ function BlockCard({
         </span>
         <span
           aria-hidden="true"
-          className="line-clamp-2 text-xs font-medium leading-[1.45] text-muted"
+          className={`line-clamp-2 text-xs font-medium leading-[1.45] ${
+            problem === null ? "text-muted" : "text-status-missed-text"
+          }`}
         >
-          {summary}
+          {problem ?? summary}
         </span>
       </button>
       <RowMenu

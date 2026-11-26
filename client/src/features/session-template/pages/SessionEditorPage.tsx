@@ -13,8 +13,10 @@ import {
   type DraftExercise,
   dateSchema,
   diffSessionDrafts,
+  findTimedBlockProblem,
   formatBlockCount,
   formatLongDate,
+  getBlockLabel,
   isTimedBlock,
   MAX_BLOCKS,
   type SelectedExercise,
@@ -316,6 +318,17 @@ function SessionEditorPage({ edit }: Props) {
 
   // Saves everything in one call: session, version 1, blocks, exercises,
   // sets and the appointment. On failure the draft stays as it is.
+  // The first block that is not ready yet ("Règle le nombre de tours.").
+  function findBlockProblem(): string | null {
+    for (const [index, block] of draft.blocks.entries()) {
+      const problem = findTimedBlockProblem(block);
+      if (problem !== null) {
+        return `${getBlockLabel(block, index)} : ${problem.toLowerCase()}`;
+      }
+    }
+    return null;
+  }
+
   async function save() {
     if (inFlight.current) {
       return;
@@ -331,6 +344,14 @@ function SessionEditorPage({ edit }: Props) {
       return;
     }
     setNameError(null);
+
+    // A timed block without its settings would be refused by the server
+    // (US-43): say it here, next to the blocks.
+    const blockProblem = findBlockProblem();
+    if (blockProblem !== null) {
+      setSaveError(blockProblem);
+      return;
+    }
 
     inFlight.current = true;
     setIsSaving(true);
@@ -369,6 +390,11 @@ function SessionEditorPage({ edit }: Props) {
       return;
     }
     setNameError(null);
+    const blockProblem = findBlockProblem();
+    if (blockProblem !== null) {
+      setSaveError(blockProblem);
+      return;
+    }
     setSaveError(null);
     setIsReviewing(true);
   }
