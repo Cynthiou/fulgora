@@ -6,6 +6,7 @@ import {
   getMeasureProfile,
   type PlannedSetValues,
 } from "./session-template.js";
+import { formatDistance, formatSpeed, formatWeight } from "./units.js";
 import {
   isObjectiveReached,
   toActualValues,
@@ -79,22 +80,22 @@ export function formatComparisonValue(
   if (profile === "weighted" || profile === "bodyweight") {
     if (values.reps !== null && values.weight_kg !== null) {
       parts.push(
-        `${format.format(values.reps)} × ${format.format(values.weight_kg)} kg`,
+        `${format.format(values.reps)} × ${formatWeight(values.weight_kg, 2)}`,
       );
     } else if (values.reps !== null) {
       parts.push(`${format.format(values.reps)} rép.`);
     } else if (values.weight_kg !== null) {
-      parts.push(`${format.format(values.weight_kg)} kg`);
+      parts.push(formatWeight(values.weight_kg, 2));
     }
   } else {
     if (values.duration_seconds !== null) {
       parts.push(formatMinSec(values.duration_seconds));
     }
     if (values.distance_meters !== null) {
-      parts.push(`${format.format(values.distance_meters / 1000)} km`);
+      parts.push(formatDistance(values.distance_meters, 2));
     }
     if (values.speed_kmh !== null) {
-      parts.push(`${format.format(values.speed_kmh)} km/h`);
+      parts.push(formatSpeed(values.speed_kmh, 2));
     }
     if (values.incline_percent !== null) {
       parts.push(`${format.format(values.incline_percent)} %`);

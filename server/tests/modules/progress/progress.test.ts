@@ -196,6 +196,11 @@ afterAll(async () => {
     "DELETE em FROM exercise_measure em JOIN exercise e ON e.id = em.exercise_id JOIN `user` u ON u.id = e.owner_user_id WHERE u.username LIKE ?",
     [`${PREFIX}%`],
   );
+  // The muscles of the test exercises, which hold the exercise back (US-50)
+  await client.query(
+    "DELETE em FROM exercise_muscle em JOIN exercise e ON e.id = em.exercise_id JOIN `user` u ON u.id = e.owner_user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
   await deleteTestUsers(PREFIX);
   await client.end();
 });

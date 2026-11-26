@@ -1,6 +1,16 @@
 import * as z from "zod";
 import type { MeasureCode } from "./catalog.js";
 import { addYears, todayInParis } from "./dates.js";
+import {
+  DISTANCE_UNIT_LABELS,
+  formatDistance,
+  formatSpeed,
+  formatWeight,
+  getDisplayUnits,
+  getSpeedUnitLabel,
+  toDisplayWeight,
+  WEIGHT_UNIT_LABELS,
+} from "./units.js";
 import { REQUIRED_MESSAGE } from "./user.js";
 import { dateSchema, timeSchema } from "./validation.js";
 
@@ -424,29 +434,26 @@ export function describeSet(
   }
   if (set.weight_kg !== null) {
     // A body weight exercise carries an added weight ("lest"), A7b.
-    const unit =
-      getMeasureProfile(codes, isBodyweight) === "bodyweight"
-        ? "kg lest"
-        : "kg";
-    parts.push(`${numberFormat.format(set.weight_kg)} ${unit}`);
+    const isLest = getMeasureProfile(codes, isBodyweight) === "bodyweight";
+    parts.push(`${formatWeight(set.weight_kg, 2)}${isLest ? " lest" : ""}`);
   }
   // "G 10 · D 6 kg" when the load differs from one side to the other.
   if (set.weight_left_kg !== null || set.weight_right_kg !== null) {
     const left = set.weight_left_kg;
     const right = set.weight_right_kg;
     parts.push(
-      `G ${left === null ? "—" : numberFormat.format(left)}`,
-      `D ${right === null ? "—" : numberFormat.format(right)} kg`,
+      `G ${left === null ? "—" : numberFormat.format(toDisplayWeight(left))}`,
+      `D ${right === null ? "—" : formatWeight(right, 2)}`,
     );
   }
   if (set.duration_seconds !== null) {
     parts.push(`${formatDuration(set.duration_seconds)}${perSide}`);
   }
   if (set.distance_meters !== null) {
-    parts.push(`${numberFormat.format(set.distance_meters / 1000)} km`);
+    parts.push(formatDistance(set.distance_meters, 2));
   }
   if (set.speed_kmh !== null) {
-    parts.push(`${numberFormat.format(set.speed_kmh)} km/h`);
+    parts.push(formatSpeed(set.speed_kmh, 2));
   }
   if (set.incline_percent !== null) {
     parts.push(`${numberFormat.format(set.incline_percent)} %`);
@@ -640,18 +647,20 @@ export function getSetFieldLabel(
     case "reps":
       // The goal is the same on both sides (US-51, A7e)
       return isPerSide ? "Rép. / côté" : "Répétitions";
-    case "weight_kg":
-      return profile === "bodyweight" ? "Lest (kg)" : "Charge (kg)";
+    case "weight_kg": {
+      const unit = WEIGHT_UNIT_LABELS[getDisplayUnits().weight];
+      return profile === "bodyweight" ? `Lest (${unit})` : `Charge (${unit})`;
+    }
     case "weight_left_kg":
-      return "Charge gauche (kg)";
+      return `Charge gauche (${WEIGHT_UNIT_LABELS[getDisplayUnits().weight]})`;
     case "weight_right_kg":
-      return "Charge droite (kg)";
+      return `Charge droite (${WEIGHT_UNIT_LABELS[getDisplayUnits().weight]})`;
     case "duration_seconds":
       return isPerSide ? "Durée / côté (min:s)" : "Durée (min:s)";
     case "distance_meters":
-      return "Distance (km)";
+      return `Distance (${DISTANCE_UNIT_LABELS[getDisplayUnits().distance]})`;
     case "speed_kmh":
-      return "Vitesse (km/h)";
+      return `Vitesse (${getSpeedUnitLabel()})`;
     case "incline_percent":
       return "Inclinaison (%)";
     case "resistance":

@@ -5,6 +5,7 @@ import {
   getMeasureProfile,
   type MeasureProfile,
 } from "./session-template.js";
+import { formatDistance, formatSpeed, formatWeight } from "./units.js";
 
 // US-39: how an exercise has gone, session after session. Everything is
 // computed from the sets really done (RM-051), never stored.
@@ -254,16 +255,16 @@ export function formatMetricValue(
   switch (metric) {
     case "weight_max":
     case "one_rep_max":
-      return `${numberFormat.format(value)} kg`;
+      return formatWeight(value);
     case "reps_max":
       return `${numberFormat.format(value)} rép.`;
     case "duration_max":
     case "duration":
       return formatDuration(value);
     case "distance":
-      return `${numberFormat.format(value / 1000)} km`;
+      return formatDistance(value);
     case "speed":
-      return `${numberFormat.format(value)} km/h`;
+      return formatSpeed(value);
     default:
       return numberFormat.format(value);
   }
@@ -339,7 +340,7 @@ export function formatBestResult(
   const records = computeExerciseRecords(sets);
   if (records.weight_max !== null && profile !== "cardio") {
     const reps = records.weight_max.reps;
-    return `${numberFormat.format(records.weight_max.weight_kg)} kg${
+    return `${formatWeight(records.weight_max.weight_kg)}${
       reps === null ? "" : ` × ${reps}`
     }`;
   }
@@ -347,7 +348,7 @@ export function formatBestResult(
     return `${records.max_reps} rép.`;
   }
   if (records.max_distance_meters !== null) {
-    return `${numberFormat.format(records.max_distance_meters / 1000)} km`;
+    return formatDistance(records.max_distance_meters);
   }
   if (records.max_duration_seconds !== null) {
     return formatDuration(records.max_duration_seconds);
@@ -413,7 +414,7 @@ export function detectNewRecords(
     const reps = session.weight_max?.reps ?? null;
     records.push({
       kind: "weight_max",
-      text: `${numberFormat.format(now.weight_max)} kg${
+      text: `${formatWeight(now.weight_max)}${
         reps === null ? "" : ` × ${reps}`
       }`,
     });
@@ -446,7 +447,7 @@ export function detectNewRecords(
   ) {
     records.push({
       kind: "distance_max",
-      text: `${numberFormat.format(now.distance_max / 1000)} km`,
+      text: formatDistance(now.distance_max),
     });
   }
   return records;

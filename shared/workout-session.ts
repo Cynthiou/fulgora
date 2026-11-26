@@ -13,6 +13,7 @@ import {
   plannedSetSchema,
   SET_LIMITS,
 } from "./session-template.js";
+import { formatDistance, formatSpeed, formatWeight } from "./units.js";
 import { dateSchema } from "./validation.js";
 
 // --- The session in progress (home page, profile) ---------------------------
@@ -305,13 +306,13 @@ function formatGapValue(field: keyof ActualSetValues, amount: number): string {
     case "reps":
       return `${format.format(amount)} rép.`;
     case "weight_kg":
-      return `${format.format(amount)} kg`;
+      return formatWeight(amount, 2);
     case "duration_seconds":
       return formatDuration(amount);
     case "distance_meters":
-      return `${format.format(amount / 1000)} km`;
+      return formatDistance(amount, 2);
     case "speed_kmh":
-      return `${format.format(amount)} km/h`;
+      return formatSpeed(amount, 2);
     case "incline_percent":
       return `${format.format(amount)} %`;
     case "resistance":
@@ -418,9 +419,9 @@ export function computeTonnage(sets: WorkoutSetRow[]): number {
   return Math.round(total * 1000) / 1000;
 }
 
-// "3 240 kg".
+// "3 240 kg", or "7 143,3 lb" for a user who reads pounds.
 export function formatTonnage(kilograms: number): string {
-  return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(kilograms)} kg`;
+  return formatWeight(kilograms);
 }
 
 // "48 min", "1 h 05", "42 s".
