@@ -22,6 +22,8 @@ let someoneElse: TestUser;
 const emptyValues = {
   reps: null,
   weight_kg: null,
+  weight_left_kg: null,
+  weight_right_kg: null,
   duration_seconds: null,
   distance_meters: null,
   speed_kmh: null,

@@ -23,6 +23,8 @@ let secondSetId: number;
 const emptyValues = {
   reps: null,
   weight_kg: null,
+  weight_left_kg: null,
+  weight_right_kg: null,
   duration_seconds: null,
   distance_meters: null,
   speed_kmh: null,
@@ -95,6 +97,17 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(async () => {
+  // The sides point at the sets (US-51): they go first.
+  await client.query(
+    `DELETE wss FROM workout_set_side wss
+       JOIN workout_set wset ON wset.id = wss.workout_set_id
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+       JOIN \`user\` u ON u.id = ws.owner_user_id
+      WHERE u.username LIKE ?`,
+    [`${PREFIX}%`],
+  );
   // Fixture exercises are deleted by deleteTestUsers; their measures first.
   await client.query(
     "DELETE em FROM exercise_measure em JOIN exercise e ON e.id = em.exercise_id JOIN `user` u ON u.id = e.owner_user_id WHERE u.username LIKE ?",
@@ -133,6 +146,8 @@ describe("PUT /api/workout-sets/:id", () => {
       weight_planned_kg: 40,
       reps_actual: 10,
       weight_actual_kg: 40,
+      weight_left_planned_kg: null,
+      weight_right_planned_kg: null,
     });
     expect(response.body.validated_at).toEqual(expect.any(String));
     const firstValidation = response.body.validated_at;
@@ -158,6 +173,8 @@ describe("PUT /api/workout-sets/:id", () => {
       weight_planned_kg: 40,
       reps_actual: 8,
       weight_actual_kg: 42.5,
+      weight_left_planned_kg: null,
+      weight_right_planned_kg: null,
       validated_at: firstValidation,
     });
 
@@ -266,6 +283,8 @@ describe("PUT /api/workout-sets/:id/correction", () => {
       weight_planned_kg: 40,
       reps_actual: 6,
       weight_actual_kg: 60,
+      weight_left_planned_kg: null,
+      weight_right_planned_kg: null,
     });
     // The first validation date never moves (RM-049)
     expect(new Date(response.body.validated_at).getTime()).toBe(
@@ -326,5 +345,120 @@ describe("PUT /api/workout-sets/:id/correction", () => {
     expect(running.status).toBe(409);
     expect(running.body.error.code).toBe("WORKOUT_IN_PROGRESS");
     await setStatus("completed");
+  });
+});
+
+// US-51: an exercise done side by side. The set waits for both sides.
+describe("PUT /api/workout-sets/:id/sides/:side", () => {
+  function side(setId: number, which: string, body: object, cookie: string) {
+    return request(app)
+      .put(`/api/workout-sets/${setId}/sides/${which}`)
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie)
+      .send(body);
+  }
+
+  async function setPerSide(isPerSide: boolean) {
+    await client.execute(
+      `UPDATE workout_exercise we
+         JOIN workout_block wb ON wb.id = we.workout_block_id
+          SET we.is_per_side = ?
+        WHERE wb.workout_session_id = ?`,
+      [isPerSide, workoutId],
+    );
+    await client.execute(
+      "UPDATE workout_session SET status = 'in_progress' WHERE id = ?",
+      [workoutId],
+    );
+  }
+
+  it("validates the set only once both sides are there (RM-044)", async () => {
+    await setPerSide(true);
+    await client.execute(
+      "UPDATE workout_set SET validated_at = NULL WHERE id = ?",
+      [secondSetId],
+    );
+
+    const left = await side(
+      secondSetId,
+      "left",
+      { reps: 15, weight_kg: 10, duration_seconds: null },
+      lea.cookie,
+    );
+
+    expect(left.status).toBe(200);
+    expect(left.body.validated_at).toBeNull();
+    expect(left.body.sides).toHaveLength(1);
+    expect(left.body.sides[0]).toMatchObject({
+      side: "left",
+      reps_actual: 15,
+      weight_actual_kg: 10,
+    });
+
+    const right = await side(
+      secondSetId,
+      "right",
+      { reps: 13, weight_kg: 6, duration_seconds: null },
+      lea.cookie,
+    );
+
+    expect(right.status).toBe(200);
+    expect(right.body.validated_at).toEqual(expect.any(String));
+    expect(right.body.sides).toHaveLength(2);
+
+    // Written again: the side is updated, the set stays validated
+    const again = await side(
+      secondSetId,
+      "left",
+      { reps: 16, weight_kg: 10, duration_seconds: null },
+      lea.cookie,
+    );
+    expect(again.status).toBe(200);
+    expect(again.body.sides[0]?.reps_actual).toBe(16);
+    expect(again.body.validated_at).toEqual(expect.any(String));
+  });
+
+  it("refuses an unknown side, an empty side and an exercise which is not per side", async () => {
+    await setPerSide(true);
+
+    const unknown = await side(
+      secondSetId,
+      "milieu",
+      { reps: 10, weight_kg: null, duration_seconds: null },
+      lea.cookie,
+    );
+    expect(unknown.status).toBe(400);
+
+    const empty = await side(
+      secondSetId,
+      "left",
+      { reps: null, weight_kg: null, duration_seconds: null },
+      lea.cookie,
+    );
+    expect(empty.status).toBe(422);
+    expect(empty.body.error.code).toBe("EMPTY_SET");
+
+    await setPerSide(false);
+    const notPerSide = await side(
+      secondSetId,
+      "left",
+      { reps: 10, weight_kg: null, duration_seconds: null },
+      lea.cookie,
+    );
+    expect(notPerSide.status).toBe(422);
+    expect(notPerSide.body.error.code).toBe("EXERCISE_NOT_PER_SIDE");
+  });
+
+  it("answers 404 for somebody else's set", async () => {
+    await setPerSide(true);
+
+    const theirs = await side(
+      secondSetId,
+      "left",
+      { reps: 10, weight_kg: null, duration_seconds: null },
+      someoneElse.cookie,
+    );
+
+    expect(theirs.status).toBe(404);
   });
 });

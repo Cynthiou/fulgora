@@ -51,9 +51,9 @@ describe("parseMigrationVersion", () => {
 });
 
 describe("listMigrationFiles", () => {
-  it("finds the four migrations of the project, in order", () => {
+  it("finds the five migrations of the project, in order", () => {
     expect(listMigrationFiles().map((file) => file.version)).toEqual([
-      1, 2, 3, 4,
+      1, 2, 3, 4, 5,
     ]);
   });
 });
@@ -77,20 +77,28 @@ describe("migrateDatabase", () => {
     ).rejects.toBeInstanceOf(ResetRefusedError);
   });
 
-  it("applies the four migrations on an empty database", async () => {
+  it("applies the five migrations on an empty database", async () => {
     const applied = await migrateDatabase(config, {
       reset: true,
       nodeEnv: "test",
       log: silent,
     });
 
-    expect(applied).toEqual([1, 2, 3, 4]);
+    expect(applied).toEqual([1, 2, 3, 4, 5]);
     expect(await readColumnNames("appointment")).toContain("cancelled_at");
     expect(await readColumnNames("user")).toEqual(
       expect.arrayContaining(["terms_accepted_at", "timezone"]),
     );
     expect(await readColumnNames("workout_session")).toEqual(
       expect.arrayContaining(["auto_closed", "declared_afterwards"]),
+    );
+    // US-51: the per-side columns and the table of the two sides
+    expect(await readColumnNames("workout_exercise")).toContain("is_per_side");
+    expect(await readColumnNames("planned_set")).toEqual(
+      expect.arrayContaining(["weight_left_kg", "weight_right_kg"]),
+    );
+    expect(await readColumnNames("workout_set_side")).toEqual(
+      expect.arrayContaining(["side", "reps_actual", "validated_at"]),
     );
   });
 
