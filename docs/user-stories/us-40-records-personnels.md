@@ -54,10 +54,10 @@ Carte masquée.
 
 ## Tâches techniques
 
-- [ ] Backend : à la fin d'une séance (US-34) et après correction (US-37) : `readPreviousBestSets(userId, exerciseIds, excludeSessionId)`, comparaison avec `computeExerciseRecords`, création de la notification (`INSERT`, sans doublon)
-- [ ] Backend : `readRecentRecords(userId, from, to)` pour le Résumé
-- [ ] Shared : `detectNewRecords(previousSets, sessionSets, profile)` (fonction pure)
-- [ ] Tests : unitaires `detectNewRecords` (égalité = pas de record, première séance = pas de notification) ; back : notification unique, correction à la baisse
+- [x] Backend : à la fin d'une séance (US-34) et après correction (US-37) : `readPreviousBestSets(userId, exerciseIds, excludeSessionId)`, comparaison avec `computeExerciseRecords`, création de la notification (`INSERT`, sans doublon)
+- [x] Backend : `readRecentRecords(userId, from, to)` pour le Résumé (la carte SUI-02 arrive avec l'US-41)
+- [x] Shared : `detectNewRecords(previousSets, sessionSets, profile)` (fonction pure)
+- [x] Tests : unitaires `detectNewRecords` (égalité = pas de record, première séance = pas de notification) ; back : notification unique, correction à la baisse
 
 ## Definition of Done
 
