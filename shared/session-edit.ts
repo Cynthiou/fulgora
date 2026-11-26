@@ -124,6 +124,18 @@ function diffExercise(
   return changes;
 }
 
+// True when the items kept on both sides stay in the same order. Only
+// the keys present on both sides count: an addition or a removal is already
+// said elsewhere (US-16).
+function sameOrder(before: string[], after: string[]): boolean {
+  const kept = new Set(after);
+  const left = before.filter((key) => kept.has(key));
+  const right = after.filter((key) => before.includes(key));
+  return (
+    left.length === right.length && left.every((key, i) => key === right[i])
+  );
+}
+
 // What changed in one block kept in the session.
 function diffBlock(
   before: DraftBlock,
@@ -165,6 +177,17 @@ function diffBlock(
     if (!afterKeys.has(exercise.key)) {
       changes.push({ kind: "removed", text: exerciseLine(exercise) });
     }
+  }
+  if (
+    !sameOrder(
+      before.exercises.map((exercise) => exercise.key),
+      after.exercises.map((exercise) => exercise.key),
+    )
+  ) {
+    changes.push({
+      kind: "changed",
+      text: `${title} : ordre des exercices modifié`,
+    });
   }
   return changes;
 }
@@ -209,6 +232,15 @@ export function diffSessionDrafts(
       }
     }
   });
+
+  if (
+    !sameOrder(
+      before.blocks.map((block) => block.key),
+      after.blocks.map((block) => block.key),
+    )
+  ) {
+    changes.push({ kind: "changed", text: "Ordre des blocs modifié" });
+  }
 
   return changes;
 }

@@ -187,6 +187,24 @@ describe("diffSessionDrafts", () => {
     ]);
   });
 
+  it("says the exercises changed place (US-16)", () => {
+    const lunges = exercise("e2", "Fentes", [set({ reps: 10 })]);
+    const before = draft([block("b1", [squat, lunges])]);
+    const after = draft([block("b1", [lunges, squat])]);
+    expect(diffSessionDrafts(before, after)).toEqual([
+      { kind: "changed", text: "Force : ordre des exercices modifié" },
+    ]);
+  });
+
+  it("says the blocks changed place (US-16)", () => {
+    const second = block("b2", [exercise("e2", "Fentes", [set({ reps: 10 })])]);
+    const before = draft([block("b1", [squat]), second]);
+    const after = draft([second, block("b1", [squat])]);
+    expect(diffSessionDrafts(before, after)).toEqual([
+      { kind: "changed", text: "Ordre des blocs modifié" },
+    ]);
+  });
+
   it("says the instructions changed", () => {
     const before = draft([block("b1", [])]);
     const after = draft([
