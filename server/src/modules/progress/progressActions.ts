@@ -1,15 +1,32 @@
 import type { RequestHandler } from "express";
 import {
+  computeProgramProgress,
+  countProgramWeeks,
+  dateSchema,
   type ExerciseProgress,
   formatBestResult,
+  getComparisonRange,
+  getPeriodRange,
+  getProgramWeekIndex,
   type MeasureCode,
+  type ProgramSummary,
   type ProgressExerciseItem,
   type ProgressSet,
+  SUMMARY_PERIODS,
+  type SummaryPeriod,
+  type TrackingSummary,
+  todayInParis,
 } from "shared";
 import { HttpError } from "../../utils/httpError.js";
 import { readUserId } from "../../utils/requestUser.js";
+import { buildAppointmentItems } from "../appointment/appointmentActions.js";
 import { readAvailableExerciseIds } from "../exercise/exerciseRepository.js";
 import {
+  readProgram,
+  readProgramAppointments,
+} from "../program/programRepository.js";
+import {
+  countAppointmentsByStatus,
   type DoneExerciseRow,
   type ExerciseHeaderRow,
   type ProgressSetRow,
@@ -17,6 +34,9 @@ import {
   readDoneExercises,
   readExerciseHeader,
   readExerciseSets,
+  readRecentRecords,
+  readWorkSessions,
+  readWorkTonnage,
 } from "./progressRepository.js";
 
 // US-39: the progress of an exercise, computed from the sets really done.
@@ -112,6 +132,129 @@ export const read: RequestHandler = async (req, res) => {
     measure_codes: toCodes(header.measure_codes),
     is_bodyweight: Number(header.is_bodyweight) === 1,
     sets,
+  };
+  res.json(answer);
+};
+
+// GET /api/progress/summary?period=&date=&program_id=: the summary of the
+// week, of the month or of a program (US-41).
+export const summary: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const query = req.query as {
+    period?: string;
+    date?: string;
+    program_id?: string;
+  };
+  const period = (query.period ?? "week") as SummaryPeriod;
+  if (!SUMMARY_PERIODS.includes(period)) {
+    throw new HttpError(400, "PERIOD_INVALID", "Période inconnue.");
+  }
+  const today = todayInParis();
+  const date = query.date ?? today;
+  if (!dateSchema.safeParse(date).success) {
+    throw new HttpError(400, "DATE_INVALID", "Date invalide.");
+  }
+
+  let from = date;
+  let to = date;
+  let programId: number | null = null;
+  let program: ProgramSummary | null = null;
+
+  if (period === "program") {
+    programId = Number(query.program_id);
+    if (!Number.isInteger(programId) || programId <= 0) {
+      throw new HttpError(400, "PROGRAM_INVALID", "Programme inconnu.");
+    }
+    const row = await readProgram(programId, userId);
+    if (row === null) {
+      throw new HttpError(
+        404,
+        "PROGRAM_NOT_FOUND",
+        "Ce programme n'existe pas.",
+      );
+    }
+    from = row.start_date;
+    to = row.end_date;
+    const appointments = await buildAppointmentItems(
+      await readProgramAppointments(programId),
+    );
+    const progress = computeProgramProgress(appointments, today);
+    program = {
+      id: row.id,
+      name: row.name,
+      week_index: getProgramWeekIndex(row, today),
+      week_count: countProgramWeeks(row.start_date, row.end_date),
+      start_date: row.start_date,
+      end_date: row.end_date,
+      past_count: progress.past,
+      done_count: progress.done,
+      percent: progress.percent,
+    };
+  } else {
+    const range = getPeriodRange(period, date);
+    from = range?.from ?? date;
+    to = range?.to ?? date;
+  }
+
+  const regularity = await countAppointmentsByStatus(
+    userId,
+    from,
+    to,
+    today,
+    programId,
+  );
+  const work = await readWorkSessions(userId, from, to, programId);
+  const tonnage = await readWorkTonnage(userId, from, to, programId);
+
+  // A month is compared with the same number of days before (RM-077).
+  let comparison: TrackingSummary["comparison"] = null;
+  if (period === "month") {
+    // A month still running stops at the day looked at (RM-077). Dates
+    // are strings: they are compared as text, never as numbers.
+    const [until] = [date, to].sort();
+    const range = getComparisonRange(from, until ?? to);
+    const before = await readWorkSessions(
+      userId,
+      range.from,
+      range.to,
+      programId,
+    );
+    comparison = {
+      from: range.from,
+      to: range.to,
+      work: {
+        sessions: before.sessions,
+        duration_seconds: before.duration_seconds ?? 0,
+        tonnage_kg: await readWorkTonnage(
+          userId,
+          range.from,
+          range.to,
+          programId,
+        ),
+      },
+    };
+  }
+
+  const records = (await readRecentRecords(userId, from, to)).map((row) => ({
+    exercise_id: row.exercise_id,
+    name: row.name,
+    message: row.message,
+    date: row.created_at.toISOString().slice(0, 10),
+  }));
+
+  const answer: TrackingSummary = {
+    period,
+    from,
+    to,
+    regularity,
+    work: {
+      sessions: work.sessions,
+      duration_seconds: work.duration_seconds ?? 0,
+      tonnage_kg: tonnage,
+    },
+    comparison,
+    records,
+    program,
   };
   res.json(answer);
 };

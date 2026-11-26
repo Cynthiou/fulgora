@@ -360,3 +360,64 @@ describe("records personnels", () => {
     expect(appointmentId).toEqual(expect.any(Number));
   });
 });
+
+// US-41: the summary of a period (RM-076, RM-077).
+describe("GET /api/progress/summary", () => {
+  it("counts every appointment once, and says what was done", async () => {
+    const response = await request(app)
+      .get("/api/progress/summary?period=month&date=2026-11-15")
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    const { regularity, work, comparison } = response.body;
+    // The sum of the categories is the number of planned sessions
+    expect(
+      regularity.done +
+        regularity.unfinished +
+        regularity.to_confirm +
+        regularity.missed +
+        regularity.cancelled +
+        regularity.upcoming,
+    ).toBe(regularity.planned);
+    expect(regularity.done).toBeGreaterThanOrEqual(2);
+    expect(work.sessions).toBeGreaterThanOrEqual(2);
+    // A month is compared with the same number of days before (RM-077)
+    expect(comparison).toMatchObject({
+      from: "2026-10-01",
+      to: "2026-10-15",
+    });
+  });
+
+  it("gives an empty week and the records of the period", async () => {
+    const response = await request(app)
+      .get("/api/progress/summary?period=week&date=2020-01-06")
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.regularity.planned).toBe(0);
+    expect(response.body.work.sessions).toBe(0);
+    expect(response.body.comparison).toBeNull();
+    expect(response.body.records).toEqual([]);
+  });
+
+  it("refuses an unknown period and a program of somebody else", async () => {
+    const bad = await request(app)
+      .get("/api/progress/summary?period=trimestre")
+      .set("Cookie", lea.cookie);
+    expect(bad.status).toBe(400);
+
+    const [created] = await client.execute<Rows[] & { insertId: number }[]>(
+      `INSERT INTO program (owner_user_id, name, start_date, end_date, status)
+       VALUES (?, 'Pas le mien', '2026-11-02', '2026-12-13', 'programmed')`,
+      [someoneElse.id],
+    );
+    const programId = (created as unknown as { insertId: number }).insertId;
+
+    const theirs = await request(app)
+      .get(`/api/progress/summary?period=program&program_id=${programId}`)
+      .set("Cookie", lea.cookie);
+    expect(theirs.status).toBe(404);
+
+    await client.execute("DELETE FROM program WHERE id = ?", [programId]);
+  });
+});

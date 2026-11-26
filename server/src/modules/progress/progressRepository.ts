@@ -236,3 +236,118 @@ export async function readExerciseNames(
   );
   return rows as { id: number; name: string }[];
 }
+
+// --- Summary of the tracking (US-41) ---------------------------------------
+
+export type RegularityRow = {
+  planned: number;
+  done: number;
+  unfinished: number;
+  to_confirm: number;
+  missed: number;
+  cancelled: number;
+  upcoming: number;
+  moved: number;
+};
+
+// Every appointment of the period, counted once (RM-076). One query, one
+// line per category, so the sum always matches the total.
+export async function countAppointmentsByStatus(
+  userId: number,
+  from: string,
+  to: string,
+  today: string,
+  programId: number | null,
+  db: Queryable = client,
+): Promise<RegularityRow> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COUNT(*) AS planned,
+            SUM(ws.status = 'completed') AS done,
+            SUM(ws.status = 'unfinished') AS unfinished,
+            SUM(ws.id IS NULL AND a.status = 'to_confirm') AS to_confirm,
+            SUM(ws.id IS NULL AND a.status = 'missed') AS missed,
+            SUM(ws.id IS NULL AND a.status = 'cancelled') AS cancelled,
+            SUM(ws.id IS NULL AND a.status IN ('planned', 'attended')
+                AND a.planned_date >= ?) AS upcoming,
+            SUM(a.moved_manually) AS moved
+       FROM appointment a
+       LEFT JOIN workout_session ws ON ws.appointment_id = a.id
+      WHERE a.owner_user_id = ?
+        AND COALESCE(DATE(ws.started_at), a.planned_date) BETWEEN ? AND ?
+        AND (? IS NULL OR a.program_id = ?)`,
+    [today, userId, from, to, programId, programId],
+  );
+  const row = rows[0] as Record<string, number | null> | undefined;
+  const read = (key: string) => Number(row?.[key] ?? 0);
+  return {
+    planned: read("planned"),
+    done: read("done"),
+    unfinished: read("unfinished"),
+    to_confirm: read("to_confirm"),
+    missed: read("missed"),
+    cancelled: read("cancelled"),
+    upcoming: read("upcoming"),
+    moved: read("moved"),
+  };
+}
+
+export type WorkRow = {
+  sessions: number;
+  duration_seconds: number | null;
+};
+
+// The sessions really done over the period, and the time they took.
+export async function readWorkSessions(
+  userId: number,
+  from: string,
+  to: string,
+  programId: number | null,
+  db: Queryable = client,
+): Promise<WorkRow> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COUNT(*) AS sessions,
+            SUM(TIMESTAMPDIFF(SECOND, ws.started_at,
+                COALESCE(ws.ended_at, ws.last_activity_at))) AS duration_seconds
+       FROM workout_session ws
+       JOIN appointment a ON a.id = ws.appointment_id
+      WHERE ws.owner_user_id = ?
+        AND ws.status IN ('completed', 'unfinished')
+        AND DATE(ws.started_at) BETWEEN ? AND ?
+        AND (? IS NULL OR a.program_id = ?)`,
+    [userId, from, to, programId, programId],
+  );
+  const row = rows[0] as { sessions: number; duration_seconds: string | null };
+  return {
+    sessions: Number(row?.sessions ?? 0),
+    duration_seconds:
+      row?.duration_seconds === null || row?.duration_seconds === undefined
+        ? null
+        : Number(row.duration_seconds),
+  };
+}
+
+// The kilograms moved over the period (RM-051): computed, never stored.
+export async function readWorkTonnage(
+  userId: number,
+  from: string,
+  to: string,
+  programId: number | null,
+  db: Queryable = client,
+): Promise<number | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT SUM(wset.reps_actual * wset.weight_actual_kg) AS tonnage
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+       JOIN workout_session ws ON ws.id = wb.workout_session_id
+       JOIN appointment a ON a.id = ws.appointment_id
+      WHERE ws.owner_user_id = ?
+        AND ws.status IN ('completed', 'unfinished')
+        AND wset.validated_at IS NOT NULL
+        AND DATE(ws.started_at) BETWEEN ? AND ?
+        AND (? IS NULL OR a.program_id = ?)`,
+    [userId, from, to, programId, programId],
+  );
+  const tonnage = (rows[0] as { tonnage: string | null } | undefined)?.tonnage;
+  return tonnage === null || tonnage === undefined ? null : Number(tonnage);
+}
