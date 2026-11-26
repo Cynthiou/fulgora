@@ -354,3 +354,105 @@ export function formatBestResult(
   }
   return null;
 }
+
+// --- New records (US-40) ---------------------------------------------------
+
+// The measures a record can be set on, in the order the notification
+// writes them.
+export type RecordKind =
+  | "weight_max"
+  | "reps_max"
+  | "duration_max"
+  | "distance_max";
+
+export const RECORD_LABELS: Record<RecordKind, string> = {
+  weight_max: "Charge max",
+  reps_max: "Répétitions max",
+  duration_max: "Durée max",
+  distance_max: "Distance max",
+};
+
+export type NewRecord = {
+  kind: RecordKind;
+  // "62,5 kg × 8", "12 rép.", "1 min 10", "5,2 km"
+  text: string;
+};
+
+// What the best of a list of sets is worth, measure by measure.
+function bestOf(sets: ProgressSet[]) {
+  const records = computeExerciseRecords(sets);
+  return {
+    weight_max: records.weight_max?.weight_kg ?? null,
+    reps_max: records.max_reps,
+    duration_max: records.max_duration_seconds,
+    distance_max: records.max_distance_meters,
+  };
+}
+
+// The records the session has just set: strictly better than everything
+// done before (RM-080). Nothing on the very first session: there is no
+// "before" to beat.
+export function detectNewRecords(
+  previousSets: ProgressSet[],
+  sessionSets: ProgressSet[],
+  profile: MeasureProfile,
+): NewRecord[] {
+  if (previousSets.length === 0 || sessionSets.length === 0) {
+    return [];
+  }
+  const before = bestOf(previousSets);
+  const now = bestOf(sessionSets);
+  const session = computeExerciseRecords(sessionSets);
+  const records: NewRecord[] = [];
+
+  if (
+    profile !== "cardio" &&
+    now.weight_max !== null &&
+    (before.weight_max === null || now.weight_max > before.weight_max)
+  ) {
+    const reps = session.weight_max?.reps ?? null;
+    records.push({
+      kind: "weight_max",
+      text: `${numberFormat.format(now.weight_max)} kg${
+        reps === null ? "" : ` × ${reps}`
+      }`,
+    });
+  }
+  if (
+    profile !== "cardio" &&
+    now.weight_max === null &&
+    now.reps_max !== null &&
+    (before.reps_max === null || now.reps_max > before.reps_max)
+  ) {
+    records.push({
+      kind: "reps_max",
+      text: `${numberFormat.format(now.reps_max)} rép.`,
+    });
+  }
+  if (
+    profile === "duration" &&
+    now.duration_max !== null &&
+    (before.duration_max === null || now.duration_max > before.duration_max)
+  ) {
+    records.push({
+      kind: "duration_max",
+      text: formatDuration(now.duration_max),
+    });
+  }
+  if (
+    profile === "cardio" &&
+    now.distance_max !== null &&
+    (before.distance_max === null || now.distance_max > before.distance_max)
+  ) {
+    records.push({
+      kind: "distance_max",
+      text: `${numberFormat.format(now.distance_max / 1000)} km`,
+    });
+  }
+  return records;
+}
+
+// "Charge max : 62,5 kg × 8": the message of the notification (NOT-06).
+export function formatRecordMessage(record: NewRecord): string {
+  return `${RECORD_LABELS[record.kind]} : ${record.text}`;
+}

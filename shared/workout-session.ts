@@ -241,17 +241,32 @@ export function formatElapsed(startedAt: string, now: Date): string {
 // plan, without the rest (the rest belongs to the plan).
 export const actualSetSchema = plannedSetSchema.omit({
   rest_after_seconds: true,
+  // The two loads are planned, never recorded: each side keeps its own
+  // values in its own row (US-51).
+  weight_left_kg: true,
+  weight_right_kg: true,
 });
 export type ActualSetValues = z.output<typeof actualSetSchema>;
+
+// The values of a form, in the shape of a planned set: the two per-side
+// loads are planned only, so they are empty here (US-51).
+export function toPlannedShape(
+  values: ActualSetValues,
+  restAfterSeconds: number | null = null,
+): PlannedSetValues {
+  return {
+    ...values,
+    weight_left_kg: null,
+    weight_right_kg: null,
+    rest_after_seconds: restAfterSeconds,
+  };
+}
 
 // The actual side of a set, in the shape of the form.
 export function toActualValues(set: WorkoutSetRow): ActualSetValues {
   return {
     reps: set.reps_actual,
     weight_kg: set.weight_actual_kg,
-    // The two loads are planned, never recorded: each side records its own
-    weight_left_kg: null,
-    weight_right_kg: null,
     duration_seconds: set.duration_actual_seconds,
     distance_meters: set.distance_actual_meters,
     speed_kmh: set.speed_actual_kmh,
@@ -290,8 +305,6 @@ function formatGapValue(field: keyof ActualSetValues, amount: number): string {
     case "reps":
       return `${format.format(amount)} rép.`;
     case "weight_kg":
-    case "weight_left_kg":
-    case "weight_right_kg":
       return `${format.format(amount)} kg`;
     case "duration_seconds":
       return formatDuration(amount);
@@ -345,7 +358,7 @@ export function formatActualValues(
   isBodyweight = false,
 ): string {
   return formatSetValues(
-    { ...toActualValues(set), rest_after_seconds: null },
+    toPlannedShape(toActualValues(set)),
     codes,
     isBodyweight,
   );

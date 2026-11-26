@@ -122,5 +122,11 @@ export function formatActualSide(
   codes: MeasureCode[],
   isBodyweight = false,
 ) {
-  return formatComparisonValue(toActualValues(set), codes, isBodyweight);
+  // The comparison reads the planned shape: a per-side load is never
+  // recorded on the set itself (US-51).
+  return formatComparisonValue(
+    { ...toActualValues(set), weight_left_kg: null, weight_right_kg: null },
+    codes,
+    isBodyweight,
+  );
 }

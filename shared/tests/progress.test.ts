@@ -3,10 +3,13 @@ import {
   buildProgressSeries,
   computeExerciseRecords,
   describeProgressSeries,
+  detectNewRecords,
   estimateOneRepMax,
   formatBestResult,
   formatProgressTrend,
+  formatRecordMessage,
   getAvailableMetrics,
+  type NewRecord,
   type ProgressSet,
 } from "../progress.js";
 
@@ -148,5 +151,66 @@ describe("formatBestResult (SUI-08)", () => {
       "12 rép.",
     );
     expect(formatBestResult([], ["reps"])).toBeNull();
+  });
+});
+
+// US-40: a record is what beats every session before (RM-080).
+describe("detectNewRecords (US-40)", () => {
+  const before: ProgressSet[] = [
+    set("2026-11-12", { reps: 10, weight_kg: 50 }),
+    set("2026-11-12", { reps: 8, weight_kg: 50 }),
+  ];
+
+  it("sees a heavier set as a new record", () => {
+    const records = detectNewRecords(
+      before,
+      [set("2026-11-19", { reps: 8, weight_kg: 62.5 })],
+      "weighted",
+    );
+
+    expect(records).toEqual([{ kind: "weight_max", text: "62,5 kg × 8" }]);
+    expect(formatRecordMessage(records[0] as NewRecord)).toBe(
+      "Charge max : 62,5 kg × 8",
+    );
+  });
+
+  it("says nothing on an equal result", () => {
+    expect(
+      detectNewRecords(
+        before,
+        [set("2026-11-19", { reps: 10, weight_kg: 50 })],
+        "weighted",
+      ),
+    ).toEqual([]);
+  });
+
+  it("says nothing on the very first session", () => {
+    expect(
+      detectNewRecords(
+        [],
+        [set("2026-11-19", { reps: 10, weight_kg: 50 })],
+        "weighted",
+      ),
+    ).toEqual([]);
+  });
+
+  it("counts the repetitions of a body weight exercise", () => {
+    const records = detectNewRecords(
+      [set("2026-11-12", { reps: 8 })],
+      [set("2026-11-19", { reps: 10 })],
+      "bodyweight",
+    );
+
+    expect(records).toEqual([{ kind: "reps_max", text: "10 rép." }]);
+  });
+
+  it("counts the distance of a cardio exercise", () => {
+    const records = detectNewRecords(
+      [set("2026-11-12", { distance_meters: 5000 })],
+      [set("2026-11-19", { distance_meters: 5200 })],
+      "cardio",
+    );
+
+    expect(records).toEqual([{ kind: "distance_max", text: "5,2 km" }]);
   });
 });

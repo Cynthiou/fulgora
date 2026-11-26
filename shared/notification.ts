@@ -84,8 +84,15 @@ export const NOTIFICATION_GROUP_LABELS: Record<NotificationGroup, string> = {
 // Where a notification leads when it is touched; null when nothing can be
 // opened yet (the program and record screens arrive later).
 export function getNotificationLink(item: NotificationItem): string | null {
+  // A record opens the progress of its exercise (US-40, NOT-06).
+  if (item.type === "personal_record" && item.exercise_id !== null) {
+    return `/suivi/exercices/${item.exercise_id}?record=1`;
+  }
   if (item.appointment_id !== null) {
     return `/seances/${item.appointment_id}`;
+  }
+  if (item.program_id !== null) {
+    return `/programmes/${item.program_id}`;
   }
   return null;
 }
