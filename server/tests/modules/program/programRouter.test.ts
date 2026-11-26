@@ -68,6 +68,15 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // Everything that points at an appointment goes first (DT-17).
+  await client.query(
+    "DELETE n FROM notification n JOIN `user` u ON u.id = n.user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
+  await client.query(
+    "DELETE ws FROM workout_session ws JOIN `user` u ON u.id = ws.owner_user_id WHERE u.username LIKE ?",
+    [`${PREFIX}%`],
+  );
   await client.query(
     "DELETE a FROM appointment a JOIN `user` u ON u.id = a.owner_user_id WHERE u.username LIKE ?",
     [`${PREFIX}%`],
@@ -765,5 +774,181 @@ describe("modifier les jours, les heures et la fin", () => {
       someoneElse.cookie,
     );
     expect(stranger.status).toBe(404);
+  });
+});
+
+// US-21: a program is given up (its past kept) or thrown away whole
+// (RM-034, RM-035, RM-073, DT-25).
+describe("abandonner ou supprimer un programme", () => {
+  function del(path: string, cookie: string) {
+    return request(app)
+      .delete(path)
+      .set("Origin", ORIGIN)
+      .set("Cookie", cookie);
+  }
+
+  // A program of two weeks already in the Planning, Monday and Thursday.
+  async function runningProgram() {
+    const draft = await post("/api/programs", validInfo(), lea.cookie);
+    for (const session of draft.body.sessions) {
+      await fillSession(session.session_version_id);
+    }
+    await post(
+      `/api/programs/${draft.body.id}/activate`,
+      undefined,
+      lea.cookie,
+    );
+    return draft.body.id as number;
+  }
+
+  // Starts the first appointment of the program, as the workout would.
+  async function startFirstSession(programId: number, status: string) {
+    const [rows] = await client.execute<Rows[]>(
+      `SELECT id FROM appointment WHERE program_id = ?
+        ORDER BY planned_date LIMIT 1`,
+      [programId],
+    );
+    const appointmentId = Number((rows[0] as { id: number }).id);
+    await client.execute(
+      `INSERT INTO workout_session (appointment_id, owner_user_id, status, started_at, last_activity_at)
+       VALUES (?, ?, ?, NOW(3), NOW(3))`,
+      [appointmentId, lea.id, status],
+    );
+    await client.execute(
+      "UPDATE appointment SET status = 'attended' WHERE id = ?",
+      [appointmentId],
+    );
+    return appointmentId;
+  }
+
+  it("gives up the rest of the program and keeps the past", async () => {
+    const id = await runningProgram();
+    const started = await startFirstSession(id, "completed");
+
+    const response = await post(
+      `/api/programs/${id}/abandon`,
+      undefined,
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe("abandoned");
+
+    const [rows] = await client.execute<Rows[]>(
+      `SELECT id, status, cancelled_at FROM appointment
+        WHERE program_id = ? ORDER BY planned_date`,
+      [id],
+    );
+    const kept = rows.find((row) => Number(row.id) === started);
+    expect(kept?.status).toBe("attended");
+    const cancelled = rows.filter((row) => row.status === "cancelled");
+    expect(cancelled).toHaveLength(3);
+    expect(cancelled[0]?.cancelled_at).not.toBeNull();
+
+    // The change is written down (RM-037)
+    const [changes] = await client.execute<Rows[]>(
+      "SELECT change_type, new_value FROM program_change WHERE program_id = ?",
+      [id],
+    );
+    expect(changes.map((row) => row.change_type)).toContain("status");
+  });
+
+  it("refuses the abandon while a session is in progress (RM-034)", async () => {
+    const id = await runningProgram();
+    await startFirstSession(id, "in_progress");
+
+    const response = await post(
+      `/api/programs/${id}/abandon`,
+      undefined,
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("PROGRAM_HAS_WORKOUT_IN_PROGRESS");
+  });
+
+  it("sends back to the deletion when no session was ever started", async () => {
+    const id = await runningProgram();
+
+    const response = await post(
+      `/api/programs/${id}/abandon`,
+      undefined,
+      lea.cookie,
+    );
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("USE_DELETE_INSTEAD");
+  });
+
+  it("throws a program nobody started away, leaving no orphan row", async () => {
+    const id = await runningProgram();
+    const [templates] = await client.execute<Rows[]>(
+      "SELECT session_template_id FROM weekly_schedule WHERE program_id = ?",
+      [id],
+    );
+    const templateIds = templates.map((row) => Number(row.session_template_id));
+    expect(templateIds).toHaveLength(2);
+
+    const response = await del(`/api/programs/${id}`, lea.cookie);
+
+    expect(response.status).toBe(204);
+    for (const [sql, params] of [
+      ["SELECT id FROM program WHERE id = ?", [id]],
+      ["SELECT id FROM appointment WHERE program_id = ?", [id]],
+      ["SELECT id FROM weekly_schedule WHERE program_id = ?", [id]],
+      ["SELECT id FROM program_change WHERE program_id = ?", [id]],
+      ["SELECT id FROM notification WHERE program_id = ?", [id]],
+      ["SELECT id FROM session_template WHERE id IN (?)", [templateIds]],
+      [
+        "SELECT id FROM session_version WHERE session_template_id IN (?)",
+        [templateIds],
+      ],
+      [
+        `SELECT tb.id FROM template_block tb
+           JOIN session_version sv ON sv.id = tb.session_version_id
+          WHERE sv.session_template_id IN (?)`,
+        [templateIds],
+      ],
+    ] as [string, unknown[]][]) {
+      const [rows] = await client.query<Rows[]>(sql, params);
+      expect({ sql, rows }).toEqual({ sql, rows: [] });
+    }
+  });
+
+  it("keeps a prepared session another program still uses", async () => {
+    const id = await runningProgram();
+    const other = await post("/api/programs", validInfo(), lea.cookie);
+    const [templates] = await client.execute<Rows[]>(
+      `SELECT session_template_id FROM weekly_schedule
+        WHERE program_id = ? LIMIT 1`,
+      [id],
+    );
+    const shared = Number(
+      (templates[0] as { session_template_id: number }).session_template_id,
+    );
+    // The other program points at the same prepared session
+    await client.execute(
+      `INSERT INTO weekly_schedule (program_id, session_template_id, weekday, planned_time)
+       VALUES (?, ?, 5, '18:30')`,
+      [other.body.id, shared],
+    );
+
+    await del(`/api/programs/${id}`, lea.cookie);
+
+    const [rows] = await client.execute<Rows[]>(
+      "SELECT id FROM session_template WHERE id = ?",
+      [shared],
+    );
+    expect(rows).toHaveLength(1);
+  });
+
+  it("refuses to delete a program with a started session", async () => {
+    const id = await runningProgram();
+    await startFirstSession(id, "completed");
+
+    const response = await del(`/api/programs/${id}`, lea.cookie);
+
+    expect(response.status).toBe(409);
+    expect(response.body.error.code).toBe("PROGRAM_HAS_STARTED_SESSIONS");
   });
 });
