@@ -92,13 +92,18 @@ function NumberField({
     }
   }
 
+  // The step is in the shown unit (2,5 kg, 5 lb, 0,1 km), the limits are in
+  // the stored one: the value is clamped once converted back (DT-11).
   function nudge(direction: 1 | -1) {
     const base = shown ?? 0;
-    const next = Math.min(max, Math.max(min, base + direction * step));
-    const rounded = Math.round(next * 1000) / 1000;
-    setText(formatNumber(rounded));
+    const target = fromDisplay(base + direction * step);
+    const stored = Math.min(
+      max,
+      Math.max(min, Math.round(target * 1000) / 1000),
+    );
+    setText(formatNumber(Math.round(toDisplay(stored) * 1000) / 1000));
     report(null);
-    onChange(Math.round(fromDisplay(rounded) * 1000) / 1000);
+    onChange(stored);
   }
 
   const errorId = `${id}-error`;

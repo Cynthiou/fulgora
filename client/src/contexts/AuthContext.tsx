@@ -1,6 +1,7 @@
 import { createContext, type ReactNode, useEffect, useState } from "react";
-import type { PublicUser } from "shared";
+import { type PublicUser, setDisplayUnits } from "shared";
 import { readMe } from "../features/user/services/authService";
+import { setAlertPreferences } from "../features/workout-session/hooks/useTimerAlerts";
 import { isAbortError } from "../services/api";
 
 // Who is connected, shared with every page through React context.
@@ -43,6 +44,20 @@ export function AuthProvider({ children }: Props) {
 
     return () => controller.abort();
   }, []);
+
+  // The preferences of the account drive the units of every screen and the
+  // alerts of the timers (US-05, RM-005). They are applied before the pages
+  // render, so nothing is ever shown in the wrong unit.
+  if (user !== null) {
+    setDisplayUnits({
+      weight: user.preferences.weight_unit,
+      distance: user.preferences.distance_unit,
+    });
+    setAlertPreferences({
+      sound: user.preferences.sound_enabled,
+      vibration: user.preferences.vibration_enabled,
+    });
+  }
 
   const value: AuthContextValue = {
     user,

@@ -4,7 +4,9 @@ import {
   formatSetValues,
   formatTrackedMeasures,
   getMeasureProfile,
+  getSetFieldDisplay,
   getSetFieldLabel,
+  getSetFieldStepper,
   getSetFields,
   getSetLabel,
   MAX_SETS_PER_EXERCISE,
@@ -41,20 +43,6 @@ type Props = {
   onChangeRest: (seconds: number | null) => void;
   // "Valider l'exercice" and the back arrow both return to the block
   onDone: () => void;
-};
-
-// What − and + add on each field (the validation step can be finer: 0.25 kg).
-const STEPPER: Record<SetValueField, { step: number; decimal: boolean }> = {
-  reps: { step: 1, decimal: false },
-  weight_kg: { step: 2.5, decimal: true },
-  weight_left_kg: { step: 2.5, decimal: true },
-  weight_right_kg: { step: 2.5, decimal: true },
-  duration_seconds: { step: 15, decimal: false },
-  distance_meters: { step: 100, decimal: true },
-  speed_kmh: { step: 0.5, decimal: true },
-  incline_percent: { step: 0.5, decimal: true },
-  resistance: { step: 1, decimal: false },
-  calories: { step: 10, decimal: false },
 };
 
 // Screen A7: the planned sets of one exercise. One set is open at a time, the
@@ -213,7 +201,9 @@ function SetConfigurator({
         />
       );
     }
-    const isDistance = field === "distance_meters";
+    // The unit of the screen (kg or lb, km or mi) and its step (US-05)
+    const stepper = getSetFieldStepper(field);
+    const display = getSetFieldDisplay(field);
     return (
       <NumberField
         key={field}
@@ -221,13 +211,12 @@ function SetConfigurator({
         label={label}
         labelTone="muted"
         value={set[field]}
-        step={STEPPER[field].step}
-        decimal={STEPPER[field].decimal}
+        step={stepper.step}
+        decimal={stepper.decimal}
         min={SET_LIMITS[field].min}
         max={SET_LIMITS[field].max}
-        // Stored in meters (DT-11), shown in km
-        toDisplay={isDistance ? (meters) => meters / 1000 : undefined}
-        fromDisplay={isDistance ? (km) => km * 1000 : undefined}
+        toDisplay={display?.toDisplay}
+        fromDisplay={display?.fromDisplay}
         onChange={(value) => onUpdateSet(index, { [field]: value })}
         validate={(value) => validateSetValue(field, value)}
         onErrorChange={(message) => setError(key, message)}

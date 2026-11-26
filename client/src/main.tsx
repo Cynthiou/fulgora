@@ -34,8 +34,10 @@ import SessionEditorPage from "./features/session-template/pages/SessionEditorPa
 import EditProfilePage from "./features/user/pages/EditProfilePage";
 import IllustrationSettingsPage from "./features/user/pages/IllustrationSettingsPage";
 import LoginPage from "./features/user/pages/LoginPage";
+import PreferencesPage from "./features/user/pages/PreferencesPage";
 import ProfilePage from "./features/user/pages/ProfilePage";
 import SignupPage from "./features/user/pages/SignupPage";
+import SoundSettingsPage from "./features/user/pages/SoundSettingsPage";
 import DeclareAfterwardsPage from "./features/workout-session/pages/DeclareAfterwardsPage";
 import WorkoutExercisePage from "./features/workout-session/pages/WorkoutExercisePage";
 import WorkoutPage from "./features/workout-session/pages/WorkoutPage";
@@ -89,6 +91,9 @@ const router = createBrowserRouter([
                 path: "/profil/illustrations",
                 element: <IllustrationSettingsPage />,
               },
+              // The preferences of the account (US-05)
+              { path: "/profil/affichage", element: <PreferencesPage /> },
+              { path: "/profil/sons", element: <SoundSettingsPage /> },
               { path: "/notifications", element: <NotificationsPage /> },
               // The programs of the user (US-48) and their creation (US-18)
               { path: "/programmes", element: <ProgramsPage /> },

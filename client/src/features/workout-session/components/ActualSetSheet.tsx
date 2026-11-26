@@ -2,9 +2,12 @@ import { useState } from "react";
 import {
   type ActualSetValues,
   getMeasureProfile,
+  getSetFieldDisplay,
   getSetFieldLabel,
+  getSetFieldStepper,
   getSetFields,
   getSetLabel,
+  getSpeedUnitLabel,
   isEmptySet,
   type MeasureCode,
   plannedAsActual,
@@ -31,20 +34,6 @@ type Props = {
   onCancel: () => void;
 };
 
-// What − and + add on each field (the validation step can be finer: 0.25 kg).
-const STEPPER: Record<SetValueField, { step: number; decimal: boolean }> = {
-  reps: { step: 1, decimal: false },
-  weight_kg: { step: 2.5, decimal: true },
-  weight_left_kg: { step: 2.5, decimal: true },
-  weight_right_kg: { step: 2.5, decimal: true },
-  duration_seconds: { step: 15, decimal: false },
-  distance_meters: { step: 100, decimal: true },
-  speed_kmh: { step: 0.5, decimal: true },
-  incline_percent: { step: 0.5, decimal: true },
-  resistance: { step: 1, decimal: false },
-  calories: { step: 10, decimal: false },
-};
-
 // Cardio readings are averages read on the machine (B5f).
 function fieldLabel(
   field: SetValueField,
@@ -52,7 +41,7 @@ function fieldLabel(
   profile: ReturnType<typeof getMeasureProfile>,
 ) {
   if (isCardio && field === "speed_kmh") {
-    return "Vitesse moy. (km/h)";
+    return `Vitesse moy. (${getSpeedUnitLabel()})`;
   }
   if (isCardio && field === "incline_percent") {
     return "Inclinaison moy. (%)";
@@ -69,10 +58,9 @@ function formatPlanned(field: SetValueField, value: number | null): string {
     const minutes = Math.floor(value / 60);
     return `${minutes}:${String(value % 60).padStart(2, "0")}`;
   }
-  if (field === "distance_meters") {
-    return format.format(value / 1000);
-  }
-  return format.format(value);
+  // The plan is written in the unit of the screen, like the field (US-05)
+  const display = getSetFieldDisplay(field);
+  return format.format(display === null ? value : display.toDisplay(value));
 }
 
 // Screens B3b and B5f: "Ce que tu as réellement fait". The fields start from
@@ -193,7 +181,8 @@ function ActualSetSheet({
               />
             );
           }
-          const isDistance = field === "distance_meters";
+          const stepper = getSetFieldStepper(field);
+          const display = getSetFieldDisplay(field);
           return (
             <NumberField
               key={field}
@@ -201,12 +190,12 @@ function ActualSetSheet({
               label={hint}
               labelTone="muted"
               value={values[field]}
-              step={STEPPER[field].step}
-              decimal={STEPPER[field].decimal}
+              step={stepper.step}
+              decimal={stepper.decimal}
               min={SET_LIMITS[field].min}
               max={SET_LIMITS[field].max}
-              toDisplay={isDistance ? (meters) => meters / 1000 : undefined}
-              fromDisplay={isDistance ? (km) => km * 1000 : undefined}
+              toDisplay={display?.toDisplay}
+              fromDisplay={display?.fromDisplay}
               onChange={(value) => {
                 setEmptyMessage(null);
                 setValues((current) => ({ ...current, [field]: value }));

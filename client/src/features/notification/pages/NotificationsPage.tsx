@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import {
   getNotificationGroup,
   NOTIFICATION_GROUP_LABELS,
@@ -7,8 +7,10 @@ import {
   type NotificationItem,
 } from "shared";
 import bellIcon from "../../../assets/icons/ui/app/bell.svg";
+import chevronRightIcon from "../../../assets/icons/ui/app/chevron-right.svg";
 import EmptyState from "../../../components/EmptyState";
 import ErrorState from "../../../components/ErrorState";
+import Icon from "../../../components/Icon";
 import LoadingState from "../../../components/LoadingState";
 import PageHeader from "../../../components/PageHeader";
 import { isAbortError } from "../../../services/api";
@@ -162,10 +164,15 @@ function NotificationsPage() {
             );
           })}
 
-        {/* The alert settings arrive with US-05. */}
-        <p className="pt-2 text-center text-xs text-muted">
-          Réglages des alertes : bientôt.
-        </p>
+        {/* NOT-08: the same screen as PRF-04, with the sentence about the
+            bell (US-05). */}
+        <Link
+          to="/profil/sons?depuis=notifications"
+          className="flex h-13 items-center justify-center gap-1.5 rounded-btn border border-base-300 bg-base-100 text-sm font-bold shadow-card"
+        >
+          Réglages des alertes
+          <Icon src={chevronRightIcon} className="size-4 text-faint" />
+        </Link>
       </div>
     </div>
   );

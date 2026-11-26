@@ -53,9 +53,10 @@ describe("formatPreferencesPreview", () => {
   });
 
   test("follows the units and the indicator being chosen", () => {
-    setDisplayUnits({ weight: "lb", distance: "mi" });
     const lines = formatPreferencesPreview({
       ...DEFAULT_PREFERENCES,
+      weight_unit: "lb",
+      distance_unit: "mi",
       home_metric: "none",
     });
     expect(lines[0]?.value).toBe("4 × 8 · 132,3 lb");

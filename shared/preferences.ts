@@ -2,8 +2,8 @@ import * as z from "zod";
 import {
   DISTANCE_UNITS,
   type DistanceUnit,
-  formatDistance,
-  formatWeight,
+  formatDistanceIn,
+  formatWeightIn,
   WEIGHT_UNITS,
   type WeightUnit,
 } from "./units.js";
@@ -61,7 +61,9 @@ export const preferencesSchema = z
 export type UpdatePreferencesInput = z.output<typeof preferencesSchema>;
 
 // The APERÇU card of PRF-03: the same three lines as the mockup, in the
-// units being chosen. The figures are examples, not real data.
+// units being chosen (the units of the preferences given, not the ones of
+// the screens: the preview shows the choice right away). The figures are
+// examples, not real data.
 export const PREVIEW_WEIGHT_KG = 60;
 export const PREVIEW_DISTANCE_METERS = 5200;
 
@@ -76,11 +78,17 @@ export function formatPreferencesPreview(
   return [
     {
       label: "Squat à la barre",
-      value: `4 × 8 · ${formatWeight(PREVIEW_WEIGHT_KG)}`,
+      value: `4 × 8 · ${formatWeightIn(
+        PREVIEW_WEIGHT_KG,
+        preferences.weight_unit,
+      )}`,
     },
     {
       label: "Tapis de course",
-      value: formatDistance(PREVIEW_DISTANCE_METERS),
+      value: formatDistanceIn(
+        PREVIEW_DISTANCE_METERS,
+        preferences.distance_unit,
+      ),
     },
     { label: "Accueil", value: homeValue[preferences.home_metric] },
   ];

@@ -1,5 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { getInitials, SEX_LABELS } from "shared";
+import {
+  DISTANCE_UNIT_LABELS,
+  getInitials,
+  HOME_METRIC_LABELS,
+  SEX_LABELS,
+  type UserPreferences,
+  WEIGHT_UNIT_LABELS,
+} from "shared";
 import bellIcon from "../../../assets/icons/ui/app/bell.svg";
 import gridIcon from "../../../assets/icons/ui/app/grid.svg";
 import imageIcon from "../../../assets/icons/ui/app/image.svg";
@@ -11,6 +18,22 @@ import SheetRow from "../../../components/SheetRow";
 import { useAuth } from "../../../hooks/useAuth";
 import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
 import { useLogout } from "../hooks/useLogout";
+
+// "Sons, vibrations", "Aucune alerte": what the three switches say in one
+// line, on the row of the profile (PRF-01).
+function describeAlerts(preferences: UserPreferences): string {
+  const on: string[] = [];
+  if (preferences.sound_enabled) {
+    on.push("Sons");
+  }
+  if (preferences.vibration_enabled) {
+    on.push("Vibrations");
+  }
+  if (preferences.timer_notification_enabled) {
+    on.push("Notifications");
+  }
+  return on.length === 0 ? "Aucune alerte" : on.join(", ");
+}
 
 // Screen PRF-01: who is connected, the way to the profile, the
 // preferences and the account. The rows that are not built yet say when
@@ -92,16 +115,16 @@ function ProfilePage() {
               isFirst
               icon={gridIcon}
               title="Affichage"
-              subtitle="kg · km · indicateur de l'Accueil · bientôt"
-              disabled
-              onClick={() => {}}
+              subtitle={`${WEIGHT_UNIT_LABELS[user.preferences.weight_unit]} · ${
+                DISTANCE_UNIT_LABELS[user.preferences.distance_unit]
+              } · ${HOME_METRIC_LABELS[user.preferences.home_metric]}`}
+              onClick={() => navigate("/profil/affichage")}
             />
             <SheetRow
               icon={bellIcon}
               title="Sons et minuteurs"
-              subtitle="Sons, vibrations, notifications · bientôt"
-              disabled
-              onClick={() => {}}
+              subtitle={describeAlerts(user.preferences)}
+              onClick={() => navigate("/profil/sons")}
             />
             <SheetRow
               icon={imageIcon}

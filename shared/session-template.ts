@@ -6,8 +6,13 @@ import {
   formatDistance,
   formatSpeed,
   formatWeight,
+  fromDisplayDistance,
+  fromDisplaySpeed,
+  fromDisplayWeight,
   getDisplayUnits,
   getSpeedUnitLabel,
+  toDisplayDistance,
+  toDisplaySpeed,
   toDisplayWeight,
   WEIGHT_UNIT_LABELS,
 } from "./units.js";
@@ -667,6 +672,58 @@ export function getSetFieldLabel(
       return "Résistance";
     case "calories":
       return "Calories";
+  }
+}
+
+// What the − and the + of a field add, in the unit shown on screen: a plate
+// of 2,5 kg, or 5 lb for a user who reads pounds (US-05).
+export function getSetFieldStepper(field: SetValueField): {
+  step: number;
+  decimal: boolean;
+} {
+  const units = getDisplayUnits();
+  switch (field) {
+    case "reps":
+      return { step: 1, decimal: false };
+    case "weight_kg":
+    case "weight_left_kg":
+    case "weight_right_kg":
+      return { step: units.weight === "kg" ? 2.5 : 5, decimal: true };
+    case "duration_seconds":
+      return { step: 15, decimal: false };
+    case "distance_meters":
+      return { step: 0.1, decimal: true };
+    case "speed_kmh":
+      return { step: 0.5, decimal: true };
+    case "incline_percent":
+      return { step: 0.5, decimal: true };
+    case "resistance":
+      return { step: 1, decimal: false };
+    case "calories":
+      return { step: 10, decimal: false };
+  }
+}
+
+// How a field goes from the stored value to the one shown, and back
+// (DT-11). Null when the field is stored exactly as it is shown.
+export function getSetFieldDisplay(field: SetValueField): {
+  toDisplay: (stored: number) => number;
+  fromDisplay: (shown: number) => number;
+} | null {
+  switch (field) {
+    case "weight_kg":
+    case "weight_left_kg":
+    case "weight_right_kg":
+      return { toDisplay: toDisplayWeight, fromDisplay: fromDisplayWeight };
+    case "distance_meters":
+      return {
+        toDisplay: toDisplayDistance,
+        fromDisplay: fromDisplayDistance,
+      };
+    case "speed_kmh":
+      return { toDisplay: toDisplaySpeed, fromDisplay: fromDisplaySpeed };
+    default:
+      return null;
   }
 }
 

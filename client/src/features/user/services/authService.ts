@@ -1,4 +1,9 @@
-import type { LoginPayload, PublicUser, UpdateProfileInput } from "shared";
+import type {
+  LoginPayload,
+  PublicUser,
+  UpdatePreferencesInput,
+  UpdateProfileInput,
+} from "shared";
 import { apiFetch } from "../../../services/api";
 
 // POST /api/auth/login: opens the session (cookie) and returns the user.
@@ -22,6 +27,16 @@ export function logout(): Promise<void> {
 // PATCH /api/users/me: the pseudo and the illustrations (US-04).
 export function updateProfile(input: UpdateProfileInput): Promise<PublicUser> {
   return apiFetch<PublicUser>("/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+// PATCH /api/users/me/preferences: one preference or several (US-05).
+export function updatePreferences(
+  input: UpdatePreferencesInput,
+): Promise<PublicUser> {
+  return apiFetch<PublicUser>("/users/me/preferences", {
     method: "PATCH",
     body: JSON.stringify(input),
   });

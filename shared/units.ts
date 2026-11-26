@@ -117,20 +117,35 @@ function format(value: number, decimals: number): string {
   }).format(value);
 }
 
-// "60 kg" or "132,3 lb": a load, in the unit chosen by the user.
-export function formatWeight(kilograms: number, decimals = 1): string {
-  const { weight } = getDisplayUnits();
-  return `${format(toDisplayWeight(kilograms, weight), decimals)} ${
-    WEIGHT_UNIT_LABELS[weight]
+// "60 kg" or "132,3 lb": a load, in a given unit. The screens use
+// formatWeight, which takes the unit of the user.
+export function formatWeightIn(
+  kilograms: number,
+  unit: WeightUnit,
+  decimals = 1,
+): string {
+  return `${format(toDisplayWeight(kilograms, unit), decimals)} ${
+    WEIGHT_UNIT_LABELS[unit]
   }`;
 }
 
-// "5,2 km" or "3,2 mi": a distance, from the stored meters.
-export function formatDistance(meters: number, decimals = 1): string {
-  const { distance } = getDisplayUnits();
-  return `${format(toDisplayDistance(meters, distance), decimals)} ${
-    DISTANCE_UNIT_LABELS[distance]
+export function formatWeight(kilograms: number, decimals = 1): string {
+  return formatWeightIn(kilograms, getDisplayUnits().weight, decimals);
+}
+
+// "5,2 km" or "3,2 mi", from the stored meters.
+export function formatDistanceIn(
+  meters: number,
+  unit: DistanceUnit,
+  decimals = 1,
+): string {
+  return `${format(toDisplayDistance(meters, unit), decimals)} ${
+    DISTANCE_UNIT_LABELS[unit]
   }`;
+}
+
+export function formatDistance(meters: number, decimals = 1): string {
+  return formatDistanceIn(meters, getDisplayUnits().distance, decimals);
 }
 
 // "9 km/h" or "5,6 mph".

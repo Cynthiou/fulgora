@@ -9,10 +9,20 @@ export type Alerts = {
 
 let audioContext: AudioContext | null = null;
 
+// The user may switch the sound or the vibration off (US-05, RM-062).
+// Both are on until the preferences of the account are known.
+export type AlertPreferences = { sound: boolean; vibration: boolean };
+
+let alertPreferences: AlertPreferences = { sound: true, vibration: true };
+
+export function setAlertPreferences(next: AlertPreferences): void {
+  alertPreferences = next;
+}
+
 // One tone through the Web Audio API. The context is created on the first
 // call, which happens right after a tap of the user (browsers require it).
 function playTone(durationMs: number) {
-  if (typeof AudioContext === "undefined") {
+  if (!alertPreferences.sound || typeof AudioContext === "undefined") {
     return;
   }
   try {
@@ -31,6 +41,9 @@ function playTone(durationMs: number) {
 }
 
 function vibrateIfPossible(durationMs: number) {
+  if (!alertPreferences.vibration) {
+    return;
+  }
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     try {
       navigator.vibrate(durationMs);
