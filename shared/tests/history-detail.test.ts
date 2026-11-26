@@ -34,8 +34,11 @@ function set(
     calories_actual: null,
     planned_rest_seconds: null,
     validated_at: actual === null ? null : "2026-11-19T06:10:00.000Z",
+    weight_left_planned_kg: null,
+    weight_right_planned_kg: null,
     updated_at: null,
     is_added: false,
+    sides: [],
   };
 }
 

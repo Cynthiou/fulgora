@@ -3,6 +3,7 @@ import type { AppointmentStatus, WorkoutStatus } from "./appointment.js";
 import type { MeasureCode } from "./catalog.js";
 import {
   type BlockType,
+  boundedValue,
   DEFAULT_REST_SECONDS,
   formatDuration,
   formatMinSec,
@@ -10,6 +11,7 @@ import {
   getMeasureProfile,
   type PlannedSetValues,
   plannedSetSchema,
+  SET_LIMITS,
 } from "./session-template.js";
 import { dateSchema } from "./validation.js";
 
@@ -77,6 +79,9 @@ export type WorkoutSetRow = {
   reps_actual: number | null;
   weight_planned_kg: number | null;
   weight_actual_kg: number | null;
+  // The two planned loads of a per-side set (US-51)
+  weight_left_planned_kg: number | null;
+  weight_right_planned_kg: number | null;
   duration_planned_seconds: number | null;
   duration_actual_seconds: number | null;
   distance_planned_meters: number | null;
@@ -97,6 +102,25 @@ export type WorkoutSetRow = {
   // Added during the session: no planned values, and it can be removed
   // (US-32, RM-043, RM-048)
   is_added: boolean;
+  // What was done on each side, for a per-side exercise (US-51)
+  sides: WorkoutSetSide[];
+};
+
+export const SIDES = ["left", "right"] as const;
+export type SideCode = (typeof SIDES)[number];
+
+export const SIDE_LABELS: Record<SideCode, string> = {
+  left: "Gauche",
+  right: "Droite",
+};
+
+// What was really done on one side of a set (US-51, RM-044).
+export type WorkoutSetSide = {
+  side: SideCode;
+  reps_actual: number | null;
+  weight_actual_kg: number | null;
+  duration_actual_seconds: number | null;
+  validated_at: string;
 };
 
 export type WorkoutExerciseTree = {
@@ -109,6 +133,8 @@ export type WorkoutExerciseTree = {
   measure_codes: MeasureCode[];
   // Body weight exercise: its load is an added weight ("lest", A7b)
   is_bodyweight: boolean;
+  // Done side by side, left then right (US-51, B5g)
+  is_per_side: boolean;
   default_rest_seconds: number | null;
   // Added during the session (US-32)
   is_added: boolean;
@@ -148,6 +174,8 @@ export function toPlannedValues(set: WorkoutSetRow): PlannedSetValues {
   return {
     reps: set.reps_planned,
     weight_kg: set.weight_planned_kg,
+    weight_left_kg: set.weight_left_planned_kg,
+    weight_right_kg: set.weight_right_planned_kg,
     duration_seconds: set.duration_planned_seconds,
     distance_meters: set.distance_planned_meters,
     speed_kmh: set.speed_planned_kmh,
@@ -221,6 +249,9 @@ export function toActualValues(set: WorkoutSetRow): ActualSetValues {
   return {
     reps: set.reps_actual,
     weight_kg: set.weight_actual_kg,
+    // The two loads are planned, never recorded: each side records its own
+    weight_left_kg: null,
+    weight_right_kg: null,
     duration_seconds: set.duration_actual_seconds,
     distance_meters: set.distance_actual_meters,
     speed_kmh: set.speed_actual_kmh,
@@ -259,6 +290,8 @@ function formatGapValue(field: keyof ActualSetValues, amount: number): string {
     case "reps":
       return `${format.format(amount)} rép.`;
     case "weight_kg":
+    case "weight_left_kg":
+    case "weight_right_kg":
       return `${format.format(amount)} kg`;
     case "duration_seconds":
       return formatDuration(amount);
@@ -355,10 +388,20 @@ export function computeDurationSeconds(
 export function computeTonnage(sets: WorkoutSetRow[]): number {
   const total = sets
     .filter((set) => set.validated_at !== null)
-    .reduce(
-      (sum, set) => sum + (set.reps_actual ?? 0) * (set.weight_actual_kg ?? 0),
-      0,
-    );
+    .reduce((sum, set) => {
+      // A per-side set counts each side with its own load (US-51).
+      if (set.sides.length > 0) {
+        return (
+          sum +
+          set.sides.reduce(
+            (sides, side) =>
+              sides + (side.reps_actual ?? 0) * (side.weight_actual_kg ?? 0),
+            0,
+          )
+        );
+      }
+      return sum + (set.reps_actual ?? 0) * (set.weight_actual_kg ?? 0);
+    }, 0);
   return Math.round(total * 1000) / 1000;
 }
 
@@ -388,7 +431,21 @@ export function formatExerciseResult(
   const head = `${done.length} / ${total}`;
 
   const parts: string[] = [];
-  if (done.length > 0) {
+  // A per-side exercise says both sides, set by set (US-51, B6).
+  const isPerSide = exercise.sets.some((set) => set.sides.length > 0);
+  if (done.length > 0 && isPerSide) {
+    parts.push(
+      done
+        .map((set) =>
+          formatBothSides(
+            set,
+            exercise.measure_codes,
+            exercise.is_bodyweight ?? false,
+          ),
+        )
+        .join(" · "),
+    );
+  } else if (done.length > 0) {
     if (profile === "weighted" || profile === "bodyweight") {
       const reps = done.map((set) => set.reps_actual ?? 0);
       parts.push(`${reps.join(", ")} rép.`);
@@ -409,11 +466,33 @@ export function formatExerciseResult(
     }
   }
 
+  const noun = profile === "cardio" ? "étape" : "série";
+  // "série 3 incomplète : gauche 30 s, droite non faite" (US-51, B6)
+  for (const [index, set] of exercise.sets.entries()) {
+    if (set.validated_at === null && set.sides.length === 1) {
+      const sides = SIDES.map((side) =>
+        getSide(set, side) === null
+          ? `${SIDE_LABELS[side].toLocaleLowerCase("fr-FR")} non faite`
+          : formatSideState(
+              set,
+              side,
+              exercise.measure_codes,
+              exercise.is_bodyweight ?? false,
+            )
+              .replace(" ✓", "")
+              .toLocaleLowerCase("fr-FR")
+              .replace(" : ", " "),
+      );
+      parts.push(`${noun} ${index + 1} incomplète : ${sides.join(", ")}`);
+    }
+  }
+
   const missing = exercise.sets
-    .map((set, index) => (set.validated_at === null ? index + 1 : null))
+    .map((set, index) =>
+      set.validated_at === null && set.sides.length !== 1 ? index + 1 : null,
+    )
     .filter((position): position is number => position !== null);
   if (missing.length > 0) {
-    const noun = profile === "cardio" ? "étape" : "série";
     const list =
       missing.length === 1
         ? `${noun} ${missing[0]} non faite`
@@ -517,4 +596,91 @@ export function getDeclaredExerciseState(
     return "todo";
   }
   return confirmed >= total ? "done" : "partial";
+}
+
+// What one side of a set records (US-51). The goal is the same on both
+// sides: only the values done change.
+export const sideSetSchema = z.object({
+  reps: boundedValue(SET_LIMITS.reps),
+  weight_kg: boundedValue(SET_LIMITS.weight_kg),
+  duration_seconds: boundedValue(SET_LIMITS.duration_seconds),
+});
+
+export type SideSetValues = z.output<typeof sideSetSchema>;
+
+// The address of one side: /api/workout-sets/:id/sides/:side
+export const sideParamsSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  side: z.enum(SIDES, { error: "Côté inconnu." }),
+});
+
+export function getSide(
+  set: Pick<WorkoutSetRow, "sides">,
+  side: SideCode,
+): WorkoutSetSide | null {
+  return set.sides.find((one) => one.side === side) ?? null;
+}
+
+// "Gauche : 30 s ✓", "Droite : non faite": what B5h writes above the timer.
+export function formatSideState(
+  set: WorkoutSetRow,
+  side: SideCode,
+  codes: MeasureCode[],
+  isBodyweight = false,
+): string {
+  const done = getSide(set, side);
+  if (done === null) {
+    return `${SIDE_LABELS[side]} : non faite`;
+  }
+  const values = formatSetValues(
+    {
+      reps: done.reps_actual,
+      weight_kg: done.weight_actual_kg,
+      weight_left_kg: null,
+      weight_right_kg: null,
+      duration_seconds: done.duration_actual_seconds,
+      distance_meters: null,
+      speed_kmh: null,
+      resistance: null,
+      incline_percent: null,
+      calories: null,
+      rest_after_seconds: null,
+    },
+    codes,
+    isBodyweight,
+  );
+  return `${SIDE_LABELS[side]} : ${values} ✓`;
+}
+
+// "G 15 / D 13", the two sides of a per-side set on one line (B6).
+export function formatBothSides(
+  set: WorkoutSetRow,
+  codes: MeasureCode[],
+  isBodyweight = false,
+): string {
+  return SIDES.map((side) => {
+    const done = getSide(set, side);
+    const letter = side === "left" ? "G" : "D";
+    if (done === null) {
+      return `${letter} non faite`;
+    }
+    const values = formatSetValues(
+      {
+        reps: done.reps_actual,
+        weight_kg: done.weight_actual_kg,
+        weight_left_kg: null,
+        weight_right_kg: null,
+        duration_seconds: done.duration_actual_seconds,
+        distance_meters: null,
+        speed_kmh: null,
+        resistance: null,
+        incline_percent: null,
+        calories: null,
+        rest_after_seconds: null,
+      },
+      codes,
+      isBodyweight,
+    );
+    return `${letter} ${values}`;
+  }).join(" / ");
 }

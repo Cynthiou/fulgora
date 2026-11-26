@@ -8,10 +8,12 @@ import {
   countValidatedSets,
   formatActualValues,
   formatAddedSets,
+  formatBothSides,
   formatClock,
   formatElapsed,
   formatExerciseResult,
   formatSetProgress,
+  formatSideState,
   formatSummaryDuration,
   formatTonnage,
   getRestDuration,
@@ -47,8 +49,11 @@ function set(id: number, validated: boolean): WorkoutSetRow {
     calories_actual: null,
     planned_rest_seconds: 90,
     validated_at: validated ? "2026-11-26T07:10:00.000Z" : null,
+    weight_left_planned_kg: null,
+    weight_right_planned_kg: null,
     updated_at: null,
     is_added: false,
+    sides: [],
   };
 }
 
@@ -92,6 +97,8 @@ describe("workout session helpers (US-28)", () => {
     expect(toPlannedValues(set(1, false))).toEqual({
       reps: 10,
       weight_kg: 40,
+      weight_left_kg: null,
+      weight_right_kg: null,
       duration_seconds: null,
       distance_meters: null,
       speed_kmh: null,
@@ -168,6 +175,8 @@ describe("validating a set (US-29)", () => {
       reps_actual: null,
       weight_planned_kg: null,
       weight_actual_kg: null,
+      weight_left_planned_kg: null,
+      weight_right_planned_kg: null,
       duration_planned_seconds: 60,
       duration_actual_seconds: 42,
     };
@@ -304,5 +313,111 @@ describe("countAddedSets et formatAddedSets", () => {
   it("agrees in number", () => {
     expect(formatAddedSets(1)).toBe("1 série supplémentaire");
     expect(formatAddedSets(2)).toBe("2 séries supplémentaires");
+  });
+});
+
+// US-51: an exercise done side by side, left then right (D-02, RM-044).
+describe("per-side sets (US-51)", () => {
+  function perSideSet(
+    id: number,
+    sides: { side: "left" | "right"; reps: number; weight: number }[],
+  ): WorkoutSetRow {
+    return {
+      ...set(id, false),
+      weight_planned_kg: null,
+      weight_left_planned_kg: 10,
+      weight_right_planned_kg: 6,
+      // Both sides done: the server validated the set (RM-044)
+      validated_at: sides.length === 2 ? "2026-11-26T07:10:00.000Z" : null,
+      sides: sides.map((one) => ({
+        side: one.side,
+        reps_actual: one.reps,
+        weight_actual_kg: one.weight,
+        duration_actual_seconds: null,
+        validated_at: "2026-11-26T07:10:00.000Z",
+      })),
+    };
+  }
+
+  it("counts the tonnage side by side", () => {
+    const sets = [
+      perSideSet(1, [
+        { side: "left", reps: 15, weight: 10 },
+        { side: "right", reps: 13, weight: 6 },
+      ]),
+    ];
+
+    // 15 × 10 + 13 × 6
+    expect(computeTonnage(sets)).toBe(228);
+  });
+
+  it("counts nothing for a set with one side only", () => {
+    const sets = [perSideSet(1, [{ side: "left", reps: 15, weight: 10 }])];
+
+    expect(computeTonnage(sets)).toBe(0);
+    expect(countValidatedSets({ blocks: [] })).toBe(0);
+  });
+
+  it("writes both sides in the result of the exercise (B6)", () => {
+    const exercise = {
+      measure_codes: ["reps", "weight"] as const,
+      is_bodyweight: false,
+      sets: [
+        perSideSet(1, [
+          { side: "left", reps: 15, weight: 10 },
+          { side: "right", reps: 13, weight: 6 },
+        ]),
+      ],
+    };
+
+    expect(
+      formatExerciseResult({
+        ...exercise,
+        measure_codes: [...exercise.measure_codes],
+      }),
+    ).toBe("1 / 1 · G 15 rép. · 10 kg / D 13 rép. · 6 kg");
+  });
+
+  it("says which side is missing on an incomplete set", () => {
+    const exercise = {
+      measure_codes: ["duration"] as const,
+      is_bodyweight: false,
+      sets: [
+        {
+          ...perSideSet(1, []),
+          duration_planned_seconds: 30,
+          sides: [
+            {
+              side: "left" as const,
+              reps_actual: null,
+              weight_actual_kg: null,
+              duration_actual_seconds: 30,
+              validated_at: "2026-11-26T07:10:00.000Z",
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(
+      formatExerciseResult({
+        ...exercise,
+        measure_codes: [...exercise.measure_codes],
+      }),
+    ).toBe("0 / 1 · série 1 incomplète : gauche 30 s, droite non faite");
+  });
+
+  it("says what each side holds, and what is missing", () => {
+    const one = perSideSet(1, [{ side: "left", reps: 15, weight: 10 }]);
+
+    expect(formatSideState(one, "left", ["reps", "weight"])).toBe(
+      "Gauche : 15 rép. · 10 kg ✓",
+    );
+    expect(formatSideState(one, "right", ["reps", "weight"])).toBe(
+      "Droite : non faite",
+    );
+    expect(formatBothSides(one, ["reps", "weight"])).toBe(
+      "G 15 rép. · 10 kg / D non faite",
+    );
   });
 });

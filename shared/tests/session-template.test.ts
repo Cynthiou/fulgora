@@ -162,6 +162,8 @@ describe("plannedSetSchema", () => {
         ...createEmptySet(),
         reps: 1000,
         weight_kg: 62.5,
+        weight_left_kg: null,
+        weight_right_kg: null,
         duration_seconds: 86_400,
         speed_kmh: 60,
         incline_percent: 40,
@@ -190,6 +192,8 @@ describe("plannedSetSchema", () => {
     const weight = plannedSetSchema.safeParse({
       ...createEmptySet(),
       weight_kg: 40.3,
+      weight_left_kg: null,
+      weight_right_kg: null,
     });
     expect(firstMessage(weight)).toBe("Entre une valeur par pas de 0,25.");
 
@@ -255,6 +259,8 @@ describe("exercise profiles and default sets (US-14)", () => {
     expect(createDefaultSet(["reps", "weight"])).toMatchObject({
       reps: 10,
       weight_kg: null,
+      weight_left_kg: null,
+      weight_right_kg: null,
     });
     expect(createDefaultSet(["duration"]).duration_seconds).toBe(60);
     expect(createDefaultSet(["duration", "speed"]).duration_seconds).toBe(600);

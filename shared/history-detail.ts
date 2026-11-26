@@ -33,6 +33,8 @@ export type PlannedExercise = {
   meta: string | null;
   measure_codes: MeasureCode[];
   is_bodyweight: boolean;
+  // Done side by side (US-51)
+  is_per_side: boolean;
   default_rest_seconds: number | null;
   sets: PlannedSetValues[];
 };

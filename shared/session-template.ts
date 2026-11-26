@@ -110,6 +110,8 @@ export type SetLimit = { min: number; max: number; step?: number };
 export const SET_LIMITS: Record<keyof PlannedSetValues, SetLimit> = {
   reps: { min: 0, max: 1000, step: 1 },
   weight_kg: { min: 0, max: 1000, step: 0.25 },
+  weight_left_kg: { min: 0, max: 1000, step: 0.25 },
+  weight_right_kg: { min: 0, max: 1000, step: 0.25 },
   duration_seconds: { min: 0, max: 24 * 60 * 60, step: 1 },
   distance_meters: { min: 0, max: 1_000_000 },
   speed_kmh: { min: 0, max: 60 },
@@ -126,7 +128,7 @@ export function formatRangeMessage(limit: SetLimit): string {
 }
 
 // A planned value: a number within its limits, or null (no objective, RM-022).
-function boundedValue(limit: SetLimit) {
+export function boundedValue(limit: SetLimit) {
   const message = formatRangeMessage(limit);
   let schema = z
     .number({ error: message })
@@ -152,6 +154,9 @@ function boundedValue(limit: SetLimit) {
 export type PlannedSetValues = {
   reps: number | null;
   weight_kg: number | null;
+  // Per-side exercise with a different load on each side (US-51, D-02)
+  weight_left_kg: number | null;
+  weight_right_kg: number | null;
   duration_seconds: number | null;
   distance_meters: number | null;
   speed_kmh: number | null;
@@ -172,6 +177,8 @@ export type DraftExercise = {
   measure_codes: MeasureCode[];
   // Body weight exercise: its load is an added weight ("lest", A7b)
   is_bodyweight?: boolean;
+  // Done side by side, left then right (US-51, A7e)
+  is_per_side?: boolean;
   default_rest_seconds: number | null;
   sets: PlannedSetValues[];
 };
@@ -196,6 +203,8 @@ export type SessionDraft = {
 export const plannedSetSchema = z.object({
   reps: boundedValue(SET_LIMITS.reps),
   weight_kg: boundedValue(SET_LIMITS.weight_kg),
+  weight_left_kg: boundedValue(SET_LIMITS.weight_left_kg),
+  weight_right_kg: boundedValue(SET_LIMITS.weight_right_kg),
   duration_seconds: boundedValue(SET_LIMITS.duration_seconds),
   distance_meters: boundedValue(SET_LIMITS.distance_meters),
   speed_kmh: boundedValue(SET_LIMITS.speed_kmh),
@@ -208,6 +217,8 @@ export const plannedSetSchema = z.object({
 export const draftExerciseSchema = z.object({
   exercise_id: z.number().int().positive({ error: "Exercice invalide." }),
   default_rest_seconds: boundedValue(SET_LIMITS.rest_after_seconds),
+  // Done side by side (US-51); absent means no
+  is_per_side: z.boolean().optional(),
   sets: z
     .array(plannedSetSchema)
     .min(1, { error: "Au moins une série." })
@@ -260,6 +271,8 @@ export function createEmptySet(): PlannedSetValues {
   return {
     reps: null,
     weight_kg: null,
+    weight_left_kg: null,
+    weight_right_kg: null,
     duration_seconds: null,
     distance_meters: null,
     speed_kmh: null,
@@ -400,10 +413,14 @@ export function describeSet(
   set: PlannedSetValues,
   codes: MeasureCode[],
   isBodyweight = false,
+  isPerSide = false,
 ): string[] {
   const parts: string[] = [];
+  // "15 rép. / côté", "30 s / côté": the goal is the same on both sides
+  // (US-51, D-02).
+  const perSide = isPerSide ? " / côté" : "";
   if (set.reps !== null) {
-    parts.push(`${numberFormat.format(set.reps)} rép.`);
+    parts.push(`${numberFormat.format(set.reps)} rép.${perSide}`);
   }
   if (set.weight_kg !== null) {
     // A body weight exercise carries an added weight ("lest"), A7b.
@@ -413,8 +430,17 @@ export function describeSet(
         : "kg";
     parts.push(`${numberFormat.format(set.weight_kg)} ${unit}`);
   }
+  // "G 10 · D 6 kg" when the load differs from one side to the other.
+  if (set.weight_left_kg !== null || set.weight_right_kg !== null) {
+    const left = set.weight_left_kg;
+    const right = set.weight_right_kg;
+    parts.push(
+      `G ${left === null ? "—" : numberFormat.format(left)}`,
+      `D ${right === null ? "—" : numberFormat.format(right)} kg`,
+    );
+  }
   if (set.duration_seconds !== null) {
-    parts.push(formatDuration(set.duration_seconds));
+    parts.push(`${formatDuration(set.duration_seconds)}${perSide}`);
   }
   if (set.distance_meters !== null) {
     parts.push(`${numberFormat.format(set.distance_meters / 1000)} km`);
@@ -443,7 +469,10 @@ function sameValues(a: PlannedSetValues, b: PlannedSetValues): boolean {
 // "1 série · 10 rép. · 40 kg", "3 séries · 8 rép.", "1 étape · 10 min",
 // "3 étapes". The values are shown only when every set has the same ones.
 export function formatSetSummary(
-  exercise: Pick<DraftExercise, "sets" | "measure_codes" | "is_bodyweight">,
+  exercise: Pick<
+    DraftExercise,
+    "sets" | "measure_codes" | "is_bodyweight" | "is_per_side"
+  >,
 ): string {
   const count = exercise.sets.length;
   const isCardio = getMeasureProfile(exercise.measure_codes) === "cardio";
@@ -459,7 +488,12 @@ export function formatSetSummary(
   }
   const allSame = exercise.sets.every((set) => sameValues(set, first));
   const parts = allSame
-    ? describeSet(first, exercise.measure_codes, exercise.is_bodyweight)
+    ? describeSet(
+        first,
+        exercise.measure_codes,
+        exercise.is_bodyweight,
+        exercise.is_per_side,
+      )
     : [];
   return [`${count} ${noun}`, ...parts].join(" · ");
 }
@@ -524,6 +558,8 @@ const FIELD_BY_MEASURE: Record<MeasureCode, SetValueField> = {
 const FIELD_ORDER: SetValueField[] = [
   "reps",
   "weight_kg",
+  "weight_left_kg",
+  "weight_right_kg",
   "duration_seconds",
   "distance_meters",
   "speed_kmh",
@@ -539,10 +575,16 @@ const FIELD_ORDER: SetValueField[] = [
 export function getSetFields(
   codes: MeasureCode[],
   isBodyweight = false,
+  isPerSide = false,
 ): SetValueField[] {
   const fields = new Set(codes.map((code) => FIELD_BY_MEASURE[code]));
   if (getMeasureProfile(codes, isBodyweight) === "bodyweight") {
     fields.add("weight_kg");
+  }
+  // One load per side, on a per-side exercise only (US-51).
+  if (isPerSide && fields.has("weight_kg")) {
+    fields.add("weight_left_kg");
+    fields.add("weight_right_kg");
   }
   return FIELD_ORDER.filter((field) => fields.has(field));
 }
@@ -553,8 +595,9 @@ export function getDisallowedSetFields(
   set: PlannedSetValues,
   codes: MeasureCode[],
   isBodyweight = false,
+  isPerSide = false,
 ): SetValueField[] {
-  const allowed = getSetFields(codes, isBodyweight);
+  const allowed = getSetFields(codes, isBodyweight, isPerSide);
   return FIELD_ORDER.filter(
     (field) => set[field] !== null && !allowed.includes(field),
   );
@@ -591,14 +634,20 @@ export function formatTrackedMeasures(
 export function getSetFieldLabel(
   field: SetValueField,
   profile: MeasureProfile,
+  isPerSide = false,
 ): string {
   switch (field) {
     case "reps":
-      return "Répétitions";
+      // The goal is the same on both sides (US-51, A7e)
+      return isPerSide ? "Rép. / côté" : "Répétitions";
     case "weight_kg":
       return profile === "bodyweight" ? "Lest (kg)" : "Charge (kg)";
+    case "weight_left_kg":
+      return "Charge gauche (kg)";
+    case "weight_right_kg":
+      return "Charge droite (kg)";
     case "duration_seconds":
-      return "Durée (min:s)";
+      return isPerSide ? "Durée / côté (min:s)" : "Durée (min:s)";
     case "distance_meters":
       return "Distance (km)";
     case "speed_kmh":
