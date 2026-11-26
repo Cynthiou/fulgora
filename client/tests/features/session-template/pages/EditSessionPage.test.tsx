@@ -95,7 +95,7 @@ describe("EditSessionPage", () => {
     ).toBe("Jambes");
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Force/,
+        name: /^Classique · Force/,
       }),
     ).toBeTruthy();
     // The date is read only: moving a session is US-25

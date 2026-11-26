@@ -286,6 +286,38 @@ describe("sessionDraftReducer · block details (US-13)", () => {
   });
 });
 
+// "Dupliquer" of the "⋯" menu of a block card (handoff 3.1).
+describe("sessionDraftReducer · duplicating a block", () => {
+  it("inserts the copy right after, with keys of its own", () => {
+    const { draft, blockKey } = draftWithExercises();
+    const second = apply(draft, { type: "addBlock", blockType: "warm_up" });
+
+    const copied = apply(second, { type: "duplicateBlock", key: blockKey });
+
+    expect(copied.blocks.map((block) => block.block_type)).toEqual([
+      "classic",
+      "classic",
+      "warm_up",
+    ]);
+    const [first, copy] = copied.blocks;
+    expect(copy?.key).not.toBe(first?.key);
+    expect(copy?.exercises.map((exercise) => exercise.name)).toEqual([
+      "Développé couché",
+      "Tractions",
+    ]);
+    expect(copy?.exercises[0]?.key).not.toBe(first?.exercises[0]?.key);
+    // Nothing is shared: the sets of the copy are their own objects.
+    expect(copy?.exercises[0]?.sets[0]).not.toBe(first?.exercises[0]?.sets[0]);
+    expect(copy?.exercises[0]?.sets[0]).toEqual(first?.exercises[0]?.sets[0]);
+  });
+
+  it("leaves the draft alone for an unknown block", () => {
+    const { draft } = draftWithExercises();
+
+    expect(apply(draft, { type: "duplicateBlock", key: "nope" })).toBe(draft);
+  });
+});
+
 describe("sessionDraftReducer · exercises (US-14)", () => {
   it("removes an exercise and puts it back at its place", () => {
     const { draft, blockKey, exerciseKey } = draftWithExercises();

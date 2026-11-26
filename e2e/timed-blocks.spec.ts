@@ -76,13 +76,14 @@ test("adds a circuit and an AMRAP to a session", async ({ page }) => {
   // Leaving the block is still possible: the session says what is missing
   await page.getByRole("button", { name: "Retour à la séance" }).click();
   await expect(
-    page.getByRole("button", { name: /Ouvrir le bloc Circuit/ }),
+    page.getByRole("button", { name: /^Circuit · Bloc 1/ }),
   ).toHaveAccessibleName(/Un objectif est à régler\./);
   await page.getByRole("button", { name: "Enregistrer la séance" }).click();
   await expect(
     page.getByText(/Circuit · Bloc 1 : un objectif est à régler\./),
   ).toBeVisible();
-  await page.getByRole("button", { name: /Ouvrir le bloc Circuit/ }).click();
+  await page.getByRole("button", { name: /^Actions du bloc Circuit/ }).click();
+  await page.getByRole("button", { name: "Modifier le bloc" }).click();
 
   // The objective comes back: a distance per round
   await page.getByRole("button", { name: /^Tapis de course/ }).click();

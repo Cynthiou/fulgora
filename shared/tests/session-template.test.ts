@@ -13,6 +13,7 @@ import {
   type DraftBlock,
   draftBlockSchema,
   findTimedBlockProblem,
+  formatBlockCardLine,
   formatBlockCount,
   formatBlockSummary,
   formatDuration,
@@ -352,6 +353,63 @@ describe("formatSetSummary", () => {
     expect(formatDuration(3900)).toBe("1 h 05");
     expect(formatSelectedCount(1)).toBe("1 sélectionné");
     expect(formatSelectedCount(3)).toBe("3 sélectionnés");
+  });
+});
+
+describe("formatBlockCardLine (handoff 3.1)", () => {
+  const base: DraftBlock = {
+    key: "b1",
+    block_type: "classic",
+    name: null,
+    instructions: null,
+    planned_rounds: null,
+    time_limit_seconds: null,
+    exercises: [],
+  };
+  const exercise = {
+    key: "e1",
+    exercise_id: 1,
+    name: "Squat",
+    meta: null,
+    measure_codes: [],
+    default_rest_seconds: 90,
+    sets: [],
+  };
+
+  it("names the block and counts its exercises", () => {
+    expect(
+      formatBlockCardLine(
+        { ...base, exercises: [exercise, exercise, exercise, exercise] },
+        0,
+      ),
+    ).toBe("Bloc 1 · 4 exercices");
+    expect(formatBlockCardLine(base, 1)).toBe("Bloc 2 · 0 exercice");
+  });
+
+  it("adds the title and the settings of a timed block", () => {
+    expect(formatBlockCardLine({ ...base, name: "Force" }, 1)).toBe(
+      "Bloc 2 · Force · 0 exercice",
+    );
+    expect(
+      formatBlockCardLine(
+        {
+          ...base,
+          block_type: "circuit",
+          planned_rounds: 3,
+          exercises: [exercise],
+        },
+        0,
+      ),
+    ).toBe("Bloc 1 · 3 tours · 1 exercice");
+  });
+
+  it("counts nothing on a note (RM-020)", () => {
+    expect(
+      formatBlockCardLine(
+        { ...base, block_type: "note", name: "Consignes" },
+        0,
+      ),
+    ).toBe("Bloc 1 · Consignes");
   });
 });
 

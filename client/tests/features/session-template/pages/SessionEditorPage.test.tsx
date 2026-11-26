@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import {
+  createEmptySet,
   formatShortDayMonth,
   type SelectedExercise,
   todayInParis,
@@ -41,6 +42,15 @@ function renderEditor(entry: Entry = "/seances/nouvelle?date=2026-11-26") {
 
 function inputValue(label: RegExp): string {
   return (screen.getByLabelText(label) as HTMLInputElement).value;
+}
+
+// Opens one block of the session on its own screen, through its menu.
+async function editBlock(
+  user: ReturnType<typeof userEvent.setup>,
+  menuName: RegExp,
+) {
+  await user.click(screen.getByRole("button", { name: menuName }));
+  await user.click(screen.getByRole("button", { name: "Modifier le bloc" }));
 }
 
 // Opens the type panel and picks a type.
@@ -217,11 +227,11 @@ describe("SessionEditorPage", () => {
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Échauffement · Mise en route/,
+        name: /^Échauffement · Mise en route/,
       }),
     ).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: /^Ouvrir le bloc/ }));
+    await editBlock(user, /^Actions du bloc Échauffement/);
     expect(inputValue(/^Intitulé/)).toBe("Mise en route");
   });
 
@@ -257,6 +267,124 @@ describe("SessionEditorPage", () => {
     expect(screen.getByText("30 / 2000 caractères")).toBeTruthy();
   });
 
+  // Handoff 3.1: the header of the card folds it, the "⋯" menu holds
+  // everything else, and the menu closes with Escape (RM-064).
+  it("folds a block card and closes its menu with Escape", async () => {
+    saveDraft({
+      draft: {
+        name: "Haut du corps",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "classic",
+            name: "Force",
+            instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
+            exercises: [
+              {
+                key: "e1",
+                exercise_id: 31,
+                name: "Développé couché",
+                meta: null,
+                measure_codes: ["reps", "weight"],
+                default_rest_seconds: 90,
+                sets: [{ ...createEmptySet(), reps: 10, weight_kg: 50 }],
+              },
+            ],
+          },
+        ],
+      },
+      openBlockKey: null,
+    });
+    const user = renderEditor("/seances/nouvelle");
+
+    const header = screen.getByRole("button", { name: /^Classique · Force/ });
+    expect(header.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("10 rép. · 50 kg")).toBeTruthy();
+
+    await user.click(header);
+    expect(header.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByText("10 rép. · 50 kg")).toBeNull();
+
+    const menu = screen.getByRole("button", {
+      name: "Actions du bloc Classique · Force",
+    });
+    await user.click(menu);
+    expect(
+      screen.getByRole("button", { name: "Modifier le bloc" }),
+    ).toBeTruthy();
+    // One block only: there is nowhere to move it.
+    expect(screen.queryByRole("button", { name: "Monter" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Descendre" })).toBeNull();
+
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("button", { name: "Modifier le bloc" }),
+    ).toBeNull();
+  });
+
+  it("duplicates a block right after it, and removes one exercise", async () => {
+    saveDraft({
+      draft: {
+        name: "Haut du corps",
+        planned_date: "2026-11-26",
+        planned_time: null,
+        blocks: [
+          {
+            key: "b1",
+            block_type: "classic",
+            name: "Force",
+            instructions: null,
+            planned_rounds: null,
+            time_limit_seconds: null,
+            exercises: [
+              {
+                key: "e1",
+                exercise_id: 31,
+                name: "Développé couché",
+                meta: null,
+                measure_codes: ["reps", "weight"],
+                default_rest_seconds: 90,
+                sets: [{ ...createEmptySet(), reps: 10 }],
+              },
+            ],
+          },
+        ],
+      },
+      openBlockKey: null,
+    });
+    const user = renderEditor("/seances/nouvelle");
+
+    await user.click(
+      screen.getByRole("button", { name: "Actions du bloc Classique · Force" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Dupliquer" }));
+
+    expect(screen.getByText("2 blocs")).toBeTruthy();
+    const cards = screen.getAllByRole("button", { name: /^Classique · Force/ });
+    expect(cards).toHaveLength(2);
+    expect(cards[1]?.textContent).toContain("Bloc 2 · Force · 1 exercice");
+
+    // The copy is its own block: removing an exercise there leaves the
+    // first one alone.
+    const copyLines = screen.getByRole("list", {
+      name: "Exercices du bloc 2",
+    });
+    await user.click(
+      screen.getAllByRole("button", {
+        name: "Retirer Développé couché",
+      })[1] as HTMLElement,
+    );
+    expect(copyLines.textContent).toBe("");
+    expect(screen.getByText("Exercice retiré")).toBeTruthy();
+    expect(
+      screen.getByRole("list", { name: "Exercices du bloc 1" }).textContent,
+    ).toContain("Développé couché");
+  });
+
   it("removes a block with a 5 second undo", async () => {
     const user = renderEditor();
     await addBlock(user, "Classique");
@@ -265,29 +393,29 @@ describe("SessionEditorPage", () => {
     );
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Bloc 1/,
+        name: /^Classique · Bloc 1/,
       }),
     ).toBeTruthy();
 
     await user.click(
       screen.getByRole("button", {
-        name: "Options du bloc Classique · Bloc 1",
+        name: "Actions du bloc Classique · Bloc 1",
       }),
     );
-    await user.click(screen.getByRole("button", { name: "Retirer" }));
+    await user.click(screen.getByRole("button", { name: "Supprimer" }));
 
     expect(screen.getByText("0 bloc")).toBeTruthy();
-    expect(screen.getByText("Bloc retiré")).toBeTruthy();
+    expect(screen.getByText("Bloc supprimé")).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: "Annuler" }));
 
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Bloc 1/,
+        name: /^Classique · Bloc 1/,
       }),
     ).toBeTruthy();
-    expect(screen.queryByText("Bloc retiré")).toBeNull();
+    expect(screen.queryByText("Bloc supprimé")).toBeNull();
   });
 
   it("makes the removal final once the toast is gone", async () => {
@@ -299,17 +427,17 @@ describe("SessionEditorPage", () => {
     );
     await user.click(
       screen.getByRole("button", {
-        name: "Options du bloc Classique · Bloc 1",
+        name: "Actions du bloc Classique · Bloc 1",
       }),
     );
-    await user.click(screen.getByRole("button", { name: "Retirer" }));
-    expect(screen.getByText("Bloc retiré")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Supprimer" }));
+    expect(screen.getByText("Bloc supprimé")).toBeTruthy();
 
     act(() => {
       vi.advanceTimersByTime(5_100);
     });
 
-    expect(screen.queryByText("Bloc retiré")).toBeNull();
+    expect(screen.queryByText("Bloc supprimé")).toBeNull();
     expect(screen.getByText("0 bloc")).toBeTruthy();
   });
 
@@ -381,10 +509,12 @@ describe("SessionEditorPage", () => {
     );
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Force/,
+        name: /^Classique · Force/,
       }),
     ).toBeTruthy();
-    expect(screen.getByText("Développé couché · Tractions")).toBeTruthy();
+    // The card of the block lists its exercises when it is open (3.1)
+    const lines = screen.getByRole("list", { name: "Exercices du bloc 1" });
+    expect(lines.textContent).toMatch(/Développé couché.*Tractions/);
     expect(screen.queryByText(/n'a pas encore d'exercice/)).toBeNull();
   });
 
@@ -397,7 +527,7 @@ describe("SessionEditorPage", () => {
     expect(screen.getByText("1 bloc")).toBeTruthy();
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Bloc 1/,
+        name: /^Classique · Bloc 1/,
       }),
     ).toBeTruthy();
     expect(screen.getByText("Développé couché")).toBeTruthy();
@@ -922,7 +1052,7 @@ describe("SessionEditorPage · saving (US-23)", () => {
     );
     expect(
       screen.getByRole("button", {
-        name: /Ouvrir le bloc Classique · Bloc 1/,
+        name: /^Classique · Bloc 1/,
       }),
     ).toBeTruthy();
   });

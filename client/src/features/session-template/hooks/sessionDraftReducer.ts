@@ -5,6 +5,7 @@ import {
   DEFAULT_REST_SECONDS,
   type DraftBlock,
   type DraftExercise,
+  MAX_BLOCKS,
   MAX_SETS_PER_EXERCISE,
   type MeasureCode,
   type PlannedSetValues,
@@ -41,6 +42,8 @@ export type SessionDraftAction =
   | { type: "setBlockRounds"; key: string; rounds: number | null }
   | { type: "setBlockTimeLimit"; key: string; seconds: number | null }
   | { type: "setBlockType"; key: string; blockType: BlockType }
+  // "Dupliquer" of the "⋯" menu: a copy right after the block (handoff 3.1)
+  | { type: "duplicateBlock"; key: string }
   | { type: "removeBlock"; key: string }
   | { type: "restoreBlock"; block: DraftBlock; index: number }
   | { type: "moveBlock"; from: number; to: number }
@@ -223,6 +226,28 @@ export function sessionDraftReducer(
           ? block
           : { ...block, block_type: action.blockType },
       );
+
+    // The copy carries new keys: the lists of the page must tell the two
+    // blocks apart, and nothing is shared between them.
+    case "duplicateBlock": {
+      const index = draft.blocks.findIndex((block) => block.key === action.key);
+      const block = draft.blocks[index];
+      if (block === undefined || draft.blocks.length >= MAX_BLOCKS) {
+        return draft;
+      }
+      const copy: DraftBlock = {
+        ...block,
+        key: nextKey(),
+        exercises: block.exercises.map((exercise) => ({
+          ...exercise,
+          key: nextKey(),
+          sets: exercise.sets.map((set) => ({ ...set })),
+        })),
+      };
+      const blocks = [...draft.blocks];
+      blocks.splice(index + 1, 0, copy);
+      return { ...draft, blocks };
+    }
 
     case "removeBlock": {
       const blocks = draft.blocks.filter((block) => block.key !== action.key);

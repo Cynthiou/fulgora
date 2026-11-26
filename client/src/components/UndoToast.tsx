@@ -8,8 +8,9 @@ type Props = {
   durationMs?: number;
 };
 
-// "Bloc retiré · Annuler": a short-lived message with a way back. Announced
-// to screen readers (role="status"); gone after 5 seconds by default.
+// "Bloc supprimé · Annuler": a short-lived message with a way back, just
+// above the orange button (handoff 3.1). Announced to screen readers
+// (role="status"); gone after 5 seconds by default.
 function UndoToast({ message, onUndo, onDismiss, durationMs = 5000 }: Props) {
   // The latest callbacks, without restarting the timer on every render.
   const dismiss = useRef(onDismiss);
@@ -23,13 +24,13 @@ function UndoToast({ message, onUndo, onDismiss, durationMs = 5000 }: Props) {
   return (
     <div
       role="status"
-      className="fixed inset-x-[18px] bottom-28 z-20 mx-auto flex max-w-md items-center justify-between gap-2.5 rounded-card bg-pick px-4 py-3.5 text-pick-content shadow-hero"
+      className="fixed inset-x-[18px] bottom-[82px] z-20 mx-auto flex h-[46px] max-w-md items-center justify-between rounded-[12px] bg-toast pr-2 pl-3.5 text-toast-content shadow-toast"
     >
-      <span className="text-sm font-semibold">{message}</span>
+      <span className="text-[13px] font-semibold">{message}</span>
       <button
         type="button"
         onClick={onUndo}
-        className="min-h-tap px-2 text-sm font-extrabold uppercase tracking-[0.02em] text-primary"
+        className="h-[34px] rounded-[8px] px-3 text-[13px] font-extrabold text-toast-action"
       >
         Annuler
       </button>

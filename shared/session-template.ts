@@ -509,6 +509,30 @@ export function findTimedBlockProblem(block: BlockSummaryInput): string | null {
   return null;
 }
 
+// The grey line of the card of a block (handoff 3.1): "Bloc 1 · 4
+// exercices", with the title of the block and the settings of a timed one
+// when it has them ("Bloc 2 · Force · 3 tours · 4 exercices"). A note
+// counts no exercise (RM-020).
+export function formatBlockCardLine(
+  block: Pick<DraftBlock, "block_type" | "name" | "exercises"> &
+    Pick<DraftBlock, "planned_rounds" | "time_limit_seconds">,
+  index: number,
+): string {
+  const parts = [`Bloc ${index + 1}`];
+  const title = block.name?.trim() ?? "";
+  if (title !== "") {
+    parts.push(title);
+  }
+  const settings = formatBlockSettings(block);
+  if (settings !== "") {
+    parts.push(settings);
+  }
+  if (block.block_type !== "note") {
+    parts.push(formatExerciseCountShort(block.exercises.length));
+  }
+  return parts.join(" · ");
+}
+
 // "0 bloc", "1 bloc", "2 blocs".
 export function formatBlockCount(count: number): string {
   return `${count} ${count > 1 ? "blocs" : "bloc"}`;

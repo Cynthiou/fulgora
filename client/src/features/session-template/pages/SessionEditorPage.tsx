@@ -24,11 +24,22 @@ import {
   sessionDraftSchema,
   todayInParis,
 } from "shared";
-import blockIcon from "../../../assets/icons/ui/app/block.svg";
-import calendarIcon from "../../../assets/icons/ui/app/calendar.svg";
-import clockIcon from "../../../assets/icons/ui/app/clock.svg";
-import plusIcon from "../../../assets/icons/ui/app/plus.svg";
+import calendarIcon from "../../../assets/icons/ui/v3/calendar.svg";
+import clockIcon from "../../../assets/icons/ui/v3/clock.svg";
+import layersIcon from "../../../assets/icons/ui/v3/layers.svg";
+import plusIcon from "../../../assets/icons/ui/v3/plus.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
+import {
+  CTA,
+  DASHED_BUTTON,
+  EMPTY_CARD,
+  EMPTY_ICON_BOX,
+  EMPTY_TEXT,
+  FORM_BOX,
+  FORM_LABEL,
+  SECTION_COUNT,
+  SECTION_TITLE,
+} from "../../../components/formClasses";
 import Icon from "../../../components/Icon";
 import PageHeader from "../../../components/PageHeader";
 import TextField from "../../../components/TextField";
@@ -65,14 +76,6 @@ function readInitialDate(raw: string | null): string {
 
 // Exercises handed over by the catalog ("Ajouter à une séance").
 type NavigationState = { exercises?: SelectedExercise[] } | null;
-
-// The pieces of the program and session forms (handoff v3, 26/11/2026).
-const FORM_LABEL =
-  "text-[10px] font-extrabold uppercase leading-[1.2] tracking-[0.14em] text-accent";
-const FORM_BOX =
-  "flex h-[46px] items-center gap-2.5 rounded-[12px] border border-base-300 bg-base-100 px-3 text-sm font-bold";
-const SECTION_TITLE =
-  "font-display text-[22px] font-black not-italic leading-none tracking-[0.01em] [transform:skewX(-10deg)]";
 
 // What the editor needs to change a session already saved: the one of an
 // appointment (US-17) or the one of a day of a program (US-18).
@@ -516,7 +519,7 @@ function SessionEditorPage({ edit }: Props) {
 
   const undoToast = removed !== null && (
     <UndoToast
-      message={removed.kind === "block" ? "Bloc retiré" : "Exercice retiré"}
+      message={removed.kind === "block" ? "Bloc supprimé" : "Exercice retiré"}
       onUndo={undoRemove}
       onDismiss={() => setRemoved(null)}
     />
@@ -701,19 +704,40 @@ function SessionEditorPage({ edit }: Props) {
               />
             </div>
           ) : isProgramDay ? (
-            // A day of a program: the day comes from the program (RM-075).
-            <div className="mb-4 flex flex-col gap-[9px]">
-              <span className={FORM_LABEL}>Jour de la semaine</span>
-              <p className={FORM_BOX}>
-                <Icon
-                  src={calendarIcon}
-                  className="size-[15px] shrink-0 text-muted"
-                />
-                <span className="min-w-0 flex-1 truncate">{edit.dayLabel}</span>
-                <span className="text-[11px] font-semibold text-muted">
-                  chaque semaine
-                </span>
-              </p>
+            // A day of a program: the day and the hour come from the
+            // program and change there (RM-075, US-20).
+            <div className="mb-4 grid grid-cols-[1.45fr_1fr] gap-2">
+              <div className="flex min-w-0 flex-col gap-[9px]">
+                <span className={FORM_LABEL}>Jour</span>
+                <p className={FORM_BOX}>
+                  <Icon
+                    src={calendarIcon}
+                    className="size-[15px] shrink-0 text-muted"
+                  />
+                  <span className="min-w-0 flex-1 truncate">
+                    {edit.dayLabel}
+                  </span>
+                  <span className="text-[10px] font-semibold text-muted">
+                    chaque sem.
+                  </span>
+                </p>
+              </div>
+              <div className="flex min-w-0 flex-col gap-[9px]">
+                <span className={FORM_LABEL}>Heure</span>
+                <p
+                  className={`${FORM_BOX} ${
+                    draft.planned_time === null ? "font-medium text-faint" : ""
+                  }`}
+                >
+                  <Icon
+                    src={clockIcon}
+                    className="size-[15px] shrink-0 text-muted"
+                  />
+                  <span className="min-w-0 flex-1 truncate">
+                    {draft.planned_time ?? "—:—"}
+                  </span>
+                </p>
+              </div>
             </div>
           ) : (
             // The date and the time belong to the appointment: they change
@@ -762,36 +786,29 @@ function SessionEditorPage({ edit }: Props) {
               <h2 id="blocks-title" className={SECTION_TITLE}>
                 Blocs
               </h2>
-              <p className="text-[11px] font-bold text-muted">
-                {formatBlockCount(blockCount)}
-              </p>
+              <p className={SECTION_COUNT}>{formatBlockCount(blockCount)}</p>
             </div>
 
             {blockCount === 0 ? (
-              <div className="mb-2.5 flex flex-col items-center gap-3.5 rounded-[16px] border border-empty-border bg-empty px-[30px] py-6 shadow-card">
-                <span
-                  aria-hidden="true"
-                  className="grid size-10 place-items-center rounded-[10px] bg-icon-box text-icon-stroke"
-                >
-                  <Icon src={blockIcon} className="size-[18px]" />
+              <div className={`mb-2.5 ${EMPTY_CARD}`}>
+                <span aria-hidden="true" className={EMPTY_ICON_BOX}>
+                  <Icon src={layersIcon} className="size-[18px]" />
                 </span>
-                <p className="text-center text-[13px] font-medium leading-[1.5] text-empty-text">
+                <p className={EMPTY_TEXT}>
                   {"Ajoute un premier bloc pour y "}
                   <br />
                   mettre des exercices.
                 </p>
               </div>
             ) : (
-              <div className="mb-2.5">
-                <SessionReview
-                  blocks={draft.blocks}
-                  onOpen={setOpenBlockKey}
-                  onRemove={removeBlock}
-                  onMove={(from, to) =>
-                    dispatch({ type: "moveBlock", from, to })
-                  }
-                />
-              </div>
+              <SessionReview
+                blocks={draft.blocks}
+                onEdit={setOpenBlockKey}
+                onDuplicate={(key) => dispatch({ type: "duplicateBlock", key })}
+                onRemove={removeBlock}
+                onRemoveExercise={removeExercise}
+                onMove={(from, to) => dispatch({ type: "moveBlock", from, to })}
+              />
             )}
 
             <button
@@ -801,7 +818,7 @@ function SessionEditorPage({ edit }: Props) {
               aria-describedby={
                 blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
               }
-              className="flex h-[46px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
+              className={DASHED_BUTTON}
             >
               <Icon src={plusIcon} className="size-[15px]" />
               Ajouter un bloc
@@ -855,7 +872,7 @@ function SessionEditorPage({ edit }: Props) {
                     ? "no-change"
                     : undefined
                 }
-                className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[12px] bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
+                className={CTA}
               >
                 {isSaving
                   ? "Enregistrement…"

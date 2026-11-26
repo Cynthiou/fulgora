@@ -58,7 +58,10 @@ test("moves an exercise with the keyboard and saves the new order", async ({
   );
 
   // The block (A6) and its two exercises, in the planned order
-  await page.getByRole("button", { name: "Ouvrir le bloc Classique" }).click();
+  await page
+    .getByRole("button", { name: "Actions du bloc Classique · Force" })
+    .click();
+  await page.getByRole("button", { name: "Modifier le bloc" }).click();
   const rows = page
     .getByRole("list", { name: "Exercices du bloc" })
     .getByRole("listitem");
@@ -91,7 +94,10 @@ test("moves an exercise with the keyboard and saves the new order", async ({
   await expect(page.getByText("Séance modifiée.")).toBeVisible();
 
   await page.goto(`${url}/modifier`);
-  await page.getByRole("button", { name: "Ouvrir le bloc Classique" }).click();
+  await page
+    .getByRole("button", { name: "Actions du bloc Classique · Force" })
+    .click();
+  await page.getByRole("button", { name: "Modifier le bloc" }).click();
   await expect(rows.nth(0)).toContainText(second);
   await expect(rows.nth(1)).toContainText(first);
 });
@@ -118,7 +124,7 @@ test("moves a block with « Monter » of the ⋯ menu", async ({ page }) => {
   await expect(blocks.nth(1)).toContainText("Consignes");
 
   await page
-    .getByRole("button", { name: "Options du bloc Étirements · Consignes" })
+    .getByRole("button", { name: "Actions du bloc Étirements · Consignes" })
     .click();
   await expect(page.getByRole("button", { name: "Descendre" })).toBeDisabled();
   await expectNoA11yViolation(page);
