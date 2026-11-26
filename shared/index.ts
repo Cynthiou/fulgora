@@ -8,6 +8,7 @@ export * from "./notification.js";
 export * from "./planning.js";
 export * from "./program.js";
 export * from "./program-schedule.js";
+export * from "./progress.js";
 export * from "./session-edit.js";
 export * from "./session-template.js";
 export * from "./status.js";
