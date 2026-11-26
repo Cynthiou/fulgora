@@ -35,20 +35,34 @@ import {
   updateSessionTemplateName,
 } from "../session-template/sessionTemplateRepository.js";
 import {
+  cancelFutureProgramAppointments,
   cancelProgramAppointment,
+  countProgramStartedSessions,
+  countTemplateUses,
   createProgram,
   createProgramAppointment,
   createProgramChange,
   createSchedule,
   deactivateSchedule,
   deleteDraftProgram,
+  deleteProgramAppointments,
+  deleteProgramChanges,
+  deleteProgramNotifications,
+  deleteProgramRow,
   deleteProgramSchedules,
+  deleteSessionTemplate,
+  deleteTemplateBlocks,
+  deleteTemplateExercises,
+  deleteTemplateSets,
+  deleteTemplateVersions,
   readProgram,
   readProgramAppointments,
   readProgramAppointmentsForUpdate,
   readProgramForUpdate,
+  readProgramInProgressSession,
   readProgramSchedules,
   readPrograms,
+  readProgramTemplateIds,
   rescheduleAppointment,
   type ScheduleRow,
   setScheduleRemoved,
@@ -301,25 +315,103 @@ export const removeDraft: RequestHandler = async (req, res) => {
   const userId = readUserId(req);
   const { id } = req.params as unknown as { id: number };
 
-  const program = await readProgram(id, userId);
-  if (program === null) {
-    throw notFound();
-  }
-  if (program.status !== "draft") {
-    throw new HttpError(
-      409,
-      "PROGRAM_NOT_DELETABLE",
-      "Ce programme est déjà créé : il s'abandonne depuis le programme.",
-    );
-  }
   await withTransaction(async (connection) => {
-    // The days of the week go first: they point at the program (DT-17).
-    // The sessions themselves stay, they belong to the user and cost
-    // nothing; cleaning them up is the job of US-21.
+    const program = await readProgramForUpdate(id, userId, connection);
+    if (program === null) {
+      throw notFound();
+    }
+    // A program somebody has trained is kept and given up, never deleted
+    // (RM-073).
+    const started = await countProgramStartedSessions(id, connection);
+    if (started > 0) {
+      throw new HttpError(
+        409,
+        "PROGRAM_HAS_STARTED_SESSIONS",
+        "Ce programme a déjà des séances démarrées : il s'abandonne.",
+      );
+    }
+
+    // The prepared sessions are read before the rows that point at them.
+    const templates = await readProgramTemplateIds(id, connection);
+    // The order follows the links (DT-25): nothing is deleted while
+    // something still points at it.
+    await deleteProgramNotifications(id, connection);
+    await deleteProgramAppointments(id, connection);
+    await deleteProgramChanges(id, connection);
     await deleteProgramSchedules(id, connection);
-    await deleteDraftProgram(id, userId, connection);
+    if (program.status === "draft") {
+      await deleteDraftProgram(id, userId, connection);
+    } else {
+      await deleteProgramRow(id, userId, connection);
+    }
+
+    // A session shared with another program or another appointment stays.
+    for (const templateId of templates) {
+      const uses = await countTemplateUses(templateId, connection);
+      if (uses > 0) {
+        continue;
+      }
+      await deleteTemplateSets(templateId, connection);
+      await deleteTemplateExercises(templateId, connection);
+      await deleteTemplateBlocks(templateId, connection);
+      await deleteTemplateVersions(templateId, connection);
+      await deleteSessionTemplate(templateId, userId, connection);
+    }
   });
   res.status(204).end();
+};
+
+// POST /api/programs/:id/abandon: the rest of the program is given up, the
+// past is kept (RM-034, RM-035).
+export const abandon: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+
+  await withTransaction(async (connection) => {
+    const program = await readProgramForUpdate(id, userId, connection);
+    if (program === null) {
+      throw notFound();
+    }
+    if (program.status !== "programmed" && program.status !== "in_progress") {
+      throw new HttpError(
+        409,
+        "PROGRAM_NOT_RUNNING",
+        "Ce programme n'est plus en cours.",
+      );
+    }
+    const running = await readProgramInProgressSession(id, connection);
+    if (running !== null) {
+      throw new HttpError(
+        409,
+        "PROGRAM_HAS_WORKOUT_IN_PROGRESS",
+        "Une séance de ce programme est en cours.",
+      );
+    }
+    const started = await countProgramStartedSessions(id, connection);
+    if (started === 0) {
+      throw new HttpError(
+        409,
+        "USE_DELETE_INSTEAD",
+        "Aucune séance n'a été démarrée : ce programme se supprime.",
+      );
+    }
+
+    await cancelFutureProgramAppointments(id, todayInParis(), connection);
+    await updateProgramStatus(id, "abandoned", connection);
+    await createProgramChange(
+      id,
+      "status",
+      { status: program.status },
+      { status: "abandoned" },
+      connection,
+    );
+  });
+
+  const detail = await buildDetail(id, userId);
+  if (detail === null) {
+    throw notFound();
+  }
+  res.json(detail);
 };
 
 // --- The session of one day of the program (US-18, step 2) ------------------

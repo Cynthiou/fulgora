@@ -461,3 +461,215 @@ export async function createProgramChange(
     [programId, changeType, JSON.stringify(oldValue), JSON.stringify(newValue)],
   );
 }
+
+// --- Stopping a program: abandon or delete (US-21) -------------------------
+
+// How many sessions of this program were really started (RM-073): as soon
+// as there is one, the program is given up, never deleted.
+export async function countProgramStartedSessions(
+  programId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT COUNT(*) AS started
+       FROM workout_session ws
+       JOIN appointment a ON a.id = ws.appointment_id
+      WHERE a.program_id = ?`,
+    [programId],
+  );
+  return Number((rows[0] as { started: number } | undefined)?.started ?? 0);
+}
+
+export type RunningSessionRow = {
+  appointment_id: number;
+  name: string;
+  started_at: string;
+};
+
+// The session of the program being trained right now, if there is one
+// (RM-034): the abandon waits for it (PRO-11b).
+export async function readProgramInProgressSession(
+  programId: number,
+  db: Queryable = client,
+): Promise<RunningSessionRow | null> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT a.id AS appointment_id, st.name, ws.started_at
+       FROM workout_session ws
+       JOIN appointment a ON a.id = ws.appointment_id
+       JOIN session_version sv ON sv.id = a.session_version_id
+       JOIN session_template st ON st.id = sv.session_template_id
+      WHERE a.program_id = ? AND ws.status = 'in_progress'
+      LIMIT 1`,
+    [programId],
+  );
+  return (rows[0] as RunningSessionRow | undefined) ?? null;
+}
+
+// The appointments an abandon cancels: from today on, still planned and
+// never started (RM-034, RM-035 keeps them in the history).
+export async function readFutureProgramAppointments(
+  programId: number,
+  today: string,
+  db: Queryable = client,
+): Promise<{ id: number; planned_date: string }[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT a.id, a.planned_date
+       FROM appointment a
+      WHERE a.program_id = ? AND a.status = 'planned' AND a.planned_date >= ?
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)
+      ORDER BY a.planned_date, a.id`,
+    [programId, today],
+  );
+  return rows as { id: number; planned_date: string }[];
+}
+
+export async function cancelFutureProgramAppointments(
+  programId: number,
+  today: string,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE appointment a
+        SET a.status = 'cancelled', a.cancelled_at = NOW(3)
+      WHERE a.program_id = ? AND a.status = 'planned' AND a.planned_date >= ?
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [programId, today],
+  );
+  return result.affectedRows;
+}
+
+// --- Deleting a program whole (DT-25) --------------------------------------
+
+// The sessions the typical week points at, active rows and old ones.
+export async function readProgramTemplateIds(
+  programId: number,
+  db: Queryable = client,
+): Promise<number[]> {
+  const [rows] = await db.execute<Rows[]>(
+    "SELECT DISTINCT session_template_id FROM weekly_schedule WHERE program_id = ?",
+    [programId],
+  );
+  return (rows as { session_template_id: number }[]).map(
+    (row) => row.session_template_id,
+  );
+}
+
+// A notification can name the program or one of its appointments.
+export async function deleteProgramNotifications(
+  programId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `DELETE n FROM notification n
+       LEFT JOIN appointment a ON a.id = n.appointment_id
+      WHERE n.program_id = ? OR a.program_id = ?`,
+    [programId, programId],
+  );
+}
+
+export async function deleteProgramAppointments(
+  programId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("DELETE FROM appointment WHERE program_id = ?", [programId]);
+}
+
+export async function deleteProgramChanges(
+  programId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("DELETE FROM program_change WHERE program_id = ?", [
+    programId,
+  ]);
+}
+
+export async function deleteProgramRow(
+  id: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<boolean> {
+  const [result] = await db.execute<Result>(
+    "DELETE FROM program WHERE id = ? AND owner_user_id = ?",
+    [id, userId],
+  );
+  return result.affectedRows === 1;
+}
+
+// Is this prepared session still used somewhere else? A session shared
+// with another program or with an appointment is never deleted (DT-25).
+export async function countTemplateUses(
+  templateId: number,
+  db: Queryable = client,
+): Promise<number> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT (SELECT COUNT(*) FROM weekly_schedule ws
+              WHERE ws.session_template_id = ?)
+          + (SELECT COUNT(*) FROM appointment a
+               JOIN session_version sv ON sv.id = a.session_version_id
+              WHERE sv.session_template_id = ?) AS uses`,
+    [templateId, templateId],
+  );
+  return Number((rows[0] as { uses: number } | undefined)?.uses ?? 0);
+}
+
+export async function deleteTemplateSets(
+  templateId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `DELETE ps FROM planned_set ps
+       JOIN template_block_exercise tbe ON tbe.id = ps.template_block_exercise_id
+       JOIN template_block tb ON tb.id = tbe.template_block_id
+       JOIN session_version sv ON sv.id = tb.session_version_id
+      WHERE sv.session_template_id = ?`,
+    [templateId],
+  );
+}
+
+export async function deleteTemplateExercises(
+  templateId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `DELETE tbe FROM template_block_exercise tbe
+       JOIN template_block tb ON tb.id = tbe.template_block_id
+       JOIN session_version sv ON sv.id = tb.session_version_id
+      WHERE sv.session_template_id = ?`,
+    [templateId],
+  );
+}
+
+export async function deleteTemplateBlocks(
+  templateId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `DELETE tb FROM template_block tb
+       JOIN session_version sv ON sv.id = tb.session_version_id
+      WHERE sv.session_template_id = ?`,
+    [templateId],
+  );
+}
+
+export async function deleteTemplateVersions(
+  templateId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    "DELETE FROM session_version WHERE session_template_id = ?",
+    [templateId],
+  );
+}
+
+export async function deleteSessionTemplate(
+  templateId: number,
+  userId: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    "DELETE FROM session_template WHERE id = ? AND owner_user_id = ?",
+    [templateId, userId],
+  );
+}

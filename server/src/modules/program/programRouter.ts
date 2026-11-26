@@ -10,6 +10,7 @@ import {
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
 import {
+  abandon,
   activate,
   addSession,
   browse,
@@ -79,7 +80,17 @@ programRouter.post(
   activate,
 );
 
-// DELETE /api/programs/:id: a draft thrown away.
+// POST /api/programs/:id/abandon: the rest of the program is given up
+// (US-21, PRO-11).
+programRouter.post(
+  "/:id/abandon",
+  authenticate,
+  validate({ params: idParamSchema }),
+  abandon,
+);
+
+// DELETE /api/programs/:id: a program nobody has started, thrown away with
+// everything it holds (US-21, PRO-11c).
 programRouter.delete(
   "/:id",
   authenticate,
