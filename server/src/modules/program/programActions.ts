@@ -2,13 +2,18 @@ import type { RequestHandler } from "express";
 import {
   buildProgramSessionName,
   canActivateProgram,
+  countProgramWeeks,
   getWeekday,
   listProgramDates,
+  MAX_PROGRAM_WEEKS,
   type ProgramCreated,
   type ProgramDetailFull,
   type ProgramInfoInput,
+  type ProgramScheduleInput,
   type ProgramSessionInput,
   type ProgramSessionSummary,
+  planScheduleChange,
+  type SchedulePlan,
   type SessionEditInput,
   statusAfterCreation,
   todayInParis,
@@ -30,17 +35,21 @@ import {
   updateSessionTemplateName,
 } from "../session-template/sessionTemplateRepository.js";
 import {
+  cancelProgramAppointment,
   createProgram,
   createProgramAppointment,
+  createProgramChange,
   createSchedule,
   deactivateSchedule,
   deleteDraftProgram,
   deleteProgramSchedules,
   readProgram,
   readProgramAppointments,
+  readProgramAppointmentsForUpdate,
   readProgramForUpdate,
   readProgramSchedules,
   readPrograms,
+  rescheduleAppointment,
   type ScheduleRow,
   setScheduleRemoved,
   updateProgramInfo,
@@ -489,3 +498,195 @@ async function assertDraft(id: number, userId: number): Promise<void> {
     );
   }
 }
+
+// --- Changing the days, the hours and the end (US-20) ----------------------
+
+// The same reading for the preview and for the writing: the program, its
+// typical week and the plan the pure function draws (RM-031, RM-033).
+async function readScheduleChange(
+  id: number,
+  userId: number,
+  input: ProgramScheduleInput,
+  connection: Parameters<typeof readProgramForUpdate>[2],
+): Promise<{
+  program: NonNullable<Awaited<ReturnType<typeof readProgramForUpdate>>>;
+  schedules: ScheduleRow[];
+  plan: SchedulePlan;
+}> {
+  const program = await readProgramForUpdate(id, userId, connection);
+  if (program === null) {
+    throw notFound();
+  }
+  if (program.status !== "programmed" && program.status !== "in_progress") {
+    throw new HttpError(
+      409,
+      "PROGRAM_NOT_EDITABLE",
+      "Ce programme ne se modifie plus.",
+    );
+  }
+  if (input.end_date < program.start_date) {
+    throw new HttpError(
+      422,
+      "PROGRAM_END_BEFORE_START",
+      "La fin doit suivre le début.",
+    );
+  }
+  if (
+    countProgramWeeks(program.start_date, input.end_date) > MAX_PROGRAM_WEEKS
+  ) {
+    throw new HttpError(
+      422,
+      "PROGRAM_TOO_LONG",
+      `${MAX_PROGRAM_WEEKS} semaines au maximum.`,
+    );
+  }
+
+  const schedules = await readProgramSchedules(id, connection);
+  const known = new Set(schedules.map((row) => row.id));
+  for (const wish of input.sessions) {
+    if (!known.has(wish.schedule_id)) {
+      throw notFound();
+    }
+  }
+
+  const appointments = await readProgramAppointmentsForUpdate(id, connection);
+  const plan = planScheduleChange({
+    start_date: program.start_date,
+    end_date: input.end_date,
+    schedules: schedules.map((row) => ({
+      schedule_id: row.id,
+      weekday: row.weekday,
+      planned_time: toHourMinute(row.planned_time),
+      name: row.name,
+    })),
+    wishes: input.sessions,
+    appointments: appointments.map((row) => ({
+      id: row.id,
+      schedule_id: row.weekly_schedule_id,
+      planned_date: row.planned_date,
+      planned_time: toHourMinute(row.planned_time),
+      moved_manually: row.moved_manually === 1,
+      status: row.status,
+      is_started: Number(row.is_started) === 1,
+    })),
+    today: todayInParis(),
+  });
+  return { program, schedules, plan };
+}
+
+// POST /api/programs/:id/schedule/preview: what the change would do.
+export const previewSchedule: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const input = req.body as ProgramScheduleInput;
+
+  const plan = await withTransaction(async (connection) => {
+    const change = await readScheduleChange(id, userId, input, connection);
+    return change.plan;
+  });
+
+  res.json(plan);
+};
+
+// PUT /api/programs/:id/schedule: the change itself, exactly as announced.
+export const updateSchedule: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const input = req.body as ProgramScheduleInput;
+
+  await withTransaction(async (connection) => {
+    const { program, schedules, plan } = await readScheduleChange(
+      id,
+      userId,
+      input,
+      connection,
+    );
+
+    if (program.name !== input.name || program.end_date !== input.end_date) {
+      await updateProgramInfo(
+        id,
+        input.name,
+        program.description,
+        program.start_date,
+        input.end_date,
+        connection,
+      );
+      await createProgramChange(
+        id,
+        "info",
+        { name: program.name, end_date: program.end_date },
+        { name: input.name, end_date: input.end_date },
+        connection,
+      );
+    }
+
+    // A rule that changes is replaced: the old row keeps its date, the new
+    // one takes the appointments still to come (RM-031).
+    const newScheduleId = new Map<number, number>();
+    for (const row of schedules) {
+      const wish = input.sessions.find(
+        (session) => session.schedule_id === row.id,
+      );
+      const before = toHourMinute(row.planned_time);
+      if (
+        wish === undefined ||
+        (wish.weekday === row.weekday && wish.planned_time === before)
+      ) {
+        newScheduleId.set(row.id, row.id);
+        continue;
+      }
+      await deactivateSchedule(row.id, connection);
+      const created = await createSchedule(
+        id,
+        row.session_template_id,
+        wish.weekday,
+        wish.planned_time,
+        connection,
+      );
+      newScheduleId.set(row.id, created);
+      await createProgramChange(
+        id,
+        "schedule",
+        { weekday: row.weekday, planned_time: before },
+        { weekday: wish.weekday, planned_time: wish.planned_time },
+        connection,
+      );
+    }
+
+    for (const moved of plan.moved) {
+      await rescheduleAppointment(
+        moved.appointment_id,
+        newScheduleId.get(moved.schedule_id) ?? moved.schedule_id,
+        moved.to_date,
+        moved.to_time,
+        connection,
+      );
+    }
+    for (const created of plan.created) {
+      const row = schedules.find(
+        (schedule) => schedule.id === created.schedule_id,
+      );
+      if (row === undefined) {
+        continue;
+      }
+      await createProgramAppointment(
+        userId,
+        id,
+        newScheduleId.get(created.schedule_id) ?? created.schedule_id,
+        row.session_version_id,
+        created.planned_date,
+        created.planned_time,
+        connection,
+      );
+    }
+    for (const cancelled of plan.cancelled) {
+      await cancelProgramAppointment(cancelled.appointment_id, connection);
+    }
+  });
+
+  const answer = await buildDetail(id, userId);
+  if (answer === null) {
+    throw notFound();
+  }
+  res.json(answer);
+};

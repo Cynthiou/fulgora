@@ -381,3 +381,83 @@ export async function deleteProgramSchedules(
     programId,
   ]);
 }
+
+// --- Changing the days, the hours and the end of a program (US-20) ---------
+
+export type ProgramAppointmentRow = {
+  id: number;
+  weekly_schedule_id: number | null;
+  planned_date: string;
+  planned_time: string | null;
+  moved_manually: number;
+  status: string;
+  is_started: number;
+};
+
+// Every appointment of a program, locked until the end of the transaction:
+// the preview and the writing must see the same Planning (RM-031).
+export async function readProgramAppointmentsForUpdate(
+  programId: number,
+  db: Queryable = client,
+): Promise<ProgramAppointmentRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT a.id, a.weekly_schedule_id, a.planned_date, a.planned_time,
+            a.moved_manually, a.status,
+            EXISTS (SELECT 1 FROM workout_session ws
+                     WHERE ws.appointment_id = a.id) AS is_started
+       FROM appointment a
+      WHERE a.program_id = ?
+      ORDER BY a.planned_date, a.id
+      FOR UPDATE`,
+    [programId],
+  );
+  return rows as ProgramAppointmentRow[];
+}
+
+// An appointment that follows its rule to its new day (US-20). It is not a
+// move made by hand: moved_manually stays false (RM-032).
+export async function rescheduleAppointment(
+  id: number,
+  scheduleId: number,
+  plannedDate: string,
+  plannedTime: string | null,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE appointment
+        SET weekly_schedule_id = ?, planned_date = ?, planned_time = ?
+      WHERE id = ?`,
+    [scheduleId, plannedDate, plannedTime, id],
+  );
+}
+
+// An appointment dropped by a shorter program (RM-033). A started session
+// is never touched.
+export async function cancelProgramAppointment(
+  id: number,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `UPDATE appointment a
+        SET a.status = 'cancelled', a.cancelled_at = NOW(3)
+      WHERE a.id = ? AND a.status IN ('planned', 'to_confirm', 'missed')
+        AND NOT EXISTS (SELECT 1 FROM workout_session ws
+                         WHERE ws.appointment_id = a.id)`,
+    [id],
+  );
+}
+
+// The trace of one change (RM-037): what it was, what it became.
+export async function createProgramChange(
+  programId: number,
+  changeType: string,
+  oldValue: unknown,
+  newValue: unknown,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute(
+    `INSERT INTO program_change (program_id, change_type, old_value, new_value)
+     VALUES (?, ?, ?, ?)`,
+    [programId, changeType, JSON.stringify(oldValue), JSON.stringify(newValue)],
+  );
+}

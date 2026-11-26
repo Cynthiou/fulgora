@@ -2,6 +2,7 @@ import express from "express";
 import {
   idParamSchema,
   programInfoSchema,
+  programScheduleSchema,
   programSessionParamsSchema,
   programSessionSchema,
   sessionEditSchema,
@@ -13,12 +14,14 @@ import {
   addSession,
   browse,
   createDraft,
+  previewSchedule,
   read,
   readDaySession,
   removeDraft,
   removeSession,
   restoreSession,
   updateDraft,
+  updateSchedule,
   writeDaySession,
 } from "./programActions.js";
 
@@ -49,6 +52,23 @@ programRouter.put(
   authenticate,
   validate({ params: idParamSchema, body: programInfoSchema }),
   updateDraft,
+);
+
+// POST /api/programs/:id/schedule/preview: what a change of days, hours or
+// end date would do, before anything is written (US-20).
+programRouter.post(
+  "/:id/schedule/preview",
+  authenticate,
+  validate({ params: idParamSchema, body: programScheduleSchema }),
+  previewSchedule,
+);
+
+// PUT /api/programs/:id/schedule: the same change, applied.
+programRouter.put(
+  "/:id/schedule",
+  authenticate,
+  validate({ params: idParamSchema, body: programScheduleSchema }),
+  updateSchedule,
 );
 
 // POST /api/programs/:id/activate: the draft fills the Planning.
