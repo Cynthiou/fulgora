@@ -71,20 +71,20 @@ Interrupteur désactivé avec « Non disponible sur ce navigateur ».
 
 ## Tâches techniques
 
-- [ ] BDD : colonnes existantes de `user` : `weight_unit`, `distance_unit`, `sound_enabled`, `vibration_enabled`, `timer_notification_enabled`, `home_metric`
-- [ ] Shared : `preferencesSchema` (partiel : un ou plusieurs champs)
-- [ ] Shared : `toDisplayWeight(kg, unit)`, `fromDisplayWeight(value, unit)` (1 lb = 0,45359237 kg), `toDisplayDistance(meters, unit)`, `fromDisplayDistance` ; `formatWeight`, `formatDistance` utilisent les préférences
-- [ ] Backend : `userRepository.updateUserPreferences(userId, values)` : uniquement les colonnes reçues, liste blanche de colonnes écrite dans le code
-- [ ] Backend : `PATCH /api/users/me/preferences`
-- [ ] Frontend : `PreferencesPage.tsx` (PRF-03), `SoundSettingsPage.tsx` (PRF-04) ; `usePreferences` (dans `AuthContext`)
-- [ ] Frontend : `useTimerAlerts` lit `sound_enabled` et `vibration_enabled` ; `Notification.requestPermission()` à l'activation
-- [ ] Frontend : tous les champs de charge et de distance passent par les fonctions de conversion
-- [ ] Tests : unitaires : conversions aller-retour (60 kg → lb → kg sans perte au-delà de 3 décimales)
-- [ ] Tests : back : une préférence modifiée, colonne inconnue refusée
-- [ ] Tests : E2E : passer en lb → la fiche de progression et la saisie affichent des lb
+- [x] BDD : colonnes existantes de `user` : `weight_unit`, `distance_unit`, `sound_enabled`, `vibration_enabled`, `timer_notification_enabled`, `home_metric`
+- [x] Shared : `preferencesSchema` (partiel : un ou plusieurs champs)
+- [x] Shared : `toDisplayWeight(kg, unit)`, `fromDisplayWeight(value, unit)` (1 lb = 0,45359237 kg), `toDisplayDistance(meters, unit)`, `fromDisplayDistance` ; `formatWeight`, `formatDistance` utilisent les préférences
+- [x] Backend : `userRepository.updateUserPreferences(userId, values)` : uniquement les colonnes reçues, liste blanche de colonnes écrite dans le code
+- [x] Backend : `PATCH /api/users/me/preferences`
+- [x] Frontend : `PreferencesPage.tsx` (PRF-03), `SoundSettingsPage.tsx` (PRF-04) ; `usePreferences` (dans `AuthContext`)
+- [x] Frontend : `useTimerAlerts` lit `sound_enabled` et `vibration_enabled` ; `Notification.requestPermission()` à l'activation
+- [x] Frontend : tous les champs de charge et de distance passent par les fonctions de conversion
+- [x] Tests : unitaires : conversions aller-retour (60 kg → lb → kg sans perte au-delà de 3 décimales)
+- [x] Tests : back : une préférence modifiée, colonne inconnue refusée
+- [x] Tests : E2E : passer en lb → la fiche de progression et la saisie affichent des lb
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation vérifiés sur Android et iPhone
-- [ ] Aucune valeur en lb ou mi stockée en base
+- [x] Aucune valeur en lb ou mi stockée en base
 - [ ] Code relu et fusionné via pull request
