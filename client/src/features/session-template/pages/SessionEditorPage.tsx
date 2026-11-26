@@ -15,7 +15,7 @@ import {
   diffSessionDrafts,
   findTimedBlockProblem,
   formatBlockCount,
-  formatLongDate,
+  formatShortDayMonth,
   getBlockLabel,
   isTimedBlock,
   MAX_BLOCKS,
@@ -26,6 +26,7 @@ import {
 } from "shared";
 import blockIcon from "../../../assets/icons/ui/app/block.svg";
 import calendarIcon from "../../../assets/icons/ui/app/calendar.svg";
+import clockIcon from "../../../assets/icons/ui/app/clock.svg";
 import plusIcon from "../../../assets/icons/ui/app/plus.svg";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import Icon from "../../../components/Icon";
@@ -64,6 +65,14 @@ function readInitialDate(raw: string | null): string {
 
 // Exercises handed over by the catalog ("Ajouter à une séance").
 type NavigationState = { exercises?: SelectedExercise[] } | null;
+
+// The pieces of the program and session forms (handoff v3, 26/11/2026).
+const FORM_LABEL =
+  "text-[10px] font-extrabold uppercase leading-[1.2] tracking-[0.14em] text-accent";
+const FORM_BOX =
+  "flex h-[46px] items-center gap-2.5 rounded-[12px] border border-base-300 bg-base-100 px-3 text-sm font-bold";
+const SECTION_TITLE =
+  "font-display text-[22px] font-black not-italic leading-none tracking-[0.01em] [transform:skewX(-10deg)]";
 
 // What the editor needs to change a session already saved: the one of an
 // appointment (US-17) or the one of a day of a program (US-18).
@@ -636,50 +645,67 @@ function SessionEditorPage({ edit }: Props) {
     );
   }
 
+  // The header of the form (handoff v3): what is being written, in blue,
+  // above the name of the screen.
+  const isProgramDay =
+    edit !== undefined && edit.dayLabel !== undefined && edit.dayLabel !== null;
+  const overline =
+    edit === undefined
+      ? "Séance libre"
+      : isProgramDay
+        ? `Programme · ${edit.subtitle ?? "Sans nom"}`
+        : (edit.subtitle ?? draft.name);
+  const title =
+    edit === undefined
+      ? "Nouvelle séance"
+      : isProgramDay
+        ? `${edit.dayLabel} · séance`
+        : "Modifier la séance";
+
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col">
       <PageHeader
+        variant="form"
         onBack={goBack}
-        title={edit === undefined ? "Nouvelle séance" : "Modifier la séance"}
-        subtitle={
-          edit === undefined ? "Séance libre" : (edit.subtitle ?? draft.name)
-        }
+        overline={overline}
+        title={title}
+        strongBack={isProgramDay}
       />
 
       <form
         noValidate
         onSubmit={handleSave}
-        className="flex flex-1 flex-col px-[18px] pt-1 pb-28"
+        className="flex flex-1 flex-col px-[18px] pt-3.5 pb-28"
       >
         {/* While saving, nothing can change anymore: one fieldset freezes all. */}
-        <fieldset disabled={isSaving} className="flex flex-col gap-3.5">
+        <fieldset disabled={isSaving} className="flex flex-col">
           {edit === undefined ? (
-            <div className="grid grid-cols-[1.5fr_1fr] gap-2.5">
-              <div className="flex flex-col gap-1.5">
-                <span className="font-sans text-overline uppercase not-italic text-accent">
-                  Date *
-                </span>
+            <div className="mb-4 grid grid-cols-[1.45fr_1fr] gap-2">
+              <div className="flex min-w-0 flex-col gap-[9px]">
+                <span className={FORM_LABEL}>Date</span>
                 <button
                   type="button"
                   onClick={() => setIsPickingDate(true)}
                   aria-haspopup="dialog"
-                  aria-label={`Date : ${formatLongDate(
+                  aria-label={`Date : ${formatShortDayMonth(
                     draft.planned_date,
                   )}, choisir une autre date`}
-                  className="flex h-field items-center gap-2.5 rounded-btn border border-base-300 bg-base-100 px-4 text-left shadow-card"
+                  className={`${FORM_BOX} text-left`}
                 >
                   <Icon
                     src={calendarIcon}
-                    className="size-[18px] shrink-0 text-muted"
+                    className="size-[15px] shrink-0 text-muted"
                   />
-                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium">
-                    {formatLongDate(draft.planned_date)}
+                  <span className="min-w-0 flex-1 truncate">
+                    {formatShortDayMonth(draft.planned_date)}
                   </span>
                 </button>
               </div>
               <TextField
                 id="planned_time"
                 label="Heure"
+                variant="form"
+                icon={clockIcon}
                 type="time"
                 value={draft.planned_time ?? ""}
                 onChange={(event) =>
@@ -690,84 +716,98 @@ function SessionEditorPage({ edit }: Props) {
                 }
               />
             </div>
-          ) : (
-            // The date and the time belong to the appointment: they change
-            // through "Déplacer" (US-25), never here. A day of a program
-            // shows its weekday instead (PRO-03).
-            <div className="flex flex-col gap-1">
-              <p className="flex h-field items-center rounded-btn border border-base-300 bg-soft px-4 shadow-card">
-                <span className="flex flex-col">
-                  <span className="text-overline uppercase text-accent">
-                    {edit.dayLabel === undefined || edit.dayLabel === null
-                      ? "Date"
-                      : "Jour"}
-                  </span>
-                  <span className="font-semibold">
-                    {edit.dayLabel === undefined || edit.dayLabel === null
-                      ? `${formatLongDate(draft.planned_date)}${
-                          draft.planned_time === null
-                            ? ""
-                            : ` · ${draft.planned_time}`
-                        }`
-                      : edit.dayLabel}
-                  </span>
+          ) : isProgramDay ? (
+            // A day of a program: the day comes from the program (RM-075).
+            <div className="mb-4 flex flex-col gap-[9px]">
+              <span className={FORM_LABEL}>Jour de la semaine</span>
+              <p className={FORM_BOX}>
+                <Icon
+                  src={calendarIcon}
+                  className="size-[15px] shrink-0 text-muted"
+                />
+                <span className="min-w-0 flex-1 truncate">{edit.dayLabel}</span>
+                <span className="text-[11px] font-semibold text-muted">
+                  chaque semaine
                 </span>
               </p>
-              <p className="text-sm text-muted">
-                {edit.dayLabel === undefined || edit.dayLabel === null
-                  ? "Pour changer la date ou l'heure : « Déplacer »."
-                  : "Ce jour vient du programme."}
+            </div>
+          ) : (
+            // The date and the time belong to the appointment: they change
+            // through "Déplacer" (US-25), never here.
+            <div className="mb-4 flex flex-col gap-[9px]">
+              <span className={FORM_LABEL}>Date</span>
+              <p className={FORM_BOX}>
+                <Icon
+                  src={calendarIcon}
+                  className="size-[15px] shrink-0 text-muted"
+                />
+                <span className="min-w-0 flex-1 truncate">
+                  {formatShortDayMonth(draft.planned_date)}
+                  {draft.planned_time === null
+                    ? ""
+                    : ` · ${draft.planned_time}`}
+                </span>
+              </p>
+              <p className="text-[11px] font-semibold text-muted">
+                Pour changer la date ou l'heure : « Déplacer ».
               </p>
             </div>
           )}
-          <TextField
-            id="session_name"
-            label="Nom de la séance"
-            required
-            ref={nameRef}
-            value={draft.name}
-            onChange={(event) => {
-              setNameError(null);
-              dispatch({ type: "setName", name: event.target.value });
-            }}
-            placeholder="Ex. Haut du corps"
-            autoComplete="off"
-            maxLength={160}
-            error={nameError ?? undefined}
-          />
 
-          <section
-            aria-labelledby="blocks-title"
-            className="flex flex-col gap-3"
-          >
-            <div className="flex items-baseline justify-between">
-              <h2 id="blocks-title" className="text-display-xs">
+          <div className="mb-5">
+            <TextField
+              id="session_name"
+              label="Nom de la séance"
+              variant="form"
+              required
+              ref={nameRef}
+              value={draft.name}
+              onChange={(event) => {
+                setNameError(null);
+                dispatch({ type: "setName", name: event.target.value });
+              }}
+              placeholder="Ex. Haut du corps"
+              autoComplete="off"
+              maxLength={160}
+              error={nameError ?? undefined}
+            />
+          </div>
+
+          <section aria-labelledby="blocks-title" className="flex flex-col">
+            <div className="mb-2.5 flex items-center justify-between">
+              <h2 id="blocks-title" className={SECTION_TITLE}>
                 Blocs
               </h2>
-              <p className="text-xs font-semibold leading-[1.45] text-muted">
+              <p className="text-[11px] font-bold text-muted">
                 {formatBlockCount(blockCount)}
               </p>
             </div>
 
             {blockCount === 0 ? (
-              <div className="flex flex-col items-center gap-2 rounded-card border border-base-300 bg-base-100 p-4 py-6 text-center shadow-card">
+              <div className="mb-2.5 flex flex-col items-center gap-3.5 rounded-[16px] border border-empty-border bg-empty px-[30px] py-6 shadow-card">
                 <span
                   aria-hidden="true"
-                  className="grid size-12 place-items-center rounded-hero bg-secondary/[0.08] text-secondary"
+                  className="grid size-10 place-items-center rounded-[10px] bg-icon-box text-icon-stroke"
                 >
-                  <Icon src={blockIcon} className="size-6" />
+                  <Icon src={blockIcon} className="size-[18px]" />
                 </span>
-                <p className="text-sm leading-[1.45] text-muted">
-                  Ajoute un premier bloc pour y mettre des exercices.
+                <p className="text-center text-[13px] font-medium leading-[1.5] text-empty-text">
+                  {"Ajoute un premier bloc pour y "}
+                  <br />
+                  mettre des exercices.
                 </p>
               </div>
             ) : (
-              <SessionReview
-                blocks={draft.blocks}
-                onOpen={setOpenBlockKey}
-                onRemove={removeBlock}
-                onMove={(from, to) => dispatch({ type: "moveBlock", from, to })}
-              />
+              <div className="mb-2.5">
+                <SessionReview
+                  blocks={draft.blocks}
+                  onOpen={setOpenBlockKey}
+                  onRemove={removeBlock}
+                  onMove={(from, to) =>
+                    dispatch({ type: "moveBlock", from, to })
+                  }
+                />
+              </div>
             )}
 
             <button
@@ -777,22 +817,23 @@ function SessionEditorPage({ edit }: Props) {
               aria-describedby={
                 blockCount >= MAX_BLOCKS ? "blocks-limit" : undefined
               }
-              className="flex h-13 items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
+              className="flex h-[46px] items-center justify-center gap-2 rounded-[14px] border border-dashed border-dash text-sm font-bold text-secondary disabled:opacity-60"
             >
-              <Icon src={plusIcon} className="size-[18px]" />
+              <Icon src={plusIcon} className="size-[15px]" />
               Ajouter un bloc
             </button>
             {blockCount >= MAX_BLOCKS && (
-              <p id="blocks-limit" className="text-sm text-muted">
+              <p id="blocks-limit" className="mt-2 text-sm text-muted">
                 {MAX_BLOCKS} blocs au maximum
               </p>
             )}
           </section>
 
-          {exerciseCount === 0 && (
+          {/* With no block at all, the empty card already says it. */}
+          {blockCount > 0 && exerciseCount === 0 && (
             <p
               role="status"
-              className="flex gap-2 rounded-card border border-status-pending bg-base-100 p-3 text-sm font-semibold"
+              className="mt-3.5 flex gap-2 rounded-[14px] border border-status-pending bg-base-100 p-3 text-sm font-semibold"
             >
               <span aria-hidden="true" className="text-status-pending">
                 ⚠
@@ -805,20 +846,20 @@ function SessionEditorPage({ edit }: Props) {
           {saveError !== null && (
             <div
               role="alert"
-              className="flex flex-col gap-3 rounded-card border border-status-missed bg-base-100 p-4"
+              className="mt-3.5 flex flex-col gap-3 rounded-[14px] border border-status-missed bg-base-100 p-4"
             >
               <p className="font-semibold">{saveError}</p>
               <button
                 type="button"
                 onClick={save}
-                className="h-12 rounded-btn border border-base-300 bg-base-100 font-semibold"
+                className="h-12 rounded-[12px] border border-base-300 bg-base-100 font-semibold"
               >
                 Réessayer
               </button>
             </div>
           )}
 
-          <div className="fixed inset-x-0 bottom-0 px-[18px] pt-3 pb-1">
+          <div className="fixed inset-x-0 bottom-0 bg-base-200 px-[18px] pt-3 pb-[18px]">
             <div className="mx-auto max-w-md">
               <button
                 type="submit"
@@ -830,18 +871,18 @@ function SessionEditorPage({ edit }: Props) {
                     ? "no-change"
                     : undefined
                 }
-                className="flex h-btn w-full items-center justify-center gap-2.5 rounded-btn bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
+                className="flex h-[50px] w-full items-center justify-center gap-2.5 rounded-[12px] bg-primary text-[15px] font-extrabold uppercase tracking-[0.02em] text-primary-content shadow-action disabled:opacity-60"
               >
-                {edit !== undefined
-                  ? "Vérifier les changements"
-                  : isSaving
-                    ? "Enregistrement…"
-                    : "Enregistrer la séance"}
+                {isSaving
+                  ? "Enregistrement…"
+                  : edit === undefined || isProgramDay
+                    ? "Enregistrer la séance"
+                    : "Vérifier les changements"}
               </button>
               {edit !== undefined && changes.length === 0 && (
                 <p
                   id="no-change"
-                  className="mt-2 text-center text-sm text-muted"
+                  className="mt-2 text-center text-[11px] font-semibold text-muted"
                 >
                   Rien n'a changé pour l'instant.
                 </p>

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
-import { formatLongDate, todayInParis } from "shared";
+import { formatLongDate, formatShortDayMonth, todayInParis } from "shared";
 import { expectHomePage, signUp } from "./helpers";
 
 async function expectNoA11yViolation(page: Page) {
@@ -283,7 +283,7 @@ test("plans a free session from the home page and finds it there (A1 to A9)", as
     "Nouvelle séance",
   );
   await expect(page.getByRole("button", { name: /^Date/ })).toContainText(
-    formatLongDate(todayInParis()),
+    formatShortDayMonth(todayInParis()),
   );
 
   // The date picker opens and keeps today

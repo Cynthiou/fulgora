@@ -12,6 +12,8 @@ type Props = Omit<ComponentPropsWithRef<"input">, "id" | "className"> & {
   trailing?: ReactNode;
   // The small icon drawn inside the field, on the left (01-1)
   icon?: string;
+  // "form": the 46 px field of the program and session forms (handoff v3)
+  variant?: "page" | "form";
 };
 
 // A labelled text input with its help and error texts, linked for screen
@@ -24,8 +26,10 @@ function TextField({
   trailing,
   icon,
   required,
+  variant = "page",
   ...inputProps
 }: Props) {
+  const isForm = variant === "form";
   const helpId = help === undefined ? undefined : `${id}-help`;
   const errorId = error === undefined ? undefined : `${id}-error`;
   const describedBy = [errorId, helpId].filter(Boolean).join(" ") || undefined;
@@ -35,18 +39,29 @@ function TextField({
       : "border-[1.5px] border-status-missed";
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col ${isForm ? "gap-[9px]" : "gap-1.5"}`}>
       <label
         htmlFor={id}
-        className="font-sans text-overline uppercase not-italic text-accent"
+        className={
+          isForm
+            ? "text-[10px] font-extrabold uppercase leading-[1.2] tracking-[0.14em] text-accent"
+            : "font-sans text-overline uppercase not-italic text-accent"
+        }
       >
         {label}
         {required ? " *" : ""}
       </label>
       <div className="relative flex items-center gap-2">
         {icon !== undefined && (
-          <span className="pointer-events-none absolute left-4 text-muted">
-            <Icon src={icon} className="size-[18px]" />
+          <span
+            className={`pointer-events-none absolute text-muted ${
+              isForm ? "left-3" : "left-4"
+            }`}
+          >
+            <Icon
+              src={icon}
+              className={isForm ? "size-[15px]" : "size-[18px]"}
+            />
           </span>
         )}
         <input
@@ -54,8 +69,18 @@ function TextField({
           aria-required={required}
           aria-invalid={error === undefined ? undefined : true}
           aria-describedby={describedBy}
-          className={`h-field w-full min-w-0 rounded-btn border bg-base-100 text-[15px] shadow-card placeholder:text-faint ${
-            icon === undefined ? "px-4" : "pr-4 pl-11"
+          className={`w-full min-w-0 border bg-base-100 ${
+            isForm
+              ? "h-[46px] rounded-[12px] text-sm font-medium placeholder:text-faint focus:border-accent focus:outline-none"
+              : "h-field rounded-btn text-[15px] shadow-card placeholder:text-faint"
+          } ${
+            icon === undefined
+              ? isForm
+                ? "px-[14px]"
+                : "px-4"
+              : isForm
+                ? "pr-3 pl-[37px]"
+                : "pr-4 pl-11"
           } ${borderClasses}`}
           {...inputProps}
         />

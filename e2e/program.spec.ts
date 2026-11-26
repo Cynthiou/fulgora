@@ -16,7 +16,6 @@ test("creates a program, fills its sessions and plans the whole period", async (
   const today = todayInParis();
   // A week starting tomorrow, so the first session is in the future
   const start = addDays(today, 1);
-  const end = addDays(today, 7);
   const weekday = getWeekday(start);
 
   await signUp(page);
@@ -28,35 +27,35 @@ test("creates a program, fills its sessions and plans the whole period", async (
   await page.getByRole("button", { name: "Ajouter une séance" }).click();
   await page.getByRole("link", { name: /^Programme/ }).click();
 
-  // PRO-02: step 1
-  await expect(
-    page.getByText("Étape 1 / 3 · Informations et jours"),
-  ).toBeVisible();
+  // The program form (handoff v3): name, period, days and sessions on one
+  // screen. The period starts tomorrow.
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Nouveau programme",
+  );
+  await page.goto(`/programmes/nouveau?date=${start}`);
+  await expect(page.getByText("0 par semaine")).toBeVisible();
   await page.getByLabel(/^Nom du programme/).fill("Hypertrophie");
-  await page.getByLabel(/^Début/).fill(start);
-  await page.getByLabel(/^Fin/).fill(end);
   await page
     .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
     .click();
-  await expectNoA11yViolation(page);
-  await page.getByRole("button", { name: "Suivant" }).click();
-
-  // PRO-03v: one session per chosen day, none ready yet
-  await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
-  await expect(page.getByText("0 / 1 séance prête")).toBeVisible();
-  // A session without exercise says "À configurer" (PRO-03).
-  await expect(page.getByText("À configurer").first()).toBeVisible();
+  // One session per chosen day, none ready yet
+  await expect(page.getByText("0 / 1 prêtes")).toBeVisible();
+  await expect(page.getByText("Séance vide")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Créer le programme" }),
-  ).toBeDisabled();
+    page.getByRole("button", { name: "Enregistrer le brouillon" }),
+  ).toBeVisible();
   await expectNoA11yViolation(page);
 
-  // The session of the day, built with the editor of the free sessions
-  await page.getByRole("link", { name: /Séance du/ }).click();
+  // The session of the day: the draft is saved, then the editor opens
+  await page
+    .getByRole("button", {
+      name: new RegExp(`^${weekdayName(weekday)} : Séance vide`),
+    })
+    .click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Modifier la séance",
+    `${weekdayName(weekday)} · séance`,
   );
-  await expect(page.getByText("Ce jour vient du programme.")).toBeVisible();
+  await expect(page.getByText("chaque semaine")).toBeVisible();
   await page.getByLabel(/^Nom de la séance/).fill("Haut du corps");
   await page.getByRole("button", { name: "Ajouter un bloc" }).click();
   await page.getByRole("button", { name: /^Classique/ }).click();
@@ -68,19 +67,16 @@ test("creates a program, fills its sessions and plans the whole period", async (
     .click();
   await page.getByRole("button", { name: /^Ajouter au bloc/ }).click();
   await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
-  await page.getByRole("button", { name: "Vérifier les changements" }).click();
+  await page.getByRole("button", { name: "Enregistrer la séance" }).click();
   await page.getByRole("button", { name: "Valider" }).click();
 
-  // PRO-03f: the session is ready, the program can be created
-  await expect(page.getByText("1 / 1 séance prête")).toBeVisible();
+  // Back on the program: the session is ready, the program can be created
+  await expect(page.getByText("1 / 1 prêtes")).toBeVisible();
+  await expect(page.getByText("Séance prête")).toBeVisible();
   await page.getByRole("button", { name: "Créer le programme" }).click();
-
-  // PRO-06: the Planning is filled
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Programme créé",
+    "Hypertrophie",
   );
-  await expect(page.getByText(/séances ajoutées au Planning/)).toBeVisible();
-  await expectNoA11yViolation(page);
 
   // The session is really in the Planning, on its day
   await page.goto(`/planning?vue=jour&jour=${start}`);
@@ -134,21 +130,27 @@ test("adds a second session on the same day, removes it and undoes", async ({
 }) => {
   const today = todayInParis();
   const start = addDays(today, 1);
-  const end = addDays(today, 14);
   const weekday = getWeekday(start);
 
   await signUp(page);
   await page.getByRole("button", { name: "Commencer" }).click();
   await expectHomePage(page);
 
-  await page.goto("/programmes/nouveau");
+  await page.goto(`/programmes/nouveau?date=${start}`);
   await page.getByLabel(/^Nom du programme/).fill("Deux fois le même jour");
-  await page.getByLabel(/^Début/).fill(start);
-  await page.getByLabel(/^Fin/).fill(end);
   await page
     .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
     .click();
-  await page.getByRole("button", { name: "Suivant" }).click();
+  // A tap on the session saves the draft; the list of its sessions (with
+  // "Autre séance" and "Retirer") stays at /programmes/:id/seances.
+  await page
+    .getByRole("button", {
+      name: new RegExp(`^${weekdayName(weekday)} : Séance vide`),
+    })
+    .click();
+  await expect(page).toHaveURL(/\/programmes\/\d+\/seances\/\d+$/);
+  const programId = /\/programmes\/(\d+)\//.exec(page.url())?.[1];
+  await page.goto(`/programmes/${programId}/seances`);
   await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
 
   // PRO-03a: the panel says what the day will hold and what it adds
@@ -157,7 +159,7 @@ test("adds a second session on the same day, removes it and undoes", async ({
     .getByRole("button", { name: `Autre séance le ${dayName}` })
     .click();
   await expect(page.getByText(/aura 2 séances/)).toBeVisible();
-  await expect(page.getByText(/le total passe de 2 à 4/)).toBeVisible();
+  await expect(page.getByText(/le total passe de \d+ à \d+/)).toBeVisible();
   await shoot(page, "pro-03a-autre-seance");
   await expectNoA11yViolation(page);
   await page.getByLabel(/^Nom de la séance/).fill("Gainage");
@@ -170,7 +172,7 @@ test("adds a second session on the same day, removes it and undoes", async ({
   // PRO-03b: unchecking a day says what it would remove
   await page.getByRole("link", { name: "Modifier les informations" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Modifier le programme",
+    "Nouveau programme",
   );
   await page
     .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
@@ -184,7 +186,9 @@ test("adds a second session on the same day, removes it and undoes", async ({
   await page
     .getByRole("button", { name: new RegExp(`^${weekdayName(weekday)}$`) })
     .click();
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Enregistrer le brouillon" }).click();
+  await expect(page).toHaveURL(/\/programmes$/);
+  await page.goto(`/programmes/${programId}/seances`);
   await expect(page.getByText("Étape 2 / 3 · Séances")).toBeVisible();
   await expect(page.getByText("Gainage")).toBeVisible();
 

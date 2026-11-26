@@ -218,7 +218,7 @@ function ProgramsPage() {
                       <Link
                         to={
                           isDraft
-                            ? `/programmes/${item.id}/seances`
+                            ? `/programmes/${item.id}/informations`
                             : `/programmes/${item.id}`
                         }
                         className="min-w-0 flex-1 truncate text-base font-extrabold"
@@ -294,7 +294,7 @@ function ProgramsPage() {
                           Supprimer
                         </button>
                         <Link
-                          to={`/programmes/${item.id}/seances`}
+                          to={`/programmes/${item.id}/informations`}
                           className="flex h-11 items-center justify-center gap-2 rounded-btn border border-secondary text-sm font-bold text-secondary"
                         >
                           <Icon src={pencilIcon} className="size-4" />

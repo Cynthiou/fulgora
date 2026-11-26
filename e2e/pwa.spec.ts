@@ -42,7 +42,7 @@ test("serves a manifest a phone can install", async ({ page }) => {
     name: "Fulgora",
     display: "standalone",
     start_url: "/",
-    theme_color: "#eceff3",
+    theme_color: "#f4f6fa",
   });
   // One icon of 192 and one of 512, plus the maskable one of the phones
   const sizes = manifest.icons.map((icon: { sizes: string }) => icon.sizes);

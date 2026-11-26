@@ -1,5 +1,6 @@
-/* Fulgora brand v2 ("light mockup, no halo"): colors, fonts, sizes and the two themes.
-   The values come from the brand guidelines (docs/brand-guidelines.md). */
+/* Fulgora brand v3 (26/11/2026): colors, fonts, sizes and the two themes.
+   The colors come from the handoff of the program and session screens
+   (design/handoff-programme/README.md), applied to the whole app. */
 
 @import "tailwindcss";
 
@@ -14,15 +15,16 @@
   color-scheme: light;
 
   --color-base-100: #ffffff; /* surface: cards, fields, tab bar */
-  --color-base-200: #eceff3; /* page background */
-  --color-base-300: #e2e5ea; /* borders */
-  --color-base-content: #0b1220; /* main text */
+  --color-base-200: #f4f6fa; /* page background */
+  --color-base-300: #cdd5e1; /* borders */
+  --color-base-content: #0a1020; /* main text */
 
-  --color-primary: #ff6b35; /* action: ONE orange button per screen */
-  --color-primary-content: #0b1220;
-  /* Brand blue. #2563EB of the guidelines gives 4.48:1 on the page
-     background (#ECEFF3), just under the 4.5:1 of RM-064, so links and the
-     active tab use this slightly darker blue in the light theme. */
+  --color-primary: #ff7a42; /* action: ONE orange button per screen */
+  --color-primary-content: #1b1410;
+  /* Blue text. #2563EB of the mockups gives 4.78:1 on the page but falls
+     under the 4.5:1 of RM-064 on a light blue tint (the "À venir" chip),
+     so links, chips and the active tab keep this slightly darker blue.
+     The blue of the logo stays #2563EB (--color-brand). */
   --color-secondary: #1d4ed8;
   --color-secondary-content: #ffffff;
   --color-accent: #0e7490; /* overlines and field labels */
@@ -55,16 +57,16 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #141e33;
-  --color-base-200: #0b1220;
-  --color-base-300: #26324a;
-  --color-base-content: #f8fafc;
+  --color-base-100: #172030;
+  --color-base-200: #0c121d;
+  --color-base-300: #263143;
+  --color-base-content: #ffffff;
 
-  --color-primary: #ff6b35;
-  --color-primary-content: #0b1220;
+  --color-primary: #ff7a42;
+  --color-primary-content: #1b1410;
   --color-secondary: #60a5fa;
   --color-secondary-content: #0b1220;
-  --color-accent: #22d3ee;
+  --color-accent: #3cc8ea;
   --color-accent-content: #0b1220;
   --color-neutral: #f8fafc;
   --color-neutral-content: #0b1220;
@@ -116,17 +118,17 @@
 /* Colors that DaisyUI does not have: they change with the theme. */
 :root,
 [data-theme="fulgora-light"] {
-  --fulgora-soft: #f3f5f8;
-  --fulgora-muted: #5b6576;
-  --fulgora-faint: #8a93a3;
-  /* The grey track of a segmented control (CAL-01) */
-  --fulgora-track: #e1e5eb;
+  --fulgora-soft: #e8ecf2;
+  --fulgora-muted: #4b5668;
+  --fulgora-faint: #5b6678;
+  /* The grey track of a segmented control (CAL-01), the rail of a progress */
+  --fulgora-track: #d5dce6;
   /* The chosen day of the calendar grid (CAL-01) */
   --fulgora-pick: #0b1220;
   /* The dashed rule of an empty day in the week view (CAL-02) */
   --fulgora-rule: #c9cfd8;
   /* The dashed border of an "add" button (A2) */
-  --fulgora-dash: #b8bfca;
+  --fulgora-dash: #9aa6b8;
   /* The teal of the charter on its own tint only reaches 4.08:1 in
      10 px bold (A7a chip), under the 4.5:1 of RM-064: a darker teal
      is used for a small word on a teal ground. */
@@ -143,48 +145,99 @@
      RM-064, so small orange text uses this darker orange. */
   --fulgora-action-text: #ab3f0a;
   --fulgora-shadow-card:
-    0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 18px rgba(15, 23, 42, 0.05);
+    0 1px 2px rgba(10, 16, 32, 0.06), 0 4px 14px rgba(10, 16, 32, 0.06);
   /* The card of the day and the other hero cards of the mockups */
   --fulgora-shadow-hero: 0 10px 30px rgba(15, 23, 42, 0.07);
+  /* The program and session screens (handoff v3, 26/11/2026) */
+  --fulgora-back: #e3e8ef;
+  --fulgora-back-strong: #d5dce6;
+  --fulgora-empty: #ffffff;
+  --fulgora-empty-border: #cdd5e1;
+  --fulgora-icon-box: #2563eb;
+  --fulgora-icon-stroke: #ffffff;
+  --fulgora-empty-text: #4b5668;
+  --fulgora-strong: #0a1020;
+  --fulgora-card-title: #0a1020;
+  --fulgora-card-sub: #5b6678;
+  --fulgora-btn2: #0a1020;
+  --fulgora-btn2-border: #0a1020;
+  --fulgora-btn2-icon: #ffffff;
+  --fulgora-btn2-text: #ffffff;
+  --fulgora-badge-border: #cdd5e1;
+  --fulgora-ready: #2563eb;
 }
 
 [data-theme="fulgora-dark"] {
-  --fulgora-soft: #1e293b;
-  --fulgora-muted: #94a3b8;
-  --fulgora-faint: #64748b;
-  --fulgora-track: #1e293b;
+  --fulgora-soft: #1e2737;
+  --fulgora-muted: #8a96a8;
+  --fulgora-faint: #6b7587;
+  --fulgora-track: #1c2533;
   --fulgora-pick: #2a3a5c;
   --fulgora-rule: #3a4763;
-  --fulgora-dash: #3a4763;
-  --fulgora-accent-text: #22d3ee;
+  --fulgora-dash: #3a4558;
+  --fulgora-accent-text: #3cc8ea;
   --fulgora-done-text: #16a34a;
   --fulgora-pending-text: #d97706;
   --fulgora-missed-text: #f87171;
   --fulgora-cancelled-text: #94a3b8;
-  --fulgora-action-text: #ff6b35;
-  --fulgora-shadow-card:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --fulgora-action-text: #ff7a42;
+  /* No shadow on a dark card: the border draws it (handoff v3) */
+  --fulgora-shadow-card: none;
   --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
+  /* The program and session screens (handoff v3, 26/11/2026) */
+  --fulgora-back: #141b27;
+  --fulgora-back-strong: #1e2836;
+  --fulgora-empty: #141c2a;
+  --fulgora-empty-border: #243042;
+  --fulgora-icon-box: #1f3050;
+  --fulgora-icon-stroke: #8fb4f5;
+  --fulgora-empty-text: #8f9bb0;
+  --fulgora-strong: #d4dae3;
+  --fulgora-card-title: #b9c2d0;
+  --fulgora-card-sub: #7f8a9c;
+  --fulgora-btn2: #1e2635;
+  --fulgora-btn2-border: #39445a;
+  --fulgora-btn2-icon: #aab4c3;
+  --fulgora-btn2-text: #ffffff;
+  --fulgora-badge-border: #2c3749;
+  --fulgora-ready: rgba(37, 99, 235, 0.2);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --fulgora-soft: #1e293b;
-    --fulgora-muted: #94a3b8;
-    --fulgora-faint: #64748b;
-    --fulgora-track: #1e293b;
+    --fulgora-soft: #1e2737;
+    --fulgora-muted: #8a96a8;
+    --fulgora-faint: #6b7587;
+    --fulgora-track: #1c2533;
     --fulgora-pick: #2a3a5c;
     --fulgora-rule: #3a4763;
-    --fulgora-dash: #3a4763;
-    --fulgora-accent-text: #22d3ee;
+    --fulgora-dash: #3a4558;
+    --fulgora-accent-text: #3cc8ea;
     --fulgora-done-text: #16a34a;
     --fulgora-pending-text: #d97706;
     --fulgora-missed-text: #f87171;
     --fulgora-cancelled-text: #94a3b8;
-    --fulgora-action-text: #ff6b35;
-    --fulgora-shadow-card:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+    --fulgora-action-text: #ff7a42;
+    /* No shadow on a dark card: the border draws it (handoff v3) */
+    --fulgora-shadow-card: none;
     --fulgora-shadow-hero: 0 10px 30px rgba(0, 0, 0, 0.35);
+    /* The program and session screens (handoff v3, 26/11/2026) */
+    --fulgora-back: #141b27;
+    --fulgora-back-strong: #1e2836;
+    --fulgora-empty: #141c2a;
+    --fulgora-empty-border: #243042;
+    --fulgora-icon-box: #1f3050;
+    --fulgora-icon-stroke: #8fb4f5;
+    --fulgora-empty-text: #8f9bb0;
+    --fulgora-strong: #d4dae3;
+    --fulgora-card-title: #b9c2d0;
+    --fulgora-card-sub: #7f8a9c;
+    --fulgora-btn2: #1e2635;
+    --fulgora-btn2-border: #39445a;
+    --fulgora-btn2-icon: #aab4c3;
+    --fulgora-btn2-text: #ffffff;
+    --fulgora-badge-border: #2c3749;
+    --fulgora-ready: rgba(37, 99, 235, 0.2);
   }
 }
 
@@ -208,6 +261,26 @@
   --color-status-pending: #d97706;
   --color-status-missed: #dc2626;
   --color-status-cancelled: #64748b;
+
+  --color-back: var(--fulgora-back);
+  --color-back-strong: var(--fulgora-back-strong);
+  --color-empty: var(--fulgora-empty);
+  --color-empty-border: var(--fulgora-empty-border);
+  --color-icon-box: var(--fulgora-icon-box);
+  --color-icon-stroke: var(--fulgora-icon-stroke);
+  --color-empty-text: var(--fulgora-empty-text);
+  --color-strong: var(--fulgora-strong);
+  --color-card-title: var(--fulgora-card-title);
+  --color-card-sub: var(--fulgora-card-sub);
+  --color-btn2: var(--fulgora-btn2);
+  --color-btn2-border: var(--fulgora-btn2-border);
+  --color-btn2-icon: var(--fulgora-btn2-icon);
+  --color-btn2-text: var(--fulgora-btn2-text);
+  --color-badge-border: var(--fulgora-badge-border);
+  --color-ready: var(--fulgora-ready);
+  --color-ready-content: #ffffff;
+  /* The blue of the logo, the same in both themes (handoff v3) */
+  --color-brand: #2563eb;
 
   --shadow-card: var(--fulgora-shadow-card);
   --shadow-hero: var(--fulgora-shadow-hero);
@@ -253,7 +326,9 @@
   /* The round button of the Planning is a soft square (CAL-01) */
   --radius-fab: 16px;
 
-  --shadow-action: 0 10px 24px rgba(255, 107, 53, 0.32);
+  --shadow-action: 0 8px 30px rgba(255, 122, 66, 0.35);
+  /* A chosen day of the week: a blue glow (handoff v3) */
+  --shadow-day: 0 0 16px rgba(37, 99, 235, 0.5);
   --shadow-nav-active: 0 10px 22px rgba(37, 99, 235, 0.35);
   /* The session to come, ringed in blue (CAL-01, CAL-03) */
   --shadow-next: 0 8px 20px rgba(37, 99, 235, 0.12);
@@ -265,7 +340,7 @@
   --shadow-sheet: 0 -10px 30px rgba(11, 18, 32, 0.2);
   --shadow-dialog: 0 20px 50px rgba(11, 18, 32, 0.3);
   /* The card of the set being done (B3a) */
-  --shadow-set: 0 10px 26px rgba(255, 107, 53, 0.14);
+  --shadow-set: 0 10px 26px rgba(255, 122, 66, 0.14);
 
   --spacing-tap: 44px;
   --spacing-btn: 56px;

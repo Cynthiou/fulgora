@@ -21,12 +21,19 @@ type Props = {
   value: string;
   onConfirm: (date: string) => void;
   onClose: () => void;
+  // The title of the panel; "Date de la séance" by default (A2b)
+  title?: string;
 };
 
 // Screen A2b: "Date de la séance". A month at a time, Monday first; a past
 // date is allowed (a session declared after the fact), within the range of
 // the server (one year back, two years ahead). "Valider la date" confirms.
-function DatePickerSheet({ value, onConfirm, onClose }: Props) {
+function DatePickerSheet({
+  value,
+  onConfirm,
+  onClose,
+  title = "Date de la séance",
+}: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const today = todayInParis();
   const [chosen, setChosen] = useState(value);
@@ -59,10 +66,10 @@ function DatePickerSheet({ value, onConfirm, onClose }: Props) {
     "flex h-9 w-full items-center justify-center rounded-btn text-[13px] disabled:opacity-40";
 
   return (
-    <BottomSheet label="Date de la séance" onClose={onClose} closeLabel={null}>
+    <BottomSheet label={title} onClose={onClose} closeLabel={null}>
       <div className="flex items-center justify-between gap-2">
         <h2 id="date-picker-title" className="text-[26px] leading-none">
-          Date de la séance
+          {title}
         </h2>
         <button
           type="button"

@@ -1,7 +1,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { formatLongDate, type SelectedExercise, todayInParis } from "shared";
+import {
+  formatShortDayMonth,
+  type SelectedExercise,
+  todayInParis,
+} from "shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFreeSession } from "../../../../src/features/appointment/services/appointmentService";
 import SessionEditorPage from "../../../../src/features/session-template/pages/SessionEditorPage";
@@ -78,16 +82,15 @@ describe("SessionEditorPage", () => {
     );
     expect(screen.getByText("Séance libre")).toBeTruthy();
     expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
-      "Jeudi 26 novembre",
+      "Jeu 26 nov.",
     );
     expect(inputValue(/^Heure/)).toBe("");
     expect(screen.getByText("0 bloc")).toBeTruthy();
     expect(
       screen.getByText("Ajoute un premier bloc pour y mettre des exercices."),
     ).toBeTruthy();
-    expect(screen.getByRole("status").textContent).toContain(
-      "Cette séance n'a pas encore d'exercice : tu ne pourras pas la démarrer.",
-    );
+    // With no block at all, the empty card says it: no warning on top.
+    expect(screen.queryByRole("status")).toBeNull();
   });
 
   it("falls back on today when the date of the address is unusable", () => {
@@ -96,7 +99,7 @@ describe("SessionEditorPage", () => {
     // The app lives in Paris: after 23:00 UTC the day is already the next
     // one there, so the test asks the same clock as the editor.
     expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
-      formatLongDate(todayInParis()),
+      formatShortDayMonth(todayInParis()),
     );
   });
 
@@ -142,7 +145,7 @@ describe("SessionEditorPage", () => {
 
     expect(screen.queryByText("Date de la séance")).toBeNull();
     expect(screen.getByRole("button", { name: /^Date/ }).textContent).toContain(
-      "Samedi 28 novembre",
+      "Sam 28 nov.",
     );
     expect(loadDraft()?.draft.planned_date).toBe("2026-11-28");
   });

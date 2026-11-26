@@ -73,7 +73,7 @@ function ProgramDaySessionPage() {
           await writeProgramDaySession(programId, scheduleId, next);
         },
         onSaved: () =>
-          navigate(`/programmes/${programId}/seances`, { replace: true }),
+          navigate(`/programmes/${programId}/informations`, { replace: true }),
       }}
     />
   );
