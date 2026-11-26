@@ -1,6 +1,7 @@
 import express from "express";
 import {
   dateRangeSchema,
+  declareDoneSchema,
   freeSessionSchema,
   idParamSchema,
   moveAppointmentSchema,
@@ -8,6 +9,10 @@ import {
 } from "shared";
 import { authenticate } from "../../middlewares/authenticate.js";
 import { validate } from "../../middlewares/validate.js";
+import {
+  declareDone,
+  readDeclaration,
+} from "../workout-session/declareActions.js";
 import {
   browse,
   cancel,
@@ -83,6 +88,24 @@ appointmentRouter.post(
   authenticate,
   validate({ params: idParamSchema }),
   markNotDone,
+);
+
+// GET /api/appointments/:id/declaration: the plan to confirm, set by set
+// (US-38, CAL-08b).
+appointmentRouter.get(
+  "/:id/declaration",
+  authenticate,
+  validate({ params: idParamSchema }),
+  readDeclaration,
+);
+
+// POST /api/appointments/:id/declare-done: the session written after the
+// fact (US-38).
+appointmentRouter.post(
+  "/:id/declare-done",
+  authenticate,
+  validate({ params: idParamSchema, body: declareDoneSchema }),
+  declareDone,
 );
 
 export default appointmentRouter;

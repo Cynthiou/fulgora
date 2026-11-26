@@ -130,6 +130,8 @@ export type WorkoutSessionRow = {
   ended_at: Date | null;
   // 0 or 1 in MySQL
   auto_closed: number;
+  // Written after the fact, never lived in the app (US-38)
+  declared_afterwards: number;
   session_name: string;
   program_name: string | null;
 };
@@ -142,7 +144,8 @@ export async function readWorkoutSession(
 ): Promise<WorkoutSessionRow | null> {
   const [rows] = await db.execute<Rows[]>(
     `SELECT ws.id, ws.appointment_id, ws.status, ws.started_at, ws.ended_at,
-            ws.auto_closed, st.name AS session_name, p.name AS program_name
+            ws.auto_closed, ws.declared_afterwards,
+            st.name AS session_name, p.name AS program_name
        FROM workout_session ws
        JOIN appointment a ON a.id = ws.appointment_id
        JOIN session_version sv ON sv.id = a.session_version_id
@@ -599,4 +602,69 @@ export async function readWorkoutSetOwner(
     [setId, userId],
   );
   return (rows[0] as AddedSetRow | undefined) ?? null;
+}
+
+// --- Declaring a session after the fact (US-38) ---------------------------
+
+// The realized session of a day already past: its start is the declared
+// date, and it is marked as declared afterwards (RM-050, RM-057).
+export async function createDeclaredWorkoutSession(
+  appointmentId: number,
+  userId: number,
+  startedAt: string,
+  status: WorkoutStatus,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `INSERT INTO workout_session (appointment_id, owner_user_id, status, started_at,
+        ended_at, last_activity_at, declared_afterwards)
+     VALUES (?, ?, ?, ?, ?, NOW(3), TRUE)`,
+    [appointmentId, userId, status, startedAt, startedAt],
+  );
+  return result.insertId;
+}
+
+// One confirmed set of a declaration: the copy made from the plan is
+// filled in and validated now (RM-049).
+export async function fillDeclaredSet(
+  workoutSessionId: number,
+  plannedSetId: number,
+  values: ActualSetValues,
+  db: Queryable = client,
+): Promise<number> {
+  const [result] = await db.execute<Result>(
+    `UPDATE workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+        SET wset.reps_actual = ?, wset.weight_actual_kg = ?,
+            wset.duration_actual_seconds = ?, wset.distance_actual_meters = ?,
+            wset.speed_actual_kmh = ?, wset.resistance_actual = ?,
+            wset.incline_actual_percent = ?, wset.calories_actual = ?,
+            wset.validated_at = NOW(3)
+      WHERE wb.workout_session_id = ? AND wset.source_planned_set_id = ?`,
+    [
+      values.reps,
+      values.weight_kg,
+      values.duration_seconds,
+      values.distance_meters,
+      values.speed_kmh,
+      values.resistance,
+      values.incline_percent,
+      values.calories,
+      workoutSessionId,
+      plannedSetId,
+    ],
+  );
+  return result.affectedRows;
+}
+
+export async function setWorkoutSessionStatus(
+  id: number,
+  status: WorkoutStatus,
+  db: Queryable = client,
+): Promise<void> {
+  await db.execute("UPDATE workout_session SET status = ? WHERE id = ?", [
+    status,
+    id,
+  ]);
 }

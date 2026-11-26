@@ -11,6 +11,7 @@ import {
   type PlannedSetValues,
   plannedSetSchema,
 } from "./session-template.js";
+import { dateSchema } from "./validation.js";
 
 // --- The session in progress (home page, profile) ---------------------------
 
@@ -135,6 +136,8 @@ export type WorkoutSessionTree = {
   ended_at: string | null;
   // True when the server closed it after 4 hours without activity (RM-065)
   auto_closed: boolean;
+  // True when the session was written after the fact (US-38)
+  declared_afterwards: boolean;
   blocks: WorkoutBlockTree[];
 };
 
@@ -458,4 +461,60 @@ export function formatAddedSets(count: number): string {
 // How many sets of the session were added by hand (B6).
 export function countAddedSets(tree: WorkoutSessionTree): number {
   return allSets(tree).filter((set) => set.is_added).length;
+}
+
+// --- Declaring a session after the fact (US-38) ---------------------------
+
+// The plan of a past session, ready to be confirmed set by set (CAL-08b).
+// The sets carry the id of the planned set they come from.
+export type DeclarationPlan = {
+  appointment: {
+    id: number;
+    planned_date: string;
+    planned_time: string | null;
+    session_name: string;
+    program_name: string | null;
+    status: AppointmentStatus;
+  };
+  blocks: WorkoutBlockTree[];
+};
+
+// What the screen sends back: the real date and the sets confirmed.
+export const declareDoneSchema = z.object({
+  actual_date: dateSchema,
+  sets: z
+    .array(
+      z.object({
+        planned_set_id: z.number().int().positive(),
+        values: actualSetSchema,
+      }),
+    )
+    .max(1000),
+});
+
+export type DeclareDoneInput = z.output<typeof declareDoneSchema>;
+
+// "2 / 3 séries confirmées", "3 séries prévues · à vérifier", "Aucune série
+// confirmée": the line under each exercise of CAL-08b.
+export function describeDeclaredExercise(
+  confirmed: number,
+  total: number,
+): string {
+  if (confirmed === 0) {
+    return total <= 1
+      ? `${total} série prévue · à vérifier`
+      : `${total} séries prévues · à vérifier`;
+  }
+  return `${confirmed} / ${total} séries confirmées`;
+}
+
+// The chip on the right of the same line.
+export function getDeclaredExerciseState(
+  confirmed: number,
+  total: number,
+): "done" | "partial" | "todo" {
+  if (confirmed === 0) {
+    return "todo";
+  }
+  return confirmed >= total ? "done" : "partial";
 }

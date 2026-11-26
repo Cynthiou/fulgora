@@ -235,6 +235,7 @@ export async function buildTree(
     started_at: session.started_at.toISOString(),
     ended_at: session.ended_at === null ? null : session.ended_at.toISOString(),
     auto_closed: session.auto_closed === 1,
+    declared_afterwards: session.declared_afterwards === 1,
     blocks: blockTrees,
   };
 }

@@ -111,6 +111,8 @@ export type AppointmentLockRow = {
   id: number;
   status: AppointmentStatus;
   session_version_id: number;
+  // The hour the session was planned at, or null (US-38)
+  planned_time: string | null;
   // null for a free session (RM-015)
   program_id: number | null;
 };
@@ -123,7 +125,7 @@ export async function readAppointmentForUpdate(
   db: Queryable = client,
 ): Promise<AppointmentLockRow | null> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT id, status, session_version_id, program_id
+    `SELECT id, status, session_version_id, program_id, planned_time
        FROM appointment
       WHERE id = ? AND owner_user_id = ?
       FOR UPDATE`,
@@ -248,6 +250,8 @@ export async function readVersionExercises(
 }
 
 export type VersionSetRow = {
+  // The planned set itself: the declaration points at it (US-38)
+  id: number;
   template_block_exercise_id: number;
   position: number;
   reps: number | null;
@@ -268,7 +272,7 @@ export async function readVersionSets(
   db: Queryable = client,
 ): Promise<VersionSetRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT ps.template_block_exercise_id, ps.position, ps.reps, ps.weight_kg,
+    `SELECT ps.id, ps.template_block_exercise_id, ps.position, ps.reps, ps.weight_kg,
             ps.duration_seconds, ps.distance_meters, ps.speed_kmh, ps.resistance,
             ps.incline_percent, ps.calories, ps.rest_after_seconds
        FROM planned_set ps
