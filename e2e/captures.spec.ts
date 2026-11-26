@@ -174,6 +174,7 @@ test("captures the screens of the MVP", async ({ page }) => {
 
   // Suivi vide, Profil
   await page.getByRole("link", { name: "Suivi", exact: true }).click();
+  await page.getByRole("link", { name: "Historique" }).click();
   await shoot(page, "sui-07-historique-vide");
   await page.getByRole("link", { name: /mon profil/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
@@ -259,7 +260,7 @@ test("captures the screens of the MVP", async ({ page }) => {
   await page.getByRole("button", { name: "Terminer", exact: true }).click();
   await expect(page.getByText("Terminée")).toBeVisible();
   await shoot(page, "b6-resume-de-la-seance");
-  await page.goto("/suivi");
+  await page.goto("/suivi/historique");
   await expect(page.getByText(/^Semaine du /)).toBeVisible();
   await shoot(page, "sui-05-historique");
   await page

@@ -118,7 +118,7 @@ test("corrects the result of a past session from its summary", async ({
   await expect(page.getByText("12 rép.")).toHaveCount(0);
 
   // SUI-06: the plan still says 10, and the result too
-  await page.goto("/suivi");
+  await page.goto("/suivi/historique");
   await page.getByRole("link", { name: /Réveil musculaire/ }).click();
   const row = page.getByRole("table").getByRole("row").nth(1);
   await expect(row).toContainText("10 rép.");

@@ -67,7 +67,7 @@ test("filters the history by status, and comes back", async ({ page }) => {
   await expect(page.getByText(/Séance marquée comme manquée/)).toBeVisible();
 
   // SUI-05: both lines
-  await page.goto("/suivi");
+  await page.goto("/suivi/historique");
   await expect(page.getByText("Réveil musculaire")).toBeVisible();
   await expect(page.getByText("Course")).toBeVisible();
 

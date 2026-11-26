@@ -159,3 +159,56 @@ test("writes a record notification at the end of a session", async ({
     "12 rép.",
   );
 });
+
+// US-41: the summary of the week and of the month (SUI-01, SUI-02, SUI-04).
+test("shows the summary of the week, then of the month", async ({ page }) => {
+  test.slow();
+  await signUp(page);
+  await page.getByRole("button", { name: "Commencer" }).click();
+  await expectHomePage(page);
+
+  // SUI-04: nothing yet
+  await page.goto("/suivi");
+  await expect(
+    page.getByText("Ton suivi commencera après ta première séance"),
+  ).toBeVisible();
+  await shoot(page, "sui-04-suivi-vide");
+  await expectNoA11yViolation(page);
+
+  // One session done today
+  const session = await doSessionOn(page, todayInParis(), 10);
+  await page.goto(`/seances/${session.appointmentId}`);
+  await page.getByRole("button", { name: /Démarrer la séance/ }).click();
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("link")
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Valider la série 1" }).click();
+  await page.getByRole("button", { name: "Terminer la séance" }).click();
+  await page.getByRole("button", { name: "Terminer", exact: true }).click();
+
+  // SUI-01: the week
+  await page.goto("/suivi");
+  await expect(page.getByRole("heading", { name: "Régularité" })).toBeVisible();
+  await expect(page.getByText("1 prévue")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Travail" })).toBeVisible();
+  await expect(
+    page.getByText("Le tonnage n'apparaît qu'avec des charges."),
+  ).toBeVisible();
+  await shoot(page, "sui-01-resume-semaine");
+  await expectNoA11yViolation(page);
+
+  // SUI-02: the month, with its comparison
+  await page.getByRole("button", { name: "Mois" }).click();
+  await expect(page.getByText(/Comparé à la même durée du mois/)).toBeVisible();
+  await shoot(page, "sui-02-resume-mois");
+  await expectNoA11yViolation(page);
+
+  // The arrows change the period, and the address keeps it
+  await page.getByRole("button", { name: "Période précédente" }).click();
+  expect(page.url()).toContain("periode=month");
+  await expect(page.getByRole("heading", { name: "Régularité" })).toHaveCount(
+    0,
+  );
+});

@@ -98,7 +98,7 @@ test("declares a past session done, after the fact", async ({ page }) => {
   await expectNoA11yViolation(page);
 
   // The history keeps it at its real date
-  await page.goto("/suivi");
+  await page.goto("/suivi/historique");
   await expect(
     page.getByRole("link", { name: /Cardio léger.*Effectuée/ }),
   ).toBeVisible();

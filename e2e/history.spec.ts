@@ -47,6 +47,8 @@ test("the history is empty at first, then lists the finished session under its w
   // SUI-07
   await page.getByRole("link", { name: "Suivi", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Suivi");
+  // The Suivi opens on the summary; the history is its second tab (US-41)
+  await page.getByRole("link", { name: "Historique" }).click();
   await expect(page.getByText("Aucune séance passée")).toBeVisible();
   await expectNoA11yViolation(page);
 
@@ -68,7 +70,7 @@ test("the history is empty at first, then lists the finished session under its w
   await expect(page.getByText("Terminée")).toBeVisible();
 
   // SUI-05
-  await page.goto("/suivi");
+  await page.goto("/suivi/historique");
   await expect(page.getByText(/^Semaine du \d+ /)).toBeVisible();
   const row = page.getByRole("link", { name: /Réveil musculaire.*Effectuée/ });
   await expect(row).toBeVisible();
