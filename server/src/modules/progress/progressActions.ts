@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import {
   computeProgramProgress,
   countProgramWeeks,
+  createEmptySet,
   dateSchema,
   type ExerciseProgress,
   formatBestResult,
@@ -34,6 +35,7 @@ import {
   readDoneExercises,
   readExerciseHeader,
   readExerciseSets,
+  readLastDoneSets,
   readMuscleSets,
   readRecentRecords,
   readWorkSessions,
@@ -263,4 +265,28 @@ export const summary: RequestHandler = async (req, res) => {
     muscles,
   };
   res.json(answer);
+};
+
+// GET /api/progress/exercises/:id/last: what the last finished session
+// holds for this exercise, as planned values the editor can take back
+// ("Dernière fois" of the handoff des séries). An empty list means the
+// exercise was never done.
+export const readLast: RequestHandler = async (req, res) => {
+  const userId = readUserId(req);
+  const { id } = req.params as unknown as { id: number };
+  const rows = await readLastDoneSets(userId, id);
+
+  res.json({
+    sets: rows.map((row) => ({
+      ...createEmptySet(),
+      reps: row.reps_actual,
+      weight_kg: toNumber(row.weight_actual_kg),
+      duration_seconds: row.duration_actual_seconds,
+      distance_meters: toNumber(row.distance_actual_meters),
+      speed_kmh: toNumber(row.speed_actual_kmh),
+      resistance: toNumber(row.resistance_actual),
+      incline_percent: toNumber(row.incline_actual_percent),
+      calories: toNumber(row.calories_actual),
+    })),
+  });
 };

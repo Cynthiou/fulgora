@@ -294,6 +294,46 @@ describe("GET /api/progress/exercises/:id", () => {
   });
 });
 
+// Handoff des séries: the sheet shows what was done last time.
+describe("GET /api/progress/exercises/:id/last", () => {
+  it("gives the sets of the last finished session, in order", async () => {
+    const response = await request(app)
+      .get(`/api/progress/exercises/${benchId}/last`)
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    // The session of the 19th is the last one: its two sets, not those
+    // of the 12th.
+    expect(
+      response.body.sets.map((set: { weight_kg: number }) => set.weight_kg),
+    ).toEqual([62.5, 60]);
+  });
+
+  it("gives an empty list for an exercise never done", async () => {
+    const [created] = await client.execute<Rows[] & { insertId: number }[]>(
+      "INSERT INTO exercise (owner_user_id, slug, name, difficulty) VALUES (?, ?, 'Jamais fait non plus', 'beginner')",
+      [lea.id, `${lea.username}-never-last`],
+    );
+    const id = (created as unknown as { insertId: number }).insertId;
+
+    const response = await request(app)
+      .get(`/api/progress/exercises/${id}/last`)
+      .set("Cookie", lea.cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.sets).toEqual([]);
+  });
+
+  it("never gives the sets of somebody else", async () => {
+    const response = await request(app)
+      .get(`/api/progress/exercises/${benchId}/last`)
+      .set("Cookie", someoneElse.cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.sets).toEqual([]);
+  });
+});
+
 // US-40: a new maximum writes a notification; a correction downwards
 // takes it back (RM-055, RM-080).
 describe("records personnels", () => {

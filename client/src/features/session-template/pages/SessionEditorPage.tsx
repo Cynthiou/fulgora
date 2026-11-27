@@ -571,7 +571,6 @@ function SessionEditorPage({ edit }: Props) {
             index={position}
             total={openBlock.exercises.length}
             blockLabel={BLOCK_TYPE_LABELS[openBlock.block_type]}
-            last={null}
             onChangeSets={(sets) =>
               dispatch({ type: "setSets", ...target, sets })
             }

@@ -25,6 +25,12 @@ vi.mock(
 );
 const createFreeSessionMock = vi.mocked(createFreeSession);
 
+// "Dernière fois" asks the server; here the exercise was never done.
+vi.mock(
+  "../../../../src/features/session-template/services/lastSetsService",
+  () => ({ readLastSets: vi.fn(() => Promise.resolve([])) }),
+);
+
 type Entry = string | { pathname: string; state: unknown };
 
 function renderEditor(entry: Entry = "/seances/nouvelle?date=2026-11-26") {

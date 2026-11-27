@@ -17,6 +17,7 @@ import trashIcon from "../../../assets/icons/ui/v3/trash.svg";
 import BottomSheet from "../../../components/BottomSheet";
 import { SHEET_TITLE } from "../../../components/formClasses";
 import Icon from "../../../components/Icon";
+import type { LastSets } from "../hooks/useLastSets";
 import MeasureCell from "./MeasureCell";
 
 // A case is 62 px tall, 56 with four of them, 50 with five (handoff).
@@ -46,8 +47,8 @@ type Props = {
   onSave: () => void;
   onCancel: () => void;
   onDelete: () => void;
-  // What the last finished session holds for this exercise, if any
-  last: SetLine | null;
+  // What the last finished session holds for this exercise
+  last: LastSets;
 };
 
 // The sheet of the handoff: the recap of the line being written, what was
@@ -70,6 +71,8 @@ function SetLineSheet({
   last,
 }: Props) {
   const isPerSide = exercise.is_per_side ?? false;
+  // What was done last time, once the server has answered
+  const lastLine = last.line;
   const measures = getSetMeasures(exercise, split, extraFields);
   const isCardio = measures[0]?.head === "NOMBRE DE TOURS";
   const height = cellHeight(measures.length);
@@ -173,7 +176,7 @@ function SetLineSheet({
         </button>
       </div>
 
-      {last === null ? (
+      {!last.isKnown ? null : lastLine === null ? (
         <p className="mt-1.5 mb-3 text-xs font-semibold text-muted">
           Première fois sur cet exercice
         </p>
@@ -186,8 +189,8 @@ function SetLineSheet({
             </span>
             <span className="mt-0.5 block truncate text-xs font-bold text-base-content">
               {formatSetLineShort(
-                last.count,
-                last.values,
+                lastLine.count,
+                lastLine.values,
                 exercise.measure_codes,
                 exercise.is_bodyweight,
                 isPerSide,
@@ -196,7 +199,12 @@ function SetLineSheet({
           </span>
           <button
             type="button"
-            onClick={() => onChange({ ...last, values: { ...last.values } })}
+            onClick={() =>
+              onChange({
+                count: lastLine.count,
+                values: { ...lastLine.values },
+              })
+            }
             className="flex h-7 shrink-0 items-center gap-1 rounded-[14px] bg-tint px-2.5 text-xs font-extrabold text-secondary"
           >
             <Icon src={rotateIcon} className="size-3" />

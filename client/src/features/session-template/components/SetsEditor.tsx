@@ -33,6 +33,7 @@ import {
 } from "../../../components/formClasses";
 import Icon from "../../../components/Icon";
 import PageHeader from "../../../components/PageHeader";
+import { useLastSets } from "../hooks/useLastSets";
 import RestInput from "./RestInput";
 import SetLineSheet from "./SetLineSheet";
 
@@ -55,9 +56,6 @@ type Props = {
   onRemove: () => void;
   // "Valider l'exercice" and the back arrow both return to the block
   onDone: () => void;
-  // What the last finished session holds for this exercise (null while
-  // it is being read, or when there is none)
-  last: SetLine | null;
 };
 
 // Screen of the handoff des séries: the lines already written, one card
@@ -73,9 +71,9 @@ function SetsEditor({
   onChangePerSide,
   onRemove,
   onDone,
-  last,
 }: Props) {
   const lines = toSetLines(exercise.sets);
+  const last = useLastSets(exercise.exercise_id);
   const [editing, setEditing] = useState<Editing>(null);
   const [draft, setDraft] = useState<SetLine | null>(null);
   const [split, setSplit] = useState<SideSplit>(NO_SPLIT);

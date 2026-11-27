@@ -110,6 +110,53 @@ export async function readAllDoneSets(
   return rows as (ProgressSetRow & { exercise_id: number })[];
 }
 
+export type LastSetRow = {
+  position: number;
+  reps_actual: number | null;
+  weight_actual_kg: string | null;
+  duration_actual_seconds: number | null;
+  distance_actual_meters: string | null;
+  speed_actual_kmh: string | null;
+  resistance_actual: string | null;
+  incline_actual_percent: string | null;
+  calories_actual: string | null;
+};
+
+// The validated sets of the last session this exercise was really done
+// in, in their order ("Dernière fois" of the handoff des séries). The
+// subquery names that session; everything else reads its rows.
+export async function readLastDoneSets(
+  userId: number,
+  exerciseId: number,
+  db: Queryable = client,
+): Promise<LastSetRow[]> {
+  const [rows] = await db.execute<Rows[]>(
+    `SELECT wset.position, wset.reps_actual, wset.weight_actual_kg,
+            wset.duration_actual_seconds, wset.distance_actual_meters,
+            wset.speed_actual_kmh, wset.resistance_actual,
+            wset.incline_actual_percent, wset.calories_actual
+       FROM workout_set wset
+       JOIN workout_exercise we ON we.id = wset.workout_exercise_id
+       JOIN workout_block wb ON wb.id = we.workout_block_id
+      WHERE we.exercise_id = ? AND wset.validated_at IS NOT NULL
+        AND wb.workout_session_id = (
+          SELECT wb2.workout_session_id
+            FROM workout_set wset2
+            JOIN workout_exercise we2 ON we2.id = wset2.workout_exercise_id
+            JOIN workout_block wb2 ON wb2.id = we2.workout_block_id
+            JOIN workout_session ws2 ON ws2.id = wb2.workout_session_id
+           WHERE ws2.owner_user_id = ? AND we2.exercise_id = ?
+             AND ws2.status = 'completed'
+             AND wset2.validated_at IS NOT NULL
+           ORDER BY ws2.started_at DESC
+           LIMIT 1
+        )
+      ORDER BY wset.position`,
+    [exerciseId, userId, exerciseId],
+  );
+  return rows as LastSetRow[];
+}
+
 export type ExerciseHeaderRow = {
   id: number;
   name: string;
