@@ -32,6 +32,8 @@ function set(id: number, validated: boolean): WorkoutSetRow {
     position: id,
     reps_planned: 10,
     reps_actual: validated ? 10 : null,
+    reps_left_planned: null,
+    reps_right_planned: null,
     weight_planned_kg: 40,
     weight_actual_kg: validated ? 40 : null,
     duration_planned_seconds: null,
@@ -175,6 +177,8 @@ describe("WorkoutExercisePage", () => {
 
     expect(validateMock).toHaveBeenCalledWith(2, {
       reps: 10,
+      reps_left: null,
+      reps_right: null,
       weight_kg: 40,
       weight_left_kg: null,
       weight_right_kg: null,
@@ -202,6 +206,8 @@ describe("WorkoutExercisePage", () => {
     validateMock.mockImplementation(async (id, values) => ({
       ...set(id, true),
       reps_actual: values.reps,
+      reps_left_planned: null,
+      reps_right_planned: null,
       weight_actual_kg: values.weight_kg,
     }));
     const user = renderPage();

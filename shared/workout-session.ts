@@ -81,6 +81,9 @@ export type WorkoutSetRow = {
   position: number;
   reps_planned: number | null;
   reps_actual: number | null;
+  // The two planned counts of a per-side set (US-51, migration 007)
+  reps_left_planned: number | null;
+  reps_right_planned: number | null;
   weight_planned_kg: number | null;
   weight_actual_kg: number | null;
   // The two planned loads of a per-side set (US-51)
@@ -185,6 +188,8 @@ export type WorkoutSessionTree = {
 export function toPlannedValues(set: WorkoutSetRow): PlannedSetValues {
   return {
     reps: set.reps_planned,
+    reps_left: set.reps_left_planned,
+    reps_right: set.reps_right_planned,
     weight_kg: set.weight_planned_kg,
     weight_left_kg: set.weight_left_planned_kg,
     weight_right_kg: set.weight_right_planned_kg,
@@ -253,8 +258,10 @@ export function formatElapsed(startedAt: string, now: Date): string {
 // plan, without the rest (the rest belongs to the plan).
 export const actualSetSchema = plannedSetSchema.omit({
   rest_after_seconds: true,
-  // The two loads are planned, never recorded: each side keeps its own
-  // values in its own row (US-51).
+  // The per-side goals are planned, never recorded: each side keeps its
+  // own values in its own row (US-51).
+  reps_left: true,
+  reps_right: true,
   weight_left_kg: true,
   weight_right_kg: true,
 });
@@ -268,6 +275,8 @@ export function toPlannedShape(
 ): PlannedSetValues {
   return {
     ...values,
+    reps_left: null,
+    reps_right: null,
     weight_left_kg: null,
     weight_right_kg: null,
     rest_after_seconds: restAfterSeconds,
@@ -660,6 +669,8 @@ export function formatSideState(
   const values = formatSetValues(
     {
       reps: done.reps_actual,
+      reps_left: null,
+      reps_right: null,
       weight_kg: done.weight_actual_kg,
       weight_left_kg: null,
       weight_right_kg: null,
@@ -692,6 +703,8 @@ export function formatBothSides(
     const values = formatSetValues(
       {
         reps: done.reps_actual,
+        reps_left: null,
+        reps_right: null,
         weight_kg: done.weight_actual_kg,
         weight_left_kg: null,
         weight_right_kg: null,

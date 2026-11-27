@@ -118,6 +118,8 @@ export const readDeclaration: RequestHandler = async (req, res) => {
             position: set.position,
             reps_planned: set.reps,
             reps_actual: null,
+            reps_left_planned: set.reps_left,
+            reps_right_planned: set.reps_right,
             weight_planned_kg: toNumber(set.weight_kg),
             weight_actual_kg: null,
             weight_left_planned_kg: toNumber(set.weight_left_kg),

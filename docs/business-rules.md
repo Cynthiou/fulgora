@@ -66,7 +66,7 @@ Les règles ont été écrites avec les noms du MCD (en français). Dans le code
 - **RM-019** · Les types de blocs sont `classic`, `circuit`, `amrap`, `for_time`, `warm_up`, `stretching`, `challenge`, `note`. Sept types sont proposés à la création : `note` n'est plus proposé, il reste en base pour les séances déjà enregistrées. _(Décision du 26/11/2026.)_
 - **RM-020** · Une séance peut contenir plusieurs blocs du même type ; un bloc `note` ne contient aucun exercice. Un bloc `note` déjà enregistré s'affiche et se modifie toujours, mais aucun nouveau ne peut être créé.
 - **RM-021** · Un même exercice peut apparaître plusieurs fois, dans un ou plusieurs blocs, avec des séries différentes.
-- **RM-022** · Chaque série a ses propres objectifs ; les mesures sportives sont facultatives selon l'exercice.
+- **RM-022** · Chaque série a ses propres objectifs ; les mesures sportives sont facultatives selon l'exercice. Sur un exercice côté par côté, les répétitions et la charge peuvent différer d'un côté à l'autre (migrations 005 et 007). _(Décision du 27/11/2026.)_
 - **RM-023** · Le repos d'une série, s'il est renseigné, remplace le repos par défaut de l'exercice.
 - **RM-024** · Les positions expriment l'ordre prévu ; l'exécution reste libre. Les positions sont uniques dans leur parent.
 

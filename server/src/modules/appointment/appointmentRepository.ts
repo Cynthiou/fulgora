@@ -263,6 +263,9 @@ export type VersionSetRow = {
   template_block_exercise_id: number;
   position: number;
   reps: number | null;
+  // The two counts of a per-side set (US-51, migration 007)
+  reps_left: number | null;
+  reps_right: number | null;
   weight_kg: string | null;
   // The two loads of a per-side set (US-51)
   weight_left_kg: string | null;
@@ -283,7 +286,8 @@ export async function readVersionSets(
   db: Queryable = client,
 ): Promise<VersionSetRow[]> {
   const [rows] = await db.execute<Rows[]>(
-    `SELECT ps.id, ps.template_block_exercise_id, ps.position, ps.reps, ps.weight_kg,
+    `SELECT ps.id, ps.template_block_exercise_id, ps.position, ps.reps,
+            ps.reps_left, ps.reps_right, ps.weight_kg,
             ps.weight_left_kg, ps.weight_right_kg,
             ps.duration_seconds, ps.distance_meters, ps.speed_kmh, ps.resistance,
             ps.incline_percent, ps.calories, ps.rest_after_seconds

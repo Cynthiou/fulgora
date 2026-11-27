@@ -36,6 +36,8 @@ function set(id: number, validated: boolean): WorkoutSetRow {
     position: id,
     reps_planned: 10,
     reps_actual: validated ? 10 : null,
+    reps_left_planned: null,
+    reps_right_planned: null,
     weight_planned_kg: 40,
     weight_actual_kg: validated ? 40 : null,
     duration_planned_seconds: null,
@@ -99,6 +101,8 @@ describe("workout session helpers (US-28)", () => {
   it("maps the planned side of a set to the editor's shape", () => {
     expect(toPlannedValues(set(1, false))).toEqual({
       reps: 10,
+      reps_left: null,
+      reps_right: null,
       weight_kg: 40,
       weight_left_kg: null,
       weight_right_kg: null,
@@ -176,6 +180,8 @@ describe("validating a set (US-29)", () => {
       ...asPlanned,
       reps_planned: null,
       reps_actual: null,
+      reps_left_planned: null,
+      reps_right_planned: null,
       weight_planned_kg: null,
       weight_actual_kg: null,
       weight_left_planned_kg: null,
@@ -252,6 +258,8 @@ describe("summary of a session (US-34)", () => {
     const reps = (value: number, validated = true) => ({
       ...set(value, validated),
       reps_actual: validated ? value : null,
+      reps_left_planned: null,
+      reps_right_planned: null,
     });
     expect(
       formatExerciseResult({
@@ -335,6 +343,8 @@ describe("per-side sets (US-51)", () => {
       sides: sides.map((one) => ({
         side: one.side,
         reps_actual: one.reps,
+        reps_left_planned: null,
+        reps_right_planned: null,
         weight_actual_kg: one.weight,
         duration_actual_seconds: null,
         validated_at: "2026-11-26T07:10:00.000Z",
@@ -393,6 +403,8 @@ describe("per-side sets (US-51)", () => {
             {
               side: "left" as const,
               reps_actual: null,
+              reps_left_planned: null,
+              reps_right_planned: null,
               weight_actual_kg: null,
               duration_actual_seconds: 30,
               validated_at: "2026-11-26T07:10:00.000Z",

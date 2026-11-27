@@ -161,6 +161,8 @@ export function toSetRow(
     position: row.position,
     reps_planned: row.reps_planned,
     reps_actual: row.reps_actual,
+    reps_left_planned: row.reps_left_planned,
+    reps_right_planned: row.reps_right_planned,
     weight_planned_kg: toNumber(row.weight_planned_kg),
     weight_actual_kg: toNumber(row.weight_actual_kg),
     weight_left_planned_kg: toNumber(row.weight_left_planned_kg),

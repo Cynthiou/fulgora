@@ -157,6 +157,8 @@ export const read: RequestHandler = async (req, res) => {
           .filter((set) => set.template_block_exercise_id === exercise.id)
           .map((set) => ({
             reps: set.reps,
+            reps_left: set.reps_left,
+            reps_right: set.reps_right,
             weight_kg: toNumber(set.weight_kg),
             weight_left_kg: toNumber(set.weight_left_kg),
             weight_right_kg: toNumber(set.weight_right_kg),

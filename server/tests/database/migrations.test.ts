@@ -51,9 +51,9 @@ describe("parseMigrationVersion", () => {
 });
 
 describe("listMigrationFiles", () => {
-  it("finds the six migrations of the project, in order", () => {
+  it("finds the seven migrations of the project, in order", () => {
     expect(listMigrationFiles().map((file) => file.version)).toEqual([
-      1, 2, 3, 4, 5, 6,
+      1, 2, 3, 4, 5, 6, 7,
     ]);
   });
 });
@@ -77,14 +77,14 @@ describe("migrateDatabase", () => {
     ).rejects.toBeInstanceOf(ResetRefusedError);
   });
 
-  it("applies the six migrations on an empty database", async () => {
+  it("applies the seven migrations on an empty database", async () => {
     const applied = await migrateDatabase(config, {
       reset: true,
       nodeEnv: "test",
       log: silent,
     });
 
-    expect(applied).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(applied).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(await readColumnNames("appointment")).toContain("cancelled_at");
     expect(await readColumnNames("user")).toEqual(
       expect.arrayContaining(["terms_accepted_at", "timezone"]),
@@ -99,6 +99,13 @@ describe("migrateDatabase", () => {
     );
     expect(await readColumnNames("workout_set_side")).toEqual(
       expect.arrayContaining(["side", "reps_actual", "validated_at"]),
+    );
+    // Handoff des séries: the repetitions may differ per side too
+    expect(await readColumnNames("planned_set")).toEqual(
+      expect.arrayContaining(["reps_left", "reps_right"]),
+    );
+    expect(await readColumnNames("workout_set")).toEqual(
+      expect.arrayContaining(["reps_left_planned", "reps_right_planned"]),
     );
   });
 

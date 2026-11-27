@@ -23,6 +23,8 @@ function set(
     position: id,
     reps_planned: 10,
     reps_actual: reps,
+    reps_left_planned: null,
+    reps_right_planned: null,
     weight_planned_kg: 40,
     weight_actual_kg: weight,
     duration_planned_seconds: null,

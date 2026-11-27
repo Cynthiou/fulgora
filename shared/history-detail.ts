@@ -126,7 +126,13 @@ export function formatActualSide(
   // The comparison reads the planned shape: a per-side load is never
   // recorded on the set itself (US-51).
   return formatComparisonValue(
-    { ...toActualValues(set), weight_left_kg: null, weight_right_kg: null },
+    {
+      ...toActualValues(set),
+      reps_left: null,
+      reps_right: null,
+      weight_left_kg: null,
+      weight_right_kg: null,
+    },
     codes,
     isBodyweight,
   );

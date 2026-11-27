@@ -29,6 +29,8 @@ function set(position: number, validated: boolean): WorkoutSetRow {
     position,
     reps_planned: 10,
     reps_actual: validated ? 10 : null,
+    reps_left_planned: null,
+    reps_right_planned: null,
     weight_planned_kg: 40,
     weight_actual_kg: validated ? 40 : null,
     duration_planned_seconds: null,

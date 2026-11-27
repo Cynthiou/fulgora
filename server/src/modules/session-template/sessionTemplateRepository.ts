@@ -128,15 +128,18 @@ export async function createPlannedSet(
   db: Queryable = client,
 ): Promise<number> {
   const [result] = await db.execute<Result>(
-    `INSERT INTO planned_set (template_block_exercise_id, position, reps, weight_kg,
+    `INSERT INTO planned_set (template_block_exercise_id, position, reps,
+        reps_left, reps_right, weight_kg,
         weight_left_kg, weight_right_kg,
         duration_seconds, distance_meters, speed_kmh, resistance, incline_percent,
         calories, rest_after_seconds)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       templateBlockExerciseId,
       position,
       set.reps,
+      set.reps_left,
+      set.reps_right,
       set.weight_kg,
       set.weight_left_kg,
       set.weight_right_kg,

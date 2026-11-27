@@ -70,6 +70,8 @@ function PerSideSetEntry({
       return formatSetValues(
         {
           reps: done.reps_actual,
+          reps_left: null,
+          reps_right: null,
           weight_kg: done.weight_actual_kg,
           weight_left_kg: null,
           weight_right_kg: null,
@@ -91,6 +93,8 @@ function PerSideSetEntry({
         ...toPlannedValues(set),
         reps: planned.reps,
         weight_kg: planned.weight_kg,
+        reps_left: null,
+        reps_right: null,
         weight_left_kg: null,
         weight_right_kg: null,
         duration_seconds: planned.duration_seconds,

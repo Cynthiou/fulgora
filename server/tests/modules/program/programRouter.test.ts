@@ -308,6 +308,8 @@ describe("les séances d'un jour du programme", () => {
               sets: [
                 {
                   reps: null,
+                  reps_left: null,
+                  reps_right: null,
                   weight_kg: null,
                   weight_left_kg: null,
                   weight_right_kg: null,

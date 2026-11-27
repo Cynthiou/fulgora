@@ -18,6 +18,8 @@ function set(
     position: id,
     reps_planned: planned.reps,
     reps_actual: actual?.reps ?? null,
+    reps_left_planned: null,
+    reps_right_planned: null,
     weight_planned_kg: planned.weight,
     weight_actual_kg: actual?.weight ?? null,
     duration_planned_seconds: null,

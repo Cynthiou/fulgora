@@ -149,6 +149,8 @@ export type SetLimit = { min: number; max: number; step?: number };
 // Stored units (DT-11): kg, meters, seconds, km/h.
 export const SET_LIMITS: Record<keyof PlannedSetValues, SetLimit> = {
   reps: { min: 0, max: 1000, step: 1 },
+  reps_left: { min: 0, max: 1000, step: 1 },
+  reps_right: { min: 0, max: 1000, step: 1 },
   weight_kg: { min: 0, max: 1000, step: 0.25 },
   weight_left_kg: { min: 0, max: 1000, step: 0.25 },
   weight_right_kg: { min: 0, max: 1000, step: 0.25 },
@@ -207,6 +209,10 @@ export function weightValue() {
 
 export type PlannedSetValues = {
   reps: number | null;
+  // Per-side exercise whose repetitions differ from one side to the other
+  // (US-51, D-02, migration 007)
+  reps_left: number | null;
+  reps_right: number | null;
   weight_kg: number | null;
   // Per-side exercise with a different load on each side (US-51, D-02)
   weight_left_kg: number | null;
@@ -262,6 +268,8 @@ export type SessionDraft = {
 
 export const plannedSetSchema = z.object({
   reps: boundedValue(SET_LIMITS.reps),
+  reps_left: boundedValue(SET_LIMITS.reps_left),
+  reps_right: boundedValue(SET_LIMITS.reps_right),
   weight_kg: weightValue(),
   weight_left_kg: weightValue(),
   weight_right_kg: weightValue(),
@@ -400,6 +408,8 @@ export type SessionDraftInput = z.output<typeof sessionDraftSchema>;
 export function createEmptySet(): PlannedSetValues {
   return {
     reps: null,
+    reps_left: null,
+    reps_right: null,
     weight_kg: null,
     weight_left_kg: null,
     weight_right_kg: null,
@@ -808,6 +818,8 @@ const FIELD_BY_MEASURE: Record<MeasureCode, SetValueField> = {
 // Display order of the fields on the configuration screen (A7).
 const FIELD_ORDER: SetValueField[] = [
   "reps",
+  "reps_left",
+  "reps_right",
   "weight_kg",
   "weight_left_kg",
   "weight_right_kg",
@@ -891,6 +903,10 @@ export function getSetFieldLabel(
     case "reps":
       // The goal is the same on both sides (US-51, A7e)
       return isPerSide ? "Rép. / côté" : "Répétitions";
+    case "reps_left":
+      return "Rép. gauche";
+    case "reps_right":
+      return "Rép. droite";
     case "weight_kg": {
       const unit = WEIGHT_UNIT_LABELS[getDisplayUnits().weight];
       return profile === "bodyweight" ? `Lest (${unit})` : `Charge (${unit})`;
@@ -925,6 +941,8 @@ export function getSetFieldStepper(field: SetValueField): {
   const units = getDisplayUnits();
   switch (field) {
     case "reps":
+    case "reps_left":
+    case "reps_right":
       return { step: 1, decimal: false };
     case "weight_kg":
     case "weight_left_kg":

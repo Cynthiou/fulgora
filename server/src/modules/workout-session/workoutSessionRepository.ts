@@ -63,11 +63,13 @@ export async function copyPlannedSets(
 ): Promise<void> {
   await db.execute(
     `INSERT INTO workout_set (workout_exercise_id, source_planned_set_id, position,
-        reps_planned, weight_planned_kg, weight_left_planned_kg, weight_right_planned_kg,
+        reps_planned, reps_left_planned, reps_right_planned,
+        weight_planned_kg, weight_left_planned_kg, weight_right_planned_kg,
         duration_planned_seconds, distance_planned_meters,
         speed_planned_kmh, resistance_planned, incline_planned_percent, calories_planned,
         planned_rest_seconds)
-     SELECT we.id, ps.id, ps.position, ps.reps, ps.weight_kg,
+     SELECT we.id, ps.id, ps.position, ps.reps,
+            ps.reps_left, ps.reps_right, ps.weight_kg,
             ps.weight_left_kg, ps.weight_right_kg, ps.duration_seconds,
             ps.distance_meters, ps.speed_kmh, ps.resistance, ps.incline_percent, ps.calories,
             ps.rest_after_seconds
@@ -250,6 +252,9 @@ export type WorkoutSetDbRow = {
   position: number;
   reps_planned: number | null;
   reps_actual: number | null;
+  // The two planned counts of a per-side set (US-51, migration 007)
+  reps_left_planned: number | null;
+  reps_right_planned: number | null;
   weight_planned_kg: string | null;
   weight_actual_kg: string | null;
   // The two planned loads of a per-side set (US-51)

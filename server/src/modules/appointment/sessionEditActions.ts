@@ -67,6 +67,8 @@ function toPlannedSet(row: VersionSetRow): PlannedSetValues {
   return {
     ...createEmptySet(),
     reps: row.reps,
+    reps_left: row.reps_left,
+    reps_right: row.reps_right,
     weight_kg: toNumber(row.weight_kg),
     weight_left_kg: toNumber(row.weight_left_kg),
     weight_right_kg: toNumber(row.weight_right_kg),
