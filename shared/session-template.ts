@@ -988,13 +988,17 @@ export function getSetFieldStepper(field: SetValueField): {
     case "reps_right":
       return { step: 1, decimal: false };
     case "weight_kg":
-    case "weight_left_kg":
-    case "weight_right_kg":
       return units.weight === "kg"
         ? { step: 2.5, decimal: true, grid: WEIGHT_STEP_KG }
         : { step: 5, decimal: true, grid: WEIGHT_STEP_LB };
+    // One side at a time moves by smaller amounts (handoff des séries)
+    case "weight_left_kg":
+    case "weight_right_kg":
+      return units.weight === "kg"
+        ? { step: 1, decimal: true, grid: WEIGHT_STEP_KG }
+        : { step: 2.5, decimal: true, grid: WEIGHT_STEP_LB };
     case "duration_seconds":
-      return { step: 15, decimal: false };
+      return { step: 5, decimal: false };
     case "distance_meters":
       return { step: 0.1, decimal: true };
     case "speed_kmh":

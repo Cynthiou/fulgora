@@ -12,6 +12,7 @@ export * from "./program-schedule.js";
 export * from "./progress.js";
 export * from "./session-edit.js";
 export * from "./session-template.js";
+export * from "./set-sheet.js";
 export * from "./status.js";
 export * from "./units.js";
 export * from "./user.js";
