@@ -90,7 +90,7 @@ function SelectableExerciseCard({
         {isSelected ? (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 right-3.5 grid size-[30px] -translate-y-1/2 place-items-center rounded-full bg-brand text-primary-content"
+            className="pointer-events-none absolute top-1/2 right-3.5 grid size-[30px] -translate-y-1/2 place-items-center rounded-full bg-brand text-brand-content"
           >
             <Icon src={checkIcon} className="size-4" />
           </span>

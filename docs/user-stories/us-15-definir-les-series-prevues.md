@@ -11,6 +11,14 @@ EPIC 3 · Séances modèles
 **Maquettes :** A6, A7a, A7b, A7c, A7d (A7e et A7f : US-51)
 **Règles :** RM-010, RM-022, RM-023
 
+> **Mise à jour du 27/11/2026 (handoff des séries).** L'écran des séries
+> d'un exercice est refait d'après `design/handoff-series/`, qui fait foi
+> quand il contredit cette fiche : on écrit des **lignes** (n séries qui
+> portent les mêmes valeurs) dans une feuille de saisie, une case par
+> mesure, avec − / + et le clavier natif. Les pas changent (charge 2,5 kg,
+> charge d'un côté 1 kg, durée 5 s minimum 5 s, durée cardio en minutes).
+> Un bloc chronométré (US-43) garde l'ancien écran.
+
 ## User story
 
 En tant qu'utilisateur, je veux définir mes séries et leurs objectifs afin de savoir exactement quoi faire à la salle.

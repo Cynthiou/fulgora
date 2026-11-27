@@ -38,19 +38,19 @@ test("prepares a per-side exercise and does it side by side", async ({
     .nth(1)
     .click();
 
-  // A7e: "Chaque côté", then a load per side
-  await page.getByRole("switch", { name: "Chaque côté" }).click();
+  // Handoff des séries: the sheet asks "Chaque côté", then the two loads
+  await page.getByRole("button", { name: /^1 série/ }).click();
+  await page.getByRole("button", { name: "Côté par côté" }).click();
   await expect(
-    page.getByRole("textbox", { name: "Rép. / côté" }),
+    page.getByRole("textbox", { name: "RÉPÉTITIONS PAR CÔTÉ" }),
   ).toBeVisible();
-  await page
-    .getByRole("switch", { name: "Même charge des deux côtés" })
-    .click();
-  await page.getByRole("textbox", { name: "Charge gauche (kg)" }).fill("10");
-  await page.getByRole("textbox", { name: "Charge droite (kg)" }).fill("6");
+  await page.getByRole("button", { name: "Charge", exact: true }).click();
+  await page.getByRole("textbox", { name: "CHARGE GAUCHE" }).fill("10");
+  await page.getByRole("textbox", { name: "CHARGE DROITE" }).fill("6");
   await shoot(page, "a7e-chaque-cote");
   await expectNoA11yViolation(page);
 
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   // A6: the line of the exercise says the goal and the two loads (A7e)
   await expect(

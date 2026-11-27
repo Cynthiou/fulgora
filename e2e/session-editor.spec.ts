@@ -185,6 +185,18 @@ test("starts a session from the catalog with « Sélectionner » and « Ajouter 
   await expect(page.getByText(/n'a pas encore d'exercice/)).toHaveCount(0);
 });
 
+// Opens the screen of the sets of the exercise at that place in the
+// block: the card is the second button of its row, after the grip.
+async function openExercise(page: Page, position: number) {
+  await page
+    .getByRole("list", { name: "Exercices du bloc" })
+    .getByRole("listitem")
+    .nth(position)
+    .getByRole("button")
+    .nth(1)
+    .click();
+}
+
 // Picks one exercise by name in the catalog selection (search, first card).
 async function pickFromCatalog(page: Page, name: string) {
   const search = page.getByRole("searchbox");
@@ -197,9 +209,7 @@ async function pickFromCatalog(page: Page, name: string) {
   await expect(cards.first()).toHaveAttribute("aria-pressed", "true");
 }
 
-test("configures the planned sets of one exercise of each profile", async ({
-  page,
-}) => {
+test("writes the sets of one exercise of each profile", async ({ page }) => {
   await signUp(page);
   await page.goto("/seances/nouvelle");
   await page.getByLabel(/^Nom de la séance/).fill("Full body");
@@ -217,65 +227,64 @@ test("configures the planned sets of one exercise of each profile", async ({
     .click();
   await expect(page.getByText("4 exercices")).toBeVisible();
 
-  // A7a: reps + weight
-  await page
-    .getByRole("button", { name: /^Développé poitrine à la machine/ })
-    .click();
-  await expect(page.getByText("Répétitions · Charge")).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Répétitions" })).toHaveValue(
+  // Reps + weight: two sets of ten at 40 kg, written in one line
+  await openExercise(page, 0);
+  await expect(page.getByText("Exercice 1 sur 4")).toBeVisible();
+  await page.getByRole("button", { name: /^1 série/ }).click();
+  await expect(page.getByRole("textbox", { name: "RÉPÉTITIONS" })).toHaveValue(
     "10",
   );
-  await page.getByRole("textbox", { name: "Charge (kg)" }).fill("40");
-  await page.getByRole("button", { name: "Dupliquer la dernière" }).click();
-  await expect(page.getByText("Série 2")).toBeVisible();
+  await page.getByRole("textbox", { name: "CHARGE" }).fill("40");
+  await page.getByRole("button", { name: "Augmenter séries" }).click();
   await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByRole("list", { name: "Séries" })).toContainText(
+    "2 séries",
+  );
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Développé poitrine à la machine/ }),
   ).toContainText("2 × 10 rép. · 40 kg");
 
-  // A7b: bodyweight with an added weight
-  await page.getByRole("button", { name: /^Anges au mur/ }).click();
-  await expect(page.getByText("Répétitions · Lest")).toBeVisible();
-  await page.getByRole("switch", { name: "Ajouter un lest" }).click();
-  await page.getByRole("textbox", { name: "Lest (kg)" }).fill("5");
+  // Body weight: the added weight may stay empty, and may be written
+  await openExercise(page, 1);
+  await page.getByRole("button", { name: /^1 série/ }).click();
+  await page.getByRole("textbox", { name: "LEST" }).fill("5");
   await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Anges au mur/ }),
   ).toContainText("10 rép. · 5 kg lest");
 
-  // A7c: duration
-  await page.getByRole("button", { name: /^Gainage \(planche\)/ }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Durée (min:s)" }),
-  ).toHaveValue("1:00");
-  await page.getByRole("button", { name: "Augmenter Durée (min:s)" }).click();
-  await expect(
-    page.getByRole("textbox", { name: "Durée (min:s)" }),
-  ).toHaveValue("1:15");
+  // Duration: in seconds, five at a time (handoff)
+  await openExercise(page, 2);
+  await page.getByRole("button", { name: /^1 série/ }).click();
+  await expect(page.getByRole("textbox", { name: "DURÉE" })).toHaveValue("60");
+  await page.getByRole("button", { name: "Augmenter durée" }).click();
+  await expect(page.getByRole("textbox", { name: "DURÉE" })).toHaveValue("65");
   await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Gainage \(planche\)/ }),
-  ).toContainText("1 min 15");
+  ).toContainText("1 min 5");
 
-  // A7d: cardio stages, with a value out of range first
-  await page.getByRole("button", { name: /^Tapis de course/ }).click();
-  await expect(page.getByText("Étape 1")).toBeVisible();
-  await page.getByRole("textbox", { name: "Vitesse (km/h)" }).fill("80");
-  await expect(page.getByText(/Entre un nombre entre 0 et 60\./)).toBeVisible();
+  // A cardio machine counts its stages and reads its duration in minutes
+  await openExercise(page, 3);
   await expect(
-    page.getByRole("button", { name: "Valider l'exercice" }),
-  ).toBeDisabled();
-  await page.getByRole("textbox", { name: "Vitesse (km/h)" }).fill("9");
-  await page.getByRole("button", { name: "Ajouter une étape" }).click();
-  await expect(page.getByText("Étape 2")).toBeVisible();
+    page.getByRole("heading", { level: 2, name: "Étapes" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^Étape 1/ }).click();
+  await expect(page.getByRole("textbox", { name: "DURÉE" })).toHaveValue("10");
+  await page.getByRole("textbox", { name: "VITESSE" }).fill("9");
+  await page.getByRole("textbox", { name: "INCLINAISON" }).fill("1");
   await expectNoA11yViolation(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   await expect(
     page.getByRole("button", { name: /^Tapis de course/ }),
-  ).toContainText("2 × …");
+  ).toContainText("10 min · 9 km/h · 1 %");
 });
 
 test("plans a free session from the home page and finds it there (A1 to A9)", async ({
@@ -350,15 +359,16 @@ test("a body weight exercise follows the lest layout (A7b)", async ({
     .getByRole("button", { name: "Ajouter au bloc, 1 sélectionné" })
     .click();
 
-  await page.getByRole("button", { name: /^Tractions/ }).click();
+  await openExercise(page, 0);
 
-  await expect(page.getByText("Répétitions · Lest")).toBeVisible();
-  const toggle = page.getByRole("switch", { name: "Ajouter un lest" });
-  await expect(toggle).toHaveAttribute("aria-checked", "false");
-  await expect(page.getByRole("textbox", { name: /^Charge/ })).toHaveCount(0);
+  // The case is called "LEST" on a body weight exercise, and it may stay
+  // empty: the goal is complete without it (handoff).
+  await page.getByRole("button", { name: /^1 série/ }).click();
+  await expect(page.getByRole("textbox", { name: "LEST" })).toHaveValue("");
+  await expect(page.getByRole("button", { name: "Enregistrer" })).toBeEnabled();
 
-  await toggle.click();
-  await page.getByRole("textbox", { name: "Lest (kg)" }).fill("10");
+  await page.getByRole("textbox", { name: "LEST" }).fill("10");
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
 
   await expect(page.getByRole("button", { name: /^Tractions/ })).toContainText(

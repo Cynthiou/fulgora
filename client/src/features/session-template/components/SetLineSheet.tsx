@@ -299,7 +299,7 @@ function SetLineSheet({
           type="button"
           onClick={onSave}
           disabled={!isComplete}
-          className="h-[46px] flex-1 rounded-[12px] bg-brand text-sm font-extrabold text-primary-content disabled:bg-back-strong disabled:text-faint"
+          className="h-[46px] flex-1 rounded-[12px] bg-brand text-sm font-extrabold text-brand-content disabled:bg-back-strong disabled:text-faint"
         >
           Enregistrer
         </button>

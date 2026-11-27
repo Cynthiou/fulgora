@@ -41,7 +41,7 @@ function FilterToggle({
       >
         {label}
         {count > 0 && (
-          <span className="grid size-[18px] place-items-center rounded-full bg-brand text-[10px] font-extrabold text-primary-content">
+          <span className="grid size-[18px] place-items-center rounded-full bg-brand text-[10px] font-extrabold text-brand-content">
             {count}
           </span>
         )}

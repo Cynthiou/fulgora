@@ -351,6 +351,8 @@
   --color-step-btn: var(--fulgora-step-btn);
   /* The blue of the logo, the same in both themes (handoff v3) */
   --color-brand: #2563eb;
+  /* What is written on that blue: white reaches 5,17:1 (RM-064) */
+  --color-brand-content: #ffffff;
 
   --shadow-card: var(--fulgora-shadow-card);
   --shadow-hero: var(--fulgora-shadow-hero);
