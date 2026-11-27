@@ -17,10 +17,11 @@ import {
   formatBlockCount,
   formatBlockSummary,
   formatDuration,
-  formatExerciseSummary,
   formatMinSec,
   formatRangeMessage,
   formatSelectedCount,
+  formatSetLine,
+  formatSetLineShort,
   formatSetSummary,
   formatSetValues,
   formatTrackedMeasures,
@@ -413,98 +414,108 @@ describe("formatBlockCardLine (handoff 3.1)", () => {
   });
 });
 
-describe("formatExerciseSummary (handoff des blocs)", () => {
-  // The six examples of the handoff, in its own order.
-  it("writes the six examples of the handoff", () => {
-    const five = (values: Partial<ReturnType<typeof createEmptySet>>) =>
-      Array.from({ length: 5 }, () => ({ ...createEmptySet(), ...values }));
-    expect(
-      formatExerciseSummary(five({ duration_seconds: 600, resistance: 6 }), [
-        "duration",
-        "distance",
-      ]),
-    ).toBe("5 × 10 min · résistance 6");
-    expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), duration_seconds: 300 }],
-        ["duration"],
-      ),
-    ).toBe("5 min");
-    expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), duration_seconds: 600 }],
-        ["duration"],
-      ),
-    ).toBe("10 min");
-    expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), weight_kg: 24, duration_seconds: 40 }],
-        ["weight", "duration"],
-      ),
-    ).toBe("24 kg · 40 s");
-    expect(
-      formatExerciseSummary(
-        [
-          { ...createEmptySet(), reps: 10, weight_kg: 50 },
-          { ...createEmptySet(), reps: 10, weight_kg: 50 },
-          { ...createEmptySet(), reps: 10, weight_kg: 50 },
-        ],
-        ["reps", "weight"],
-      ),
-    ).toBe("3 × 10 rép. · 50 kg");
-    expect(
-      formatExerciseSummary(
-        [
-          { ...createEmptySet(), duration_seconds: 45 },
-          { ...createEmptySet(), duration_seconds: 45 },
-        ],
-        ["duration"],
-      ),
-    ).toBe("2 × 45 s");
+describe("formatSetLine (handoff des séries)", () => {
+  const set = (values: Partial<ReturnType<typeof createEmptySet>>) => ({
+    ...createEmptySet(),
+    ...values,
   });
+  const repeat = (
+    count: number,
+    values: Partial<ReturnType<typeof createEmptySet>>,
+  ) => Array.from({ length: count }, () => set(values));
 
-  it("never writes « 1 × » and always writes the unit", () => {
+  // The four examples of the README, in its own order.
+  it("writes the four examples of the handoff", () => {
     expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), reps: 10, weight_kg: 62.5 }],
-        ["reps", "weight"],
+      formatSetLine(repeat(4, { reps: 10, weight_kg: 60 }), ["reps", "weight"]),
+    ).toBe("4 × 10 rép. · 60 kg");
+    expect(
+      formatSetLine(repeat(3, { duration_seconds: 45 }), ["duration"]),
+    ).toBe("3 × 45 s");
+    expect(
+      formatSetLine(
+        [set({ duration_seconds: 600, speed_kmh: 9, incline_percent: 1 })],
+        ["duration", "speed", "incline"],
       ),
-    ).toBe("10 rép. · 62,5 kg");
-  });
-
-  it("says nothing of values that differ from one set to the next", () => {
+    ).toBe("10 min · 9 km/h · 1 %");
     expect(
-      formatExerciseSummary(
-        [
-          { ...createEmptySet(), reps: 10 },
-          { ...createEmptySet(), reps: 8 },
-        ],
-        ["reps"],
-      ),
-    ).toBe("2 × …");
-  });
-
-  it("says « Aucun objectif » for an empty set and for no set at all", () => {
-    expect(formatExerciseSummary([], ["reps"])).toBe(NO_GOAL);
-    expect(formatExerciseSummary([createEmptySet()], ["reps"])).toBe(NO_GOAL);
-  });
-
-  it("writes the lest of a body weight exercise and the per side goals", () => {
-    expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), reps: 8, weight_kg: 10 }],
-        ["reps"],
-        false,
-      ),
-    ).toBe("8 rép. · 10 kg lest");
-    expect(
-      formatExerciseSummary(
-        [{ ...createEmptySet(), reps: 15 }],
+      formatSetLine(
+        [set({ reps: 10, weight_left_kg: 8, weight_right_kg: 12 })],
         ["reps", "weight"],
         false,
         true,
       ),
-    ).toBe("15 rép. / côté");
+    ).toBe("10 rép. par côté · 8 kg gauche · 12 kg droite");
+  });
+
+  it("writes the two short titles of the sheet", () => {
+    expect(
+      formatSetLineShort(
+        3,
+        set({ reps: 10, weight_left_kg: 8, weight_right_kg: 12 }),
+        ["reps", "weight"],
+        false,
+        true,
+      ),
+    ).toBe("3 × 10 rép./côté · 8 / 12 kg");
+    expect(
+      formatSetLineShort(
+        3,
+        set({ reps_left: 10, reps_right: 8, weight_kg: 12 }),
+        ["reps", "weight"],
+        false,
+        true,
+      ),
+    ).toBe("3 × 10 / 8 rép. · 12 kg");
+  });
+
+  it("falls back on the recap away from a per-side exercise", () => {
+    expect(
+      formatSetLineShort(4, set({ reps: 10, weight_kg: 60 }), [
+        "reps",
+        "weight",
+      ]),
+    ).toBe("4 × 10 rép. · 60 kg");
+  });
+
+  it("never writes « 1 × » and always writes the unit", () => {
+    expect(
+      formatSetLine([set({ reps: 10, weight_kg: 62.5 })], ["reps", "weight"]),
+    ).toBe("10 rép. · 62,5 kg");
+  });
+
+  it("leaves out an empty value", () => {
+    expect(formatSetLine(repeat(3, { reps: 10 }), ["reps", "weight"])).toBe(
+      "3 × 10 rép.",
+    );
+  });
+
+  it("says nothing of values that differ from one set to the next", () => {
+    expect(formatSetLine([set({ reps: 10 }), set({ reps: 8 })], ["reps"])).toBe(
+      "2 × …",
+    );
+  });
+
+  it("says « Aucun objectif » for an empty set and for no set at all", () => {
+    expect(formatSetLine([], ["reps"])).toBe(NO_GOAL);
+    expect(formatSetLine([createEmptySet()], ["reps"])).toBe(NO_GOAL);
+  });
+
+  it("writes the lest of a body weight exercise", () => {
+    expect(
+      formatSetLine([set({ reps: 8, weight_kg: 10 })], ["reps"], false),
+    ).toBe("8 rép. · 10 kg lest");
+  });
+
+  it("writes the repetitions of each side (migration 007)", () => {
+    expect(
+      formatSetLine(
+        repeat(3, { reps_left: 10, reps_right: 8, weight_kg: 12 }),
+        ["reps", "weight"],
+        false,
+        true,
+      ),
+    ).toBe("3 × 10 rép. gauche · 8 rép. droite · 12 kg");
   });
 });
 

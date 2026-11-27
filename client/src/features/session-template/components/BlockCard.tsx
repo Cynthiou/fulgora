@@ -4,7 +4,7 @@ import {
   type DraftBlock,
   findTimedBlockProblem,
   formatBlockCardLine,
-  formatExerciseSummary,
+  formatSetLine,
   getBlockLabel,
 } from "shared";
 import arrowDownIcon from "../../../assets/icons/ui/v3/arrow-down.svg";
@@ -209,7 +209,7 @@ function BlockCard({
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-sm font-bold">{exercise.name}</span>
                   <span className="mt-0.5 text-xs font-semibold tabular-nums text-card-sub">
-                    {formatExerciseSummary(
+                    {formatSetLine(
                       exercise.sets,
                       exercise.measure_codes,
                       exercise.is_bodyweight,

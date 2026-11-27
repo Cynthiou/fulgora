@@ -53,7 +53,9 @@ test("prepares a per-side exercise and does it side by side", async ({
 
   await page.getByRole("button", { name: "Valider l'exercice" }).click();
   // A6: the line of the exercise says the goal and the two loads (A7e)
-  await expect(page.getByText(/rép\. \/ côté · G 10 · D 6 kg/)).toBeVisible();
+  await expect(
+    page.getByText(/rép\. par côté · 10 kg gauche · 6 kg droite/),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Enregistrer le bloc" }).click();
   await page.getByRole("button", { name: "Enregistrer la séance" }).click();
   await expect(

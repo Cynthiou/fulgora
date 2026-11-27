@@ -642,7 +642,19 @@ const numberFormat = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,
 });
 
-// The values of one set, in order: ["10 rép.", "40 kg"].
+// A load that may be missing on one side: "8 kg" or "— kg".
+function sideWeight(value: number | null): string {
+  return value === null ? "— kg" : formatWeight(value, 2);
+}
+
+// A count that may be missing on one side: "10" or "—".
+function sideNumber(value: number | null): string {
+  return value === null ? "—" : numberFormat.format(value);
+}
+
+// The values of one set, in order and with their unit, as the handoff of
+// the sets writes them: ["10 rép.", "60 kg"], ["10 rép. par côté",
+// "8 kg gauche", "12 kg droite"]. An empty value is left out.
 export function describeSet(
   set: PlannedSetValues,
   codes: MeasureCode[],
@@ -650,10 +662,18 @@ export function describeSet(
   isPerSide = false,
 ): string[] {
   const parts: string[] = [];
-  // "15 rép. / côté", "30 s / côté": the goal is the same on both sides
+  // "15 rép. par côté", "30 s par côté": the same goal on both sides
   // (US-51, D-02).
-  const perSide = isPerSide ? " / côté" : "";
-  if (set.reps !== null) {
+  const perSide = isPerSide ? " par côté" : "";
+  // "10 rép. gauche · 8 rép. droite" when the count differs per side
+  // (migration 007); it then replaces the shared count.
+  const hasSideReps = set.reps_left !== null || set.reps_right !== null;
+  if (hasSideReps) {
+    parts.push(
+      `${sideNumber(set.reps_left)} rép. gauche`,
+      `${sideNumber(set.reps_right)} rép. droite`,
+    );
+  } else if (set.reps !== null) {
     parts.push(`${numberFormat.format(set.reps)} rép.${perSide}`);
   }
   if (set.weight_kg !== null) {
@@ -661,13 +681,11 @@ export function describeSet(
     const isLest = getMeasureProfile(codes, isBodyweight) === "bodyweight";
     parts.push(`${formatWeight(set.weight_kg, 2)}${isLest ? " lest" : ""}`);
   }
-  // "G 10 · D 6 kg" when the load differs from one side to the other.
+  // "8 kg gauche · 12 kg droite" when the load differs per side (US-51).
   if (set.weight_left_kg !== null || set.weight_right_kg !== null) {
-    const left = set.weight_left_kg;
-    const right = set.weight_right_kg;
     parts.push(
-      `G ${left === null ? "—" : numberFormat.format(toDisplayWeight(left))}`,
-      `D ${right === null ? "—" : formatWeight(right, 2)}`,
+      `${sideWeight(set.weight_left_kg)} gauche`,
+      `${sideWeight(set.weight_right_kg)} droite`,
     );
   }
   if (set.duration_seconds !== null) {
@@ -732,12 +750,13 @@ export function formatSetSummary(
 // Said when a set has no objective at all (RM-022).
 export const NO_GOAL = "Aucun objectif";
 
-// The one line of detail of an exercise, the same everywhere (handoff
-// "Format des détails d'exercice") : "[séries ×] quantité unité [· charge
-// ou réglage]". The unit is always written, "1 ×" never is, durations stay
-// in min / s and the decimals take a comma ("62,5 kg").
-// "5 × 10 min · résistance 6", "24 kg · 40 s", "2 × 45 s".
-export function formatExerciseSummary(
+// The one line of recap, the same on every screen of the editor (handoff
+// des séries, "Format du récap") : "[n ×] valeur unité · valeur unité".
+// The unit is always written, "1 ×" never is, the decimals take a comma
+// and an empty value is left out.
+// "4 × 10 rép. · 60 kg", "3 × 45 s", "10 min · 9 km/h · 1 %",
+// "10 rép. par côté · 8 kg gauche · 12 kg droite".
+export function formatSetLine(
   sets: PlannedSetValues[],
   codes: MeasureCode[] = [],
   isBodyweight = false,
@@ -759,26 +778,50 @@ export function formatExerciseSummary(
   return `${times}${parts.join(" · ")}`;
 }
 
-// "4 × 8 · 60 kg", "3 × 1 min": the short line of a planned exercise, as
-// the high fidelity mockups write it (03-2, CAL-04).
-export function formatSetLine(
-  sets: PlannedSetValues[],
+// The title of the sheet of the sets (handoff des séries): the same recap,
+// written shorter when the two sides differ. "3 × 10 rép./côté · 8 / 12 kg",
+// "3 × 10 / 8 rép. · 12 kg". Away from a per-side exercise it is the recap
+// itself.
+export function formatSetLineShort(
+  count: number,
+  set: PlannedSetValues,
   codes: MeasureCode[],
   isBodyweight = false,
-): string | null {
-  const first = sets[0];
-  if (first === undefined) {
-    return null;
+  isPerSide = false,
+): string {
+  const hasSideReps = set.reps_left !== null || set.reps_right !== null;
+  const hasSideWeight =
+    set.weight_left_kg !== null || set.weight_right_kg !== null;
+  const times = count > 1 ? `${count} × ` : "";
+
+  // Both sides alike: the recap is already short enough.
+  if (!hasSideReps && !hasSideWeight) {
+    const parts = describeSet(set, codes, isBodyweight, isPerSide);
+    return parts.length === 0 ? NO_GOAL : `${times}${parts.join(" · ")}`;
   }
-  const allSame = sets.every((set) => sameValues(set, first));
-  const parts = describeSet(first, codes, isBodyweight);
-  if (!allSame || parts.length === 0) {
-    return `${sets.length} × …`;
+
+  const parts: string[] = [];
+  if (hasSideReps) {
+    parts.push(
+      `${sideNumber(set.reps_left)} / ${sideNumber(set.reps_right)} rép.`,
+    );
+  } else if (set.reps !== null) {
+    parts.push(
+      `${numberFormat.format(set.reps)} rép.${isPerSide ? "/côté" : ""}`,
+    );
   }
-  // The repetitions join the count with a ×, the rest follows with a dot
-  const [head, ...rest] = parts;
-  const headValue = (head ?? "").replace(" rép.", "");
-  return [`${sets.length} × ${headValue}`, ...rest].join(" · ");
+  if (hasSideWeight) {
+    const left = set.weight_left_kg;
+    parts.push(
+      `${left === null ? "—" : numberFormat.format(toDisplayWeight(left))} / ${sideWeight(set.weight_right_kg)}`,
+    );
+  } else if (set.weight_kg !== null) {
+    parts.push(formatWeight(set.weight_kg, 2));
+  }
+  if (set.duration_seconds !== null) {
+    parts.push(formatDuration(set.duration_seconds));
+  }
+  return parts.length === 0 ? NO_GOAL : `${times}${parts.join(" · ")}`;
 }
 
 // "1 sélectionné", "3 sélectionnés".

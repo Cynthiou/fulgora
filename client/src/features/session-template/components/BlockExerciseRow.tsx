@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { type DraftExercise, formatExerciseSummary } from "shared";
+import { type DraftExercise, formatSetLine } from "shared";
 import chevronRightIcon from "../../../assets/icons/ui/v3/chevron-right.svg";
 import Icon from "../../../components/Icon";
 
@@ -42,7 +42,7 @@ function BlockExerciseRow({
           >
             {missingGoal
               ? "objectif à régler"
-              : formatExerciseSummary(
+              : formatSetLine(
                   exercise.sets,
                   exercise.measure_codes,
                   exercise.is_bodyweight,
