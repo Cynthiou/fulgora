@@ -6,6 +6,7 @@ import {
   useSearchParams,
 } from "react-router";
 import {
+  BLOCK_TYPE_LABELS,
   type BlockType,
   countDraftExercises,
   createEmptyDraft,
@@ -53,6 +54,7 @@ import SessionChangesPanel from "../components/SessionChangesPanel";
 import SessionReview from "../components/SessionReview";
 import SessionSavedPanel from "../components/SessionSavedPanel";
 import SetConfigurator from "../components/SetConfigurator";
+import SetsEditor from "../components/SetsEditor";
 import { nextKey, sessionDraftReducer } from "../hooks/sessionDraftReducer";
 import { useSessionDraft } from "../hooks/useSessionDraft";
 import {
@@ -555,6 +557,41 @@ function SessionEditorPage({ edit }: Props) {
     openExerciseKey !== null
   ) {
     const target = { blockKey: openBlockKey, exerciseKey: openExerciseKey };
+    const position = openBlock.exercises.findIndex(
+      (exercise) => exercise.key === openExerciseKey,
+    );
+
+    // A timed block keeps the old screen: one objective per round, which
+    // the handoff des séries does not draw (US-43).
+    if (!isTimedBlock(openBlock.block_type)) {
+      return (
+        <>
+          <SetsEditor
+            exercise={openExercise}
+            index={position}
+            total={openBlock.exercises.length}
+            blockLabel={BLOCK_TYPE_LABELS[openBlock.block_type]}
+            last={null}
+            onChangeSets={(sets) =>
+              dispatch({ type: "setSets", ...target, sets })
+            }
+            onChangeRest={(seconds) =>
+              dispatch({ type: "updateExerciseRest", ...target, seconds })
+            }
+            onChangePerSide={(isPerSide) =>
+              dispatch({ type: "setPerSide", ...target, isPerSide })
+            }
+            onDone={() => setOpenExerciseKey(null)}
+            onRemove={() => {
+              setOpenExerciseKey(null);
+              removeExercise(openBlockKey, openExerciseKey);
+            }}
+          />
+          {exitDialog}
+        </>
+      );
+    }
+
     return (
       <>
         <SetConfigurator

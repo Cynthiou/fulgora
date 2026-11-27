@@ -92,7 +92,14 @@ export type SessionDraftAction =
       index: number;
       values: Partial<PlannedSetValues>;
     }
-  | { type: "removeSet"; blockKey: string; exerciseKey: string; index: number };
+  | { type: "removeSet"; blockKey: string; exerciseKey: string; index: number }
+  // The sheet of the sets writes whole lines at once (handoff des séries)
+  | {
+      type: "setSets";
+      blockKey: string;
+      exerciseKey: string;
+      sets: PlannedSetValues[];
+    };
 
 // Local keys for the lists: unique within a page, never stored.
 let keyCounter = 0;
@@ -438,6 +445,14 @@ export function sessionDraftReducer(
           sets[action.index] = { ...current, ...action.values };
           return { ...exercise, sets };
         },
+      );
+
+    case "setSets":
+      return updateExercise(
+        draft,
+        action.blockKey,
+        action.exerciseKey,
+        (exercise) => ({ ...exercise, sets: action.sets }),
       );
 
     case "removeSet":

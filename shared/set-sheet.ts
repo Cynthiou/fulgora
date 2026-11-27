@@ -85,6 +85,10 @@ export type SetMeasure = {
   // Stored to shown, and back (DT-11: kg and meters are stored)
   toDisplay: (stored: number) => number;
   fromDisplay: (shown: number) => number;
+  // A case that may stay empty without holding "Enregistrer" back: the
+  // added weight of a body weight exercise, the distance and the
+  // calories of a cardio machine.
+  isOptional?: boolean;
 };
 
 const SAME = {
@@ -159,6 +163,8 @@ function describeMeasure(
         // A plate weighs 2,5 kg, or 5 lb for a user who reads pounds
         step: getDisplayUnits().weight === "kg" ? 2.5 : 5,
         min: 0,
+        // A pull-up without any added weight is a complete goal (A7b)
+        isOptional: profile === "bodyweight",
         ...weight,
       };
     case "weight_left_kg":
@@ -292,7 +298,12 @@ export function getSetMeasures(
       keys.push(field);
     }
   }
-  return keys.map((key) => describeMeasure(key, profile, isPerSide));
+  return keys.map((key) => {
+    const measure = describeMeasure(key, profile, isPerSide);
+    return OPTIONAL_CARDIO_FIELDS.includes(key as SetValueField)
+      ? { ...measure, isOptional: true }
+      : measure;
+  });
 }
 
 // Which sides a line already carries apart, so the sheet opens on the

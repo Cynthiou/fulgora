@@ -659,6 +659,16 @@ function saveBlockWithProfiles() {
               sets: [{ ...set, duration_seconds: 600 }],
             },
             {
+              key: "e6",
+              exercise_id: 90,
+              name: "Fentes haltères",
+              meta: "Jambes · Haltères",
+              measure_codes: ["reps", "weight"],
+              allows_per_side: true,
+              default_rest_seconds: 90,
+              sets: [{ ...set, reps: 10 }],
+            },
+            {
               key: "e5",
               exercise_id: 80,
               name: "Mon exercice sans mesure",
@@ -675,231 +685,202 @@ function saveBlockWithProfiles() {
   });
 }
 
-function field(label: string): HTMLInputElement {
-  return screen.getByLabelText(label) as HTMLInputElement;
+// The number written in one case of the sheet, read by its cyan label.
+function caseValue(head: string): string {
+  return (screen.getByLabelText(head) as HTMLInputElement).value;
 }
 
-describe("SessionEditorPage · planned sets (US-15)", () => {
+describe("SessionEditorPage · les séries d'un exercice (handoff des séries)", () => {
   beforeEach(() => {
     sessionStorage.clear();
     saveBlockWithProfiles();
   });
 
-  it("configures a weighted exercise: reps, weight, duplicate, summary", async () => {
+  // Opens the sheet of the only line of an exercise.
+  async function openLine(
+    user: ReturnType<typeof userEvent.setup>,
+    name: RegExp,
+  ) {
+    await user.click(screen.getByRole("button", { name }));
+    await user.click(
+      screen.getAllByRole("button", { name: /^\d+ série/ })[0] as HTMLElement,
+    );
+  }
+
+  it("writes the lines of a weighted exercise, and sums them up", async () => {
     const user = renderEditor("/seances/nouvelle");
 
     await user.click(screen.getByRole("button", { name: /^Développé couché/ }));
 
+    // The list of the handoff: its title, its rest and its one line
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
       "Développé couché",
     );
-    expect(screen.getByText("Pectoraux · Barre")).toBeTruthy();
-    expect(screen.getByText("Répétitions · Charge")).toBeTruthy();
-    expect(screen.getByText("Série 1")).toBeTruthy();
-    expect(field("Répétitions").value).toBe("10");
-    expect(field("Charge (kg)").value).toBe("");
-    expect(screen.getByText("1 min 30")).toBeTruthy();
+    expect(screen.getByText("Exercice 1 sur 6")).toBeTruthy();
+    expect(screen.getByText("Repos entre séries")).toBeTruthy();
+    expect(screen.getByRole("list", { name: "Séries" }).textContent).toContain(
+      "1 série",
+    );
 
-    await user.click(
-      screen.getByRole("button", { name: "Augmenter Répétitions" }),
-    );
-    expect(field("Répétitions").value).toBe("11");
-    await user.type(field("Charge (kg)"), "40");
-    await user.click(
-      screen.getByRole("button", { name: "Diminuer Repos par défaut" }),
-    );
-    expect(screen.getByText("1 min 15")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /^1 série/ }));
 
-    await user.click(
-      screen.getByRole("button", { name: "Dupliquer la dernière" }),
-    );
-    expect(screen.getByText("Série 2")).toBeTruthy();
-    expect(field("Répétitions").value).toBe("11");
-    expect(field("Charge (kg)").value).toBe("40");
-    // The first set is folded and sums itself up
+    // The sheet: one case per measure, and nothing else
+    expect(screen.getByLabelText("SÉRIES")).toBeTruthy();
+    expect(screen.getByLabelText("RÉPÉTITIONS")).toBeTruthy();
+    expect(screen.getByLabelText("CHARGE")).toBeTruthy();
+    expect(screen.getByText("Première fois sur cet exercice")).toBeTruthy();
+    // Nothing is saved while the load is empty
     expect(
-      screen.getByRole("button", { name: /^Série 1/ }).textContent,
-    ).toContain("11 rép. · 40 kg");
+      (screen.getByRole("button", { name: "Enregistrer" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
 
+    await user.type(screen.getByLabelText("CHARGE"), "60");
+    await user.click(screen.getByRole("button", { name: "Augmenter séries" }));
+    await user.click(screen.getByRole("button", { name: "Augmenter séries" }));
+    expect(caseValue("SÉRIES")).toBe("3");
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(screen.getByRole("list", { name: "Séries" }).textContent).toBe(
+      "3 séries10 rép. · 60 kg",
+    );
+    expect(loadDraft()?.draft.blocks[0]?.exercises[0]?.sets).toHaveLength(3);
+  });
+
+  it("steps a load by 2,5 kg and a duration by 5 s", async () => {
+    const user = renderEditor("/seances/nouvelle");
+    await openLine(user, /^Développé couché/);
+
+    await user.type(screen.getByLabelText("CHARGE"), "60");
+    await user.click(screen.getByRole("button", { name: "Augmenter charge" }));
+    expect(caseValue("CHARGE")).toBe("62,5");
+    await user.click(screen.getByRole("button", { name: "Diminuer charge" }));
+    await user.click(screen.getByRole("button", { name: "Diminuer charge" }));
+    expect(caseValue("CHARGE")).toBe("57,5");
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+
+    // Back to the block, then the exercise measured in time
     await user.click(
       screen.getByRole("button", { name: "Valider l'exercice" }),
     );
-
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
-      "Classique",
-    );
-    expect(
-      screen.getByRole("button", { name: /^Développé couché/ }).textContent,
-    ).toContain("2 × 11 rép. · 40 kg");
+    await openLine(user, /^Gainage/);
+    expect(caseValue("DURÉE")).toBe("60");
+    await user.click(screen.getByRole("button", { name: "Augmenter durée" }));
+    expect(caseValue("DURÉE")).toBe("65");
   });
 
-  it("blocks « Valider » while a value is out of its limits", async () => {
+  it("saves a body weight exercise without any added weight", async () => {
     const user = renderEditor("/seances/nouvelle");
-    await user.click(screen.getByRole("button", { name: /^Développé couché/ }));
-    const validate = screen.getByRole("button", {
-      name: "Valider l'exercice",
-    }) as HTMLButtonElement;
+    await openLine(user, /^Anges au mur/);
 
-    await user.clear(field("Répétitions"));
-    await user.type(field("Répétitions"), "1001");
+    expect(screen.getByLabelText("LEST")).toBeTruthy();
+    // The lest may stay empty: the goal is complete without it
     expect(
-      screen.getByText(/Entre un nombre entre 0 et 1\s000\./),
-    ).toBeTruthy();
-    expect(validate.disabled).toBe(true);
-
-    await user.clear(field("Répétitions"));
-    await user.type(field("Répétitions"), "8");
-    expect(screen.queryByText(/Entre un nombre entre/)).toBeNull();
-    expect(validate.disabled).toBe(false);
-
-    await user.type(field("Charge (kg)"), "40,3");
-    expect(screen.getByText("Entre une valeur par pas de 0,25.")).toBeTruthy();
-    expect(validate.disabled).toBe(true);
-  });
-
-  it("offers an added weight on a bodyweight exercise", async () => {
-    const user = renderEditor("/seances/nouvelle");
-    await user.click(screen.getByRole("button", { name: /^Anges au mur/ }));
-
-    expect(screen.getByText("Répétitions · Lest")).toBeTruthy();
-    const toggle = screen.getByRole("switch", { name: "Ajouter un lest" });
-    expect(toggle.getAttribute("aria-checked")).toBe("false");
-    expect(screen.queryByLabelText("Lest (kg)")).toBeNull();
-
-    await user.click(toggle);
-    expect(toggle.getAttribute("aria-checked")).toBe("true");
-    await user.type(field("Lest (kg)"), "5");
-    await user.click(
-      screen.getByRole("button", { name: "Valider l'exercice" }),
-    );
-
-    expect(
-      screen.getByRole("button", { name: /^Anges au mur/ }).textContent,
-    ).toContain("10 rép. · 5 kg lest");
-  });
-
-  it("handles durations in min:s, adds and removes a set, and a set's own rest", async () => {
-    const user = renderEditor("/seances/nouvelle");
-    await user.click(screen.getByRole("button", { name: /^Gainage/ }));
-
-    expect(field("Durée (min:s)").value).toBe("1:00");
-    expect(
-      screen.getByText("Pendant la séance : minuteur ou chrono au choix."),
-    ).toBeTruthy();
-    await user.click(
-      screen.getByRole("button", { name: "Augmenter Durée (min:s)" }),
-    );
-    expect(field("Durée (min:s)").value).toBe("1:15");
-
-    await user.click(screen.getByRole("button", { name: "Ajouter une série" }));
-    expect(screen.getByText("Série 2")).toBeTruthy();
-    expect(field("Durée (min:s)").value).toBe("");
-
-    // Its own rest
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 2" }),
-    );
-    await user.click(screen.getByRole("button", { name: "Repos différent" }));
-    expect(
-      screen.getByRole("group", { name: "Repos de la série 2" }),
-    ).toBeTruthy();
-    await user.click(
-      screen.getByRole("button", { name: "Augmenter Repos de la série 2" }),
-    );
-    expect(
-      screen.getByRole("group", { name: "Repos de la série 2" }).textContent,
-    ).toContain("15 s");
-
-    // Remove it
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 2" }),
-    );
-    await user.click(screen.getByRole("button", { name: "Retirer" }));
-    expect(screen.queryByText("Série 2")).toBeNull();
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 1" }),
-    );
-    expect(
-      (screen.getByRole("button", { name: "Retirer" }) as HTMLButtonElement)
+      (screen.getByRole("button", { name: "Enregistrer" }) as HTMLButtonElement)
         .disabled,
-    ).toBe(true);
+    ).toBe(false);
+
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect(screen.getByText("10 rép.")).toBeTruthy();
   });
 
-  it("moves a set with « Monter » of the ⋯ menu (US-16)", async () => {
-    const user = renderEditor("/seances/nouvelle");
-    await user.click(screen.getByRole("button", { name: /^Développé couché/ }));
-
-    await user.clear(field("Répétitions"));
-    await user.type(field("Répétitions"), "11");
-    await user.click(screen.getByRole("button", { name: "Ajouter une série" }));
-    await user.type(field("Répétitions"), "5");
-
-    // The first set cannot go up
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 1" }),
-    );
-    expect(
-      (screen.getByRole("button", { name: "Monter" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 1" }),
-    );
-
-    await user.click(
-      screen.getByRole("button", { name: "Options de la série 2" }),
-    );
-    await user.click(screen.getByRole("button", { name: "Monter" }));
-
-    // The moved set keeps its values and takes the first place
-    expect(field("Répétitions").value).toBe("5");
-    expect(
-      screen.getByRole("button", { name: /^Série 2/ }).textContent,
-    ).toContain("11 rép.");
-  });
-
-  it("calls the sets of a cardio exercise stages, shown in km", async () => {
+  it("counts the stages of a cardio machine in minutes", async () => {
     const user = renderEditor("/seances/nouvelle");
     await user.click(screen.getByRole("button", { name: /^Tapis de course/ }));
 
-    expect(screen.getByText("Étape 1")).toBeTruthy();
-    expect(field("Durée (min:s)").value).toBe("10:00");
+    expect(screen.getByText("Étapes")).toBeTruthy();
+    expect(screen.getByText("Repos entre étapes")).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "Ajouter une étape" }),
+      screen.getByRole("button", { name: /Ajouter une étape/ }),
     ).toBeTruthy();
-    expect(screen.queryByText("Dupliquer la dernière")).toBeNull();
 
-    await user.type(field("Distance (km)"), "2,5");
-    await user.click(
-      screen.getByRole("button", { name: "Augmenter Vitesse (km/h)" }),
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Valider l'exercice" }),
-    );
+    await user.click(screen.getByRole("button", { name: /^Étape 1/ }));
 
-    expect(
-      screen.getByRole("button", { name: /^Tapis de course/ }).textContent,
-    ).toContain("10 min · 2,5 km · 0,5 km/h");
+    expect(screen.getByLabelText("NOMBRE DE TOURS")).toBeTruthy();
+    // 600 seconds are stored, 10 minutes are read
+    expect(caseValue("DURÉE")).toBe("10");
+    expect(screen.getByLabelText("VITESSE")).toBeTruthy();
+    expect(screen.getByLabelText("INCLINAISON")).toBeTruthy();
+    // The distance and the calories wait behind "Modifier"
+    expect(screen.queryByLabelText("DISTANCE")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Augmenter durée" }));
+    await user.type(screen.getByLabelText("VITESSE"), "9");
+    await user.type(screen.getByLabelText("INCLINAISON"), "1");
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(screen.getByText("11 min · 9 km/h · 1 %")).toBeTruthy();
     expect(loadDraft()?.draft.blocks[0]?.exercises[3]?.sets[0]).toMatchObject({
-      duration_seconds: 600,
-      distance_meters: 2500,
-      speed_kmh: 0.5,
+      duration_seconds: 660,
+      speed_kmh: 9,
+      incline_percent: 1,
     });
   });
 
-  it("explains an exercise without any measure", async () => {
+  it("shows the distance and the calories of a cardio machine on « Modifier »", async () => {
+    const user = renderEditor("/seances/nouvelle");
+    await user.click(screen.getByRole("button", { name: /^Tapis de course/ }));
+
+    await user.click(screen.getByRole("button", { name: "Modifier" }));
+    await user.click(screen.getByRole("button", { name: /^Étape 1/ }));
+
+    expect(screen.getByLabelText("DISTANCE")).toBeTruthy();
+    expect(screen.getByLabelText("CALORIES")).toBeTruthy();
+  });
+
+  it("adds a line that copies the one before it, with one set", async () => {
+    const user = renderEditor("/seances/nouvelle");
+    await openLine(user, /^Développé couché/);
+    await user.type(screen.getByLabelText("CHARGE"), "60");
+    await user.click(screen.getByRole("button", { name: "Enregistrer" }));
+
+    await user.click(
+      screen.getByRole("button", { name: /Ajouter une série différente/ }),
+    );
+
+    expect(caseValue("SÉRIES")).toBe("1");
+    expect(caseValue("CHARGE")).toBe("60");
+    expect(screen.getByText("Ligne 2")).toBeTruthy();
+
+    // "Annuler" on a line that was never saved drops it
+    await user.click(screen.getByRole("button", { name: "Annuler" }));
+    expect(screen.getByRole("list", { name: "Séries" }).children).toHaveLength(
+      1,
+    );
+  });
+
+  it("asks the two sides apart on a per-side exercise", async () => {
+    const user = renderEditor("/seances/nouvelle");
+    await openLine(user, /^Fentes/);
+
+    // "Chaque côté" is offered by the catalog (RM-084)
+    await user.click(screen.getByRole("button", { name: "Côté par côté" }));
+    expect(screen.getByLabelText("RÉPÉTITIONS PAR CÔTÉ")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Rép." }));
+    expect(screen.getByLabelText("RÉP. GAUCHE")).toBeTruthy();
+    expect(screen.getByLabelText("RÉP. DROITE")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Charge" }));
+    expect(screen.getByLabelText("CHARGE GAUCHE")).toBeTruthy();
+    expect(screen.getByLabelText("CHARGE DROITE")).toBeTruthy();
+  });
+
+  it("validates the exercise only once a line is written", async () => {
     const user = renderEditor("/seances/nouvelle");
     await user.click(
       screen.getByRole("button", { name: /^Mon exercice sans mesure/ }),
     );
 
-    expect(screen.getByRole("status").textContent).toContain(
-      "Cet exercice n'a pas de mesure : tu pourras seulement le cocher comme fait.",
+    const validate = screen.getByRole("button", {
+      name: "Valider l'exercice",
+    }) as HTMLButtonElement;
+    expect(validate.disabled).toBe(false);
+
+    await user.click(validate);
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+      "Classique",
     );
-    expect(screen.queryByText("Ajouter une série")).toBeNull();
-    expect(
-      screen.getByRole("group", { name: "Repos par défaut" }),
-    ).toBeTruthy();
   });
 });
 

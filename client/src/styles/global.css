@@ -179,6 +179,10 @@
   --fulgora-toast: #0a1020;
   --fulgora-toast-content: #ffffff;
   --fulgora-toast-action: #60a5fa;
+  /* The sheet of the sets (handoff des séries, 27/11/2026) */
+  --fulgora-cell: #ffffff;
+  --fulgora-cell-border: #d5dce6;
+  --fulgora-step-btn: #e3e8ef;
 }
 
 [data-theme="fulgora-dark"] {
@@ -229,6 +233,10 @@
   --fulgora-toast: #f4f6fa;
   --fulgora-toast-content: #0a1020;
   --fulgora-toast-action: #2563eb;
+  /* The sheet of the sets (handoff des séries, 27/11/2026) */
+  --fulgora-cell: #0f1622;
+  --fulgora-cell-border: #2a3446;
+  --fulgora-step-btn: #243045;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -280,6 +288,10 @@
     --fulgora-toast: #f4f6fa;
     --fulgora-toast-content: #0a1020;
     --fulgora-toast-action: #2563eb;
+    /* The sheet of the sets (handoff des séries, 27/11/2026) */
+    --fulgora-cell: #0f1622;
+    --fulgora-cell-border: #2a3446;
+    --fulgora-step-btn: #243045;
   }
 }
 
@@ -334,6 +346,9 @@
   --color-toast: var(--fulgora-toast);
   --color-toast-content: var(--fulgora-toast-content);
   --color-toast-action: var(--fulgora-toast-action);
+  --color-cell: var(--fulgora-cell);
+  --color-cell-border: var(--fulgora-cell-border);
+  --color-step-btn: var(--fulgora-step-btn);
   /* The blue of the logo, the same in both themes (handoff v3) */
   --color-brand: #2563eb;
 
